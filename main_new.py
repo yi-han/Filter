@@ -11,14 +11,17 @@ N_action = 1000 #In the current implementation, each filter has 10 possible acti
                 #e.g., action 123 means the drop rates at the three filters are set to 0.1, 0.2 and 0.3, respectively
 N_switch = 13
 hosts = [5, 10, 12, 6, 9, 9] #ID of the switch that the host is connected to  
+
+
 servers = [0] #ID of the switch that the server is connected to 
 filters = [5, 6, 9] #ID of the switch that the filter locates at
 
 reward_overload = -1
 
-rate_legal_low = 0.05
-rate_legal_high = 1
-rate_attack_low = 2.5
+# J: I think this is lower / upper bounds of message sending by attackers / defenders
+rate_legal_low = 0.05 
+rate_legal_high = 1 
+rate_attack_low = 2.5 
 rate_attack_high = 6
 
 legal_probability = 0.6
@@ -90,8 +93,8 @@ with tf.Session() as sess:
         ckpt = tf.train.get_checkpoint_state(load_path)
         saver.restore(sess,ckpt.model_checkpoint_path)
         
-    for i in range(num_episodes):
-        net.reset()
+    for i in range(num_episodes): # i is the number of episodes
+        net.reset() # reset the network
 
         d = False
         rAll = 0

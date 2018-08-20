@@ -3,7 +3,7 @@ import numpy as np
 import math
 import copy
 
-import agent
+import agent # i think this is the other folder but I dont think it would have access to this?
 
 MAX_STEP = 30
 
