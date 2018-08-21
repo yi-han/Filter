@@ -123,19 +123,13 @@ class network(object):
         self.last_state[:] = self.current_state
         self.current_state.clear()
         
-        #print(self.N_filter)
-
         for i in range(self.N_filter):
-            #print("\ni is currently {0}".format(i))
             self.current_state.append(0)
 
-            # print("filter host for i is {0}".format(self.filter_host[self.filters[i]]))
-            # print("host rate is {0}".format(self.host_rate))
             for j in self.filter_host[self.filters[i]]:
                 
                 self.current_state[i] += self.host_rate[j]
         
-        print("\ncurrent state is {0}".format(self.current_state))
         return self.current_state
     
     def set_drop_probability(self, action):
@@ -155,7 +149,6 @@ class network(object):
         self.drop_probability[2] /= 10
         """
 
-        #print("\ndrop_probability is {0}".format(self.drop_probability))
         return self.drop_probability
 
     def initialise(self, f_link):
