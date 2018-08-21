@@ -1,43 +1,76 @@
-# code initially sourced by https://github.com/studywolf/blog/tree/master/RL
+"""
+What my objective is: 
+1) We're just going to make a class that we feed fake data to
+2) Then try to link with the main stuff
 
-import random
+"""
+import sarsaAI
+import numpy as np
 
 
-class Sarsa:
-    def __init__(self, actions, epsilon=0.1, alpha=0.2, gamma=0.9):
-        self.q = {}
 
-        self.epsilon = epsilon
-        self.alpha = alpha
-        self.gamma = gamma
-        self.actions = actions
+class Agent():
 
-    def getQ(self, state, action):
-        return self.q.get((state, action), 0.0)
+    def __init__(self, numActions):
 
-    def learnQ(self, state, action, reward, value):
-        oldv = self.q.get((state, action), None)
-        if oldv is None:
-            self.q[(state, action)] = reward 
-        else:
-            self.q[(state, action)] = oldv + self.alpha * (value - oldv)
+        self.ai = sarsaAI.Sarsa(
+            actions=range(numActions), epsilon=0.3, alpha=0.1, gamma=0.4)
+        self.lastAction = None
+        self.lastState = None
+        self.score = 0
 
-    def chooseAction(self, state):
-        if random.random() < self.epsilon:
-            action = random.choice(self.actions)
-        else:
-            q = [self.getQ(state, a) for a in self.actions]
-            maxQ = max(q)
-            count = q.count(maxQ)
-            if count > 1:
-                best = [i for i in range(len(self.actions)) if q[i] == maxQ]
-                i = random.choice(best)
-            else:
-                i = q.index(maxQ)
+    def makeGuess(self, state):
+        action = self.ai.chooseAction(state)
+        return action 
 
-            action = self.actions[i]
-        return action
+    def update(self, state, action, reward):
 
-    def learn(self, state1, action1, reward, state2, action2):
-        qnext = self.getQ(state2, action2)
-        self.learnQ(state1, action1, reward, reward + self.gamma * qnext)
+        self.score += reward
+
+        self.state = tileState(state)
+
+        if self.lastAction is not None:
+            self.ai.learn(
+                self.lastState, self.lastAction, reward, state, action)
+        self.lastState = state
+        self.lastAction = action   
+
+def tileState(state):
+    # a hack job at tileCoding. Based on 0 research or effort
+    return round(state, 1)  
+
+def calcReward(state):
+    if state == 3:
+        #return round(np.random.random_sample(size=None)*2-1,3)
+        return 1
+    else:
+        return -1
+
+def nextState(action):
+    if action == 2 and (np.random.rand() <0.8):
+        return 3
+
+    return np.random.randint(3, size=None)
+
+agent = Agent(3)
+
+reward = 0.2
+action = 2
+count = 0
+while(True):
+    count += 1
+    state = nextState(action)
+    reward = calcReward(state)
+    action = agent.makeGuess(state)
+
+    agent.update(state, action, reward)
+    
+
+    #print("state = {0} - action = {1} - reward = {2}".format(state,action,reward))
+    if count%100 == 0:
+        print("count = {0}, sumReward = {1}".format(count, agent.score))
+    if count > 1000:
+        print(action)
+    #print("\n\n")
+
+
