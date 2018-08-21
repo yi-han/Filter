@@ -136,9 +136,9 @@ class network(object):
         #TODO
         #The implementation below only works for the current setup
 
-        self.drop_probability[0] = int(action)/10
+        # self.drop_probability[0] = int(action)/10
 
-        """
+        
         # Implementation for 3
         self.drop_probability[0] = int(action/100)
         self.drop_probability[1] = int((action - self.drop_probability[0]*100)/10)
@@ -147,7 +147,7 @@ class network(object):
         self.drop_probability[0] /= 10
         self.drop_probability[1] /= 10
         self.drop_probability[2] /= 10
-        """
+        
 
         return self.drop_probability
 
@@ -176,13 +176,13 @@ class network(object):
         #TODO
         #hard-coded for now
         #a dict of {filter_ID:[Ids of hosts that are connected to the filter]}
-        self.filter_host.update({5:[0, 1, 2]})
+        #self.filter_host.update({5:[0, 1, 2]})
         
 
         ### Jeremy, temporarily removed bottom two
-        # self.filter_host.update({5:[0, 1, 2]})
-        # self.filter_host.update({6:[3]})
-        # self.filter_host.update({9:[4, 5]})
+        self.filter_host.update({5:[0, 1, 2]})
+        self.filter_host.update({6:[3]})
+        self.filter_host.update({9:[4, 5]})
         
         self.reset()
 
