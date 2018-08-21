@@ -1,10 +1,10 @@
 """
-What my objective is: 
-1) We're just going to make a class that we feed fake data to
-2) Then try to link with the main stuff
+#TODO
+
+1) Get rid of epsilon stuff (for now), seems to be handled by bigger thing
 
 """
-import sarsaAI
+from agent.sarsaAI import *
 import numpy as np
 
 
@@ -13,21 +13,27 @@ class Agent():
 
     def __init__(self, numActions):
 
-        self.ai = sarsaAI.Sarsa(
-            actions=range(numActions), epsilon=0.3, alpha=0.1, gamma=0.4)
+        self.ai = SarsaAI(
+            actions=range(numActions), epsilon=0.3, alpha=0.1, gamma=0)
         self.lastAction = None
         self.lastState = None
         self.score = 0
 
     def makeGuess(self, state):
+        state = tileState(state)
         action = self.ai.chooseAction(state)
         return action 
 
     def update(self, state, action, reward):
-
+        state = tileState(state)
+        
+        # print("doing an update")
+        # print(self.lastAction)
+        # print(reward)
+        # print(state)
         self.score += reward
 
-        self.state = tileState(state)
+        self.state = state
 
         if self.lastAction is not None:
             self.ai.learn(
@@ -35,9 +41,28 @@ class Agent():
         self.lastState = state
         self.lastAction = action   
 
+    def reset(self):
+        # i think it should just put into a random state
+        # alternatively i think there is preset states from net. See that
+        
+        self.lastAction = None
+        self.lastState = None
+        #         here = self.cell
+        # if here.goal or here.cliff:
+        #     self.cell = startCell
+        #     self.lastAction = None
+        # else:
+        #     self.goInDirection(action)
+
+
 def tileState(state):
     # a hack job at tileCoding. Based on 0 research or effort
-    return round(state, 1)  
+    #print(state)
+    return round(state[0], 1)  
+
+
+"""
+mock stuff to see if i can get it to work
 
 def calcReward(state):
     if state == 3:
@@ -51,6 +76,7 @@ def nextState(action):
         return 3
 
     return np.random.randint(3, size=None)
+
 
 agent = Agent(3)
 
@@ -71,6 +97,5 @@ while(True):
         print("count = {0}, sumReward = {1}".format(count, agent.score))
     if count > 1000:
         print(action)
-    #print("\n\n")
 
-
+"""
