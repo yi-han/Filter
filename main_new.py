@@ -119,7 +119,7 @@ with tf.Session() as sess:
             #Choose an action e-greedily (with e chance of random action) from the Q-network
             if (np.random.rand(1) < e or total_steps < pre_train_steps) and not debug and not test:
                 a = np.random.randint(0,N_action)
-                rd = True
+                rd = True # rd means is random
             else:
                 a = sess.run(mainQN.predict,feed_dict={mainQN.input:[net.current_state]})[0]
                 rd = False
