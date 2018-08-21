@@ -7,6 +7,14 @@ import agent # i think this is the other folder but I dont think it would have a
 
 MAX_STEP = 30
 
+"""
+#TODO
+1) Convert drop_probabilities to dynamic
+
+"""
+
+
+
 def clip(min_value, max_value, value):
     if value < min_value:
         return min_value
@@ -114,16 +122,30 @@ class network(object):
     def get_state(self):
         self.last_state[:] = self.current_state
         self.current_state.clear()
+        
+        #print(self.N_filter)
+
         for i in range(self.N_filter):
+            #print("\ni is currently {0}".format(i))
             self.current_state.append(0)
+
+            # print("filter host for i is {0}".format(self.filter_host[self.filters[i]]))
+            # print("host rate is {0}".format(self.host_rate))
             for j in self.filter_host[self.filters[i]]:
+                
                 self.current_state[i] += self.host_rate[j]
         
+        print("\ncurrent state is {0}".format(self.current_state))
         return self.current_state
     
     def set_drop_probability(self, action):
         #TODO
         #The implementation below only works for the current setup
+
+        self.drop_probability[0] = int(action)/10
+
+        """
+        # Implementation for 3
         self.drop_probability[0] = int(action/100)
         self.drop_probability[1] = int((action - self.drop_probability[0]*100)/10)
         self.drop_probability[2] = int(action - self.drop_probability[0]*100 - self.drop_probability[1]*10)
@@ -131,7 +153,9 @@ class network(object):
         self.drop_probability[0] /= 10
         self.drop_probability[1] /= 10
         self.drop_probability[2] /= 10
-        
+        """
+
+        #print("\ndrop_probability is {0}".format(self.drop_probability))
         return self.drop_probability
 
     def initialise(self, f_link):
@@ -160,8 +184,12 @@ class network(object):
         #hard-coded for now
         #a dict of {filter_ID:[Ids of hosts that are connected to the filter]}
         self.filter_host.update({5:[0, 1, 2]})
-        self.filter_host.update({6:[3]})
-        self.filter_host.update({9:[4, 5]})
+        
+
+        ### Jeremy, temporarily removed bottom two
+        # self.filter_host.update({5:[0, 1, 2]})
+        # self.filter_host.update({6:[3]})
+        # self.filter_host.update({9:[4, 5]})
         
         self.reset()
 
