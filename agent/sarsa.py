@@ -11,10 +11,10 @@ import numpy as np
 
 class Agent():
 
-    def __init__(self, numActions):
+    def __init__(self, numActions, eps=0.3, alph=0.1, gam=0):
 
         self.ai = SarsaAI(
-            actions=range(numActions), epsilon=0.3, alpha=0.1, gamma=0)
+            actions=range(numActions), epsilon=eps, alpha=alph, gamma=gam)
         self.lastAction = None
         self.lastState = None
         self.score = 0

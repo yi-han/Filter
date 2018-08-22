@@ -2,9 +2,8 @@
 
 """
 #TODO
-1) put the update somewhere
-2) Deal with the initialisation
-3) Update teh sarsa.py to reflect epsilon
+1) Confirm that alpha = tau and gamma = discount
+2) I think update is in wrong area
 
 
 """
@@ -18,15 +17,15 @@ from network.network_new import *
 from agent.sarsa import *
 #import agent.sarsa as sarsa
 
-N_state = 1 #The number of state, i.e., the number of filters
-N_action = 10 #In the current implementation, each filter has 10 possible actions, so altogether there are 10^N_state actions, 
+N_state = 3 #The number of state, i.e., the number of filters
+N_action = 1000 #In the current implementation, each filter has 10 possible actions, so altogether there are 10^N_state actions, 
                 #e.g., action 123 means the drop rates at the three filters are set to 0.1, 0.2 and 0.3, respectively
 N_switch = 13
-hosts = [5, 10, 12] #ID of the switch that the host is connected to  
+hosts = [5, 10, 12, 6, 9, 9] #ID of the switch that the host is connected to  
 
 
 servers = [0] #ID of the switch that the server is connected to 
-filters = [5] #ID of the switch that the filter locates at
+filters = [5, 6, 9] #ID of the switch that the filter locates at
 
 reward_overload = -1
 
@@ -47,16 +46,12 @@ net = network(N_switch, N_action, hosts, servers, filters, reward_overload,
 batch_size = 32 #How many experiences to use for each training step.
 update_freq = 4 #How often to perform a training step.
 y = 0 #.99 #Discount factor on the target Q-values
-#startE = 1 #Starting chance of random action
-startE = 0.4
-
-
+startE = 1 #Starting chance of random action
 endE = 0.1 #Final chance of random action
 annealing_steps = 900000 #How many steps of training to reduce startE to endE.
 num_episodes = 150000 #How many episodes of game environment to train network with.
-#pre_train_steps = 300000 #How many steps of random actions before training begins.
-pre_train_steps = 100 # testing
-
+pre_train_steps = 300000 #How many steps of random actions before training begins.
+# pre_train_steps = 30 #How many steps of random actions before training begins.
 max_epLength = 30 #The max allowed length of our episode.
 load_model = False #Whether to load a saved model.
 
@@ -66,7 +61,7 @@ path = "./filter" + name #The path to save our model to.
 load_path = ""
 
 
-#tau = 0.001 #Rate to update target network toward primary network
+tau = 0.001 #Rate to update target network toward primary network
 
 test = False #set to True when testing a trained model
 debug = False
@@ -108,7 +103,7 @@ reward_file = open(path + "/reward" + name + ".csv", "w")
 loss_file = open(path + "/loss" + name + ".csv", "w")
 
 
-agent = Agent(N_action)
+agent = Agent(N_action, alph = tau, gam=y)
 # with Agent(N_action) as agent:
 
 for i in range(num_episodes): # i is the number of episodes
