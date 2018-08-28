@@ -7,11 +7,10 @@ import random
 
 
 class SarsaAI:
-    def __init__(self, actions, epsilon=0.4, alpha=0.1, gamma=0): 
+    def __init__(self, actions, alpha=0.1, gamma=0): 
         # note i set gamma to 0 to reflect the implementation by Malialis
         self.q = {}
 
-        self.epsilon = epsilon
         self.alpha = alpha
         self.gamma = gamma
         self.actions = actions

@@ -45,6 +45,7 @@ load_model = False #Whether to load a saved model.
 name = " new 3 layers 256 bias"
 path = "./filter" + name #The path to save our model to.
 load_path = ""
+#load_path = path
 tau = 0.001 #Rate to update target network toward primary network
 
 test = False #set to True when testing a trained model

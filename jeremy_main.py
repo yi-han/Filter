@@ -1,4 +1,9 @@
-# designed to be worked with the ddqn agent
+"""
+Used for mucking around with topology of main_new, don't base work off this
+
+
+
+"""
 
 from __future__ import division
 

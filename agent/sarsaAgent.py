@@ -1,27 +1,36 @@
 """
+A custom made 
+
 #TODO
 
-1) Get rid of epsilon stuff (for now), seems to be handled by bigger thing
+
 
 """
 from agent.sarsaAI import *
+import agent.agentBase as aBase
 import numpy as np
 
 
 
-class Agent():
+class Agent(aBase.Agent):
 
-    def __init__(self, numActions, eps=0.3, alph=0.1, gam=0):
+    def __init__(self, numActions, pre_train_steps, alph=0.1, gam=0, debug=False, test=False):
 
+        super().__init__(pre_train_steps, debug, test)
         self.ai = SarsaAI(
-            actions=range(numActions), epsilon=eps, alpha=alph, gamma=gam)
+            actions=range(numActions), alpha=alph, gamma=gam)
+        self.numActions = numActions
         self.lastAction = None
         self.lastState = None
         self.score = 0
 
-    def makeGuess(self, state):
-        state = tileState(state)
-        action = self.ai.chooseAction(state)
+    def predict(self, state, total_steps, e):
+        randomChoice = super().isRandomGuess(total_steps, e)
+        if not randomChoice:
+            state = tileState(state)
+            action = self.ai.chooseAction(state)
+        else:
+            action = np.random.randint(0,self.numActions)
         return action 
 
     def update(self, state, action, reward):
@@ -54,6 +63,8 @@ class Agent():
         # else:
         #     self.goInDirection(action)
 
+    def getName():
+        return "SarsaCentralisedAgent"
 
 def tileState(state):
     # a hack job at tileCoding. Based on 0 research or effort

@@ -14,7 +14,7 @@ import numpy as np
 import os, sys
 
 from network.network_new import *
-from agent.sarsa import *
+from agent.sarsaAgent import *
 #import agent.sarsa as sarsa
 
 N_state = 3 #The number of state, i.e., the number of filters
