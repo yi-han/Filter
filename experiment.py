@@ -13,7 +13,7 @@ import os, sys
 
 from network.network_new import *
 
-from agent.sarsaAgent import *
+from agent.sarsaCentralised import *
 
 
 # Network information
