@@ -16,9 +16,9 @@ class Agent():
         self.debug = debug
         self.test= test
 
-    @abstractmethod
-    def reset(self):
-        pass
+    # @abstractmethod
+    # def reset(self):
+    #     pass
 
     @abstractmethod
     def predict(self):
@@ -33,6 +33,19 @@ class Agent():
     def getName():
         pass
 
+
+    @abstractmethod
+    def actionReplay():
+        # note not used in sarsa
+        pass
+
+    # @abstractmethod
+    # def __enter__(self):
+    #     pass
+
+    # @abstractmethod
+    # def __exit__(self, exception_type, exception_value, traceback):
+    #     pass
 
     def isRandomGuess(self, total_steps, e):
         # calculate if meant to do choose a random

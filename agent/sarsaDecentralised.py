@@ -66,6 +66,9 @@ class Agent(aBase.Agent):
     def getName():
         return "SarsaDecentralisedAgent"
 
+    def actionReplay(self, currentState):
+        return None
+
 def actionToActions(action, numAgents, actionPerAgent):
     # takes the action presented to network and returns
     # a list of each action by each agent

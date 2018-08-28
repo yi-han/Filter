@@ -25,13 +25,24 @@ class Agent(aBase.Agent):
         self.lastState = None
         self.score = 0
 
+    def __enter__(self):
+        # probably have memory management here
+        
+        return
+
+    def __exit__(self):
+        # have memory management here
+        return
+
+
     def predict(self, state, total_steps, e):
         randomChoice = super().isRandomGuess(total_steps, e)
-        if not randomChoice:
+        if randomChoice:
+            action = np.random.randint(0,self.numActions)
+        else:
             state = tileState(state)
             action = self.ai.chooseAction(state)
-        else:
-            action = np.random.randint(0,self.numActions)
+
         return action 
 
     def update(self, state, action, reward):
@@ -50,6 +61,10 @@ class Agent(aBase.Agent):
                 self.lastState, self.lastAction, reward, state, action)
         self.lastState = state
         self.lastAction = action   
+
+    def actionReplay(self, currentState):
+        return None
+
 
     def reset(self):
         # i think it should just put into a random state
