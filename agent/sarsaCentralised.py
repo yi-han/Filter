@@ -1,5 +1,6 @@
 """
-A custom made 
+Middleman between the experiment and the sarsa agent. Called centralised 
+due to use of a singular sarsa AI but is compatble with multiple to one states.
 
 #TODO
 
