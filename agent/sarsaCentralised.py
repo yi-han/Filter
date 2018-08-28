@@ -68,8 +68,10 @@ class Agent(aBase.Agent):
 
 def tileState(state):
     # a hack job at tileCoding. Based on 0 research or effort
-    #print(state)
-    return round(state[0], 1)  
+    newState = []
+    for el in state:
+        newState.append(round(el, 1))
+    return tuple(newState)
 
 
 """
