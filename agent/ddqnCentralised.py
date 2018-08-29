@@ -5,7 +5,7 @@ import numpy as np
 
 
 class Agent(aBase.Agent):
-    def __init__(self, load_path):
+    def __init__(self, N_action, pre_train_steps, debug, test, N_state, tau, discountFactor):
         super().__init__(pre_train_steps, debug, test)
 
         tf.reset_default_graph() # note remove for the decentralised one
@@ -15,13 +15,17 @@ class Agent(aBase.Agent):
         self.init = tf.global_variables_initializer()
         self.saver = tf.train.Saver()
         self.trainables = tf.trainable_variables()
-        self.targetOps = updateTargetGraph(trainables,tau)
-        self.targetOps = updateTargetGraph(trainables,tau)
+        self.targetOps = updateTargetGraph(self.trainables,tau)
+        self.targetOps = updateTargetGraph(self.trainables,tau)
         self.myBuffer = Memory(capacity=300000)
+        self.N_action = N_action
+        self.y = discountFactor
 
     def __enter__(self):
         self.sess = tf.Session()
         self.sess.run(self.init)
+
+        # should load model here
 
 
     def __exit__(self, type, value, tb):
@@ -31,13 +35,44 @@ class Agent(aBase.Agent):
     def predict(self, state, total_steps, e):
         randomChoice = super().isRandomGuess(total_steps, e)
         if randomChoice:
-            action = np.random.randint(0,self.numActions)
+            action = np.random.randint(0,self.N_action)
         else:
             mainQN = self.mainQN
             action = self.sess.run(mainQN.predict,feed_dict={mainQN.input:[state]})[0]
+            print("my prediction: {0}".format(action))
         return action
 
-    def update
+    def update(self, last_state, last_action, current_state,d, r):
+        # Stores an update to the buffer, actual Qlearning is done in action replay
+        self.myBuffer.store(np.array([deep_copy_state(last_state),last_action,r,deep_copy_state(current_state),d,False])) 
+
+
+    def actionReplay(self, current_state, batch_size):
+        tree_idx, trainBatch, ISWeights = self.myBuffer.sample(batch_size) #Get a batch of experiences.
+        #Below we perform the Double-DQN update to the target Q-values
+        
+        mainQN = self.mainQN
+        targetQN = self.targetQN
+        batch = np.vstack(trainBatch[:,3])
+
+        Q1 = self.sess.run(mainQN.predict,feed_dict={mainQN.input:batch})
+        Q2 = self.sess.run(targetQN.Qout,feed_dict={targetQN.input:batch})
+        end_multiplier = -(trainBatch[:,4] - 1)
+        doubleQ = Q2[range(batch_size),Q1]
+        targetQ = trainBatch[:,2] + (self.y*doubleQ * end_multiplier)
+
+        _, abs_errors, l = self.sess.run([mainQN.updateModel, mainQN.abs_errors, mainQN.loss], \
+            feed_dict={mainQN.input:np.vstack(trainBatch[:,0]), mainQN.targetQ:targetQ, mainQN.actions:trainBatch[:,1], mainQN.ISWeights:ISWeights}) #
+        
+        updateTarget(self.targetOps,self.sess) #Update the target network toward the primary network.
+        self.myBuffer.batch_update(tree_idx, abs_errors)
+
+        #Exit if "dying ReLU" occurs
+        out = self.sess.run(mainQN.Qout,feed_dict={mainQN.input:[current_state]})[0]
+        if out[0] == out [1] and out[0] == out [2] and out[0] == out [3] and out[1] == 0:
+            sys.exit(-1)
+
+        return l
 
 
 
