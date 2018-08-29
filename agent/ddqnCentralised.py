@@ -1,7 +1,7 @@
 from agent.ddqn import *
 import agent.agentBase as aBase
 import numpy as np
-
+import os
 
 
 class Agent(aBase.Agent):
@@ -20,9 +20,10 @@ class Agent(aBase.Agent):
         self.myBuffer = Memory(capacity=300000)
         self.N_action = N_action
         self.y = discountFactor
-
-    def __enter__(self):
         self.sess = tf.Session()
+    def __enter__(self):
+        print("about to run")
+        #self.sess = tf.Session()
         self.sess.run(self.init)
 
         # should load model here
@@ -34,6 +35,7 @@ class Agent(aBase.Agent):
         
     def predict(self, state, total_steps, e):
         randomChoice = super().isRandomGuess(total_steps, e)
+        #print("I believe i can make {0} actions".format(self.N_action))
         if randomChoice:
             action = np.random.randint(0,self.N_action)
         else:
@@ -80,6 +82,8 @@ class Agent(aBase.Agent):
 
 
     def saveModel(self, load_path, iteration):
+        if not os.path.exists(load_path):
+            os.makedirs(load_path)        
         self.saver.save(self.sess, load_path+'/model-'+str(iteration)+'.ckpt')
 
 

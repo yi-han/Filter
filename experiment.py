@@ -19,13 +19,16 @@ import os, sys
 from network.network_new import *
 
 #from agent.sarsaDecentralised import *
-from agent.ddqnCentralised import *
+#from agent.ddqnCentralised import *
+from agent.ddqnDecentralised import *
+
 
 # Network information
 #TODO decouple this as well by putting into a class and feeding in?
 N_state = 3 #The number of state, i.e., the number of filters
 N_action = 1000 #In the current implementation, each filter has 10 possible actions, so altogether there are 10^N_state actions, 
                 #e.g., action 123 means the drop rates at the three filters are set to 0.1, 0.2 and 0.3, respectively
+action_per_agent = 10 # each filter can do 10 actions
 N_switch = 13
 hosts = [5, 10, 12, 6, 9, 9] #ID of the switch that the host is connected to  
 
@@ -40,8 +43,8 @@ y = 0 #.99 #Discount factor on the target Q-values
 startE = 1 #Starting chance of random action
 endE = 0.1 #Final chance of random action
 annealing_steps = 900000 #How many steps of training to reduce startE to endE.
-#num_episodes = 150000 #How many episodes of game environment to train network with.
-num_episodes = 15000 #How many episodes of game environment to train network with.
+num_episodes = 150000 #How many episodes of game environment to train network with.
+#num_episodes = 15000 #How many episodes of game environment to train network with.
 pre_train_steps = 300000 #How many steps of random actions before training begins.
 #pre_train_steps = 3000 #How many steps of random actions before training begins.
 
@@ -91,7 +94,7 @@ fail = 0
 
 #agent = Agent(N_action, pre_train_steps, alph = tau, gam=y, debug=debug, test=test)
 
-agent = Agent(N_action, pre_train_steps, debug, test, N_state, tau, y)
+agent = Agent(N_action, pre_train_steps, action_per_agent, debug, test, N_state, tau, y)
 
 
 
