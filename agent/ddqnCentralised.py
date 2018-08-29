@@ -39,7 +39,6 @@ class Agent(aBase.Agent):
         else:
             mainQN = self.mainQN
             action = self.sess.run(mainQN.predict,feed_dict={mainQN.input:[state]})[0]
-            print("my prediction: {0}".format(action))
         return action
 
     def update(self, last_state, last_action, current_state,d, r):
@@ -74,7 +73,18 @@ class Agent(aBase.Agent):
 
         return l
 
+    def loadModel(self, load_path):
+        print("Loading Model...")
+        ckpt = tf.train.get_checkpoint_state(load_path)
+        self.saver.restore(sess,ckpt.model_checkpoint_path)
+
+
+    def saveModel(self, load_path, iteration):
+        self.saver.save(self.sess, load_path+'/model-'+str(iteration)+'.ckpt')
 
 
     def getName():
         return "CentralisedDDQN"
+
+    def getPath():
+        return "./filter"+Agent.getName()

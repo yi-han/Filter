@@ -4,6 +4,11 @@ Replaces main_new, decouples the experiment from the learning agent.
 Input: A learning agent
 
 Runs network, sends state to learning agent, gets response, sends response to network.
+
+#TODO
+I think my update is wrong as its using the current state not the prior state
+and shouldn't it be including both the last state and the prior state?
+
 """
 
 from __future__ import division
@@ -13,8 +18,8 @@ import os, sys
 
 from network.network_new import *
 
-from agent.sarsaDecentralised import *
-
+#from agent.sarsaDecentralised import *
+from agent.ddqnCentralised import *
 
 # Network information
 #TODO decouple this as well by putting into a class and feeding in?
@@ -35,9 +40,13 @@ y = 0 #.99 #Discount factor on the target Q-values
 startE = 1 #Starting chance of random action
 endE = 0.1 #Final chance of random action
 annealing_steps = 900000 #How many steps of training to reduce startE to endE.
-num_episodes = 150000 #How many episodes of game environment to train network with.
+#num_episodes = 150000 #How many episodes of game environment to train network with.
+num_episodes = 15000 #How many episodes of game environment to train network with.
 pre_train_steps = 300000 #How many steps of random actions before training begins.
+#pre_train_steps = 3000 #How many steps of random actions before training begins.
+
 max_epLength = 30 #The max allowed length of our episode.
+load_model = False
 
 
 reward_overload = -1
@@ -60,7 +69,6 @@ net = network(N_switch, N_action, hosts, servers, filters, reward_overload,
 test = False #set to True when testing a trained model
 debug = False
 
-
 tau = 0.001 #Rate to update target network toward primary network
 
 ### TODO put into AGENT
@@ -81,73 +89,104 @@ largest_gradient = 0
 fail = 0
 
 
+#agent = Agent(N_action, pre_train_steps, alph = tau, gam=y, debug=debug, test=test)
+
+agent = Agent(N_action, pre_train_steps, debug, test, N_state, tau, y)
 
 
-
-#agent = Agent(N_action, test=test, debug=debug, alph = tau, gam=y)
-agent = Agent(N_action, pre_train_steps, alph = tau, gam=y, debug=debug, test=test)
 
 name = Agent.getName()
-path = "./filter" + name #The path to save our model to.
-load_path = ""
+path = Agent.getPath()
+
+#path = "./filter" + name #The path to save our model to.
+#load_path = ""
+load_path = path #ideally can move a good one to a seperate location
 
 
 #Make a path for our model to be saved in.
+
 if not os.path.exists(path):
     os.makedirs(path)
 
 reward_file = open(path + "/reward" + name + ".csv", "w")
 loss_file = open(path + "/loss" + name + ".csv", "w")
 
-
-for i in range(num_episodes):
-    net.reset()
-
-    d = False # indicates that network is finished
-    rAll = 0
-    j = 0
-
-    while j < max_epLength:
-        j+=1
-        net.get_state()
-
-        if j > 1: # when j==1, the actions are chosen randomly, and the state is NULL
-
-            # r = reward, d = done
-            d, r = net.calculate_reward(d, j)
-            rAll += r
-
-            agent.update(net.current_state, last_action, r)
-            print('\n' + "step:" + str(j) + ", action:" + str(last_action) + ", reward:" + str(r), end='')
-            if r < 0:
-                fail += 1
+print("{0} is:".format(name))
 
 
-        #TODO make sure to do do pre_training_stuff
-        a = agent.predict(net.current_state, total_steps, e) # action
 
-        net.step(a)
-        last_action = a
-        total_steps += 1
 
-        if total_steps > pre_train_steps:
-            if e > endE:
-                e -= stepDrop
 
-        if d:
-            break
+with agent:
 
-    jList.append(j)
-    rList.append(rAll)
+    if load_model == True:
+        agent.loadModel(load_path)
 
-    reward_file.write(str(i) + "," + str(total_steps) + "," + str(rList[-1]) + "," + str(jList[-1]) + "," + str(e) + "\n")
-    if len(loss) > 0:
-        loss_file.write(str(i) + "," + str(total_steps) + "," + str(loss[-1]) + "," + str(e) + "\n")
+
+    for i in range(num_episodes):
+        net.reset()
+
+        d = False # indicates that network is finished
+        rAll = 0
+        j = 0
+
+        while j < max_epLength:
+            j+=1
+            net.get_state()
+
+            if j > 1: # when j==1, the actions are chosen randomly, and the state is NULL
+
+                # r = reward, d = done
+                d, r = net.calculate_reward(d, j)
+                rAll += r
+
+                ### why are we putting in the current state??? Shouldn't it be last state
+                ### or better, shouldn't it involve both the last state and current state?
+                agent.update(net.last_state, last_action, net.current_state, d, r)
+                #agent.update(net.current_state, last_action, r)
+                print("step:" + str(j) + ", action:" + str(last_action) + ", reward:" + str(r), end='\n')
+                if r < 0:
+                    fail += 1
+
+
+            #TODO make sure to do do pre_training_stuff
+            a = agent.predict(net.current_state, total_steps, e) # action
+
+            net.step(a)
+            last_action = a
+            total_steps += 1
+
+            if total_steps > pre_train_steps:
+                if e > endE:
+                    e -= stepDrop
+
+                if total_steps % (update_freq) == 0 and not test:
+                    l = agent.actionReplay(net.current_state, batch_size)
+                    if l:
+                        loss.append(l)
+
+                if total_steps%3000==0:
+                    print("total steps = {0}".format(total_steps))
+
+            if d:
+                break
+        
+        if not test: 
+            if i % 1000 == 0:
+                agent.saveModel(load_path, i)
+
+        jList.append(j)
+        rList.append(rAll)
+
+        reward_file.write(str(i) + "," + str(total_steps) + "," + str(rList[-1]) + "," + str(jList[-1]) + "," + str(e) + "\n")
+        if len(loss) > 0:
+            loss_file.write(str(i) + "," + str(total_steps) + "," + str(loss[-1]) + "," + str(e) + "\n")
 
 
 reward_file.close()
 loss_file.close()
 
+print("{0} is:".format(name))
 print("Percent of succesful episodes: " + str(100 - fail*100/total_steps) + "%")
 
 

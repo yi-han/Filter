@@ -33,12 +33,20 @@ class Agent():
     def getName():
         pass
 
+    @abstractmethod
+    def getPath():
+        pass
 
     @abstractmethod
     def actionReplay():
         # note not used in sarsa
         pass
 
+    @abstractmethod
+    def load_model(self,load_path):
+        pass
+
+        
     # @abstractmethod
     # def __enter__(self):
     #     pass
