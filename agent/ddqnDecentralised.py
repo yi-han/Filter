@@ -22,7 +22,8 @@ class Agent(aBase.Agent):
 
         self.agents = []
         for i in range(self.numAgents):
-            indivAgent = centralAgent.Agent(action_per_agent, pre_train_steps, debug, test, N_state, tau, discountFactor)
+            # note we set the number of states as one as we have autonomous agents
+            indivAgent = centralAgent.Agent(action_per_agent, pre_train_steps, debug, test, 1, tau, discountFactor)
             self.agents.append(indivAgent)
         self.score = 0
 
@@ -62,6 +63,7 @@ class Agent(aBase.Agent):
         self.score += reward
 
     def actionReplay(self, current_state, batch_size):
+        print("\naction replay")
         l = 0
         for i in range(len(current_state)):
             l+= self.agents[i].actionReplay([current_state[i]], batch_size)
