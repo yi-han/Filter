@@ -2,7 +2,7 @@
 Middleman between the experiment and the sarsa agent. Called centralised 
 due to use of a singular sarsa AI but is compatble with multiple to one states.
 
-#TODO
+#TODO I think the update is wrong. Confirm that experiment is sending the right state
 
 
 
@@ -15,12 +15,12 @@ import numpy as np
 
 class Agent(aBase.Agent):
 
-    def __init__(self, numActions, pre_train_steps, alph=0.1, gam=0, debug=False, test=False):
+    def __init__(self, N_action, pre_train_steps, action_per_agent, N_state, alph=0.1, gam=0, debug=False, test=False):
 
         super().__init__(pre_train_steps, debug, test)
         self.ai = SarsaAI(
-            actions=range(numActions), alpha=alph, gamma=gam)
-        self.numActions = numActions
+            actions=range(N_action), alpha=alph, gamma=gam)
+        self.N_action = N_action
         self.lastAction = None
         self.lastState = None
         self.score = 0
@@ -30,7 +30,7 @@ class Agent(aBase.Agent):
         
         return
 
-    def __exit__(self):
+    def __exit__(self, type, value, tb):
         # have memory management here
         return
 
@@ -38,49 +38,41 @@ class Agent(aBase.Agent):
     def predict(self, state, total_steps, e):
         randomChoice = super().isRandomGuess(total_steps, e)
         if randomChoice:
-            action = np.random.randint(0,self.numActions)
+            action = np.random.randint(0,self.N_action)
         else:
             state = tileState(state)
             action = self.ai.chooseAction(state)
 
         return action 
 
-    def update(self, state, action, reward):
-        state = tileState(state)
+
+
+    def update(self, last_state, last_action, current_state, is_finished, reward):
+        last_state = tileState(last_state)
         
-        # print("doing an update")
-        # print(self.lastAction)
-        # print(reward)
-        # print(state)
         self.score += reward
 
-        self.state = state
+        self.last_state = last_state
 
         if self.lastAction is not None:
             self.ai.learn(
-                self.lastState, self.lastAction, reward, state, action)
-        self.lastState = state
-        self.lastAction = action   
+                self.lastState, self.lastAction, reward, last_state, last_action)
+        self.lastState = last_state
+        self.lastAction = last_action   
 
-    def actionReplay(self, currentState):
+    def actionReplay(self, current_state, batch_size):
         return None
 
 
-    def reset(self):
-        # i think it should just put into a random state
-        # alternatively i think there is preset states from net. See that
-        
-        self.lastAction = None
-        self.lastState = None
-        #         here = self.cell
-        # if here.goal or here.cliff:
-        #     self.cell = startCell
-        #     self.lastAction = None
-        # else:
-        #     self.goInDirection(action)
+    def saveModel(self, load_path, i):
+        #TODO: finish this
+        return
 
     def getName():
         return "SarsaCentralisedAgent"
+
+    def getPath():
+        return "./filter"+Agent.getName() 
 
 def tileState(state):
     # a hack job at tileCoding. Based on 0 research or effort

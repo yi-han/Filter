@@ -10,7 +10,7 @@ and by only these conditions nothing changes
 
 class Agent():    
 
-
+    #@abstractmethod
     def __init__(self, pre_train_steps, debug=False, test=False):
         self.pre_train_steps = pre_train_steps
         self.debug = debug

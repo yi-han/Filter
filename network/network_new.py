@@ -5,6 +5,14 @@ import copy
 
 import agent # i think this is the other folder but I dont think it would have access to this?
 
+"""
+#TODO
+
+1) Either allow fetching state without updating network or fix other code not to call for state so often
+
+"""
+
+
 MAX_STEP = 30
 
 """

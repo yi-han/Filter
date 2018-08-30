@@ -5,9 +5,16 @@ Input: A learning agent
 
 Runs network, sends state to learning agent, gets response, sends response to network.
 
-#TODO
-I think my update is wrong as its using the current state not the prior state
+#BUGS
+1) I think my update is wrong as its using the current state not the prior state
 and shouldn't it be including both the last state and the prior state?
+2) Bug with pulling the right state from network
+
+#TODO
+1) Standardise agents
+2) Ensure the saving and reloading works properly for ALL agents
+3) Create script to capture reward per episode as we train
+4) Use script for testing purposes. Compare
 
 """
 
@@ -18,9 +25,10 @@ import os, sys
 
 from network.network_new import *
 
+from agent.sarsaCentralised import *
 #from agent.sarsaDecentralised import *
 #from agent.ddqnCentralised import *
-from agent.ddqnDecentralised import *
+# from agent.ddqnDecentralised import * # works
 
 
 # Network information
@@ -79,8 +87,6 @@ tau = 0.001 #Rate to update target network toward primary network
 e = startE
 stepDrop = (startE - endE)/annealing_steps
 
-
-
 #create lists to contain total rewards and steps per episode
 jList = []
 rList = []
@@ -91,10 +97,7 @@ experiences_added = 0
 largest_gradient = 0
 fail = 0
 
-
-#agent = Agent(N_action, pre_train_steps, alph = tau, gam=y, debug=debug, test=test)
-
-agent = Agent(N_action, pre_train_steps, action_per_agent, debug, test, N_state, tau, y)
+agent = Agent(N_action, pre_train_steps, action_per_agent, N_state, tau, y, debug, test)
 
 
 
