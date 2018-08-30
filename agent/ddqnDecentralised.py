@@ -13,7 +13,7 @@ import math
 
 class Agent(aBase.Agent):
 
-    def __init__(self, N_action, pre_train_steps, action_per_agent, debug, test, N_state, tau, discountFactor):
+    def __init__(self, N_action, pre_train_steps, action_per_agent, N_state, tau=0.1, discountFactor=0, debug=False, test=False):
 
         self.numAgents = int(round(math.log(N_action, action_per_agent)))
         self.action_per_agent = action_per_agent
@@ -23,7 +23,7 @@ class Agent(aBase.Agent):
         self.agents = []
         for i in range(self.numAgents):
             # note we set the number of states as one as we have autonomous agents
-            indivAgent = centralAgent.Agent(action_per_agent, pre_train_steps, debug, test, 1, tau, discountFactor)
+            indivAgent = centralAgent.Agent(action_per_agent, pre_train_steps, action_per_agent, 1, tau, discountFactor, debug, test)
             self.agents.append(indivAgent)
         self.score = 0
 
@@ -57,7 +57,7 @@ class Agent(aBase.Agent):
 
     def update(self, last_state, action, current_state, discount, reward):
         # provide the update function to each individual state
-        actions = actionToActions(action, self.numAgents, self.action_per_agent)
+        actions = Agent.actionToActions(action, self.numAgents, self.action_per_agent)
         for i in range(len(last_state)):
             self.agents[i].update([last_state[i]], actions[i], [current_state[i]], discount, reward)
         self.score += reward

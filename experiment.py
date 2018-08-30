@@ -25,10 +25,10 @@ import os, sys
 
 from network.network_new import *
 
-from agent.sarsaCentralised import *
-#from agent.sarsaDecentralised import *
-#from agent.ddqnCentralised import *
-# from agent.ddqnDecentralised import * # works
+# from agent.sarsaCentralised import * #works
+# from agent.sarsaDecentralised import * #works
+# from agent.ddqnCentralised import * #works
+from agent.ddqnDecentralised import * #works
 
 
 # Network information
