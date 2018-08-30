@@ -27,11 +27,13 @@ class Agent(aBase.Agent):
 
     def __enter__(self):
         # probably have memory management here
-        
+        print("__enter__ sarsaCentralised")
+
         return
 
     def __exit__(self, type, value, tb):
         # have memory management here
+        print("__exit__ sarsaCentralised")
         return
 
 
@@ -63,6 +65,9 @@ class Agent(aBase.Agent):
     def actionReplay(self, current_state, batch_size):
         return None
 
+    def loadModal(self, load_path):
+        #TODO: finish this
+        return
 
     def saveModel(self, load_path, i):
         #TODO: finish this

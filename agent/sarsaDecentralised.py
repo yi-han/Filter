@@ -16,21 +16,28 @@ import math
 
 
 class Agent(aBase.Agent):
-
-    def __init__(self, numActions, pre_train_steps, actionPerAgent = 10, alph=0.1, gam=0, debug=False, test=False):
+    def __init__(self, N_action, pre_train_steps, action_per_agent, N_state, alph=0.1, gam=0, debug=False, test=False):
 
         # creates an agent for each filter
 
-        self.numAgents = int(round(math.log(numActions, actionPerAgent)))
-        self.actionPerAgent = actionPerAgent
+        self.num_agents = int(round(math.log(N_action, action_per_agent)))
+        self.action_per_agent = action_per_agent
 
-        assert actionPerAgent**self.numAgents==numActions
+        assert action_per_agent**self.num_agents==N_action
 
         self.agents = []
-        for i in range(self.numAgents):
-            indivAgent = centralAgent.Agent(actionPerAgent, pre_train_steps, alph = alph, gam=gam, debug=debug, test=test)
-            self.agents.append(indivAgent)
+        for i in range(self.num_agents):
+            indiv_agent = centralAgent.Agent(action_per_agent, pre_train_steps, action_per_agent, 1, alph = alph, gam=gam, debug=debug, test=test)
+            self.agents.append(indiv_agent)
         self.score = 0
+
+    def __enter__(self):
+        print("__enter__ sarsaDecentralised")
+
+    def __exit__(self, type, value, tb):
+        # have memory management here
+        print("__exit__ sarsaDecentralised")
+        return
 
     def predict(self, state, total_steps, e):
         # only provide each agent with its corresponding state
@@ -49,39 +56,37 @@ class Agent(aBase.Agent):
 
         return action 
 
-    def update(self, state, action, reward):
-        # provide the update function to each individual state
-        actions = actionToActions(action, self.numAgents, self.actionPerAgent)
-        for i in range(len(state)):
-            self.agents[i].update([state[i]], actions[i], reward)
+    def update(self, last_state, last_action, current_state, is_finished, reward):
 
+        # provide the update function to each individual state
+        actions = Agent.actionToActions(last_action, self.num_agents, self.action_per_agent)
+        for i in range(len(last_state)):
+            self.agents[i].update([last_state[i]], actions[i], current_state[i], is_finished, reward)
         self.score += reward
 
 
-    def reset(self):
-        # reset each agent
+    def actionReplay(self, current_state):
+        return None
+
+    def loadModel(self, load_path):
+        # note we are going to use the index of the array as an id
+        print("loading all models")
+        for i in range(self.agents):
+            individual_path = load_path+'/{0}'.format(i)
+            self.agents[i].loadModel(individual_path)
+
+    def saveModel(self,load_path, interation):
+        #print("saving all models")
         for i in range(len(self.agents)):
-            self.agents[i].reset()
+            individual_path = load_path+'/{0}'.format(i)
+            self.agents[i].saveModel(individual_path, interation)     
 
     def getName():
         return "SarsaDecentralisedAgent"
 
-    def actionReplay(self, currentState):
-        return None
+    def getPath():
+        return "./filter"+Agent.getName()
 
-def actionToActions(action, numAgents, actionPerAgent):
-    # takes the action presented to network and returns
-    # a list of each action by each agent
-    actions = []
-    numAgents-=1
-    while(numAgents>=0):
-
-        divider = actionPerAgent**numAgents
-        individualAction = int(action/divider)
-        action -= (individualAction*divider)
-        numAgents -= 1
-        actions.append(individualAction)
-    return actions
 
 
 

@@ -58,4 +58,19 @@ class Agent():
     def isRandomGuess(self, total_steps, e):
         # calculate if meant to do choose a random
         return (random.rand(1) < e or total_steps < self.pre_train_steps) and not self.debug and not self.test
+
+    def actionToActions(action, num_agents, action_per_agent):
+    # takes the action presented to network and returns
+    # a list of each action by each agent
+        actions = []
+        num_agents-=1
+        while(num_agents>=0):
+
+            divider = action_per_agent**num_agents
+            individualAction = int(action/divider)
+            action -= (individualAction*divider)
+            num_agents -= 1
+            actions.append(individualAction)
+        return actions
+
             

@@ -88,19 +88,6 @@ class Agent(aBase.Agent):
         return "./filter"+Agent.getName()
 
 
-def actionToActions(action, numAgents, action_per_agent):
-    # takes the action presented to network and returns
-    # a list of each action by each agent
-    actions = []
-    numAgents-=1
-    while(numAgents>=0):
-
-        divider = action_per_agent**numAgents
-        individualAction = int(action/divider)
-        action -= (individualAction*divider)
-        numAgents -= 1
-        actions.append(individualAction)
-    return actions
 
 
 
