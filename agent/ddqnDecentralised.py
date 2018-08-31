@@ -63,7 +63,6 @@ class Agent(aBase.Agent):
         self.score += reward
 
     def actionReplay(self, current_state, batch_size):
-        print("\naction replay")
         l = 0
         for i in range(len(current_state)):
             l+= self.agents[i].actionReplay([current_state[i]], batch_size)
@@ -76,7 +75,6 @@ class Agent(aBase.Agent):
             self.agents[i].loadModel(individual_path)
 
     def saveModel(self,load_path, interation):
-        print("saving all models")
         for i in range(len(self.agents)):
             individual_path = load_path+'/{0}'.format(i)
             self.agents[i].saveModel(individual_path, interation)
