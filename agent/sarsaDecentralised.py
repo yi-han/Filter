@@ -65,14 +65,14 @@ class Agent(aBase.Agent):
         self.score += reward
 
 
-    def actionReplay(self, current_state):
+    def actionReplay(self, current_state, batch_size):
         return None
 
     def loadModel(self, load_path):
         # note we are going to use the index of the array as an id
         print("loading all models")
-        for i in range(self.agents):
-            individual_path = load_path+'/{0}'.format(i)
+        for i in range(len(self.agents)):
+            individual_path = load_path+'/{0}/'.format(i)
             self.agents[i].loadModel(individual_path)
 
     def saveModel(self,load_path, interation):

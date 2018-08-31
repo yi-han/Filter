@@ -71,7 +71,7 @@ class Agent(aBase.Agent):
     def loadModel(self, load_path):
         # note we are going to use the index of the array as an id
         print("loading all models")
-        for i in range(self.agents):
+        for i in range(len(self.agents)):
             individual_path = load_path+'/{0}'.format(i)
             self.agents[i].loadModel(individual_path)
 
@@ -79,7 +79,7 @@ class Agent(aBase.Agent):
         print("saving all models")
         for i in range(len(self.agents)):
             individual_path = load_path+'/{0}'.format(i)
-            self.agents[i].saveModel(individual_path, interation)        
+            self.agents[i].saveModel(individual_path, interation)
 
     def getName():
         return "DecentralisedDDQN"

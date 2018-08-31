@@ -46,9 +46,31 @@ class SarsaAI:
 
     def learn(self, state1, action1, reward, state2, action2):
         
-
         qnext = self.getQ(state2, action2)
         self.learnQ(state1, action1, reward, reward + self.gamma * qnext)
 
 
-  
+    def getData(self):
+        #return a dict of all the information of the agent
+        data = {}
+        data['q']=self.q
+        data['alpha'] = self.alpha
+        data['gamma'] = self.gamma
+        data['actions'] = self.actions
+
+        return data
+
+    def loadData(self, dataDict):
+        # given a dictionary of preloaded values check that parameters fit
+        # the current experiment and then load the q values
+
+        if dataDict['alpha'] != self.alpha or dataDict['gamma'] != self.gamma or \
+            dataDict['actions'] != self.actions:
+            raise ValueError('Experiments parameters do not match saved file')
+        else:
+            self.q = dataDict['q']
+            
+
+
+
+

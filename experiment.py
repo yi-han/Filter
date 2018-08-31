@@ -9,12 +9,16 @@ Runs network, sends state to learning agent, gets response, sends response to ne
 1) I think my update is wrong as its using the current state not the prior state
 and shouldn't it be including both the last state and the prior state?
 2) Bug with pulling the right state from network
+3) When loading via sarsa (and tensorflow), it doesn't increment the i. Low priority
+
+
 
 #TODO
-1) Standardise agents
 2) Ensure the saving and reloading works properly for ALL agents
 3) Create script to capture reward per episode as we train
 4) Use script for testing purposes. Compare
+
+
 
 """
 
@@ -26,9 +30,9 @@ import os, sys
 from network.network_new import *
 
 # from agent.sarsaCentralised import * #works
-# from agent.sarsaDecentralised import * #works
+from agent.sarsaDecentralised import * #works
 # from agent.ddqnCentralised import * #works
-from agent.ddqnDecentralised import * #works
+#from agent.ddqnDecentralised import * #works
 
 
 # Network information
@@ -57,7 +61,6 @@ pre_train_steps = 300000 #How many steps of random actions before training begin
 #pre_train_steps = 3000 #How many steps of random actions before training begins.
 
 max_epLength = 30 #The max allowed length of our episode.
-load_model = False
 
 
 reward_overload = -1
@@ -77,8 +80,8 @@ net = network(N_switch, N_action, hosts, servers, filters, reward_overload,
               legal_probability, upper_boundary, topologyFile)
 
 
-test = False #set to True when testing a trained model
-debug = False
+
+
 
 tau = 0.001 #Rate to update target network toward primary network
 
@@ -97,7 +100,13 @@ experiences_added = 0
 largest_gradient = 0
 fail = 0
 
+test = False #set to True when testing a trained model
+debug = False
+
 agent = Agent(N_action, pre_train_steps, action_per_agent, N_state, tau, y, debug, test)
+
+
+load_model = False
 
 
 

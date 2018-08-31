@@ -2,17 +2,19 @@
 Middleman between the experiment and the sarsa agent. Called centralised 
 due to use of a singular sarsa AI but is compatble with multiple to one states.
 
-#TODO I think the update is wrong. Confirm that experiment is sending the right state
+#TODO 
 
-
+1) I think the update is wrong. Confirm that experiment is sending the right state
+2) We should only keep track of last 3 saves, don't keep all due to memory / needless
+3) Implemet checkpoint file of just the latest
 
 """
 from agent.sarsaAI import *
 import agent.agentBase as aBase
 import numpy as np
-
-
-
+import pickle
+from pathlib import Path
+import os
 class Agent(aBase.Agent):
 
     def __init__(self, N_action, pre_train_steps, action_per_agent, N_state, alph=0.1, gam=0, debug=False, test=False):
@@ -48,7 +50,6 @@ class Agent(aBase.Agent):
         return action 
 
 
-
     def update(self, last_state, last_action, current_state, is_finished, reward):
         last_state = tileState(last_state)
         
@@ -65,12 +66,52 @@ class Agent(aBase.Agent):
     def actionReplay(self, current_state, batch_size):
         return None
 
-    def loadModal(self, load_path):
-        #TODO: finish this
+    def loadModel(self, load_path):
+        # let above work out the load_path especially with the decentralised part
+        
+
+
+        with open(load_path+"/checkpoint", 'r') as checkpoint_file:
+            last_checkpoint = checkpoint_file.readline()
+
+        with open(load_path+"/"+last_checkpoint, 'rb') as f:
+            dataDict = pickle.load(f)
+            print("datadic is loaded \n")
+            self.ai.loadData(dataDict)
+
+
         return
 
     def saveModel(self, load_path, i):
-        #TODO: finish this
+        if not os.path.exists(load_path):
+            os.makedirs(load_path) 
+                    
+        checkpoint_path = load_path+'/checkpoint'
+        cpp = Path(checkpoint_path)
+        if cpp.is_file():
+            checkpoint_file = open(checkpoint_path,'r')
+            last_checkpoint = checkpoint_file.readline()
+        else:
+            last_checkpoint = None
+
+        dataDict = self.ai.getData()
+        name = Agent.getName()+'-'+str(i)+'.pkl'
+
+        with open(load_path+'/'+name, 'wb') as f:
+            # dump datafile
+            pickle.dump(dataDict, f, pickle.HIGHEST_PROTOCOL)
+
+        with open(checkpoint_path, 'w') as checkpoint_file:
+            # update checkpoint to point to new datafile
+            checkpoint_file = open(checkpoint_path, 'w')
+            checkpoint_file.write(name)
+        
+        if last_checkpoint:
+            # delete redundant datafile that was prior checkpoint
+            # this happens at the end
+            os.remove(load_path+'/'+last_checkpoint)
+
+
         return
 
     def getName():
