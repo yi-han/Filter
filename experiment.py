@@ -29,10 +29,10 @@ import os, sys
 
 from network.network_new import *
 
-# from agent.sarsaCentralised import * #works
-from agent.sarsaDecentralised import * #works
-# from agent.ddqnCentralised import * #works
-#from agent.ddqnDecentralised import * #works
+# from agent.sarsaCentralised import *
+from agent.sarsaDecentralised import *
+# from agent.ddqnCentralised import *
+# from agent.ddqnDecentralised import *
 
 
 # Network information
@@ -85,7 +85,6 @@ net = network(N_switch, N_action, hosts, servers, filters, reward_overload,
 
 tau = 0.001 #Rate to update target network toward primary network
 
-### TODO put into AGENT
 #Set the rate of random action decrease. 
 e = startE
 stepDrop = (startE - endE)/annealing_steps
@@ -125,6 +124,7 @@ if not os.path.exists(path):
 
 reward_file = open(path + "/reward" + name + ".csv", "w")
 loss_file = open(path + "/loss" + name + ".csv", "w")
+packet_served_file = open(path + "/packet_served" + name+".csv","w")
 
 print("{0} is:".format(name))
 
@@ -154,12 +154,11 @@ with agent:
                 # r = reward, d = done
                 d, r = net.calculate_reward(d, j)
                 rAll += r
-
                 ### why are we putting in the current state??? Shouldn't it be last state
                 ### or better, shouldn't it involve both the last state and current state?
                 agent.update(net.last_state, last_action, net.current_state, d, r)
                 #agent.update(net.current_state, last_action, r)
-                print("step:" + str(j) + ", action:" + str(last_action) + ", reward:" + str(r), end='\n')
+                #print("step:" + str(j) + ", action:" + str(last_action) + ", reward:" + str(r), end='\n')
                 if r < 0:
                     fail += 1
 
@@ -186,12 +185,17 @@ with agent:
             if d:
                 break
         
+
         if not test: 
             if i % 1000 == 0:
+                print("Completed Episode - {0}".format(i))
                 agent.saveModel(load_path, i)
 
         jList.append(j)
         rList.append(rAll)
+
+        legit_served, legit_all, legit_per = net.getLegitStats()
+        packet_served_file.write("{0}, {1}, {2}, {3}\n".format(i, legit_served, legit_all, legit_per))
 
         reward_file.write(str(i) + "," + str(total_steps) + "," + str(rList[-1]) + "," + str(jList[-1]) + "," + str(e) + "\n")
         if len(loss) > 0:

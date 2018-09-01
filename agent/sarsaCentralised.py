@@ -68,9 +68,6 @@ class Agent(aBase.Agent):
 
     def loadModel(self, load_path):
         # let above work out the load_path especially with the decentralised part
-        
-
-
         with open(load_path+"/checkpoint", 'r') as checkpoint_file:
             last_checkpoint = checkpoint_file.readline()
 
@@ -85,7 +82,7 @@ class Agent(aBase.Agent):
     def saveModel(self, load_path, i):
         if not os.path.exists(load_path):
             os.makedirs(load_path) 
-                    
+
         checkpoint_path = load_path+'/checkpoint'
         cpp = Path(checkpoint_path)
         if cpp.is_file():

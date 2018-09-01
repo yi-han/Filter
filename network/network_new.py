@@ -8,18 +8,16 @@ import agent # i think this is the other folder but I dont think it would have a
 """
 #TODO
 
+0) Remove the whole MAX_STEP or 'd' from this, should be handled by experiment
 1) Either allow fetching state without updating network or fix other code not to call for state so often
-
+2) Convert drop_probabilities to dynamic
+3) I'm confident that the calculation of state is incorrect
+4) Note whilst calcPercentage is a part of getReward it doesn't evaluate for the first step (so not full)
 """
 
 
 MAX_STEP = 30
 
-"""
-#TODO
-1) Convert drop_probabilities to dynamic
-
-"""
 
 
 
@@ -84,10 +82,19 @@ class network(object):
         self.initialise(f_link)
         self.last_state = np.empty_like(self.current_state)
 
+        # for evaluation
+        self.legitimate_served = 0
+        self.legitimate_all = 0
+        self.is_functional = True
+
     def reset(self):
         self.set_attackers()
         self.set_rate()
         
+        self.legitimate_served = 0
+        self.legitimate_all = 0
+        self.is_functional = True
+
         self.drop_probability.clear()
         for i in range(self.N_filter):
             #TODO
@@ -195,6 +202,7 @@ class network(object):
         self.reset()
 
     def calculate_reward(self, d, step):
+        # not sure why we would take in d if we set it regardless
         if step < MAX_STEP:
             d = False
         else:
@@ -211,16 +219,36 @@ class network(object):
                 if j not in self.attackers:
                     legitimate_rate += self.host_rate[j] * (1-self.drop_probability[i])
                     legitimate_rate_all += self.host_rate[j]
+
                 else:
                     attacker_rate += self.host_rate[j] * (1-self.drop_probability[i])
 
         if legitimate_rate + attacker_rate > self.upper_boundary:
             #used to set the reward to "reward_overload" in this case, but didn't work well
             reward -= ((legitimate_rate + attacker_rate)/self.upper_boundary - 1.0)
+            self.is_functional = False
         else:
             reward += legitimate_rate/legitimate_rate_all
         
+        # metrics for evaluation if we want
+        if self.is_functional:
+            # once incapacitated the server no longer can accept any more requests
+            self.legitimate_served += legitimate_rate
+        self.legitimate_all += legitimate_rate_all
+
         return d, clip(-1, 1, reward)
 
     def step(self, action):
         self.set_drop_probability(action)
+
+    def getLegitStats(self):
+        # returns % of packets served in an episode
+        # assumes if server has failed then no further packets were received
+        # meant to be used at end of an epsisode
+        per = self.legitimate_served / self.legitimate_all
+        return self.legitimate_served, self.legitimate_all, per
+
+
+
+
+
