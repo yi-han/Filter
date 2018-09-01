@@ -49,7 +49,9 @@ debug = False
 load_model = True
 
 # adversary = adv.ConstantAttack
-adversary = adv.PulseQuick
+# adversary = adv.PulseQuick
+adversary = adv.PulseMedium
+
 
 
 # Network information

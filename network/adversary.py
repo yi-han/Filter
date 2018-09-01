@@ -19,15 +19,16 @@ class ConstantAttack():
     def getHostRate(self):
         return self.host_rate
 
-class PulseQuick():
+
+class Pulse():
     # aim to have a super class for pulses
     def __init__(self, N_host, attackers, rate_attack_low, rate_attack_high, rate_legal_low, rate_legal_high,
-        max_epLength):
+        max_epLength, swap_at):
         self.pulse_host = []
         self.standard_host = []
         self.max_epLength = max_epLength
         
-        self.swap_at=1 
+        self.swap_at=swap_at
         self.counter = 0
         self.pulse_on = False
         for i in range(N_host):
@@ -54,4 +55,21 @@ class PulseQuick():
 
     def getHostRate(self):
         return self.host_rate
+
+
+class PulseQuick(Pulse):
+
+    def __init__(self, N_host, attackers, rate_attack_low, rate_attack_high, rate_legal_low, rate_legal_high,
+        max_epLength):
+        super().__init__(N_host, attackers, rate_attack_low, rate_attack_high, rate_legal_low, rate_legal_high,
+        max_epLength, 2)
+
+
+class PulseMedium(Pulse):
+    def __init__(self, N_host, attackers, rate_attack_low, rate_attack_high, rate_legal_low, rate_legal_high,
+        max_epLength):
+        super().__init__(N_host, attackers, rate_attack_low, rate_attack_high, rate_legal_low, rate_legal_high,
+        max_epLength, 4)
+
+
 
