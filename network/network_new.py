@@ -7,7 +7,7 @@ import agent # i think this is the other folder but I dont think it would have a
 
 """
 #TODO
-
+0) Set rate after each step to fix the bug?
 1) Either allow fetching state without updating network or fix other code not to call for state so often
 2) Convert drop_probabilities to dynamic
 3) I'm confident that the calculation of state is incorrect
@@ -47,7 +47,7 @@ class network(object):
         self.servers[:] = servers
         self.filters = np.empty_like(filters)
         self.filters[:] = filters
-        self.attackers = []
+        self.attackers = [] # id corresponds to the host attatched
 
         self.N_switch = N_switch
         self.N_action = N_action
@@ -62,20 +62,21 @@ class network(object):
         self.rate_attack_low = rate_attack_low
         self.rate_attack_high = rate_attack_high
         
-        self.legal_probability = legal_probability
+        self.legal_probability = legal_probability # odds of host being an attacker
         self.upper_boundary = upper_boundary
         
         self.topology = []
         self.links = []
         
-        self.host_rate = []
+        self.host_rate = [] # list of traffic generated. Differnt if host has been designated as an attacker
         self.filter_host = {}
         self.current_state = [] #aggregate traffic rate
-        self.drop_probability = []
+        self.drop_probability = [] # percentage of traffic stopping
         self.initialise(f_link)
         self.last_state = np.empty_like(self.current_state)
 
         # for evaluation
+        # i doubt it matters here as reset is called instantaneously
         self.legitimate_served = 0
         self.legitimate_all = 0
         self.is_functional = True
@@ -110,7 +111,10 @@ class network(object):
             return count
 
     def set_attackers(self):
+        # sets a random amount of attackers inbetween (but not inclusive) 0 and max
         self.attackers.clear()
+
+        assert self.N_host!=0 or self.N_host!=1 # to stop infinite loops
 
         while len(self.attackers) == 0 or len(self.attackers) == self.N_host:
         #do not allow "none/all attacker"
@@ -120,6 +124,8 @@ class network(object):
                     self.attackers.append(i)
                 
     def set_rate(self):
+        # sets the rate of all hosts
+        # different levels if they have been classified as an attacker
         self.host_rate.clear()
         for i in range(self.N_host):
             if i in self.attackers:
@@ -227,6 +233,8 @@ class network(object):
         return clip(-1, 1, reward)
 
     def step(self, action):
+        # input the actions. Just sets drop probabilities at the moment
+        # ideally i would move calculations here
         self.set_drop_probability(action)
 
     def getLegitStats(self):
