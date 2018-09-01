@@ -26,6 +26,7 @@ class Agent(aBase.Agent):
         self.lastAction = None
         self.lastState = None
         self.score = 0
+        self.test = test
 
     def __enter__(self):
         # probably have memory management here

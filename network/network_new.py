@@ -40,7 +40,7 @@ class link(object):
 class network(object):
     def __init__(self, N_switch, N_action, hosts, servers, filters, reward_overload, 
               rate_legal_low, rate_legal_high, rate_attack_low, rate_attack_high, 
-              legal_probability, upper_boundary, f_link):
+              legal_probability, upper_boundary, adv, f_link):
         self.hosts = np.empty_like(hosts)
         self.hosts[:] = hosts
         self.servers = np.empty_like(servers)
@@ -64,26 +64,24 @@ class network(object):
         
         self.legal_probability = legal_probability # odds of host being an attacker
         self.upper_boundary = upper_boundary
-        
+        self.adv = adv
         self.topology = []
         self.links = []
-        
-        self.host_rate = [] # list of traffic generated. Differnt if host has been designated as an attacker
         self.filter_host = {}
         self.current_state = [] #aggregate traffic rate
         self.drop_probability = [] # percentage of traffic stopping
         self.initialise(f_link)
         self.last_state = np.empty_like(self.current_state)
 
-        # for evaluation
-        # i doubt it matters here as reset is called instantaneously
-        self.legitimate_served = 0
-        self.legitimate_all = 0
-        self.is_functional = True
+
 
     def reset(self):
         self.set_attackers()
-        self.set_rate()
+        #self.set_rate()
+        
+        self.adversary = self.adv(self.N_host, self.attackers, self.rate_attack_low, self.rate_attack_high, 
+            self.rate_legal_low, self.rate_legal_high)
+
         
         self.legitimate_served = 0
         self.legitimate_all = 0
@@ -122,17 +120,7 @@ class network(object):
             for i in range(self.N_host):
                 if np.random.rand() >= self.legal_probability:
                     self.attackers.append(i)
-                
-    def set_rate(self):
-        # sets the rate of all hosts
-        # different levels if they have been classified as an attacker
-        self.host_rate.clear()
-        for i in range(self.N_host):
-            if i in self.attackers:
-                self.host_rate.append(self.rate_attack_low + np.random.rand()*(self.rate_attack_high - self.rate_attack_low))
-            else:
-                self.host_rate.append(self.rate_legal_low + np.random.rand()*(self.rate_legal_high - self.rate_legal_low))
-                
+        
     def get_state(self):
         self.last_state[:] = self.current_state
         self.current_state.clear()
@@ -142,7 +130,7 @@ class network(object):
 
             for j in self.filter_host[self.filters[i]]:
                 
-                self.current_state[i] += self.host_rate[j]
+                self.current_state[i] += self.adversary.getHostRate()[j]
         
         return self.current_state
     
@@ -211,11 +199,11 @@ class network(object):
         for i in range(self.N_filter):
             for j in self.filter_host[self.filters[i]]:
                 if j not in self.attackers:
-                    legitimate_rate += self.host_rate[j] * (1-self.drop_probability[i])
-                    legitimate_rate_all += self.host_rate[j]
+                    legitimate_rate += self.adversary.getHostRate()[j] * (1-self.drop_probability[i])
+                    legitimate_rate_all += self.adversary.getHostRate()[j]
 
                 else:
-                    attacker_rate += self.host_rate[j] * (1-self.drop_probability[i])
+                    attacker_rate += self.adversary.getHostRate()[j] * (1-self.drop_probability[i])
 
         if legitimate_rate + attacker_rate > self.upper_boundary:
             #used to set the reward to "reward_overload" in this case, but didn't work well
@@ -232,10 +220,12 @@ class network(object):
 
         return clip(-1, 1, reward)
 
-    def step(self, action):
+    def step(self, action, step):
         # input the actions. Just sets drop probabilities at the moment
         # ideally i would move calculations here
         self.set_drop_probability(action)
+
+        self.adversary.takeStep()
         # should pass the data along nodes
 
         # this is where we would update attack rates for NON-CONSTANT attacks

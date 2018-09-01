@@ -41,12 +41,14 @@ from agent.sarsaDecentralised import *
 # from agent.ddqnCentralised import *
 # from agent.ddqnDecentralised import *
 
+import network.adversary as adv
+
 
 test = True #set to True when testing a trained model
 debug = False
 load_model = True
 
-
+adversary = adv.ConstantAttack
 
 # Network information
 #TODO decouple this as well by putting into a class and feeding in?
@@ -113,7 +115,7 @@ topologyFile = 'topology.txt'
 
 net = network(N_switch, N_action, hosts, servers, filters, reward_overload, 
               rate_legal_low, rate_legal_high, rate_attack_low, rate_attack_high, 
-              legal_probability, upper_boundary, topologyFile)
+              legal_probability, upper_boundary, adversary, topologyFile)
 
 
 
@@ -201,7 +203,7 @@ with agent:
             #TODO make sure to do do pre_training_stuff
             a = agent.predict(net.current_state, total_steps, e) # action
 
-            net.step(a)
+            net.step(a, j)
             last_action = a
             total_steps += 1
 
@@ -213,9 +215,6 @@ with agent:
                     l = agent.actionReplay(net.current_state, batch_size)
                     if l:
                         loss.append(l)
-
-
-        
 
         if not test: 
             if i % 1000 == 0:
