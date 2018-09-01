@@ -18,6 +18,13 @@ and shouldn't it be including both the last state and the prior state?
 3) Create script to capture reward per episode as we train
 4) Use script for testing purposes. Compare
 
+#DONE
+
+1) Made SARSA centralised
+2) Made SARSA decentralised
+3) Made ddqn decentralised
+4) Saved SARSA
+5) REMOVED D FROM ACTION LEARNING DDQN, NOT SURE IF THIS HAS GRAVE CONSEQUENCES
 
 
 """
@@ -30,8 +37,8 @@ import os, sys
 from network.network_new import *
 
 # from agent.sarsaCentralised import *
-from agent.sarsaDecentralised import *
-# from agent.ddqnCentralised import *
+# from agent.sarsaDecentralised import *
+from agent.ddqnCentralised import *
 # from agent.ddqnDecentralised import *
 
 
@@ -152,7 +159,8 @@ with agent:
             if j > 1: # when j==1, the actions are chosen randomly, and the state is NULL
 
                 # r = reward, d = done
-                d, r = net.calculate_reward(d, j)
+                d = j==max_epLength
+                r = net.calculate_reward()
                 rAll += r
                 ### why are we putting in the current state??? Shouldn't it be last state
                 ### or better, shouldn't it involve both the last state and current state?

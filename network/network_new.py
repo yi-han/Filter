@@ -8,18 +8,11 @@ import agent # i think this is the other folder but I dont think it would have a
 """
 #TODO
 
-0) Remove the whole MAX_STEP or 'd' from this, should be handled by experiment
 1) Either allow fetching state without updating network or fix other code not to call for state so often
 2) Convert drop_probabilities to dynamic
 3) I'm confident that the calculation of state is incorrect
 4) Note whilst calcPercentage is a part of getReward it doesn't evaluate for the first step (so not full)
 """
-
-
-MAX_STEP = 30
-
-
-
 
 def clip(min_value, max_value, value):
     if value < min_value:
@@ -201,12 +194,7 @@ class network(object):
         
         self.reset()
 
-    def calculate_reward(self, d, step):
-        # not sure why we would take in d if we set it regardless
-        if step < MAX_STEP:
-            d = False
-        else:
-            d = True
+    def calculate_reward(self):
         
         reward = 0.0
 
@@ -236,7 +224,7 @@ class network(object):
             self.legitimate_served += legitimate_rate
         self.legitimate_all += legitimate_rate_all
 
-        return d, clip(-1, 1, reward)
+        return clip(-1, 1, reward)
 
     def step(self, action):
         self.set_drop_probability(action)

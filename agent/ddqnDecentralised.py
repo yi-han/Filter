@@ -55,11 +55,11 @@ class Agent(aBase.Agent):
         print("state-{0} action-{1}".format(state,action))
         return action
 
-    def update(self, last_state, action, current_state, discount, reward):
+    def update(self, last_state, action, current_state, is_done, reward):
         # provide the update function to each individual state
         actions = Agent.actionToActions(action, self.numAgents, self.action_per_agent)
         for i in range(len(last_state)):
-            self.agents[i].update([last_state[i]], actions[i], [current_state[i]], discount, reward)
+            self.agents[i].update([last_state[i]], actions[i], [current_state[i]], is_done, reward)
         self.score += reward
 
     def actionReplay(self, current_state, batch_size):

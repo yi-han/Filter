@@ -22,6 +22,7 @@ class Agent(aBase.Agent):
         self.N_action = N_action
         self.y = discountFactor
         self.sess = tf.Session()
+    
     def __enter__(self):
         print("about to run")
         #self.sess = tf.Session()
