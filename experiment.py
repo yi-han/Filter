@@ -190,8 +190,6 @@ with agent:
                 if total_steps%3000==0:
                     print("total steps = {0}".format(total_steps))
 
-            if d:
-                break
         
 
         if not test: 

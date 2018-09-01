@@ -236,6 +236,9 @@ class network(object):
         # input the actions. Just sets drop probabilities at the moment
         # ideally i would move calculations here
         self.set_drop_probability(action)
+        # should pass the data along nodes
+
+        # this is where we would update attack rates for NON-CONSTANT attacks
 
     def getLegitStats(self):
         # returns % of packets served in an episode
