@@ -48,7 +48,9 @@ test = True #set to True when testing a trained model
 debug = False
 load_model = True
 
-adversary = adv.ConstantAttack
+# adversary = adv.ConstantAttack
+adversary = adv.PulseQuick
+
 
 # Network information
 #TODO decouple this as well by putting into a class and feeding in?
@@ -115,7 +117,7 @@ topologyFile = 'topology.txt'
 
 net = network(N_switch, N_action, hosts, servers, filters, reward_overload, 
               rate_legal_low, rate_legal_high, rate_attack_low, rate_attack_high, 
-              legal_probability, upper_boundary, adversary, topologyFile)
+              legal_probability, upper_boundary, adversary, max_epLength, topologyFile)
 
 
 

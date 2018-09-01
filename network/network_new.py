@@ -40,7 +40,7 @@ class link(object):
 class network(object):
     def __init__(self, N_switch, N_action, hosts, servers, filters, reward_overload, 
               rate_legal_low, rate_legal_high, rate_attack_low, rate_attack_high, 
-              legal_probability, upper_boundary, adv, f_link):
+              legal_probability, upper_boundary, adv, max_epLength, f_link):
         self.hosts = np.empty_like(hosts)
         self.hosts[:] = hosts
         self.servers = np.empty_like(servers)
@@ -70,6 +70,7 @@ class network(object):
         self.filter_host = {}
         self.current_state = [] #aggregate traffic rate
         self.drop_probability = [] # percentage of traffic stopping
+        self.max_epLength = max_epLength
         self.initialise(f_link)
         self.last_state = np.empty_like(self.current_state)
 
@@ -80,7 +81,7 @@ class network(object):
         #self.set_rate()
         
         self.adversary = self.adv(self.N_host, self.attackers, self.rate_attack_low, self.rate_attack_high, 
-            self.rate_legal_low, self.rate_legal_high)
+            self.rate_legal_low, self.rate_legal_high, self.max_epLength)
 
         
         self.legitimate_served = 0
