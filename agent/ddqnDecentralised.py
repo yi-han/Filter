@@ -82,8 +82,12 @@ class Agent(aBase.Agent):
     def getName():
         return "DecentralisedDDQN"
 
-    def getPath():
-        return "./filter"+Agent.getName()
+    def getPath(self):
+        if self.test:
+            prefix="./trained"
+        else:
+            prefix = "./filter"
+        return prefix+Agent.getName()
 
 
 

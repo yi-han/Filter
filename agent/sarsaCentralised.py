@@ -114,8 +114,12 @@ class Agent(aBase.Agent):
     def getName():
         return "SarsaCentralisedAgent"
 
-    def getPath():
-        return "./filter"+Agent.getName() 
+    def getPath(self):
+        if self.test:
+            prefix="./trained"
+        else:
+            prefix = "./filter"
+        return prefix+Agent.getName()
 
 def tileState(state):
     # a hack job at tileCoding. Based on 0 research or effort

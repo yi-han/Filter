@@ -30,6 +30,7 @@ class Agent(aBase.Agent):
             indiv_agent = centralAgent.Agent(action_per_agent, pre_train_steps, action_per_agent, 1, alph = alph, gam=gam, debug=debug, test=test)
             self.agents.append(indiv_agent)
         self.score = 0
+        self.test = test
 
     def __enter__(self):
         print("__enter__ sarsaDecentralised")
@@ -84,8 +85,12 @@ class Agent(aBase.Agent):
     def getName():
         return "SarsaDecentralisedAgent"
 
-    def getPath():
-        return "./filter"+Agent.getName()
+    def getPath(self):
+        if self.test:
+            prefix="./trained"
+        else:
+            prefix = "./filter"
+        return prefix+Agent.getName()
 
 
 
