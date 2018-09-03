@@ -1,24 +1,64 @@
 import numpy as np
+"""
+1) Shoudln't be keeping a counter, use the one provided by experiment
+2) update to be handle variable
 
-class ConstantAttack():
+"""
 
-    def __init__(self, N_host, attackers, rate_attack_low, rate_attack_high, rate_legal_low, rate_legal_high,
+class Host():
+    # ideally you want to merge host with switch somewhat
+
+    def __init__(self, destination_switch, rate_attack_low, rate_attack_high, rate_legal_low, rate_legal_high,
         max_epLength):
-        self.host_rate = []
-        
-        for i in range(N_host):
-            if i in attackers:
-                self.host_rate.append(rate_attack_low + np.random.rand()*(rate_attack_high - rate_attack_low))
-            else:
-                self.host_rate.append(rate_legal_low + np.random.rand()*(rate_legal_high - rate_legal_low))
+
+        self.destination_switch = destination_switch
+
+        self.rate_attack_low = rate_attack_low
+        self.rate_attack_high = rate_attack_high
+        self.rate_legal_low = rate_legal_low
+        self.rate_legal_high = rate_legal_high
+        self.max_epLength = max_epLength
 
 
-    def takeStep(self):
-        pass
+        self.reset(False) # initates all values
 
-    def getHostRate(self):
-        return self.host_rate
+    def reset(self, is_attacker, traffic_rate):
+        self.is_attacker = is_attacker
+        self.traffic_rate = traffic_rate        
 
+
+
+    def sendTraffic(self, time_step):
+        if self.is_attacker:
+            self.destination_switch.new_illegal += self.traffic_rate
+        else:
+            self.destination_switch.new_legal += self.traffic_rate
+
+
+    def print_host(self):
+        print("destination {0}".format(self.destination_switch.id))
+
+
+class ConstantAttack(Host):
+
+
+    def reset(self, is_attacker):
+
+        if is_attacker:
+            traffic_rate = self.rate_attack_low + np.random.rand()*(self.rate_attack_high - self.rate_attack_low)
+        else:
+            traffic_rate = self.rate_legal_low + np.random.rand()*(self.rate_legal_high - self.rate_legal_low)
+
+        super().reset(is_attacker, traffic_rate)
+
+
+
+    # def takeStep(self):
+    #     pass
+
+    # def getHostRate(self):
+    #     return self.host_rate
+"""
 
 class Pulse():
     # aim to have a super class for pulses
@@ -71,5 +111,5 @@ class PulseMedium(Pulse):
         super().__init__(N_host, attackers, rate_attack_low, rate_attack_high, rate_legal_low, rate_legal_high,
         max_epLength, 4)
 
-
+"""
 

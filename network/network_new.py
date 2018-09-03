@@ -7,11 +7,11 @@ import agent # i think this is the other folder but I dont think it would have a
 
 """
 #TODO
-2) Remove all hard coded stuff
 2) Implement nodes for realistic implementation
 4) Implement a observation window
 5) Do a close inspection of the state at the very start and run through to make sure the network is running right
-
+6) Confirm rewards...might be incentive to accept everything
+7) Simulate network milliseconds
 #DONE
 1) Created flexible adverseary
 2) Seperate 'next_state' from 'get_state'
@@ -35,34 +35,136 @@ def deep_copy_state(state):
     state_copy[:] = state
     return state_copy
 
+
+
+
+class Switch():
+    def __init__(self, switch_id, is_filter):
+        self.id = switch_id
+        self.source_links = []
+        self.destination_links = []
+        self.attatched_hosts = []
+        self.throttle_rate = 0
+        
+        self.legal_window = 0
+        self.illegal_window = 0
+        self.dropped_legal_window = 0
+        self.dropped_illegal_window = 0
+
+        self.legal_traffic = 0
+        self.dropped_legal = 0
+        self.illegal_traffic = 0
+        self.dropped_illegal = 0
+
+        self.new_legal = 0
+        self.new_dropped_legal = 0
+        self.new_illegal = 0
+        self.new_dropped_illegal = 0
+
+        self.is_filter = is_filter
+
+    def sendTraffic(self):
+        # an initial part of passing traffic along
+        num_dests = len(self.destination_links)
+        
+        legal_pass = self.legal_traffic * (1-self.throttle_rate)
+        legal_dropped = self.legal_traffic * self.throttle_rate
+
+        illegal_pass = self.illegal_traffic * (1 - self.throttle_rate)
+        illegal_dropped = self.illegal_traffic * self.throttle_rate
+
+        # update all other switches with new traffic values
+        for dest in self.destination_links:
+            dest.destination_switch.new_legal += (legal_pass/num_dests)
+            dest.destination_switch.new_dropped_legal += ((legal_dropped + self.dropped_legal)/num_dests)
+
+            dest.destination_switch.new_illegal += (illegal_pass/num_dests)
+            dest.destination_switch.new_dropped_illegal += ((illegal_dropped+ self.dropped_illegal)/num_dests)
+
+    def updateSwitch(self):
+        # update the traffic values
+        self.legal_traffic = self.new_legal
+        self.illegal_traffic = self.new_illegal
+        self.dropped_legal = self.new_dropped_legal
+        self.dropped_illegal = self.new_dropped_illegal
+
+        # register switches interested in
+        self.legal_window += self.legal_traffic
+        self.illegal_window += self.illegal_traffic
+
+        self.dropped_legal_window += self.dropped_legal
+        self.dropped_illegal_window += self.dropped_illegal_window
+        # reset new traffic values
+        self.new_legal = 0
+        self.new_illegal = 0
+        self.new_dropped_legal = 0
+        self.new_dropped_illegal = 0
+
+    def resetWindow(self):
+        self.legal_window=0
+        self.illegal_window = 0
+        self.dropped_legal_window = 0
+        self.dropped_illegal_window = 0
+
+    def getWindow(self):
+        return self.legal_window + self.illegal_window
+
+    def getImmediateState(self):
+        return self.legal_traffic + self.illegal_traffic
+
+    def setThrottle(self, throttle_rate):
+        assert(self.is_filter)
+        self.throttle_rate = throttle_rate
+
+    def reset(self):
+        self.legal_traffic = 0
+        self.dropped_legal = 0
+        self.illegal_traffic = 0
+        self.dropped_illegal = 0
+        self.new_legal = 0
+        self.new_dropped_legal = 0
+        self.new_illegal = 0
+        self.new_dropped_illegal = 0
+        self.resetWindow()
+
+    #def printSwitch(self):
+    #    print("switch_id {0} | load {1} | destination {2}".format(self.id, ))
+
 class link(object):
     id = -1
-    source_node = -1
-    source_port = -1
+    source_node = None
+    source_port = None
+    source_switch = None # switch object
     destination_node = -1
     destination_port = -1
+    destination_switch = None # switch object
     status = -1
     importance = -1
     bandwidth = -1
 
-class network(object):
-    def __init__(self, N_switch, N_action, N_state, action_per_agent, hosts, servers, filters, reward_overload, 
-              rate_legal_low, rate_legal_high, rate_attack_low, rate_attack_high, 
-              legal_probability, upper_boundary, adv, max_epLength, f_link):
-        self.hosts = np.empty_like(hosts)
-        self.hosts[:] = hosts
-        self.servers = np.empty_like(servers)
-        self.servers[:] = servers
-        self.filters = np.empty_like(filters)
-        self.filters[:] = filters
-        self.attackers = [] # id corresponds to the host attatched
 
+    def printLink(self):
+        print("id: {0} | source_node {1} | source_port {2} | destination_node {3} | destination_port {4} | bandwidth {5}".format(\
+            self.id, self.source_node, self.source_port, self.destination_node, self.destination_port, self.bandwidth))
+
+class network(object):
+    def __init__(self, N_switch, N_action, N_state, action_per_agent, host_sources, servers, filter_list, reward_overload, 
+              rate_legal_low, rate_legal_high, rate_attack_low, rate_attack_high, 
+              legal_probability, upper_boundary, hostClass, max_epLength, f_link):
+        self.host_sources = np.empty_like(host_sources)
+        self.host_sources[:] = host_sources
+        self.servers = np.empty_like(servers)
+        self.servers[:] = servers # list of the servers. Usually [0]
+        # self.filters = np.empty_like(filters)
+        # self.filters[:] = filters
+        #self.attackers = [] # id corresponds to the host attatched
+        self.filter_list = filter_list
         self.N_state = N_state
-        self.N_switch = N_switch
+        self.N_switch = N_switch # number of nodes?
         self.N_action = N_action
         self.N_server = len(self.servers)
-        self.N_host = len(self.hosts)
-        self.N_filter = len(self.filters)
+        self.N_host = len(self.host_sources)
+        self.N_filter = len(filter_list)
         self.action_per_agent = action_per_agent # actions each host can take
         
         self.reward_overload = reward_overload
@@ -74,36 +176,46 @@ class network(object):
         
         self.legal_probability = legal_probability # odds of host being an attacker
         self.upper_boundary = upper_boundary
-        self.adv = adv
+        self.hostClass = hostClass
         self.topology = []
-        self.links = []
-        self.filter_host = {}
-        self.current_state = [] #aggregate traffic rate
-        self.drop_probability = [] # percentage of traffic stopping
+        # self.filter_host = {} - for old implementation of calculating traffic
+        #self.drop_probability = [] # percentage of traffic stopping
         self.max_epLength = max_epLength
 
+
+        # specific to new network
+
+        self.switches = [] # list of all switches, first one shouuld be attatched to server
+        self.links = []
+        self.hosts = []
+
         self.initialise(f_link)
-        self.last_state = np.empty_like(self.current_state)
+        self.last_state = np.empty_like(self.get_state())
+
+        for link in self.links:
+            link.printLink()
+
+        for host in self.hosts:
+            host.print_host()
 
 
     def reset(self):
         self.set_attackers()
         #self.set_rate()
-        
-        self.adversary = self.adv(self.N_host, self.attackers, self.rate_attack_low, self.rate_attack_high, 
-            self.rate_legal_low, self.rate_legal_high, self.max_epLength)
-
-        
-        self.legitimate_served = 0
         self.legitimate_all = 0
+        self.legitimate_served = 0
+        for i in range(self.N_switch):
+            self.switches[i].reset()
+            is_filter = i in self.filter_list
+            if is_filter:
+                self.switches[i].setThrottle(np.random.randint(0,self.action_per_agent)/self.action_per_agent)
+            #self.switches.append(Switch(i, is_filter))
+        
+
         self.is_functional = True
 
-        self.drop_probability.clear()
-        for i in range(self.N_filter):
-            #TODO
-            self.drop_probability.append(np.random.randint(0,self.action_per_agent)/self.action_per_agent)
+        #self.drop_probability.clear()
 
-        self.current_state = [0.0] * self.N_filter
 
     def get_link(self, topology, f_link, v):
         with open(f_link) as f:
@@ -111,8 +223,9 @@ class network(object):
             for line in f:
                 line = line.strip('\n')
                 count += 1
-                source_nd_id = int(line.split('-')[0])
-                dest_nd_id = int(line.split('-')[1])
+                # Note I swapped dest/source from Yi as makes more sense for traffic going toward router
+                dest_nd_id = int(line.split('-')[0])
+                source_nd_id = int(line.split('-')[1])
 
                 topology[source_nd_id][dest_nd_id] = v
                 topology[dest_nd_id][source_nd_id] = v
@@ -121,34 +234,51 @@ class network(object):
 
     def set_attackers(self):
         # sets a random amount of attackers inbetween (but not inclusive) 0 and max
-        self.attackers.clear()
+        attackers = []
 
         assert self.N_host!=0 or self.N_host!=1 # to stop infinite loops
 
-        while len(self.attackers) == 0 or len(self.attackers) == self.N_host:
+        while len(attackers) == 0 or len(attackers) == self.N_host:
         #do not allow "none/all attacker"
-            self.attackers.clear()
+            attackers.clear()
             for i in range(self.N_host):
                 if np.random.rand() >= self.legal_probability:
-                    self.attackers.append(i)
+                    attackers.append(i)
+
+        for i in range(len(self.hosts)):
+            if i in attackers:
+                self.hosts[i].reset(is_attacker=True)
+            else:
+               self.hosts[i].reset(is_attacker=False) 
         
     def get_state(self):
-        return self.current_state
+        # grab the state of the switches we're interested in
+        state = []
+        for i in self.filter_list:
+            state.append(self.switches[i].getWindow())
+
+
+
+        return state
         
 
     
-    def next_state(self):
-        self.last_state[:] = self.current_state
-        self.current_state.clear()        
+    def next_state(self, time_step):
+        # update the network
 
-        for i in range(self.N_filter):
-            self.current_state.append(0)
+        self.last_state[:] = self.get_state()
 
-            for j in self.filter_host[self.filters[i]]:
-                
-                self.current_state[i] += self.adversary.getHostRate()[j]
-        
-        return self.current_state        
+        for host in self.hosts:
+            host.sendTraffic(time_step)
+
+        for switch in self.switches:
+            # ensure all traffic sent before we update
+            switch.sendTraffic()
+
+        for switch in self.switches:
+            switch.updateSwitch()
+
+       
 
     def set_drop_probability(self, action):
 
@@ -156,14 +286,16 @@ class network(object):
             j = self.N_state - (i + 1) # start at one below host, end at 0
             divider = self.action_per_agent**j
 
-            self.drop_probability[i] = int(action / divider)
-            action = action - (self.drop_probability[i]*divider)
-            self.drop_probability[i] /= self.action_per_agent # to turn into a percentage
+            switch_id = self.filter_list[i]
+            drop_prob = int(action / divider)
+            action = action - (drop_prob*divider)
+            drop_prob /= self.action_per_agent # to turn into a percentage
+            self.switches[switch_id].setThrottle(drop_prob)
+
 
 
         
         assert(action==0) 
-        return self.drop_probability
 
     def initialise(self, f_link):
         for i in range(self.N_switch):
@@ -174,18 +306,40 @@ class network(object):
 
         n_lk = self.get_link(self.topology, f_link, 1)
         
+        for i in range(self.N_switch):
+            is_filter = i in self.filter_list
+            self.switches.append(Switch(i, is_filter))
+
+
+
         #initialise links
-        for i in range(self.N_switch-1):
-            for j in range(i+1, self.N_switch):
+        # for i in range(self.N_switch-1):
+        #     for j in range(i+1, self.N_switch):
+        #         if self.topology[i][j] != -1:
+        #             l = link()
+        #             l.id = len(self.links)
+        #             l.source_node = i
+        #             l.destination_node = j
+        #             l.status = self.topology[i][j]
+        #             l.importance = 0
+        #             l.destination_switch = self.switches[j]
+
+        #             self.links.append(l)
+
+        #             self.switches[i].source_links.append(l)
+        #             self.switches[j].destination_links.append(l)
+        
+        for i in range(0, self.N_switch-1):
+            for j in range(i, self.N_switch):
                 if self.topology[i][j] != -1:
                     l = link()
                     l.id = len(self.links)
-                    l.source_node = i
-                    l.destination_node = j
-                    l.status = self.topology[i][j]
-                    l.importance = 0
-
+                    l.destination_switch = self.switches[i]
                     self.links.append(l)
+
+                    self.switches[i].source_links.append(l)
+                    self.switches[j].destination_links.append(l)                                    
+
 
         #TODO
         #hard-coded for now
@@ -194,35 +348,46 @@ class network(object):
         
 
         ### Jeremy, temporarily removed bottom two
-        self.filter_host.update({5:[0, 1, 2]})
-        self.filter_host.update({6:[3]})
-        self.filter_host.update({9:[4, 5]})
+        # self.filter_host.update({5:[0, 1, 2]})
+        # self.filter_host.update({6:[3]})
+        # self.filter_host.update({9:[4, 5]})
+
         
+        for i in self.host_sources:
+
+            host = self.hostClass(self.switches[i], self.rate_attack_low, self.rate_attack_high,
+                self.rate_legal_low, self.rate_legal_high, self.max_epLength)
+            self.hosts.append(host)
+
         self.reset()
 
     def calculate_reward(self):
         
         reward = 0.0
 
-        legitimate_rate = 0.0
-        legitimate_rate_all = 0.0
-        attacker_rate = 0.0
+        legitimate_rate = self.switches[0].legal_window
+        legitimate_rate_all = self.switches[0].legal_window + self.switches[0].dropped_legal_window
+        attacker_rate = self.switches[0].illegal_window
 
-        for i in range(self.N_filter):
-            for j in self.filter_host[self.filters[i]]:
-                if j not in self.attackers:
-                    legitimate_rate += self.adversary.getHostRate()[j] * (1-self.drop_probability[i])
-                    legitimate_rate_all += self.adversary.getHostRate()[j]
 
-                else:
-                    attacker_rate += self.adversary.getHostRate()[j] * (1-self.drop_probability[i])
+
+
+        # for i in range(self.N_filter):
+        #     for j in self.filter_host[self.filters[i]]:
+        #         if j not in self.attackers:
+        #             legitimate_rate += self.adversary.getHostRate()[j] * (1-self.drop_probability[i])
+        #             legitimate_rate_all += self.adversary.getHostRate()[j]
+
+        #         else:
+        #             attacker_rate += self.adversary.getHostRate()[j] * (1-self.drop_probability[i])
 
         if legitimate_rate + attacker_rate > self.upper_boundary:
             #used to set the reward to "reward_overload" in this case, but didn't work well
             reward -= ((legitimate_rate + attacker_rate)/self.upper_boundary - 1.0)
             self.is_functional = False
         else:
-            reward += legitimate_rate/legitimate_rate_all
+            if legitimate_rate_all != 0:
+                reward += legitimate_rate/legitimate_rate_all
         
         # metrics for evaluation if we want
         if self.is_functional:
@@ -232,15 +397,17 @@ class network(object):
 
         return clip(-1, 1, reward)
 
-    def step(self, action, step):
+    def step(self, action, step_count):
         # input the actions. Just sets drop probabilities at the moment
         # ideally i would move calculations here
         #print("State: {0}".format(self.current_state))
         #print("Drop Prob are {0}".format(self.drop_probability))
 
+        self.printState()
+
         self.set_drop_probability(action)
-        self.next_state()
-        self.adversary.takeStep()
+        self.next_state(step_count)
+        #self.adversary.takeStep()
         # should pass the data along nodes
 
         # this is where we would update attack rates for NON-CONSTANT attacks
@@ -249,8 +416,20 @@ class network(object):
         # returns % of packets served in an episode
         # assumes if server has failed then no further packets were received
         # meant to be used at end of an epsisode
-        per = self.legitimate_served / self.legitimate_all
-        return self.legitimate_served, self.legitimate_all, per
+        if self.legitimate_all == 0:
+            return (0, 0, 0)
+        else:
+            per = self.legitimate_served / self.legitimate_all
+            return self.legitimate_served, self.legitimate_all, per
+
+    def printState(self):
+        for switch in self.switches:
+            if switch.destination_links:
+                dest = switch.destination_links[0].destination_switch.id
+            else:
+                dest = None
+            print("id {0} | load {1} | window {2} | destination {3}".format(switch.id, switch.getImmediateState(), switch.getWindow(), dest))
+
 
 
 

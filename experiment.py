@@ -41,11 +41,11 @@ import os, sys, logging
 from network.network_new import *
 
 # from agent.sarsaCentralised import *
-# from agent.sarsaDecentralised import *
-from agent.ddqnCentralised import *
+from agent.sarsaDecentralised import *
+# from agent.ddqnCentralised import *
 # from agent.ddqnDecentralised import *
 
-import network.adversary as adv
+import network.hosts as hostClass
 
 
 test = False #set to True when testing a trained model
@@ -54,7 +54,7 @@ load_model = False
 
 
 
-adversary = adv.ConstantAttack
+adversary = hostClass.ConstantAttack
 # adversary = adv.PulseQuick
 # adversary = adv.PulseMedium
 
@@ -67,7 +67,7 @@ N_action = 1000 #In the current implementation, each filter has 10 possible acti
                 #e.g., action 123 means the drop rates at the three filters are set to 0.1, 0.2 and 0.3, respectively
 action_per_agent = 10 # each filter can do 10 actions
 N_switch = 13
-hosts = [5, 10, 12, 6, 9, 9] #ID of the switch that the host is connected to  
+hosts_sources = [5, 10, 12, 6, 9, 9] #ID of the switch that the host is connected to  
 
 servers = [0] #ID of the switch that the server is connected to 
 filters = [5, 6, 9] #ID of the switch that the filter locates at
@@ -123,7 +123,7 @@ upper_boundary = 8
 
 topologyFile = 'topology.txt'
 
-net = network(N_switch, N_action, N_state, action_per_agent, hosts, servers, filters, reward_overload, 
+net = network(N_switch, N_action, N_state, action_per_agent, hosts_sources, servers, filters, reward_overload, 
               rate_legal_low, rate_legal_high, rate_attack_low, rate_attack_high, 
               legal_probability, upper_boundary, adversary, max_epLength, topologyFile)
 
@@ -206,17 +206,17 @@ with agent:
                 ### why are we putting in the current state??? Shouldn't it be last state
                 ### or better, shouldn't it involve both the last state and current state?
                 if not test:
-                    agent.update(net.last_state, last_action, net.current_state, d, r)
+                    agent.update(net.last_state, last_action, net.get_state(), d, r)
                 #agent.update(net.current_state, last_action, r)
-                #print("step:" + str(j) + ", action:" + str(last_action) + ", reward:" + str(r), end='\n')
+                print("step:" + str(j) + ", action:" + str(last_action) + ", reward:" + str(r), end='\n')
                 #logging.debug("step: {0} - action: {1} - reward {2}".format(j,last_action,r))
                 if r < 0:
                     fail += 1
 
 
             #TODO make sure to do do pre_training_stuff
-            a = agent.predict(net.current_state, total_steps, e) # action
-
+            a = agent.predict(net.get_state(), total_steps, e) # action
+            print("taking action {0}".format(a))
             net.step(a, j)
             last_action = a
             total_steps += 1
