@@ -7,11 +7,19 @@ import agent # i think this is the other folder but I dont think it would have a
 
 """
 #TODO
-0) Set rate after each step to fix the bug?
-1) Either allow fetching state without updating network or fix other code not to call for state so often
-2) Convert drop_probabilities to dynamic
-3) I'm confident that the calculation of state is incorrect
-4) Note whilst calcPercentage is a part of getReward it doesn't evaluate for the first step (so not full)
+2) Remove all hard coded stuff
+2) Implement nodes for realistic implementation
+4) Implement a observation window
+5) Do a close inspection of the state at the very start and run through to make sure the network is running right
+
+#DONE
+1) Created flexible adverseary
+2) Seperate 'next_state' from 'get_state'
+3) Convert drop_probabilities to dynamic
+
+#OTHER
+1) Note whilst calcPercentage is a part of getReward it doesn't evaluate for the first step (so not full)
+
 """
 
 def clip(min_value, max_value, value):
@@ -38,7 +46,7 @@ class link(object):
     bandwidth = -1
 
 class network(object):
-    def __init__(self, N_switch, N_action, hosts, servers, filters, reward_overload, 
+    def __init__(self, N_switch, N_action, N_state, action_per_agent, hosts, servers, filters, reward_overload, 
               rate_legal_low, rate_legal_high, rate_attack_low, rate_attack_high, 
               legal_probability, upper_boundary, adv, max_epLength, f_link):
         self.hosts = np.empty_like(hosts)
@@ -49,11 +57,13 @@ class network(object):
         self.filters[:] = filters
         self.attackers = [] # id corresponds to the host attatched
 
+        self.N_state = N_state
         self.N_switch = N_switch
         self.N_action = N_action
         self.N_server = len(self.servers)
         self.N_host = len(self.hosts)
         self.N_filter = len(self.filters)
+        self.action_per_agent = action_per_agent # actions each host can take
         
         self.reward_overload = reward_overload
         
@@ -71,9 +81,9 @@ class network(object):
         self.current_state = [] #aggregate traffic rate
         self.drop_probability = [] # percentage of traffic stopping
         self.max_epLength = max_epLength
+
         self.initialise(f_link)
         self.last_state = np.empty_like(self.current_state)
-
 
 
     def reset(self):
@@ -91,7 +101,7 @@ class network(object):
         self.drop_probability.clear()
         for i in range(self.N_filter):
             #TODO
-            self.drop_probability.append(np.random.randint(0,10)/10)
+            self.drop_probability.append(np.random.randint(0,self.action_per_agent)/self.action_per_agent)
 
         self.current_state = [0.0] * self.N_filter
 
@@ -123,9 +133,14 @@ class network(object):
                     self.attackers.append(i)
         
     def get_state(self):
-        self.last_state[:] = self.current_state
-        self.current_state.clear()
+        return self.current_state
         
+
+    
+    def next_state(self):
+        self.last_state[:] = self.current_state
+        self.current_state.clear()        
+
         for i in range(self.N_filter):
             self.current_state.append(0)
 
@@ -133,25 +148,21 @@ class network(object):
                 
                 self.current_state[i] += self.adversary.getHostRate()[j]
         
-        return self.current_state
-    
+        return self.current_state        
+
     def set_drop_probability(self, action):
-        #TODO
-        #The implementation below only works for the current setup
 
-        # self.drop_probability[0] = int(action)/10
+        for i in range(self.N_state):
+            j = self.N_state - (i + 1) # start at one below host, end at 0
+            divider = self.action_per_agent**j
+
+            self.drop_probability[i] = int(action / divider)
+            action = action - (self.drop_probability[i]*divider)
+            self.drop_probability[i] /= self.action_per_agent # to turn into a percentage
+
 
         
-        # Implementation for 3
-        self.drop_probability[0] = int(action/100)
-        self.drop_probability[1] = int((action - self.drop_probability[0]*100)/10)
-        self.drop_probability[2] = int(action - self.drop_probability[0]*100 - self.drop_probability[1]*10)
-        
-        self.drop_probability[0] /= 10
-        self.drop_probability[1] /= 10
-        self.drop_probability[2] /= 10
-        
-
+        assert(action==0) 
         return self.drop_probability
 
     def initialise(self, f_link):
@@ -224,8 +235,11 @@ class network(object):
     def step(self, action, step):
         # input the actions. Just sets drop probabilities at the moment
         # ideally i would move calculations here
-        self.set_drop_probability(action)
+        #print("State: {0}".format(self.current_state))
+        #print("Drop Prob are {0}".format(self.drop_probability))
 
+        self.set_drop_probability(action)
+        self.next_state()
         self.adversary.takeStep()
         # should pass the data along nodes
 

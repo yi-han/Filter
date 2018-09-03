@@ -14,9 +14,10 @@ and shouldn't it be including both the last state and the prior state?
 
 
 #TODO
-2) Ensure the saving and reloading works properly for ALL agents
-3) Create script to capture reward per episode as we train
-4) Use script for testing purposes. Compare
+1) Redo the network to simulate actual nodes
+2) Allow choose the attack type
+
+
 
 #DONE
 
@@ -25,6 +26,9 @@ and shouldn't it be including both the last state and the prior state?
 3) Made ddqn decentralised
 4) Saved SARSA
 5) REMOVED D FROM ACTION LEARNING DDQN, NOT SURE IF THIS HAS GRAVE CONSEQUENCES
+6) Ensure the saving and reloading works properly for ALL agents
+7) Create script to capture reward per episode as we train
+8) Use script for testing purposes. Compare
 
 
 """
@@ -32,25 +36,27 @@ and shouldn't it be including both the last state and the prior state?
 from __future__ import division
 
 import numpy as np
-import os, sys
+import os, sys, logging
 
 from network.network_new import *
 
 # from agent.sarsaCentralised import *
-from agent.sarsaDecentralised import *
-# from agent.ddqnCentralised import *
+# from agent.sarsaDecentralised import *
+from agent.ddqnCentralised import *
 # from agent.ddqnDecentralised import *
 
 import network.adversary as adv
 
 
-test = True #set to True when testing a trained model
+test = False #set to True when testing a trained model
 debug = False
-load_model = True
+load_model = False
 
-# adversary = adv.ConstantAttack
+
+
+adversary = adv.ConstantAttack
 # adversary = adv.PulseQuick
-adversary = adv.PulseMedium
+# adversary = adv.PulseMedium
 
 
 
@@ -74,7 +80,7 @@ y = 0 #.99 #Discount factor on the target Q-values
 startE = 1 #Starting chance of random action
 endE = 0.1 #Final chance of random action
 
-
+assert(action_per_agent**N_state == N_action)
 
 
 if test:
@@ -117,7 +123,7 @@ upper_boundary = 8
 
 topologyFile = 'topology.txt'
 
-net = network(N_switch, N_action, hosts, servers, filters, reward_overload, 
+net = network(N_switch, N_action, N_state, action_per_agent, hosts, servers, filters, reward_overload, 
               rate_legal_low, rate_legal_high, rate_attack_low, rate_attack_high, 
               legal_probability, upper_boundary, adversary, max_epLength, topologyFile)
 
@@ -144,7 +150,11 @@ fail = 0
 agent = Agent(N_action, pre_train_steps, action_per_agent, N_state, tau, y, debug, test)
 
 
-
+if debug:
+    print("cat")
+    #logging.basicConfig(stream=sys.stderr, level=logging.DEBUG)
+else:
+    logging.basicConfig(stream=sys.stderr, level=logging.NOTSET)
 
 
 name = Agent.getName()
@@ -186,7 +196,6 @@ with agent:
 
         while j < max_epLength:
             j+=1
-            net.get_state()
 
             if j > 1: # when j==1, the actions are chosen randomly, and the state is NULL
 
@@ -200,6 +209,7 @@ with agent:
                     agent.update(net.last_state, last_action, net.current_state, d, r)
                 #agent.update(net.current_state, last_action, r)
                 #print("step:" + str(j) + ", action:" + str(last_action) + ", reward:" + str(r), end='\n')
+                #logging.debug("step: {0} - action: {1} - reward {2}".format(j,last_action,r))
                 if r < 0:
                     fail += 1
 
