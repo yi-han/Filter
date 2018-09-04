@@ -26,6 +26,7 @@ class Agent(aBase.Agent):
             indivAgent = centralAgent.Agent(action_per_agent, pre_train_steps, action_per_agent, 1, tau, discountFactor, debug, test)
             self.agents.append(indivAgent)
         self.score = 0
+        self.test = test
 
     def __enter__(self):
         print("__enter__ decentralised")
@@ -52,7 +53,6 @@ class Agent(aBase.Agent):
             agentState = [state[i]] # in a list to mock centralised
             agentAction = agent.predict(agentState, total_steps, e)
             action = action*10+agentAction
-        print("state-{0} action-{1}".format(state,action))
         return action
 
     def update(self, last_state, action, current_state, is_done, reward):

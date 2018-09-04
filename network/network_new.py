@@ -217,7 +217,7 @@ class network(object):
             #self.switches.append(Switch(i, is_filter))
         
 
-        self.is_functional = True
+        self.server_failures = 0
 
         #self.drop_probability.clear()
 
@@ -391,15 +391,13 @@ class network(object):
         if legitimate_rate + attacker_rate > self.upper_boundary:
             #used to set the reward to "reward_overload" in this case, but didn't work well
             reward -= ((legitimate_rate + attacker_rate)/self.upper_boundary - 1.0)
-            self.is_functional = False
+            self.server_failures +=1
         else:
             if legitimate_rate_all != 0:
                 reward += legitimate_rate/legitimate_rate_all
         
-        # metrics for evaluation if we want
-        if self.is_functional:
-            # once incapacitated the server no longer can accept any more requests
-            self.legitimate_served += legitimate_rate
+
+        self.legitimate_served += legitimate_rate
         self.legitimate_all += legitimate_rate_all
 
         return clip(-1, 1, reward)
@@ -426,13 +424,12 @@ class network(object):
 
     def getLegitStats(self):
         # returns % of packets served in an episode
-        # assumes if server has failed then no further packets were received
         # meant to be used at end of an epsisode
         if self.legitimate_all == 0:
             return (0, 0, 0)
         else:
             per = self.legitimate_served / self.legitimate_all
-            return self.legitimate_served, self.legitimate_all, per
+            return self.legitimate_served, self.legitimate_all, per, self.server_failures
 
     def printState(self):
         for switch in self.switches:
