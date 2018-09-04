@@ -98,7 +98,7 @@ if test:
 
 else:
 
-    num_episodes = 100000 #How many episodes of game environment to train network with.
+    num_episodes = 100001 #How many episodes of game environment to train network with.
 
     annealing_steps = 60000 #How many steps of training to reduce startE to endE.
     pre_train_steps = 30000 #How many steps of random actions before training begins.
