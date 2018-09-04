@@ -171,14 +171,25 @@ load_path = path #ideally can move a good one to a seperate location
 if not os.path.exists(path):
     os.makedirs(path)
 
-reward_file = open(path + "/reward" + name + "-" + adversary.getName()+".csv", "w")
-loss_file = open(path + "/loss" + name+ "-" + adversary.getName()+ ".csv", "w")
-packet_served_file = open(path + "/packet_served"+ "-" + adversary.getName()+ name+".csv","w")
+if test:
+    run_mode = "test"
+else:
+    run_mode = "train"
+
+"""
+reward_file = open(path + "/reward" + name + "-" + run_mode + "-" + adversary.getName()+".csv", "w")
+loss_file = open(path + "/loss" + name + "-" + run_mode + "-" + adversary.getName()+ ".csv", "w")
+packet_served_file = open(path + "/packet_served" + "-" + run_mode + "-" + adversary.getName()+ name+".csv","w")
+"""
+
+reward_file = open("{0}/reward-{1}-{2}.csv".format(path,run_mode,adversary.getName()),"w")
+loss_file = open("{0}/loss-{1}-{2}.csv".format(path,run_mode,adversary.getName()),"w")
+packet_served_file = open("{0}/packet_served-{1}-{2}.csv".format(path,run_mode,adversary.getName()),"w")
 
 print("{0} is:".format(name))
 
-reward_file.write("Episode, Steps so far, Total reward, Last reward, Length episode, e\n")
-packet_served_file.write("Episode, Packets Received, Packets Served, Percentage Received, Server Failures\n")
+reward_file.write("Episode,StepsSoFar,TotalReward,LastReward,LengthEpisode,e\n")
+packet_served_file.write("Episode,PacketsReceived,PacketsServed,PercentageReceived,ServerFailures\n")
 
 
 with agent:
