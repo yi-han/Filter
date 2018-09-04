@@ -48,16 +48,17 @@ from agent.sarsaDecentralised import *
 import network.hosts as hostClass
 
 
-test = False #set to True when testing a trained model
+test = True #set to True when testing a trained model
 debug = False
-load_model = False
+load_model = True
 
 
 
-adversary = hostClass.ConstantAttack
-# adversary = adv.PulseQuick
-# adversary = adv.PulseMedium
-
+# adversary = hostClass.ConstantAttack
+# adversary = hostClass.ShortPulse
+# adversary = hostClass.MediumPulse
+# adversary = hostClass.LargePulse
+adversary = hostClass.GradualIncrease
 
 
 # Network information
@@ -170,9 +171,9 @@ load_path = path #ideally can move a good one to a seperate location
 if not os.path.exists(path):
     os.makedirs(path)
 
-reward_file = open(path + "/reward" + name + ".csv", "w")
-loss_file = open(path + "/loss" + name + ".csv", "w")
-packet_served_file = open(path + "/packet_served" + name+".csv","w")
+reward_file = open(path + "/reward" + name + "-" + adversary.getName()+".csv", "w")
+loss_file = open(path + "/loss" + name+ "-" + adversary.getName()+ ".csv", "w")
+packet_served_file = open(path + "/packet_served"+ "-" + adversary.getName()+ name+".csv","w")
 
 print("{0} is:".format(name))
 
@@ -234,9 +235,11 @@ with agent:
                     if l:
                         loss.append(l)
 
+        if i % 1000 == 0:
+            print("Completed Episode - {0}".format(i))
+
         if not test: 
-            if i % 1000 == 0:
-                print("Completed Episode - {0}".format(i))
+
             if i % 10000 == 0:
                 agent.saveModel(load_path, i)
 
