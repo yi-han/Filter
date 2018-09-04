@@ -14,7 +14,7 @@ import agent # i think this is the other folder but I dont think it would have a
 7) Simulate network milliseconds
 #DONE
 1) Created flexible adverseary
-2) Seperate 'next_state' from 'get_state'
+2) Seperate 'move_traffic' from 'get_state'
 3) Convert drop_probabilities to dynamic
 
 #OTHER
@@ -127,8 +127,8 @@ class Switch():
         self.new_dropped_illegal = 0
         self.resetWindow()
 
-    #def printSwitch(self):
-    #    print("switch_id {0} | load {1} | destination {2}".format(self.id, ))
+    def printSwitch(self):
+       print("switch_id {0} | load {1} | window {2}".format(self.id, self.legal_traffic + self.illegal_traffic, self.getWindow()))
 
 class link(object):
     id = -1
@@ -151,6 +151,11 @@ class network(object):
     def __init__(self, N_switch, N_action, N_state, action_per_agent, host_sources, servers, filter_list, reward_overload, 
               rate_legal_low, rate_legal_high, rate_attack_low, rate_attack_high, 
               legal_probability, upper_boundary, hostClass, max_epLength, f_link):
+
+        #self.ITERATIONSBETEENACTION = 200 # with 10 ms delay, and throttle agent every 2 seconds, we see 200 messages passed in between
+
+        self.ITERATIONSBETEENACTION = 50 # set at 50 just to quarter the amount of time
+
         self.host_sources = np.empty_like(host_sources)
         self.host_sources[:] = host_sources
         self.servers = np.empty_like(servers)
@@ -169,10 +174,10 @@ class network(object):
         
         self.reward_overload = reward_overload
         
-        self.rate_legal_low = rate_legal_low
-        self.rate_legal_high = rate_legal_high
-        self.rate_attack_low = rate_attack_low
-        self.rate_attack_high = rate_attack_high
+        self.rate_legal_low = (rate_legal_low / self.ITERATIONSBETEENACTION)
+        self.rate_legal_high = (rate_legal_high / self.ITERATIONSBETEENACTION)
+        self.rate_attack_low = (rate_attack_low / self.ITERATIONSBETEENACTION)
+        self.rate_attack_high = (rate_attack_high / self.ITERATIONSBETEENACTION)
         
         self.legal_probability = legal_probability # odds of host being an attacker
         self.upper_boundary = upper_boundary
@@ -192,11 +197,11 @@ class network(object):
         self.initialise(f_link)
         self.last_state = np.empty_like(self.get_state())
 
-        for link in self.links:
-            link.printLink()
+        # for link in self.links:
+        #     link.printLink()
 
-        for host in self.hosts:
-            host.print_host()
+        # for host in self.hosts:
+        #     host.print_host()
 
 
     def reset(self):
@@ -254,7 +259,10 @@ class network(object):
     def get_state(self):
         # grab the state of the switches we're interested in
         state = []
+        #print(self.filter_list)
+
         for i in self.filter_list:
+            #self.switches[i].printSwitch()
             state.append(self.switches[i].getWindow())
 
 
@@ -263,10 +271,9 @@ class network(object):
         
 
     
-    def next_state(self, time_step):
+    def move_traffic(self, time_step):
         # update the network
 
-        self.last_state[:] = self.get_state()
 
         for host in self.hosts:
             host.sendTraffic(time_step)
@@ -400,13 +407,18 @@ class network(object):
     def step(self, action, step_count):
         # input the actions. Just sets drop probabilities at the moment
         # ideally i would move calculations here
-        #print("State: {0}".format(self.current_state))
-        #print("Drop Prob are {0}".format(self.drop_probability))
 
-        self.printState()
 
+        self.last_state = self.get_state()
+
+        for switch in self.switches:
+            switch.resetWindow()
+        
         self.set_drop_probability(action)
-        self.next_state(step_count)
+        for i in range(self.ITERATIONSBETEENACTION): # each time delay is 10 ms, 10*200 = 2000 ms = 2 seconds
+           self.move_traffic(step_count)
+
+
         #self.adversary.takeStep()
         # should pass the data along nodes
 

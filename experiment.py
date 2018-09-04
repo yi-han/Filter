@@ -208,7 +208,11 @@ with agent:
                 if not test:
                     agent.update(net.last_state, last_action, net.get_state(), d, r)
                 #agent.update(net.current_state, last_action, r)
-                print("step:" + str(j) + ", action:" + str(last_action) + ", reward:" + str(r), end='\n')
+                #print("current_state: {0}".format(net.get_state()))
+                #print("last state: {0}".format(net.last_state))
+                #print("step:" + str(j) + ", action:" + str(last_action) + ", reward:" + str(r), end='\n')
+                #print("server state: {0}\n".format(net.switches[0].getWindow()))
+                
                 #logging.debug("step: {0} - action: {1} - reward {2}".format(j,last_action,r))
                 if r < 0:
                     fail += 1
@@ -216,7 +220,7 @@ with agent:
 
             #TODO make sure to do do pre_training_stuff
             a = agent.predict(net.get_state(), total_steps, e) # action
-            print("taking action {0}".format(a))
+            #print("taking action {0}".format(a))
             net.step(a, j)
             last_action = a
             total_steps += 1
@@ -234,6 +238,7 @@ with agent:
             if i % 1000 == 0:
                 print("Completed Episode - {0}".format(i))
                 agent.saveModel(load_path, i)
+
 
         jList.append(j)
         rList.append(rAll)
