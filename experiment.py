@@ -41,24 +41,24 @@ import os, sys, logging
 from network.network_new import *
 
 # from agent.sarsaCentralised import *
-from agent.sarsaDecentralised import *
+# from agent.sarsaDecentralised import *
 # from agent.ddqnCentralised import *
-# from agent.ddqnDecentralised import *
+from agent.ddqnDecentralised import *
 
 import network.hosts as hostClass
 
 
-test = True #set to True when testing a trained model
+test = False #set to True when testing a trained model
 debug = False
-load_model = True
+load_model = False
 
 
 
-# adversary = hostClass.ConstantAttack
+adversary = hostClass.ConstantAttack
 # adversary = hostClass.ShortPulse
 # adversary = hostClass.MediumPulse
 # adversary = hostClass.LargePulse
-adversary = hostClass.GradualIncrease
+# adversary = hostClass.GradualIncrease
 
 
 # Network information
@@ -178,7 +178,7 @@ packet_served_file = open(path + "/packet_served"+ "-" + adversary.getName()+ na
 print("{0} is:".format(name))
 
 reward_file.write("Episode, Steps so far, Total reward, Last reward, Length episode, e\n")
-packet_served_file.write("Episode, Packets Received, Packets Served, Percentage Received\n")
+packet_served_file.write("Episode, Packets Received, Packets Served, Percentage Received, Server Failures\n")
 
 
 with agent:
@@ -247,8 +247,8 @@ with agent:
         jList.append(j)
         rList.append(rAll)
 
-        legit_served, legit_all, legit_per = net.getLegitStats()
-        packet_served_file.write("{0}, {1}, {2}, {3}\n".format(i, legit_served, legit_all, legit_per))
+        legit_served, legit_all, legit_per, server_failures = net.getLegitStats()
+        packet_served_file.write("{0}, {1}, {2}, {3}, {4}\n".format(i, legit_served, legit_all, legit_per, server_failures))
 
         reward_file.write(str(i) + "," + str(total_steps) + "," + str(rList[-1]) + "," + str(r) + "," + str(jList[-1]) + "," + str(e) + "\n")
         if len(loss) > 0:
