@@ -230,13 +230,14 @@ with agent:
                     e -= stepDrop
 
                 if total_steps % (update_freq) == 0 and not test:
-                    l = agent.actionReplay(net.current_state, batch_size)
+                    l = agent.actionReplay(net.get_state(), batch_size)
                     if l:
                         loss.append(l)
 
         if not test: 
             if i % 1000 == 0:
                 print("Completed Episode - {0}".format(i))
+            if i % 10000 == 0:
                 agent.saveModel(load_path, i)
 
 
