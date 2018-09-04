@@ -120,7 +120,7 @@ class GradualIncrease(Host):
         super().sendTraffic(time_step, rate_traffic)
 
     def getName():
-        return "Gradul-Increase"
+        return "Gradual-Increase"
 
     def reset(self, is_attacker):
 
