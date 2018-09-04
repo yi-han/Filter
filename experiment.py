@@ -16,7 +16,7 @@ and shouldn't it be including both the last state and the prior state?
 #TODO
 1) Redo the network to simulate actual nodes
 2) Allow choose the attack type
-
+3) % successful episodes doesn't make sense
 
 
 #DONE
@@ -78,8 +78,9 @@ filters = [5, 6, 9] #ID of the switch that the filter locates at
 batch_size = 32 #How many experiences to use for each training step.
 update_freq = 4 #How often to perform a training step.
 y = 0 #.99 #Discount factor on the target Q-values
-startE = 1 #Starting chance of random action
-endE = 0.1 #Final chance of random action
+
+startE = 0.5 #Starting chance of random action
+endE = 0.0 #Final chance of random action
 
 assert(action_per_agent**N_state == N_action)
 
@@ -97,11 +98,10 @@ if test:
 
 else:
 
-    annealing_steps = 900000 #How many steps of training to reduce startE to endE.
-    num_episodes = 150000 #How many episodes of game environment to train network with.
-    #num_episodes = 15000 #How many episodes of game environment to train network with.
-    pre_train_steps = 300000 #How many steps of random actions before training begins.
-    #pre_train_steps = 3000 #How many steps of random actions before training begins.
+    num_episodes = 100000 #How many episodes of game environment to train network with.
+
+    annealing_steps = 60000 #How many steps of training to reduce startE to endE.
+    pre_train_steps = 30000 #How many steps of random actions before training begins.
 
     max_epLength = 30 #The max allowed length of our episode.
 
@@ -238,6 +238,7 @@ with agent:
             total_steps += 1
 
             if total_steps > pre_train_steps:
+                
                 if e > endE:
                     e -= stepDrop
 

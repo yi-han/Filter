@@ -156,6 +156,8 @@ class network(object):
 
         self.ITERATIONSBETEENACTION = 50 # set at 50 just to quarter the amount of time
 
+
+
         self.host_sources = np.empty_like(host_sources)
         self.host_sources[:] = host_sources
         self.servers = np.empty_like(servers)
