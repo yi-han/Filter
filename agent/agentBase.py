@@ -20,12 +20,14 @@ class Agent():
     # def reset(self):
     #     pass
 
+    # Given state, generate an action
     @abstractmethod
-    def predict(self):
+    def predict(self, state, total_steps, e):
         pass
 
+    # provided the last state and the current state and prior actoin, update the learning agent
     @abstractmethod
-    def update(self):
+    def update(self, last_state, last_action, current_state,d, r):
         pass
 
 

@@ -398,8 +398,8 @@ class network(object):
             if legitimate_rate_all != 0:
                 reward += legitimate_rate/legitimate_rate_all
         
-
-        self.legitimate_served += legitimate_rate
+            self.legitimate_served += legitimate_rate
+        
         self.legitimate_all += legitimate_rate_all
 
         return clip(-1, 1, reward)
