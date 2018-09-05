@@ -17,6 +17,29 @@ cenDdqDir = "./trainedCentralisedDDQN"
 adversary_prelude = "/packet_served-test-"
 adversaries = ["Constant-Attack", "Pulse-Medium"]
 
+def condenseValues(x, y):
+    # reduce to 1000 points
+
+    y = list(y)
+
+    block_len = len(x)/100
+
+    nx, ny = [], []
+
+    i = 0
+    while(i*block_len<len(x)):
+
+        nx.append(i)
+        # print((i*block_len))
+        # print((i+1)*block_len)
+        block_y = y[int(i*block_len):(int((i+1)*block_len))]
+        reduced_y = np.mean(block_y)
+        ny.append(np.mean(reduced_y))
+        #print(block_y)
+        i+=1
+
+    return nx, ny
+
 def rewardGraph(directory):
     # used for the reward of the training file
     path = "{0}/reward-{1}-{2}.csv".format(directory,"train","Constant-Attack")
@@ -27,7 +50,7 @@ def rewardGraph(directory):
     ep_reward = f.LastReward[30000:] #f['Totalreward']
     ep = f['Episode'][30000:]
 
-
+    (ep, ep_reward) = condenseValues(ep, ep_reward)
 
     plt.plot(ep,ep_reward, 'o-')
     plt.show()
@@ -61,36 +84,42 @@ def getAttackStat(systemsUsed,columnName):
 
 def dicToGraph(results):
     print(results)
-    ax = plt.subplot(111)
     num_groups = len(results.keys())
 
+    keys = list(results.keys())
+
     for i in range(len(results.keys())):
-        keys = list(results.keys())
+        
+        plt.clf()
+        
         key = keys[i]
+        print("\n\ndoing {0}".format(key))
+
         y_values = []
         names = []
-        num_agents = 0
+        num_files = len(results[key].keys())
         for agent in results[key]:
             y_values.append(results[key][agent])
             names.append(agent)
-            num_agents += 1
 
-        width = 0.2 *(1/(num_groups*num_agents))
+        y_values = np.array(y_values)
+        
+        width = 0.2 #*(1/(num_groups*num_agents))
 
-        x = (width*num_agents + 0.5)*i 
 
-        print("width - {0} | x - {1}".format(width, x))
+        ind = np.arange(num_files)
+        print(ind)
 
+        #print("yvalues - {0}".format(y_values))
         print("{0} {1}".format(y_values, names))
-        ax.bar(x, y_values, width = (1/num_groups), align='edge', tick_label=names)
+        plt.bar(ind, y_values, align='center', tick_label=names)
+        plt.title(key)
+        plt.show()
 
+results = getAttackStat([("decSarsa",decSarsaDir), ("decDdq", decDdqDir)], "PercentageReceived")
+dicToGraph(results)
 
-    plt.show()
-
-# results = getAttackStat([("decSarsa",decSarsaDir)], "PercentageReceived")
-# dicToGraph(results)
-
-rewardGraph(decSarsaDir)
+# rewardGraph(decSarsaDir)
 
 
 
