@@ -24,7 +24,7 @@ def rewardGraph(directory):
     f = pd.read_csv(path)
     
 
-    ep_reward = f.Lastreward[30000:] #f['Totalreward']
+    ep_reward = f.LastReward[30000:] #f['Totalreward']
     ep = f['Episode'][30000:]
 
 
@@ -87,9 +87,10 @@ def dicToGraph(results):
 
     plt.show()
 
-results = getAttackStat([("decSarsa",decSarsaDir)], "PercentageReceived")
-dicToGraph(results)
+# results = getAttackStat([("decSarsa",decSarsaDir)], "PercentageReceived")
+# dicToGraph(results)
 
+rewardGraph(decSarsaDir)
 
 
 

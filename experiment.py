@@ -8,15 +8,12 @@ Runs network, sends state to learning agent, gets response, sends response to ne
 #BUGS
 1) I think my update is wrong as its using the current state not the prior state
 and shouldn't it be including both the last state and the prior state?
-2) Bug with pulling the right state from network
 3) When loading via sarsa (and tensorflow), it doesn't increment the i. Low priority
 
 
 
 #TODO
-1) Redo the network to simulate actual nodes
-2) Allow choose the attack type
-3) % successful episodes doesn't make sense
+
 
 
 #DONE
@@ -29,8 +26,9 @@ and shouldn't it be including both the last state and the prior state?
 6) Ensure the saving and reloading works properly for ALL agents
 7) Create script to capture reward per episode as we train
 8) Use script for testing purposes. Compare
-
-
+9) Now pulls correct state
+10) Redid network
+11) Allow you to choose adversary
 """
 
 from __future__ import division
@@ -40,10 +38,11 @@ import os, sys, logging
 
 from network.network_new import *
 
-# from agent.sarsaCentralised import *
+# list of agents to choose
+from agent.sarsaCentralised import *
 # from agent.sarsaDecentralised import *
 # from agent.ddqnCentralised import *
-from agent.ddqnDecentralised import *
+# from agent.ddqnDecentralised import *
 
 import network.hosts as hostClass
 
@@ -52,8 +51,9 @@ test = False #set to True when testing a trained model
 debug = False
 load_model = False
 
+assert(test==load_model) # sanity check to stop myself overwriting past checkpoints
 
-
+# The class of the adversary to implement
 adversary = hostClass.ConstantAttack
 # adversary = hostClass.ShortPulse
 # adversary = hostClass.MediumPulse
@@ -62,18 +62,16 @@ adversary = hostClass.ConstantAttack
 
 
 # Network information
-#TODO decouple this as well by putting into a class and feeding in?
 N_state = 3 #The number of state, i.e., the number of filters
 N_action = 1000 #In the current implementation, each filter has 10 possible actions, so altogether there are 10^N_state actions, 
                 #e.g., action 123 means the drop rates at the three filters are set to 0.1, 0.2 and 0.3, respectively
 action_per_agent = 10 # each filter can do 10 actions
-N_switch = 13
+N_switch = 13 # number of routers in the system
 hosts_sources = [5, 10, 12, 6, 9, 9] #ID of the switch that the host is connected to  
 
 servers = [0] #ID of the switch that the server is connected to 
 filters = [5, 6, 9] #ID of the switch that the filter locates at
 
-# might put some of this different
 
 batch_size = 32 #How many experiences to use for each training step.
 update_freq = 4 #How often to perform a training step.
@@ -94,7 +92,7 @@ if test:
     e = 0
     stepDrop = 0
 
-    # implement something start attack episode 5 and stop at 55
+    # implement something start attack episode 5 and stop at 55 here
 
 else:
 
@@ -113,7 +111,7 @@ else:
 reward_overload = -1
 
 # J: I think this is lower / upper bounds of message sending by attackers / defenders
-rate_legal_low = 0.05  #
+rate_legal_low = 0.05 
 rate_legal_high = 1 
 rate_attack_low = 2.5 
 rate_attack_high = 6
@@ -124,6 +122,7 @@ upper_boundary = 8
 
 topologyFile = 'topology.txt'
 
+# The network
 net = network(N_switch, N_action, N_state, action_per_agent, hosts_sources, servers, filters, reward_overload, 
               rate_legal_low, rate_legal_high, rate_attack_low, rate_attack_high, 
               legal_probability, upper_boundary, adversary, max_epLength, topologyFile)
@@ -132,7 +131,7 @@ net = network(N_switch, N_action, N_state, action_per_agent, hosts_sources, serv
 
 
 
-tau = 0.001 #Rate to update target network toward primary network
+tau = 0.001 #Rate to update target network toward primary network. 
 
 
 
@@ -148,21 +147,19 @@ fail = 0
 
 
 
+# The learning agent
 agent = Agent(N_action, pre_train_steps, action_per_agent, N_state, tau, y, debug, test)
 
 
-if debug:
-    print("cat")
+# if debug:
     #logging.basicConfig(stream=sys.stderr, level=logging.DEBUG)
-else:
-    logging.basicConfig(stream=sys.stderr, level=logging.NOTSET)
+# else:
+#     logging.basicConfig(stream=sys.stderr, level=logging.NOTSET)
 
 
-name = Agent.getName()
-path = agent.getPath()
+name = Agent.getName() # The name of the Agent used
+path = agent.getPath() # The path to save model to
 
-#path = "./filter" + name #The path to save our model to.
-#load_path = ""
 load_path = path #ideally can move a good one to a seperate location
 
 
@@ -176,17 +173,12 @@ if test:
 else:
     run_mode = "train"
 
-"""
-reward_file = open(path + "/reward" + name + "-" + run_mode + "-" + adversary.getName()+".csv", "w")
-loss_file = open(path + "/loss" + name + "-" + run_mode + "-" + adversary.getName()+ ".csv", "w")
-packet_served_file = open(path + "/packet_served" + "-" + run_mode + "-" + adversary.getName()+ name+".csv","w")
-"""
 
 reward_file = open("{0}/reward-{1}-{2}.csv".format(path,run_mode,adversary.getName()),"w")
 loss_file = open("{0}/loss-{1}-{2}.csv".format(path,run_mode,adversary.getName()),"w")
 packet_served_file = open("{0}/packet_served-{1}-{2}.csv".format(path,run_mode,adversary.getName()),"w")
 
-print("{0} is:".format(name))
+print("Using the {0} agent:".format(name))
 
 reward_file.write("Episode,StepsSoFar,TotalReward,LastReward,LengthEpisode,e\n")
 packet_served_file.write("Episode,PacketsReceived,PacketsServed,PercentageReceived,ServerFailures\n")
@@ -197,13 +189,11 @@ with agent:
     if load_model == True:
         agent.loadModel(load_path)
 
-
     for i in range(num_episodes):
-
-        net.reset()
+        net.reset() # reset the network
 
         d = False # indicates that network is finished
-        rAll = 0
+        rAll = 0 # total reward for system. #TODO shouldn't contribute in pretraining
         j = 0
 
         while j < max_epLength:
@@ -211,7 +201,7 @@ with agent:
 
             if j > 1: # when j==1, the actions are chosen randomly, and the state is NULL
 
-                # r = reward, d = done
+                # r = reward, d = episode is done
                 d = j==max_epLength
                 r = net.calculate_reward()
                 rAll += r
@@ -219,22 +209,21 @@ with agent:
                 ### or better, shouldn't it involve both the last state and current state?
                 if not test:
                     agent.update(net.last_state, last_action, net.get_state(), d, r)
-                #agent.update(net.current_state, last_action, r)
-                #print("current_state: {0}".format(net.get_state()))
-                #print("last state: {0}".format(net.last_state))
-                #print("step:" + str(j) + ", action:" + str(last_action) + ", reward:" + str(r), end='\n')
-                #print("server state: {0}\n".format(net.switches[0].getWindow()))
+
+                if debug:                
+                    print("current_state: {0}".format(net.get_state()))
+                    print("last state: {0}".format(net.last_state))
+                    print("step:" + str(j) + ", action:" + str(last_action) + ", reward:" + str(r), end='\n')
+                    print("server state: {0}\n".format(net.switches[0].getWindow()))
                 
-                #logging.debug("step: {0} - action: {1} - reward {2}".format(j,last_action,r))
+                    #logging.debug("step: {0} - action: {1} - reward {2}".format(j,last_action,r))
                 if r < 0:
                     fail += 1
 
-
             #TODO make sure to do do pre_training_stuff
-            a = agent.predict(net.get_state(), total_steps, e) # action
-            #print("taking action {0}".format(a))
-            net.step(a, j)
-            last_action = a
+            a = agent.predict(net.get_state(), total_steps, e) # generate an action
+            net.step(a, j) # take the action, update the network
+            last_action = a 
             total_steps += 1
 
             if total_steps > pre_train_steps:
@@ -251,11 +240,12 @@ with agent:
             print("Completed Episode - {0}".format(i))
 
         if not test: 
-
+            # save the model only every 10,000 steps
             if i % 10000 == 0:
                 agent.saveModel(load_path, i)
 
 
+        # save data generated
         jList.append(j)
         rList.append(rAll)
 
