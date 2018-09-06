@@ -15,14 +15,14 @@ cenDdqDir = "./trainedCentralisedDDQN"
 
 
 adversary_prelude = "/packet_served-test-"
-adversaries = ["Constant-Attack", "Pulse-Medium"]
+adversaries = ["Constant-Attack", "Gradual-Increase", "Pulse-Large", "Pulse-Medium", "Pulse-Short"]
 
 def condenseValues(x, y):
     # reduce to 1000 points
 
     y = list(y)
 
-    block_len = len(x)/100
+    block_len = len(x)/200
 
     nx, ny = [], []
 
@@ -116,10 +116,21 @@ def dicToGraph(results):
         plt.title(key)
         plt.show()
 
-results = getAttackStat([("decSarsa",decSarsaDir), ("decDdq", decDdqDir)], "PercentageReceived")
-dicToGraph(results)
+def dicToSummary(results):
+    summaryFile = open("testingSummary.csv",'w')
+    summaryFile.write("adversary,agent,result\n")
+    for adversary in results:
+        for agent in results[adversary]:
+            summaryFile.write("{0},{1},{2}\n".format(adversary,agent,results[adversary][agent]))
 
-# rewardGraph(decSarsaDir)
+    summaryFile.close()
+    # creates a quick summary for excel
+
+# results = getAttackStat([("decSarsa",decSarsaDir), ("decDdq", decDdqDir), ("centralDdq", cenDdqDir), ("centralSarsa", cenSarsaDir)], "ServerFailures")#"PercentageReceived")
+# dicToGraph(results)
+# dicToSummary(results)
+
+rewardGraph(decSarsaDir)
 
 
 
