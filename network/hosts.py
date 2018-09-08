@@ -30,6 +30,10 @@ class Host():
         else:
             self.destination_switch.new_legal += send_rate
 
+    def setRate(self, is_attacker, traffic_rate):
+        # manual alternative to resetting a host
+        self.is_attacker = is_attacker
+        self.traffic_rate = traffic_rate        
 
     def print_host(self):
         print("destination {0}".format(self.destination_switch.id))

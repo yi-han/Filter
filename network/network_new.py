@@ -2,6 +2,8 @@ import requests, json
 import numpy as np
 import math
 import copy
+from enum import Enum
+import pickle
 
 import agent # i think this is the other folder but I dont think it would have access to this?
 
@@ -150,7 +152,8 @@ class link(object):
 class network(object):
     def __init__(self, N_switch, N_action, N_state, action_per_agent, host_sources, servers, filter_list, reward_overload, 
               rate_legal_low, rate_legal_high, rate_attack_low, rate_attack_high, 
-              legal_probability, upper_boundary, hostClass, max_epLength, f_link):
+              legal_probability, upper_boundary, hostClass, max_epLength, f_link, SaveAttackEnum,
+              save_attack, save_attack_path):
 
         #self.ITERATIONSBETEENACTION = 200 # with 10 ms delay, and throttle agent every 2 seconds, we see 200 messages passed in between
 
@@ -195,9 +198,15 @@ class network(object):
         self.switches = [] # list of all switches, first one shouuld be attatched to server
         self.links = []
         self.hosts = []
+        self.attack_record = [] # list of all attack stats, used if we're saving the attack
 
+        self.SaveAttackEnum = SaveAttackEnum
+        self.save_attack = save_attack
+        self.save_attack_path = save_attack_path
         self.initialise(f_link)
         self.last_state = np.empty_like(self.get_state())
+
+
 
         # for link in self.links:
         #     link.printLink()
@@ -205,9 +214,13 @@ class network(object):
         # for host in self.hosts:
         #     host.print_host()
 
-
     def reset(self):
-        self.set_attackers()
+        if self.save_attack is self.SaveAttackEnum.load:
+            self.load_attacker()
+        else:
+            self.set_attackers()
+        if self.save_attack is self.SaveAttackEnum.save:
+            self.record_attackers()
         #self.set_rate()
         self.legitimate_all = 0
         self.legitimate_served = 0
@@ -241,6 +254,8 @@ class network(object):
 
     def set_attackers(self):
         # sets a random amount of attackers inbetween (but not inclusive) 0 and max
+        # I think just replace this if you want to replicate attacks
+
         attackers = []
 
         assert self.N_host!=0 or self.N_host!=1 # to stop infinite loops
@@ -257,7 +272,22 @@ class network(object):
                 self.hosts[i].reset(is_attacker=True)
             else:
                self.hosts[i].reset(is_attacker=False) 
-        
+     
+    def record_attackers(self):
+        details = []
+        for host in self.hosts:
+            details.append((host.is_attacker, host.traffic_rate))
+
+        self.attack_record.append(details)
+
+
+    def load_attacker(self):
+        host_data = self.saved_attack.pop()
+        for i in range(len(host_data)):
+            (is_attacker, traffic_rate) = host_data[i]
+            self.hosts[i].setRate(is_attacker, traffic_rate)
+
+
     def get_state(self):
         # grab the state of the switches we're interested in
         state = []
@@ -301,9 +331,6 @@ class network(object):
             drop_prob /= self.action_per_agent # to turn into a percentage
             self.switches[switch_id].setThrottle(drop_prob)
 
-
-
-        
         assert(action==0) 
 
     def initialise(self, f_link):
@@ -319,24 +346,6 @@ class network(object):
             is_filter = i in self.filter_list
             self.switches.append(Switch(i, is_filter))
 
-
-
-        #initialise links
-        # for i in range(self.N_switch-1):
-        #     for j in range(i+1, self.N_switch):
-        #         if self.topology[i][j] != -1:
-        #             l = link()
-        #             l.id = len(self.links)
-        #             l.source_node = i
-        #             l.destination_node = j
-        #             l.status = self.topology[i][j]
-        #             l.importance = 0
-        #             l.destination_switch = self.switches[j]
-
-        #             self.links.append(l)
-
-        #             self.switches[i].source_links.append(l)
-        #             self.switches[j].destination_links.append(l)
         
         for i in range(0, self.N_switch-1):
             for j in range(i, self.N_switch):
@@ -349,24 +358,15 @@ class network(object):
                     self.switches[i].source_links.append(l)
                     self.switches[j].destination_links.append(l)                                    
 
-
-        #TODO
-        #hard-coded for now
-        #a dict of {filter_ID:[Ids of hosts that are connected to the filter]}
-        #self.filter_host.update({5:[0, 1, 2]})
-        
-
-        ### Jeremy, temporarily removed bottom two
-        # self.filter_host.update({5:[0, 1, 2]})
-        # self.filter_host.update({6:[3]})
-        # self.filter_host.update({9:[4, 5]})
-
         
         for i in self.host_sources:
 
             host = self.hostClass(self.switches[i], self.rate_attack_low, self.rate_attack_high,
                 self.rate_legal_low, self.rate_legal_high, self.max_epLength)
             self.hosts.append(host)
+        
+        if self.save_attack is self.SaveAttackEnum.load:
+            self.load_attacker_file()
 
         self.reset()
 
@@ -432,6 +432,16 @@ class network(object):
         else:
             per = self.legitimate_served / self.legitimate_all
             return self.legitimate_served, self.legitimate_all, per, self.server_failures
+
+    
+    def save_attacks(self):
+        with open(self.save_attack_path, "wb") as f:
+            pickle.dump(self.attack_record, f, pickle.HIGHEST_PROTOCOL)
+
+
+    def load_attacker_file(self):
+        with open(self.save_attack_path, 'rb') as f:
+            self.saved_attack = pickle.load(f)        
 
     def printState(self):
         for switch in self.switches:

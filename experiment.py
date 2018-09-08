@@ -35,23 +35,32 @@ from __future__ import division
 
 import numpy as np
 import os, sys, logging
-
+from enum import Enum
 from network.network_new import *
 
 # list of agents to choose
-from agent.sarsaCentralised import *
-# from agent.sarsaDecentralised import *
+# from agent.sarsaCentralised import *
+from agent.sarsaDecentralised import *
 # from agent.ddqnCentralised import *
 # from agent.ddqnDecentralised import *
 
 import network.hosts as hostClass
 
+SaveAttackEnum = Enum('SaveAttack', 'random save load')
+save_attack_path = "./attack.pkl"
+
 
 test = False #set to True when testing a trained model
 debug = False
 load_model = False
+save_attack = SaveAttackEnum.load
+
+
+#if save_attack is SaveAttack.save:
 
 assert(test==load_model) # sanity check to stop myself overwriting past checkpoints
+
+
 
 # The class of the adversary to implement
 adversary = hostClass.ConstantAttack
@@ -77,10 +86,12 @@ batch_size = 32 #How many experiences to use for each training step.
 update_freq = 4 #How often to perform a training step.
 y = 0 #.99 #Discount factor on the target Q-values
 
-startE = 0.5 #Starting chance of random action
+startE = 0.4 #Starting chance of random action
 endE = 0.0 #Final chance of random action
 
 assert(action_per_agent**N_state == N_action)
+
+tau = 0.001 #Rate to update target network toward primary network. 
 
 
 if test:
@@ -96,13 +107,22 @@ if test:
 
 else:
 
+    tau = 0.1
+    startE = 0.4
+    endE = 0.0
+
+    #num_episodes = 62501
+    num_episodes = 2000
+    pre_train_steps = 0
+    annealing_steps = 50000
+    """
     num_episodes = 100001 #How many episodes of game environment to train network with.
 
     annealing_steps = 60000 #How many steps of training to reduce startE to endE.
     pre_train_steps = 30000 #How many steps of random actions before training begins.
 
+    """
     max_epLength = 30 #The max allowed length of our episode.
-
     #Set the rate of random action decrease. 
     e = startE
     stepDrop = (startE - endE)/annealing_steps
@@ -125,13 +145,12 @@ topologyFile = 'topology.txt'
 # The network
 net = network(N_switch, N_action, N_state, action_per_agent, hosts_sources, servers, filters, reward_overload, 
               rate_legal_low, rate_legal_high, rate_attack_low, rate_attack_high, 
-              legal_probability, upper_boundary, adversary, max_epLength, topologyFile)
+              legal_probability, upper_boundary, adversary, max_epLength, topologyFile, SaveAttackEnum, save_attack, save_attack_path)
 
 
 
 
 
-tau = 0.001 #Rate to update target network toward primary network. 
 
 
 
@@ -256,6 +275,8 @@ with agent:
         if len(loss) > 0:
             loss_file.write(str(i) + "," + str(total_steps) + "," + str(loss[-1]) + "," + str(e) + "\n")
 
+if save_attack:
+    net.save_attacks()
 
 reward_file.close()
 loss_file.close()
