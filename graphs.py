@@ -7,6 +7,8 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 
+decSarsaFilter = "./filterSarsaDecentralisedAgent"
+
 decSarsaDir = "./trainedSarsaDecentralisedAgent"
 cenSarsaDir = "./trainedSarsaCentralisedAgent"
 
@@ -18,12 +20,14 @@ cenDdqDir = "./trainedCentralisedDDQN"
 mucking around directories
 """
 
+
 no_pretrain_dec_sarsa = "./noPretrainSarsaDecentralisedAgent"
+twenty_same = "./filterSarsaDecTwentyDiffernt"
 
 adversary_prelude = "/packet_served-test-"
 adversaries = ["Constant-Attack", "Gradual-Increase", "Pulse-Large", "Pulse-Medium", "Pulse-Short"]
 
-def condenseValues(x, y):
+def condense_values(x, y):
     # reduce to 1000 points
 
     y = list(y)
@@ -46,18 +50,55 @@ def condenseValues(x, y):
 
     return nx, ny
 
-def rewardGraph(directory):
-    # used for the reward of the training file
+def reward_single(directory):
     path = "{0}/reward-{1}-{2}.csv".format(directory,"train","Constant-Attack")
-    print(path)
-    f = pd.read_csv(path)
-    
-
+    f = pd.read_csv(path)    
     ep_reward = f.LastReward#[30000:] #f['Totalreward']
     ep = f['Episode']#[30000:]
 
-    (ep, ep_reward) = condenseValues(ep, ep_reward)
+    #(ep, ep_reward) = condense_values(ep, ep_reward)
+    return (ep, ep_reward)
 
+def reward_multiple(directory, max_num):
+    # we do first one manually then loop for rest
+    
+
+    path = "{0}/reward-{1}-{2}-{3}.csv".format(directory,"train","Constant-Attack",0)
+
+    f = pd.read_csv(path)
+    ep_reward = f.LastReward
+    ep = f['Episode']
+
+    average_reward = np.zeros((len(ep),1), dtype=float)
+
+    for i in range(max_num):
+        path = "{0}/reward-{1}-{2}-{3}.csv".format(directory,"train","Constant-Attack",i)
+        f = pd.read_csv(path)
+        ep_reward = np.array(f.LastReward, dtype=float)
+        ep_reward.shape=(len(ep),1)
+        average_reward += ep_reward
+    average_reward/=max_num
+    average_reward = average_reward.tolist()
+    #(ep, average_reward) = condense_values(ep, average_reward)
+    return (ep, average_reward)
+
+
+
+
+
+
+def reward_graph(directory, max_num = None):
+    # used for the reward of the training file
+    
+    #print(path)
+   
+    if not max_num:
+        (ep, ep_reward) = reward_single(directory)
+    else:
+        (ep, ep_reward) = reward_multiple(directory, max_num)
+
+
+    plt.ylim((-1, 1))
     plt.plot(ep,ep_reward, 'o-')
     plt.show()
 
@@ -65,9 +106,9 @@ def rewardGraph(directory):
  
 #packet_served_file = open("{0}/packet_served-{1}-{2}.csv".format(path,run_mode,adversary.getName()),"w")
 
-#rewardGraph(decSarsaDir)
+#reward_graph(decSarsaDir)
 
-def getAttackStat(systemsUsed,columnName):
+def get_attack_stat(systemsUsed,columnName):
     names = [i[0] for i in systemsUsed]
     directories = [i[1] for i in systemsUsed]
 
@@ -88,7 +129,7 @@ def getAttackStat(systemsUsed,columnName):
 
     return results
 
-def dicToGraph(results):
+def dic_to_graph(results):
     print(results)
     num_groups = len(results.keys())
 
@@ -122,7 +163,7 @@ def dicToGraph(results):
         plt.title(key)
         plt.show()
 
-def dicToSummary(results):
+def dic_to_summary(results):
     summaryFile = open("testingSummary.csv",'w')
     summaryFile.write("adversary,agent,result\n")
     for adversary in results:
@@ -132,11 +173,11 @@ def dicToSummary(results):
     summaryFile.close()
     # creates a quick summary for excel
 
-# results = getAttackStat([("decSarsa",decSarsaDir), ("decDdq", decDdqDir), ("centralDdq", cenDdqDir), ("centralSarsa", cenSarsaDir)], "ServerFailures")#"PercentageReceived")
-# dicToGraph(results)
-# dicToSummary(results)
+# results = get_attack_stat([("decSarsa",decSarsaDir), ("decDdq", decDdqDir), ("centralDdq", cenDdqDir), ("centralSarsa", cenSarsaDir)], "ServerFailures")#"PercentageReceived")
+# dic_to_graph(results)
+# dic_to_summary(results)
 
-rewardGraph(no_pretrain_dec_sarsa)
+reward_graph(decSarsaFilter,4)
 
 
 
