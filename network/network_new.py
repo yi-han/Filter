@@ -157,7 +157,7 @@ class network(object):
 
         #self.ITERATIONSBETEENACTION = 200 # with 10 ms delay, and throttle agent every 2 seconds, we see 200 messages passed in between
 
-        self.ITERATIONSBETEENACTION = 50 # set at 50 just to quarter the amount of time
+        self.ITERATIONSBETEENACTION = 5 # set at 50 just to quarter the amount of time
 
 
 
