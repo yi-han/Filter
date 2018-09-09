@@ -69,6 +69,11 @@ class Agent(aBase.Agent):
     def actionReplay(self, current_state, batch_size):
         return None
 
+    def printStats(self):
+        for agent in self.agents:
+            agent.printStats()
+
+
     def loadModel(self, load_path):
         # note we are going to use the index of the array as an id
         print("loading all models")

@@ -108,9 +108,10 @@ class Agent(aBase.Agent):
             # delete redundant datafile that was prior checkpoint
             # this happens at the end
             os.remove(load_path+'/'+last_checkpoint)
-
-
         return
+    def printStats(self):
+        print(self.ai.getData())
+
 
     def getName():
         return "SarsaCentralisedAgent"
