@@ -47,14 +47,14 @@ from agent.sarsaDecentralised import *
 import network.hosts as hostClass
 
 SaveAttackEnum = Enum('SaveAttack', 'random save load')
-save_attack_path = "./attack.pkl"
+save_attack_path = "./attack.pkl" # note you shouldn't be repeating this
 
 
 test = False #set to True when testing a trained model
 debug = False
 load_model = False
 save_attack = SaveAttackEnum.load
-
+REPEATS=20 # how many times to repeat this
 
 #if save_attack is SaveAttack.save:
 
@@ -111,8 +111,8 @@ else:
     startE = 0.4
     endE = 0.0
 
-    #num_episodes = 62501
-    num_episodes = 2000
+    num_episodes = 62501
+    #num_episodes = 1001
     pre_train_steps = 0
     annealing_steps = 50000
     """
@@ -142,10 +142,13 @@ upper_boundary = 8
 
 topologyFile = 'topology.txt'
 
-# The network
-net = network(N_switch, N_action, N_state, action_per_agent, hosts_sources, servers, filters, reward_overload, 
-              rate_legal_low, rate_legal_high, rate_attack_low, rate_attack_high, 
-              legal_probability, upper_boundary, adversary, max_epLength, topologyFile, SaveAttackEnum, save_attack, save_attack_path)
+for i in range(REPEATS):
+    print("\nREPEAT {0}".format(i))
+
+    # The network
+    net = network(N_switch, N_action, N_state, action_per_agent, hosts_sources, servers, filters, reward_overload, 
+                  rate_legal_low, rate_legal_high, rate_attack_low, rate_attack_high, 
+                  legal_probability, upper_boundary, adversary, max_epLength, topologyFile, SaveAttackEnum, save_attack, save_attack_path)
 
 
 
@@ -154,135 +157,136 @@ net = network(N_switch, N_action, N_state, action_per_agent, hosts_sources, serv
 
 
 
-#create lists to contain total rewards and steps per episode
-jList = []
-rList = []
-loss = []
-total_steps = 0
-rewards_tampered = 0
-experiences_added = 0
-largest_gradient = 0
-fail = 0
+    #create lists to contain total rewards and steps per episode
+    jList = []
+    rList = []
+    loss = []
+    total_steps = 0
+    rewards_tampered = 0
+    experiences_added = 0
+    largest_gradient = 0
+    fail = 0
 
 
 
-# The learning agent
-agent = Agent(N_action, pre_train_steps, action_per_agent, N_state, tau, y, debug, test)
+    # The learning agent
+    agent = Agent(N_action, pre_train_steps, action_per_agent, N_state, tau, y, debug, test)
 
 
-# if debug:
-    #logging.basicConfig(stream=sys.stderr, level=logging.DEBUG)
-# else:
-#     logging.basicConfig(stream=sys.stderr, level=logging.NOTSET)
+    # if debug:
+        #logging.basicConfig(stream=sys.stderr, level=logging.DEBUG)
+    # else:
+    #     logging.basicConfig(stream=sys.stderr, level=logging.NOTSET)
 
 
-name = Agent.getName() # The name of the Agent used
-path = agent.getPath() # The path to save model to
+    name = Agent.getName() # The name of the Agent used
+    path = agent.getPath() # The path to save model to
 
-load_path = path #ideally can move a good one to a seperate location
-
-
-#Make a path for our model to be saved in.
-
-if not os.path.exists(path):
-    os.makedirs(path)
-
-if test:
-    run_mode = "test"
-else:
-    run_mode = "train"
+    load_path = path #ideally can move a good one to a seperate location
 
 
-reward_file = open("{0}/reward-{1}-{2}.csv".format(path,run_mode,adversary.getName()),"w")
-loss_file = open("{0}/loss-{1}-{2}.csv".format(path,run_mode,adversary.getName()),"w")
-packet_served_file = open("{0}/packet_served-{1}-{2}.csv".format(path,run_mode,adversary.getName()),"w")
+    #Make a path for our model to be saved in.
 
-print("Using the {0} agent:".format(name))
+    if not os.path.exists(path):
+        os.makedirs(path)
 
-reward_file.write("Episode,StepsSoFar,TotalReward,LastReward,LengthEpisode,e\n")
-packet_served_file.write("Episode,PacketsReceived,PacketsServed,PercentageReceived,ServerFailures\n")
-
-
-with agent:
-
-    if load_model == True:
-        agent.loadModel(load_path)
-
-    for i in range(num_episodes):
-        net.reset() # reset the network
-
-        d = False # indicates that network is finished
-        rAll = 0 # total reward for system. #TODO shouldn't contribute in pretraining
-        j = 0
-
-        while j < max_epLength:
-            j+=1
-
-            if j > 1: # when j==1, the actions are chosen randomly, and the state is NULL
-
-                # r = reward, d = episode is done
-                d = j==max_epLength
-                r = net.calculate_reward()
-                rAll += r
-                ### why are we putting in the current state??? Shouldn't it be last state
-                ### or better, shouldn't it involve both the last state and current state?
-                if not test:
-                    agent.update(net.last_state, last_action, net.get_state(), d, r)
-
-                if debug:                
-                    print("current_state: {0}".format(net.get_state()))
-                    print("last state: {0}".format(net.last_state))
-                    print("step:" + str(j) + ", action:" + str(last_action) + ", reward:" + str(r), end='\n')
-                    print("server state: {0}\n".format(net.switches[0].getWindow()))
-                
-                    #logging.debug("step: {0} - action: {1} - reward {2}".format(j,last_action,r))
-                if r < 0:
-                    fail += 1
-
-            #TODO make sure to do do pre_training_stuff
-            a = agent.predict(net.get_state(), total_steps, e) # generate an action
-            net.step(a, j) # take the action, update the network
-            last_action = a 
-            total_steps += 1
-
-            if total_steps > pre_train_steps:
-                
-                if e > endE:
-                    e -= stepDrop
-
-                if total_steps % (update_freq) == 0 and not test:
-                    l = agent.actionReplay(net.get_state(), batch_size)
-                    if l:
-                        loss.append(l)
-
-        if i % 1000 == 0:
-            print("Completed Episode - {0}".format(i))
-
-        if not test: 
-            # save the model only every 10,000 steps
-            if i % 10000 == 0:
-                agent.saveModel(load_path, i)
+    if test:
+        run_mode = "test"
+    else:
+        run_mode = "train"
 
 
-        # save data generated
-        jList.append(j)
-        rList.append(rAll)
+    reward_file = open("{0}/reward-{1}-{2}-{3}.csv".format(path,run_mode,adversary.getName(), REPEATS),"w")
+    loss_file = open("{0}/loss-{1}-{2}-{3}.csv".format(path,run_mode,adversary.getName(), REPEATS) ,"w")
+    packet_served_file = open("{0}/packet_served-{1}-{2}-{3}.csv".format(path,run_mode,adversary.getName(), REPEATS),"w")
 
-        legit_served, legit_all, legit_per, server_failures = net.getLegitStats()
-        packet_served_file.write("{0}, {1}, {2}, {3}, {4}\n".format(i, legit_served, legit_all, legit_per, server_failures))
+    print("Using the {0} agent:".format(name))
 
-        reward_file.write(str(i) + "," + str(total_steps) + "," + str(rList[-1]) + "," + str(r) + "," + str(jList[-1]) + "," + str(e) + "\n")
-        if len(loss) > 0:
-            loss_file.write(str(i) + "," + str(total_steps) + "," + str(loss[-1]) + "," + str(e) + "\n")
+    reward_file.write("Episode,StepsSoFar,TotalReward,LastReward,LengthEpisode,e\n")
+    packet_served_file.write("Episode,PacketsReceived,PacketsServed,PercentageReceived,ServerFailures\n")
 
-if save_attack:
-    net.save_attacks()
 
-reward_file.close()
-loss_file.close()
+    with agent:
 
-print("{0} is:".format(name))
-print("Percent of succesful episodes: " + str(100 - fail*100/total_steps) + "%")
+        if load_model == True:
+            agent.loadModel(load_path)
+
+        for i in range(num_episodes):
+            net.reset() # reset the network
+
+            d = False # indicates that network is finished
+            rAll = 0 # total reward for system. #TODO shouldn't contribute in pretraining
+            j = 0
+
+            while j < max_epLength:
+                j+=1
+
+                if j > 1: # when j==1, the actions are chosen randomly, and the state is NULL
+
+                    # r = reward, d = episode is done
+                    d = j==max_epLength
+                    r = net.calculate_reward()
+                    rAll += r
+                    ### why are we putting in the current state??? Shouldn't it be last state
+                    ### or better, shouldn't it involve both the last state and current state?
+                    if not test:
+                        agent.update(net.last_state, last_action, net.get_state(), d, r)
+
+                    if debug:                
+                        print("current_state: {0}".format(net.get_state()))
+                        print("last state: {0}".format(net.last_state))
+                        print("step:" + str(j) + ", action:" + str(last_action) + ", reward:" + str(r), end='\n')
+                        print("server state: {0}\n".format(net.switches[0].getWindow()))
+                    
+                        #logging.debug("step: {0} - action: {1} - reward {2}".format(j,last_action,r))
+                    if r < 0:
+                        fail += 1
+
+                #TODO make sure to do do pre_training_stuff
+                a = agent.predict(net.get_state(), total_steps, e) # generate an action
+                net.step(a, j) # take the action, update the network
+                last_action = a 
+                total_steps += 1
+
+                if total_steps > pre_train_steps:
+                    
+                    if e > endE:
+                        e -= stepDrop
+
+                    if total_steps % (update_freq) == 0 and not test:
+                        l = agent.actionReplay(net.get_state(), batch_size)
+                        if l:
+                            loss.append(l)
+
+            if i % 1000 == 0:
+                print("Completed Episode - {0}".format(i))
+
+            if not test: 
+                # save the model only every 10,000 steps
+                if i % 10000 == 0:
+                    agent.saveModel(load_path, i)
+
+
+            # save data generated
+            jList.append(j)
+            rList.append(rAll)
+
+            legit_served, legit_all, legit_per, server_failures = net.getLegitStats()
+            packet_served_file.write("{0}, {1}, {2}, {3}, {4}\n".format(i, legit_served, legit_all, legit_per, server_failures))
+
+            reward_file.write(str(i) + "," + str(total_steps) + "," + str(rList[-1]) + "," + str(r) + "," + str(jList[-1]) + "," + str(e) + "\n")
+            if len(loss) > 0:
+                loss_file.write(str(i) + "," + str(total_steps) + "," + str(loss[-1]) + "," + str(e) + "\n")
+
+    if save_attack is SaveAttackEnum.save:
+
+        net.save_attacks()
+
+    reward_file.close()
+    loss_file.close()
+
+    print("{0} is:".format(name))
+    print("Percent of succesful episodes: " + str(100 - fail*100/total_steps) + "%")
 
 
 

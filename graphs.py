@@ -14,6 +14,12 @@ decDdqDir = "./trainedDecentralisedDDQN"
 cenDdqDir = "./trainedCentralisedDDQN"
 
 
+"""
+mucking around directories
+"""
+
+no_pretrain_dec_sarsa = "./noPretrainSarsaDecentralisedAgent"
+
 adversary_prelude = "/packet_served-test-"
 adversaries = ["Constant-Attack", "Gradual-Increase", "Pulse-Large", "Pulse-Medium", "Pulse-Short"]
 
@@ -22,7 +28,7 @@ def condenseValues(x, y):
 
     y = list(y)
 
-    block_len = len(x)/200
+    block_len = 4#len(x)/2000
 
     nx, ny = [], []
 
@@ -47,8 +53,8 @@ def rewardGraph(directory):
     f = pd.read_csv(path)
     
 
-    ep_reward = f.LastReward[30000:] #f['Totalreward']
-    ep = f['Episode'][30000:]
+    ep_reward = f.LastReward#[30000:] #f['Totalreward']
+    ep = f['Episode']#[30000:]
 
     (ep, ep_reward) = condenseValues(ep, ep_reward)
 
@@ -130,7 +136,7 @@ def dicToSummary(results):
 # dicToGraph(results)
 # dicToSummary(results)
 
-rewardGraph(decSarsaDir)
+rewardGraph(no_pretrain_dec_sarsa)
 
 
 

@@ -436,12 +436,14 @@ class network(object):
     
     def save_attacks(self):
         with open(self.save_attack_path, "wb") as f:
+            print("saving the attack")
             pickle.dump(self.attack_record, f, pickle.HIGHEST_PROTOCOL)
 
 
     def load_attacker_file(self):
         with open(self.save_attack_path, 'rb') as f:
-            self.saved_attack = pickle.load(f)        
+            print("opening saved attack")
+            self.saved_attack = pickle.load(f)     
 
     def printState(self):
         for switch in self.switches:
