@@ -104,7 +104,7 @@ class Agent(aBase.Agent):
             checkpoint_file = open(checkpoint_path, 'w')
             checkpoint_file.write(name)
         
-        if last_checkpoint:
+        if last_checkpoint and Path(load_path+'/'+last_checkpoint).is_file():
             # delete redundant datafile that was prior checkpoint
             # this happens at the end
             os.remove(load_path+'/'+last_checkpoint)
