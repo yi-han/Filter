@@ -110,11 +110,13 @@ else:
     tau = 0.1
     startE = 0.4
     endE = 0.0
-
+    max_epLength = 30 #The max allowed length of our episode.
     num_episodes = 62501
     #num_episodes = 1001
-    pre_train_steps = 0
-    annealing_steps = 50000
+    pre_train_steps = 0 * max_epLength
+    annealing_steps = 50000 * max_epLength
+
+
     """
     num_episodes = 100001 #How many episodes of game environment to train network with.
 
@@ -122,7 +124,6 @@ else:
     pre_train_steps = 30000 #How many steps of random actions before training begins.
 
     """
-    max_epLength = 30 #The max allowed length of our episode.
     #Set the rate of random action decrease. 
     stepDrop = (startE - endE)/annealing_steps
 
@@ -149,24 +150,17 @@ for repeat_num in range(REPEATS):
                   rate_legal_low, rate_legal_high, rate_attack_low, rate_attack_high, 
                   legal_probability, upper_boundary, adversary, max_epLength, topologyFile, SaveAttackEnum, save_attack, save_attack_path)
 
-
-
     e = startE # reset e
 
-
-
-
-
     #create lists to contain total rewards and steps per episode
-    jList = []
+    stepList = []
     rList = []
     loss = []
     total_steps = 0
     rewards_tampered = 0
     experiences_added = 0
     largest_gradient = 0
-    fail = 0
-
+    fail = 0 # The total number of fails
 
 
     # The learning agent
@@ -211,20 +205,18 @@ for repeat_num in range(REPEATS):
         if load_model == True:
             agent.loadModel(load_path)
 
+        fail_seg = 0
         for ep_num in range(num_episodes):
             net.reset() # reset the network
 
             d = False # indicates that network is finished
-            rAll = 0 # total reward for system. #TODO shouldn't contribute in pretraining
-            j = 0
-            fail_seg = 0
-            while j < max_epLength:
-                j+=1
-
-                if j > 1: # when j==1, the actions are chosen randomly, and the state is NULL
+            rAll = 0 # accumulative reward for system in the episode. #TODO shouldn't contribute in pretraining
+            
+            for step in range(max_epLength):
+                if step > 0: # when step==0, the actions are chosen randomly, and the state is NULL
 
                     # r = reward, d = episode is done
-                    d = j==max_epLength
+                    d = (step+1)==max_epLength
                     r = net.calculate_reward()
                     rAll += r
                     ### why are we putting in the current state??? Shouldn't it be last state
@@ -235,33 +227,35 @@ for repeat_num in range(REPEATS):
                     if debug:                
                         print("current_state: {0}".format(net.get_state()))
                         print("last state: {0}".format(net.last_state))
-                        print("step:" + str(j) + ", action:" + str(last_action) + ", reward:" + str(r), end='\n')
+                        print("step:" + str(step) + ", action:" + str(last_action) + ", reward:" + str(r), end='\n')
                         print("server state: {0}\n".format(net.switches[0].getWindow()))
                     
-                        #logging.debug("step: {0} - action: {1} - reward {2}".format(j,last_action,r))
+                        #logging.debug("step: {0} - action: {1} - reward {2}".format(step,last_action,r))
                     if r < 0:
                         fail += 1
                         fail_seg += 1
 
                 #TODO make sure to do do pre_training_stuff
                 a = agent.predict(net.get_state(), total_steps, e) # generate an action
-                net.step(a, j) # take the action, update the network
+                net.step(a, step) # take the action, update the network
                 last_action = a 
-            total_steps += 1
-
-            if total_steps > pre_train_steps:
                 
-                if e > endE:
-                    e -= stepDrop
+                total_steps += 1
 
-                if total_steps % (update_freq) == 0 and not test:
-                    l = agent.actionReplay(net.get_state(), batch_size)
-                    if l:
-                        loss.append(l)
+                if total_steps > pre_train_steps:
+                    
+                    if e > endE:
+                        e -= stepDrop
+                    elif e < endE:
+                        e = endE
+                    if total_steps % (update_freq) == 0 and not test:
+                        l = agent.actionReplay(net.get_state(), batch_size)
+                        if l:
+                            loss.append(l)
 
             if ep_num % 1000 == 0:
                 print("Completed Episode - {0}".format(ep_num))
-                print("E={0} Fails = {1} FailPer = {2}".format(e,fail_seg, (fail_seg/10)))
+                print("E={0} Fails = {1} FailPer = {2}".format(e,fail_seg, (fail_seg*100/(1000*max_epLength))))
                 fail_seg = 0
             if not test: 
                 # save the model only every 10,000 steps
@@ -270,18 +264,17 @@ for repeat_num in range(REPEATS):
 
 
             # save data generated
-            jList.append(j)
+            stepList.append(step)
             rList.append(rAll)
 
             legit_served, legit_all, legit_per, server_failures = net.getLegitStats()
             packet_served_file.write("{0}, {1}, {2}, {3}, {4}\n".format(ep_num, legit_served, legit_all, legit_per, server_failures))
 
-            reward_file.write(str(ep_num) + "," + str(total_steps) + "," + str(rList[-1]) + "," + str(r) + "," + str(jList[-1]) + "," + str(e) + "\n")
+            reward_file.write(str(ep_num) + "," + str(total_steps) + "," + str(rList[-1]) + "," + str(r) + "," + str(stepList[-1]) + "," + str(e) + "\n")
             if len(loss) > 0:
                 loss_file.write(str(ep_num) + "," + str(total_steps) + "," + str(loss[-1]) + "," + str(e) + "\n")
 
     if save_attack is SaveAttackEnum.save:
-
         net.save_attacks()
 
     reward_file.close()
