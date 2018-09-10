@@ -13,7 +13,7 @@ and shouldn't it be including both the last state and the prior state?
 
 
 #TODO
-1) Whats the differnce between j and total_steps???
+1)I suspect that if e <1 but step < pretrainign, it might still be not working right
 
 
 #DONE
@@ -39,8 +39,8 @@ from enum import Enum
 from network.network_new import *
 
 # list of agents to choose
-# from agent.sarsaCentralised import *
-from agent.sarsaDecentralised import *
+from agent.sarsaCentralised import *
+# from agent.sarsaDecentralised import *
 # from agent.ddqnCentralised import *
 # from agent.ddqnDecentralised import *
 
@@ -107,14 +107,14 @@ if test:
 
 else:
 
-    tau = 0.1
-    startE = 0.4
+    #tau = 0.1 # use this value for malialis
+    startE = 1
     endE = 0.0
     max_epLength = 30 #The max allowed length of our episode.
-    num_episodes = 62501
+    num_episodes = 100001#62501
     #num_episodes = 1001
-    pre_train_steps = 0 * max_epLength
-    annealing_steps = 50000 * max_epLength
+    pre_train_steps = 20000 * max_epLength
+    annealing_steps = 60000 * max_epLength 
 
 
     """
@@ -213,6 +213,11 @@ for repeat_num in range(REPEATS):
             rAll = 0 # accumulative reward for system in the episode. #TODO shouldn't contribute in pretraining
             
             for step in range(max_epLength):
+                #TODO make sure to do do pre_training_stuff
+                a = agent.predict(net.get_state(), total_steps, e) # generate an action
+                net.step(a, step) # take the action, update the network
+
+                
                 if step > 0: # when step==0, the actions are chosen randomly, and the state is NULL
 
                     # r = reward, d = episode is done
@@ -222,7 +227,7 @@ for repeat_num in range(REPEATS):
                     ### why are we putting in the current state??? Shouldn't it be last state
                     ### or better, shouldn't it involve both the last state and current state?
                     if not test:
-                        agent.update(net.last_state, last_action, net.get_state(), d, r)
+                        agent.update(net.last_state, last_action, net.get_state(), d, r, next_action = a)
 
                     if debug:                
                         print("current_state: {0}".format(net.get_state()))
@@ -235,9 +240,7 @@ for repeat_num in range(REPEATS):
                         fail += 1
                         fail_seg += 1
 
-                #TODO make sure to do do pre_training_stuff
-                a = agent.predict(net.get_state(), total_steps, e) # generate an action
-                net.step(a, step) # take the action, update the network
+
                 last_action = a 
                 
                 total_steps += 1

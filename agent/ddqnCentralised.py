@@ -45,7 +45,7 @@ class Agent(aBase.Agent):
             action = self.sess.run(mainQN.predict,feed_dict={mainQN.input:[state]})[0]
         return action
 
-    def update(self, last_state, last_action, current_state,d, r):
+    def update(self, last_state, last_action, current_state,d, r, next_action=None):
         # Stores an update to the buffer, actual Qlearning is done in action replay
         self.myBuffer.store(np.array([deep_copy_state(last_state),last_action,r,deep_copy_state(current_state),d,False])) 
 

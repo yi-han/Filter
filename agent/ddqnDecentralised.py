@@ -55,7 +55,7 @@ class Agent(aBase.Agent):
             action = action*10+agentAction
         return action
 
-    def update(self, last_state, action, current_state, is_done, reward):
+    def update(self, last_state, action, current_state, is_done, reward, next_action=None):
         # provide the update function to each individual state
         actions = Agent.actionToActions(action, self.numAgents, self.action_per_agent)
         for i in range(len(last_state)):

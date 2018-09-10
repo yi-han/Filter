@@ -5,6 +5,8 @@ due to use of a singular sarsa AI but is compatble with multiple to one states.
 #TODO 
 
 1) I think the update is wrong. Confirm that experiment is sending the right state
+2) Update bug, using same state twice
+# DONE
 2) We should only keep track of last 3 saves, don't keep all due to memory / needless
 3) Implemet checkpoint file of just the latest
 
@@ -51,16 +53,24 @@ class Agent(aBase.Agent):
         return action 
 
 
-    def update(self, last_state, last_action, current_state, is_finished, reward):
+    def update(self, last_state, last_action, current_state, is_finished, reward, next_action = 0):
+        # Note by having delta as 0, the whole point of sarsa is gone?
+        # Simply a case of what has the best reward
+
+        """
+        We need the state / action / reward of one set
+
+        Then state and action of planned next?
+        """
+
         last_state = tileState(last_state)
-        
+        current_state = tileState(current_state)
         self.score += reward
 
-        self.last_state = last_state
 
         if self.lastAction is not None:
             self.ai.learn(
-                self.lastState, self.lastAction, reward, last_state, last_action)
+                self.lastState, self.lastAction, reward, current_state, next_action)
         self.lastState = last_state
         self.lastAction = last_action   
 

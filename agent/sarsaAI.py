@@ -16,10 +16,12 @@ class SarsaAI:
         self.actions = actions
 
     def getQ(self, state, action):
+        # used for associating with reward of new state/action. 
+        # Not useful in initial implementation 
         return self.q.get((state, action), 0.0)
 
     def learnQ(self, state, action, reward, value):
-        #print(self.q)
+
         oldv = self.q.get((state, action), None)
         if oldv is None:
             self.q[(state, action)] = reward 
