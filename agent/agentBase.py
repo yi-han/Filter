@@ -1,4 +1,4 @@
-from abc import ABCMeta, abstractmethod
+#from abc import ABCMeta, abstractmethod
 from numpy import random as random
 
 """
@@ -21,30 +21,30 @@ class Agent():
     #     pass
 
     # Given state, generate an action
-    @abstractmethod
+    # @abstractmethod
     def predict(self, state, total_steps, e):
         pass
 
     # provided the last state and the current state and prior actoin, update the learning agent
-    @abstractmethod
+    # @abstractmethod
     def update(self, last_state, last_action, current_state,d, r):
         pass
 
 
-    @abstractmethod
+    # @abstractmethod
     def getName():
         pass
 
-    @abstractmethod
+    # @abstractmethod
     def getPath():
         pass
 
-    @abstractmethod
+    # @abstractmethod
     def actionReplay():
         # note not used in sarsa
         pass
 
-    @abstractmethod
+    # @abstractmethod
     def load_model(self,load_path):
         pass
 

@@ -1,7 +1,8 @@
-import requests, json
+#import requests
+#import json
 import numpy as np
-import math
-import copy
+#import math
+#import copy
 from enum import Enum
 import pickle
 
@@ -157,7 +158,7 @@ class network(object):
 
         #self.ITERATIONSBETEENACTION = 200 # with 10 ms delay, and throttle agent every 2 seconds, we see 200 messages passed in between
 
-        self.ITERATIONSBETEENACTION = 5 # set at 50 just to quarter the amount of time
+        self.ITERATIONSBETEENACTION = 50 # set at 50 just to quarter the amount of time
 
 
 
