@@ -8,6 +8,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 decSarsaFilter = "./filterSarsaDecentralisedAgent"
+cenSarsaFilter = "./filterSarsaCentralisedAgent"
 
 decSarsaDir = "./trainedSarsaDecentralisedAgent"
 cenSarsaDir = "./trainedSarsaCentralisedAgent"
@@ -15,14 +16,19 @@ cenSarsaDir = "./trainedSarsaCentralisedAgent"
 decDdqDir = "./trainedDecentralisedDDQN"
 cenDdqDir = "./trainedCentralisedDDQN"
 
-
+cenDdqFilter = "./filterCentralisedDDQN"
 """
 mucking around directories
 """
 
+centralised_sarsa_twensixty = "./sarsaCen2060"
 
+sarsa_malialis = "./sarsaDecMalialis"
 no_pretrain_dec_sarsa = "./noPretrainSarsaDecentralisedAgent"
 twenty_same = "./filterSarsaDecTwentyDiffernt"
+
+sarsa_short = "./sarsaDecExploration1000"
+
 
 adversary_prelude = "/packet_served-test-"
 adversaries = ["Constant-Attack", "Gradual-Increase", "Pulse-Large", "Pulse-Medium", "Pulse-Short"]
@@ -66,7 +72,7 @@ def reward_multiple(directory, max_num):
     path = "{0}/reward-{1}-{2}-{3}.csv".format(directory,"train","Constant-Attack",0)
 
     f = pd.read_csv(path)
-    ep_reward = f.LastReward
+    ep_reward = f.LastReward #LastReward
     ep = f['Episode']
 
     average_reward = np.zeros((len(ep),1), dtype=float)
@@ -87,7 +93,7 @@ def reward_multiple(directory, max_num):
 
 
 
-def reward_graph(directory, max_num = None):
+def reward_graph(directory, max_num = None, title=None):
     # used for the reward of the training file
     
     #print(path)
@@ -98,8 +104,10 @@ def reward_graph(directory, max_num = None):
         (ep, ep_reward) = reward_multiple(directory, max_num)
 
 
-    plt.ylim((-1, 1))
+    plt.ylim((-0.8, 1.2))
     plt.plot(ep,ep_reward, 'o-')
+    if title:
+        plt.title(title)
     plt.show()
 
 
@@ -173,11 +181,27 @@ def dic_to_summary(results):
     summaryFile.close()
     # creates a quick summary for excel
 
+def distributions(directory, max_num = None, start_point=0):
+    if not max_num:
+        (ep, ep_reward) = reward_single(directory)
+    else:
+        (ep, ep_reward) = reward_multiple(directory, max_num)
+
+    ep_reward = np.array(ep_reward[start_point:])
+
+    print("Mean = {0}".format(np.mean(ep_reward)))
+    print("Median = {0}".format(np.median(ep_reward)))
+    print("1Q: {0} - 2Q: {1} 2: {2}".format(np.percentile(ep_reward,25), np.percentile(ep_reward, 50),
+        np.percentile(ep_reward, 75)))
+
+
+
 # results = get_attack_stat([("decSarsa",decSarsaDir), ("decDdq", decDdqDir), ("centralDdq", cenDdqDir), ("centralSarsa", cenSarsaDir)], "ServerFailures")#"PercentageReceived")
 # dic_to_graph(results)
 # dic_to_summary(results)
+# reward_graph(sarsa_malialis,12, "sarsa_decentralised_12rep")
+# reward_graph(centralised_sarsa_twensixty, 20, "sarsa centralised")
 
-reward_graph(decSarsaFilter,4)
-
+distributions(centralised_sarsa_twensixty, 20, 90000)
 
 
