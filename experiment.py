@@ -14,6 +14,7 @@ and shouldn't it be including both the last state and the prior state?
 
 #TODO
 1)I suspect that if e <1 but step < pretrainign, it might still be not working right
+2) Input the settings
 
 
 #DONE
@@ -34,257 +35,224 @@ and shouldn't it be including both the last state and the prior state?
 from __future__ import division
 
 import numpy as np
-import os, sys, logging
+import os#, sys, logging
 from enum import Enum
 from network.network_new import *
 
-# list of agents to choose
-from agent.sarsaCentralised import *
-# from agent.sarsaDecentralised import *
-# from agent.ddqnCentralised import *
-# from agent.ddqnDecentralised import *
-
-import network.hosts as hostClass
-
-SaveAttackEnum = Enum('SaveAttack', 'neither save load')
-save_attack_path = "./attack.pkl" # note you shouldn't be repeating this
-
-
-test = False #set to True when testing a trained model
-debug = False
-load_model = False
-save_attack = SaveAttackEnum.neither
-REPEATS=20 # how many times to repeat this
-
-#if save_attack is SaveAttack.save:
-
-assert(test==load_model) # sanity check to stop myself overwriting past checkpoints
 
 
 
-# The class of the adversary to implement
-adversary = hostClass.ConstantAttack
-# adversary = hostClass.ShortPulse
-# adversary = hostClass.MediumPulse
-# adversary = hostClass.LargePulse
-# adversary = hostClass.GradualIncrease
+class Experiment:
 
+    def __init__(self, save_attack_path, test, debug, save_attack, save_attack_enum, adversary_class, NetworkClass, AgentSettings):
+        self.save_attack_path = save_attack_path
+        self.is_test = test
+        self.is_debug = debug
+        self.save_attack = save_attack
+        self.save_attack_enum = save_attack_enum
+        self.adversary_class = adversary_class
 
-# Network information
-N_state = 3 #The number of state, i.e., the number of filters
-N_action = 1000 #In the current implementation, each filter has 10 possible actions, so altogether there are 10^N_state actions, 
-                #e.g., action 123 means the drop rates at the three filters are set to 0.1, 0.2 and 0.3, respectively
-action_per_agent = 10 # each filter can do 10 actions
-N_switch = 13 # number of routers in the system
-hosts_sources = [5, 10, 12, 6, 9, 9] #ID of the switch that the host is connected to  
+        self.network_settings = NetworkClass
+        self.agent_settings = AgentSettings
 
-servers = [0] #ID of the switch that the server is connected to 
-filters = [5, 6, 9] #ID of the switch that the filter locates at
-
-
-batch_size = 32 #How many experiences to use for each training step.
-update_freq = 4 #How often to perform a training step.
-y = 0 #.99 #Discount factor on the target Q-values
-
-startE = 0.4 #Starting chance of random action
-endE = 0.0 #Final chance of random action
-
-assert(action_per_agent**N_state == N_action)
-
-tau = 0.001 #Rate to update target network toward primary network. 
-
-
-if test:
-
-    num_episodes = 1000
-    pre_train_steps = 0
-    max_epLength = 60
-
-    e = 0
-    stepDrop = 0
-
-    # implement something start attack episode 5 and stop at 55 here
-
-else:
-
-    #tau = 0.1 # use this value for malialis
-    startE = 1
-    endE = 0.0
-    max_epLength = 30 #The max allowed length of our episode.
-    num_episodes = 100001#62501
-    #num_episodes = 1001
-    pre_train_steps = 20000 * max_epLength
-    annealing_steps = 60000 * max_epLength 
-
-
-    """
-    num_episodes = 100001 #How many episodes of game environment to train network with.
-
-    annealing_steps = 60000 #How many steps of training to reduce startE to endE.
-    pre_train_steps = 30000 #How many steps of random actions before training begins.
-
-    """
-    #Set the rate of random action decrease. 
-    stepDrop = (startE - endE)/annealing_steps
-
-
-reward_overload = -1
-
-# J: I think this is lower / upper bounds of message sending by attackers / defenders
-rate_legal_low = 0.05 
-rate_legal_high = 1 
-rate_attack_low = 2.5 
-rate_attack_high = 6
-legal_probability = 0.6 # probability that is a good guys
-upper_boundary = 8
+        assert(NetworkClass.action_per_agent**NetworkClass.N_state == NetworkClass.N_action)
 
 
 
-topologyFile = 'topology.txt'
 
-for repeat_num in range(REPEATS):
-    print("\nREPEAT {0}".format(repeat_num))
-
-    # The network
-    net = network(N_switch, N_action, N_state, action_per_agent, hosts_sources, servers, filters, reward_overload, 
-                  rate_legal_low, rate_legal_high, rate_attack_low, rate_attack_high, 
-                  legal_probability, upper_boundary, adversary, max_epLength, topologyFile, SaveAttackEnum, save_attack, save_attack_path)
-
-    e = startE # reset e
-
-    #create lists to contain total rewards and steps per episode
-    stepList = []
-    rList = []
-    loss = []
-    total_steps = 0
-    rewards_tampered = 0
-    experiences_added = 0
-    largest_gradient = 0
-    fail = 0 # The total number of fails
+    def run(self, prefix):
+        N_action = self.network_settings.N_action
+        N_state = self.network_settings.N_state
+        action_per_agent = self.network_settings.action_per_agent
 
 
-    # The learning agent
-    agent = Agent(N_action, pre_train_steps, action_per_agent, N_state, tau, y, debug, test)
+
+        # hosts_sources = self.network_settings.hosts_sources
+        # servers = self.network_settings.servers
+        # filters = self.network_settings.filters
+        # topologyFile = self.network_settings.topologyFile
+        # rate_legal_low = self.network_settings.rate_legal_low
+        # rate_legal_high = self.network_settings.rate_legal_high
+        # rate_attack_high = self.network_settings.rate_attack_high
+        # legal_probability = self.network_settings.legal_probability
+        # upper_boundary = self.network_settings.upper_boundary
 
 
-    # if debug:
-        #logging.basicConfig(stream=sys.stderr, level=logging.DEBUG)
-    # else:
-    #     logging.basicConfig(stream=sys.stderr, level=logging.NOTSET)
+
+        y = self.agent_settings.y
+        tau = self.agent_settings.tau
+        update_freq = self.agent_settings.update_freq
+        batch_size = self.agent_settings.batch_size
+
+        num_episodes = self.agent_settings.num_episodes
+        pre_train_steps = self.agent_settings.pre_train_steps
+        e = self.agent_settings.startE
+        endE = self.agent_settings.endE
+        stepDrop = self.agent_settings.stepDrop
+        test = self.is_test
+        debug = self.is_debug
+        max_epLength = self.agent_settings.max_epLength
+        if test:
+            self.num_episodes = 1000
+            self.pre_train_steps = 0
+            self.max_epLength = 60
+            e = 0
+            self.stepDrop = 0
 
 
-    name = Agent.getName() # The name of the Agent used
-    path = agent.getPath() # The path to save model to
+        agent = self.agent_settings.agent(N_action, pre_train_steps, action_per_agent, N_state, tau, y, debug, test)
 
-    load_path = path #ideally can move a good one to a seperate location
-
-
-    #Make a path for our model to be saved in.
-
-    if not os.path.exists(path):
-        os.makedirs(path)
-
-    if test:
-        run_mode = "test"
-    else:
-        run_mode = "train"
+        reward_overload = -1
 
 
-    reward_file = open("{0}/reward-{1}-{2}-{3}.csv".format(path,run_mode,adversary.getName(), repeat_num),"w")
-    loss_file = open("{0}/loss-{1}-{2}-{3}.csv".format(path,run_mode,adversary.getName(), repeat_num) ,"w")
-    packet_served_file = open("{0}/packet_served-{1}-{2}-{3}.csv".format(path,run_mode,adversary.getName(), repeat_num),"w")
-
-    print("Using the {0} agent:".format(name))
-
-    reward_file.write("Episode,StepsSoFar,TotalReward,LastReward,LengthEpisode,e\n")
-    packet_served_file.write("Episode,PacketsReceived,PacketsServed,PercentageReceived,ServerFailures\n")
 
 
-    with agent:
 
-        if load_model == True:
-            agent.loadModel(load_path)
 
-        fail_seg = 0
-        for ep_num in range(num_episodes):
-            net.reset() # reset the network
+        print("\n Prefix {0}".format(prefix))
 
-            d = False # indicates that network is finished
-            rAll = 0 # accumulative reward for system in the episode. #TODO shouldn't contribute in pretraining
-            
-            for step in range(max_epLength):
-                #TODO make sure to do do pre_training_stuff
-                a = agent.predict(net.get_state(), total_steps, e) # generate an action
-                net.step(a, step) # take the action, update the network
+        # The network
+        # net = network(N_switch, N_action, N_state, action_per_agent, hosts_sources, servers, filters, reward_overload, 
+        #           rate_legal_low, rate_legal_high, rate_attack_low, rate_attack_high, 
+        #           legal_probability, upper_boundary, adversary, max_epLength, topologyFile, SaveAttackEnum, save_attack, save_attack_path)
 
+
+
+
+        net = network(self.network_settings, reward_overload, self.save_attack, self.save_attack_enum, self.save_attack_path, self.adversary_class, max_epLength)
+        #create lists to contain total rewards and steps per episode
+        stepList = []
+        rList = []
+        loss = []
+        total_steps = 0
+        rewards_tampered = 0
+        experiences_added = 0
+        largest_gradient = 0
+        fail = 0 # The total number of fails
+
+
+
+
+        # if debug:
+            #logging.basicConfig(stream=sys.stderr, level=logging.DEBUG)
+        # else:
+        #     logging.basicConfig(stream=sys.stderr, level=logging.NOTSET)
+
+
+        name = self.agent_settings.agent.getName() # The name of the Agent used
+        path = agent.getPath() # The path to save model to
+
+        #path = "/data/projects/punim0621" # for slug
+        load_path = path #ideally can move a good one to a seperate location
+
+
+        #Make a path for our model to be saved in.
+
+        if not os.path.exists(path):
+            os.makedirs(path)
+
+        if test:
+            run_mode = "test"
+        else:
+            run_mode = "train"
+
+
+        reward_file = open("{0}/reward-{1}-{2}-{3}.csv".format(path,run_mode, self.adversary_class.getName(), prefix),"w")
+        loss_file = open("{0}/loss-{1}-{2}-{3}.csv".format(path,run_mode, self.adversary_class.getName(), prefix) ,"w")
+        packet_served_file = open("{0}/packet_served-{1}-{2}-{3}.csv".format(path,run_mode, self.adversary_class.getName(), prefix),"w")
+
+        print("Using the {0} agent:".format(name))
+
+        reward_file.write("Episode,StepsSoFar,TotalReward,LastReward,LengthEpisode,e\n")
+        packet_served_file.write("Episode,PacketsReceived,PacketsServed,PercentageReceived,ServerFailures\n")
+
+
+        with agent:
+
+            if test == True:
+                agent.loadModel(load_path)
+
+            fail_seg = 0
+            for ep_num in range(num_episodes):
+                net.reset() # reset the network
+
+                d = False # indicates that network is finished
+                rAll = 0 # accumulative reward for system in the episode. #TODO shouldn't contribute in pretraining
                 
-                if step > 0: # when step==0, the actions are chosen randomly, and the state is NULL
+                for step in range(max_epLength):
+                    #TODO make sure to do do pre_training_stuff
+                    a = agent.predict(net.get_state(), total_steps, e) # generate an action
+                    net.step(a, step) # take the action, update the network
 
-                    # r = reward, d = episode is done
-                    d = (step+1)==max_epLength
-                    r = net.calculate_reward()
-                    rAll += r
-                    ### why are we putting in the current state??? Shouldn't it be last state
-                    ### or better, shouldn't it involve both the last state and current state?
-                    if not test:
-                        agent.update(net.last_state, last_action, net.get_state(), d, r, next_action = a)
-
-                    if debug:                
-                        print("current_state: {0}".format(net.get_state()))
-                        print("last state: {0}".format(net.last_state))
-                        print("step:" + str(step) + ", action:" + str(last_action) + ", reward:" + str(r), end='\n')
-                        print("server state: {0}\n".format(net.switches[0].getWindow()))
                     
-                        #logging.debug("step: {0} - action: {1} - reward {2}".format(step,last_action,r))
-                    if r < 0:
-                        fail += 1
-                        fail_seg += 1
+                    if step > 0: # when step==0, the actions are chosen randomly, and the state is NULL
+
+                        # r = reward, d = episode is done
+                        d = (step+1)==max_epLength
+                        r = net.calculate_reward()
+                        rAll += r
+                        ### why are we putting in the current state??? Shouldn't it be last state
+                        ### or better, shouldn't it involve both the last state and current state?
+                        if not test:
+                            agent.update(net.last_state, last_action, net.get_state(), d, r, next_action = a)
+
+                        if debug:                
+                            print("current_state: {0}".format(net.get_state()))
+                            print("last state: {0}".format(net.last_state))
+                            print("step:" + str(step) + ", action:" + str(last_action) + ", reward:" + str(r), end='\n')
+                            print("server state: {0}\n".format(net.switches[0].getWindow()))
+                        
+                            #logging.debug("step: {0} - action: {1} - reward {2}".format(step,last_action,r))
+                        if r < 0:
+                            fail += 1
+                            fail_seg += 1
 
 
-                last_action = a 
-                
-                total_steps += 1
-
-                if total_steps > pre_train_steps:
+                    last_action = a 
                     
-                    if e > endE:
-                        e -= stepDrop
-                    elif e < endE:
-                        e = endE
-                    if total_steps % (update_freq) == 0 and not test:
-                        l = agent.actionReplay(net.get_state(), batch_size)
-                        if l:
-                            loss.append(l)
+                    total_steps += 1
 
-            if ep_num % 1000 == 0:
-                print("Completed Episode - {0}".format(ep_num))
-                print("E={0} Fails = {1} FailPer = {2}".format(e,fail_seg, (fail_seg*100/(1000*max_epLength))))
-                fail_seg = 0
-            if not test: 
-                # save the model only every 10,000 steps
-                if ep_num % 10000 == 0:
-                    agent.saveModel(load_path, ep_num)
+                    if total_steps > pre_train_steps:
+                        
+                        if e > endE:
+                            e -= stepDrop
+                        elif e < endE:
+                            e = endE
+
+                        if update_freq and not test and total_steps % (update_freq) == 0:
+                            l = agent.actionReplay(net.get_state(), batch_size)
+                            if l:
+                                loss.append(l)
+
+                if ep_num % 1000 == 0:
+                    print("Completed Episode - {0}".format(ep_num))
+                    print("E={0} Fails = {1} FailPer = {2}".format(e,fail_seg, (fail_seg*100/(1000*max_epLength))))
+                    fail_seg = 0
+                if not test: 
+                    # save the model only every 10,000 steps
+                    if ep_num % 10000 == 0:
+                        agent.saveModel(load_path, ep_num)
 
 
-            # save data generated
-            stepList.append(step)
-            rList.append(rAll)
+                # save data generated
+                stepList.append(step)
+                rList.append(rAll)
 
-            legit_served, legit_all, legit_per, server_failures = net.getLegitStats()
-            packet_served_file.write("{0}, {1}, {2}, {3}, {4}\n".format(ep_num, legit_served, legit_all, legit_per, server_failures))
+                legit_served, legit_all, legit_per, server_failures = net.getLegitStats()
+                packet_served_file.write("{0}, {1}, {2}, {3}, {4}\n".format(ep_num, legit_served, legit_all, legit_per, server_failures))
 
-            reward_file.write(str(ep_num) + "," + str(total_steps) + "," + str(rList[-1]) + "," + str(r) + "," + str(stepList[-1]) + "," + str(e) + "\n")
-            if len(loss) > 0:
-                loss_file.write(str(ep_num) + "," + str(total_steps) + "," + str(loss[-1]) + "," + str(e) + "\n")
+                reward_file.write(str(ep_num) + "," + str(total_steps) + "," + str(rList[-1]) + "," + str(r) + "," + str(stepList[-1]) + "," + str(e) + "\n")
+                if len(loss) > 0:
+                    loss_file.write(str(ep_num) + "," + str(total_steps) + "," + str(loss[-1]) + "," + str(e) + "\n")
 
-    if save_attack is SaveAttackEnum.save:
-        net.save_attacks()
+        if self.save_attack is self.save_attack_enum.save:
+            net.save_attacks()
 
-    reward_file.close()
-    loss_file.close()
+        reward_file.close()
+        loss_file.close()
 
-    print("{0} is:".format(name))
-    print("Percent of succesful episodes: " + str(100 - fail*100/total_steps) + "%")
+        print("{0} is:".format(name))
+        print("Percent of succesful episodes: " + str(100 - fail*100/total_steps) + "%")
 
 
 

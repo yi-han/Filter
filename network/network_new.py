@@ -151,43 +151,47 @@ class link(object):
             self.id, self.source_node, self.source_port, self.destination_node, self.destination_port, self.bandwidth))
 
 class network(object):
-    def __init__(self, N_switch, N_action, N_state, action_per_agent, host_sources, servers, filter_list, reward_overload, 
-              rate_legal_low, rate_legal_high, rate_attack_low, rate_attack_high, 
-              legal_probability, upper_boundary, hostClass, max_epLength, f_link, SaveAttackEnum,
-              save_attack, save_attack_path):
+    # def __init__(self, N_switch, N_action, N_state, action_per_agent, host_sources, servers, filter_list, reward_overload, 
+    #           rate_legal_low, rate_legal_high, rate_attack_low, rate_attack_high, 
+    #           legal_probability, upper_boundary, hostClass, max_epLength, f_link, SaveAttackEnum,
+    #           save_attack, save_attack_path):
 
-        #self.ITERATIONSBETEENACTION = 200 # with 10 ms delay, and throttle agent every 2 seconds, we see 200 messages passed in between
+    #self.ITERATIONSBETEENACTION = 200 # with 10 ms delay, and throttle agent every 2 seconds, we see 200 messages passed in between
+    def __init__(self, network_settings, reward_overload, save_attack, SaveAttackEnum, save_attack_path, adversary_class, max_epLength):
+        
 
-        self.ITERATIONSBETEENACTION = 50 # set at 50 just to quarter the amount of time
+
+
+        self.iterations_between_action = network_settings.iterations_between_action# set at 50 just to quarter the amount of time
 
 
 
-        self.host_sources = np.empty_like(host_sources)
-        self.host_sources[:] = host_sources
-        self.servers = np.empty_like(servers)
-        self.servers[:] = servers # list of the servers. Usually [0]
+        self.host_sources = np.empty_like(network_settings.host_sources)
+        self.host_sources[:] = network_settings.host_sources
+        self.servers = np.empty_like(network_settings.servers)
+        self.servers[:] = network_settings.servers # list of the servers. Usually [0]
         # self.filters = np.empty_like(filters)
         # self.filters[:] = filters
         #self.attackers = [] # id corresponds to the host attatched
-        self.filter_list = filter_list
-        self.N_state = N_state
-        self.N_switch = N_switch # number of nodes?
-        self.N_action = N_action
+        self.filter_list = network_settings.filters
+        self.N_state = network_settings.N_state
+        self.N_switch = network_settings.N_switch # number of nodes?
+        self.N_action = network_settings.N_action
         self.N_server = len(self.servers)
         self.N_host = len(self.host_sources)
-        self.N_filter = len(filter_list)
-        self.action_per_agent = action_per_agent # actions each host can take
+        self.N_filter = len(self.filter_list)
+        self.action_per_agent = network_settings.action_per_agent # actions each host can take
         
         self.reward_overload = reward_overload
         
-        self.rate_legal_low = (rate_legal_low / self.ITERATIONSBETEENACTION)
-        self.rate_legal_high = (rate_legal_high / self.ITERATIONSBETEENACTION)
-        self.rate_attack_low = (rate_attack_low / self.ITERATIONSBETEENACTION)
-        self.rate_attack_high = (rate_attack_high / self.ITERATIONSBETEENACTION)
+        self.rate_legal_low = (network_settings.rate_legal_low / self.iterations_between_action)
+        self.rate_legal_high = (network_settings.rate_legal_high / self.iterations_between_action)
+        self.rate_attack_low = (network_settings.rate_attack_low / self.iterations_between_action)
+        self.rate_attack_high = (network_settings.rate_attack_high / self.iterations_between_action)
         
-        self.legal_probability = legal_probability # odds of host being an attacker
-        self.upper_boundary = upper_boundary
-        self.hostClass = hostClass
+        self.legal_probability = network_settings.legal_probability # odds of host being an attacker
+        self.upper_boundary = network_settings.upper_boundary
+        self.hostClass = adversary_class
         self.topology = []
         # self.filter_host = {} - for old implementation of calculating traffic
         #self.drop_probability = [] # percentage of traffic stopping
@@ -204,7 +208,7 @@ class network(object):
         self.SaveAttackEnum = SaveAttackEnum
         self.save_attack = save_attack
         self.save_attack_path = save_attack_path
-        self.initialise(f_link)
+        self.initialise(network_settings.topologyFile)
         self.last_state = np.empty_like(self.get_state())
 
 
@@ -416,7 +420,7 @@ class network(object):
             switch.resetWindow()
         
         self.set_drop_probability(action)
-        for i in range(self.ITERATIONSBETEENACTION): # each time delay is 10 ms, 10*200 = 2000 ms = 2 seconds
+        for i in range(self.iterations_between_action): # each time delay is 10 ms, 10*200 = 2000 ms = 2 seconds
            self.move_traffic(step_count)
 
 
