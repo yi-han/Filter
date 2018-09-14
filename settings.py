@@ -4,10 +4,10 @@ import network.hosts as hostClass
 
 
 # list of agents to choose
-# from agent.sarsaCentralised import *
-from agent.sarsaDecentralised import *
-# from agent.ddqnCentralised import *
-# from agent.ddqnDecentralised import *
+import agent.sarsaCentralised as sarCen
+import agent.sarsaDecentralised as sarDec
+import agent.ddqnCentralised as ddCen
+import agent.ddqnDecentralised as ddDec
 
 
 
@@ -34,7 +34,7 @@ class sarsaDecMalias(object):
     startE = 0.4
     endE = 0.0
     stepDrop = (startE - endE)/annealing_steps
-    agent = Agent
+    agent = sarCen.Agent
 
 
 class ddqnCenSettings(object):
@@ -51,7 +51,7 @@ class ddqnCenSettings(object):
     startE = 1
     endE = 0.0
     stepDrop = (startE - endE)/annealing_steps
-
+    agent = ddCen.Agent
 ### Network Settings. Put this in a class/ object?
 
 class NetworkBasic(object):
@@ -97,9 +97,9 @@ repeats = 1
 save_attack = SaveAttackEnum.neither
 
 
-experiment = experiment.Experiment(save_attack_path, test, debug, save_attack, SaveAttackEnum, adversary, NetworkBasic, sarsaDecMalias)
+experiment = experiment.Experiment(save_attack_path, test, debug, save_attack, SaveAttackEnum, adversary, NetworkBasic, ddqnCenSettings)
 
-experiment.run(2)
+experiment.run(15)
 """
 Aim to only change settings here and feed into experiment
 
