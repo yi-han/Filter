@@ -15,7 +15,7 @@ and shouldn't it be including both the last state and the prior state?
 #TODO
 1)I suspect that if e <1 but step < pretrainign, it might still be not working right
 14) I think sarsa (and tensorflow) files will collide in parrelel
-
+15) Name dependent on topology
 #DONE
 
 1) Made SARSA centralised

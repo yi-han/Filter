@@ -2,7 +2,7 @@
 #SBATCH --nodes 1
 #SBATCH --partition gpgpu
 #SBATCH --gres=gpu:p100:1
-#SBATCH --time 08:00:00
+#SBATCH --time 14:00:00
 #SBATCH --cpus-per-task=1
 #SBATCH --job-name=router_throttle
 
