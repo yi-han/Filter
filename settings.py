@@ -15,18 +15,18 @@ class sarsaCenMalias(object):
     
     max_epLength = 30 # or 60 if test
     y = 0
-    tau = 0.01
+    tau = 0.001
     update_freq = None
     batch_size = None
     # num_episodes = 62501
     # pre_train_steps = 0 * max_epLength
     # annealing_steps = 50000 * max_epLength #1000*max_epLength #60000 * max_epLength 
-    num_episodes = 11001
-    pre_train_steps = 0 * max_epLength
-    annealing_steps = 1001 * max_epLength #1000*max_epLength #60000 * max_epLength 
+    num_episodes = 130001
+    pre_train_steps = 60000 * max_epLength
+    annealing_steps = 60001 * max_epLength #1000*max_epLength #60000 * max_epLength 
     
 
-    startE = 0.4
+    startE = 1
     endE = 0.0
     stepDrop = (startE - endE)/annealing_steps
     agent = sarCen.Agent
@@ -88,7 +88,7 @@ class NetworkSimpleStandard(object):
     rate_attack_high = 6
     legal_probability = 0.6 # probability that is a good guys
     upper_boundary = 8
-    iterations_between_action = 50
+    iterations_between_action = 3
 
 class NetworkSimpleBasic(object):
     N_state = 2 #The number of state, i.e., the number of filters
@@ -108,7 +108,7 @@ class NetworkSimpleBasic(object):
     rate_attack_high = 6
     legal_probability = 0.6 # probability that is a good guys
     upper_boundary = 8
-    iterations_between_action = 5
+    iterations_between_action = 1
 
 
 
@@ -132,7 +132,7 @@ repeats = 1
 save_attack = SaveAttackEnum.neither
 
 
-experiment = experiment.Experiment(save_attack_path, test, debug, save_attack, SaveAttackEnum, adversary, NetworkSimpleStandard, sarsaDecMalias)
+experiment = experiment.Experiment(save_attack_path, test, debug, save_attack, SaveAttackEnum, adversary, NetworkSimpleStandard, sarsaCenMalias)
 
 
 """

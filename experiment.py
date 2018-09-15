@@ -14,8 +14,7 @@ and shouldn't it be including both the last state and the prior state?
 
 #TODO
 1)I suspect that if e <1 but step < pretrainign, it might still be not working right
-2) Input the settings
-
+14) I think sarsa (and tensorflow) files will collide in parrelel
 
 #DONE
 
@@ -30,6 +29,9 @@ and shouldn't it be including both the last state and the prior state?
 9) Now pulls correct state
 10) Redid network
 11) Allow you to choose adversary
+12) Input the settings
+13) Slurm parrelel
+
 """
 
 from __future__ import division
@@ -202,7 +204,11 @@ class Experiment:
                             print("step:" + str(step) + ", action:" + str(last_action) + ", reward:" + str(r), end='\n')
                             print("server state: {0}\n".format(net.switches[0].getWindow()))
                         
-                            #logging.debug("step: {0} - action: {1} - reward {2}".format(step,last_action,r))
+                        # if e==endE: # only do this once trained
+                        #     print("\n")
+                        #     print(net.last_state)
+                        #     print(agent.get_action_choices(net.last_state))
+                        #     print("step: {0} - action: {1} - reward {2}".format(step,last_action,r))
                         if r < 0:
                             fail += 1
                             fail_seg += 1

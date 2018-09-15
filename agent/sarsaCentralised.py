@@ -45,7 +45,7 @@ class Agent(aBase.Agent):
     def predict(self, state, total_steps, e):
         randomChoice = super().isRandomGuess(total_steps, e)
         
-        #print(self.ai.q)
+
         if randomChoice:
             action = np.random.randint(0,self.N_action)
         else:
@@ -53,6 +53,10 @@ class Agent(aBase.Agent):
             action = self.ai.chooseAction(state)
 
         return action 
+
+    def get_action_choices(self, state):
+        state = tileState(state)
+        return self.ai.getActionChoices(state)
 
 
     def update(self, last_state, last_action, current_state, is_finished, reward, next_action = 0):
@@ -139,7 +143,7 @@ def tileState(state):
     # a hack job at tileCoding. Based on 0 research or effort
     newState = []
     for el in state:
-        newState.append(round(el, 1))
+        newState.append(round(el, 0))
     return tuple(newState)
 
 

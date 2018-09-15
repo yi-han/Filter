@@ -46,6 +46,14 @@ class SarsaAI:
         action = self.actions[i]
         return action
 
+    def getActionChoices(self, state):
+        q_list = []
+        for a in self.actions:
+            q_list.append((a, self.getQ(state, a)))
+
+        return q_list
+
+
     def learn(self, state1, action1, reward, state2, action2):
         
         qnext = self.getQ(state2, action2)

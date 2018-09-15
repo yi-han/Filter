@@ -70,7 +70,6 @@ def reward_multiple(directory, max_num):
     
 
     path = "{0}/reward-{1}-{2}-{3}.csv".format(directory,"train","Constant-Attack",0)
-
     f = pd.read_csv(path)
     ep_reward = f.LastReward #LastReward
     ep = f['Episode']
@@ -187,6 +186,7 @@ def distributions(directory, max_num = None, start_point=0):
     else:
         (ep, ep_reward) = reward_multiple(directory, max_num)
 
+    print(len(ep_reward))
     ep_reward = np.array(ep_reward[start_point:])
 
     print("Mean = {0}".format(np.mean(ep_reward)))
@@ -202,6 +202,6 @@ def distributions(directory, max_num = None, start_point=0):
 # reward_graph(sarsa_malialis,12, "sarsa_decentralised_12rep")
 # reward_graph(centralised_sarsa_twensixty, 20, "sarsa centralised")
 
-distributions(centralised_sarsa_twensixty, 20, 90000)
+distributions(cenSarsaFilter, 1, 12001)
 
 

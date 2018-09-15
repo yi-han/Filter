@@ -11,7 +11,7 @@ module load Tensorflow/1.8.0-intel-2017.u2-GCC-6.2.0-CUDA9-Python-3.5.2-GPU
 # Launch multiple process python code
 
 echo "Starting sarsacentralised big Spartan"
-time mpiexec -n 1 python3 run_multi_core.py 0 4
+time mpiexec -n 1 python3 run_multi_core.py 8 4
 
 echo "done"
 
