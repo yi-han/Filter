@@ -8,8 +8,11 @@ network \
 agent \
 experiment.py \
 settings.py \
-topology.txt \
+run_multi_core.py \
+topologies \
 exp_one_node_one_core.slurm \
+exp_two_node_one_core.slurm \
+program_to_run_slurm.txt \
 --exclude='*' \
 jpattison@spartan.hpc.unimelb.edu.au:/home/jpattison/Filter
 

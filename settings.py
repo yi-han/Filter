@@ -11,9 +11,25 @@ import agent.ddqnDecentralised as ddDec
 
 
 
-class TrainSettings(object):
+class sarsaCenMalias(object):
+    
     max_epLength = 30 # or 60 if test
     y = 0
+    tau = 0.01
+    update_freq = None
+    batch_size = None
+    # num_episodes = 62501
+    # pre_train_steps = 0 * max_epLength
+    # annealing_steps = 50000 * max_epLength #1000*max_epLength #60000 * max_epLength 
+    num_episodes = 11001
+    pre_train_steps = 0 * max_epLength
+    annealing_steps = 1001 * max_epLength #1000*max_epLength #60000 * max_epLength 
+    
+
+    startE = 0.4
+    endE = 0.0
+    stepDrop = (startE - endE)/annealing_steps
+    agent = sarCen.Agent
 
 
 class sarsaDecMalias(object):
@@ -34,7 +50,7 @@ class sarsaDecMalias(object):
     startE = 0.4
     endE = 0.0
     stepDrop = (startE - endE)/annealing_steps
-    agent = sarCen.Agent
+    agent = sarDec.Agent
 
 
 class ddqnCenSettings(object):
@@ -54,7 +70,7 @@ class ddqnCenSettings(object):
     agent = ddCen.Agent
 ### Network Settings. Put this in a class/ object?
 
-class NetworkBasic(object):
+class NetworkSimpleStandard(object):
     N_state = 3 #The number of state, i.e., the number of filters
     N_action = 1000 #In the current implementation, each filter has 10 possible actions, so altogether there are 10^N_state actions, 
                     #e.g., action 123 means the drop rates at the three filters are set to 0.1, 0.2 and 0.3, respectively
@@ -65,7 +81,27 @@ class NetworkBasic(object):
     servers = [0] #ID of the switch that the server is connected to 
     filters = [5, 6, 9] #ID of the switch that the filter locates at
 
-    topologyFile = 'topology.txt'
+    topologyFile = 'topologies/simple_standard.txt'
+    rate_legal_low = 0.05 
+    rate_legal_high = 1 
+    rate_attack_low = 2.5 
+    rate_attack_high = 6
+    legal_probability = 0.6 # probability that is a good guys
+    upper_boundary = 8
+    iterations_between_action = 50
+
+class NetworkSimpleBasic(object):
+    N_state = 2 #The number of state, i.e., the number of filters
+    N_action = 100 #In the current implementation, each filter has 10 possible actions, so altogether there are 10^N_state actions, 
+                    #e.g., action 123 means the drop rates at the three filters are set to 0.1, 0.2 and 0.3, respectively
+    action_per_agent = 10 # each filter can do 10 actions
+    N_switch = 6 # number of routers in the system
+    host_sources = [3, 4, 5] #ID of the switch that the host is connected to  
+
+    servers = [0] #ID of the switch that the server is connected to 
+    filters = [1, 2] #ID of the switch that the filter locates at
+
+    topologyFile = 'topologies/simple_basic.txt'
     rate_legal_low = 0.05 
     rate_legal_high = 1 
     rate_attack_low = 2.5 
@@ -73,7 +109,6 @@ class NetworkBasic(object):
     legal_probability = 0.6 # probability that is a good guys
     upper_boundary = 8
     iterations_between_action = 5
-
 
 
 
@@ -97,9 +132,9 @@ repeats = 1
 save_attack = SaveAttackEnum.neither
 
 
-experiment = experiment.Experiment(save_attack_path, test, debug, save_attack, SaveAttackEnum, adversary, NetworkBasic, ddqnCenSettings)
+experiment = experiment.Experiment(save_attack_path, test, debug, save_attack, SaveAttackEnum, adversary, NetworkSimpleStandard, sarsaDecMalias)
 
-experiment.run(15)
+
 """
 Aim to only change settings here and feed into experiment
 

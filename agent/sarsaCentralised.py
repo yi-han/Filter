@@ -44,6 +44,8 @@ class Agent(aBase.Agent):
 
     def predict(self, state, total_steps, e):
         randomChoice = super().isRandomGuess(total_steps, e)
+        
+        #print(self.ai.q)
         if randomChoice:
             action = np.random.randint(0,self.N_action)
         else:
