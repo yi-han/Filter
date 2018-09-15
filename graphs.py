@@ -199,9 +199,11 @@ def distributions(directory, max_num = None, start_point=0):
 # results = get_attack_stat([("decSarsa",decSarsaDir), ("decDdq", decDdqDir), ("centralDdq", cenDdqDir), ("centralSarsa", cenSarsaDir)], "ServerFailures")#"PercentageReceived")
 # dic_to_graph(results)
 # dic_to_summary(results)
-# reward_graph(sarsa_malialis,12, "sarsa_decentralised_12rep")
-# reward_graph(centralised_sarsa_twensixty, 20, "sarsa centralised")
 
-distributions(cenSarsaFilter, 1, 12001)
+# reward_graph(cenSarsaFilter,15, "sarsa centralised")
+# reward_graph(decSarsaFilter, 15, "sarsa decentralised")
+
+distributions(cenSarsaFilter, 15, 12001)
+distributions(decSarsaFilter, 15, 2000)
 
 
