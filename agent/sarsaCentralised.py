@@ -25,8 +25,6 @@ class Agent(aBase.Agent):
         self.ai = SarsaAI(
             actions=range(N_action), alpha=alph, gamma=gam)
         self.N_action = N_action
-        self.lastAction = None
-        self.lastState = None
         self.score = 0
         self.test = test
 
@@ -74,11 +72,8 @@ class Agent(aBase.Agent):
         self.score += reward
 
 
-        if self.lastAction is not None:
-            self.ai.learn(
-                self.lastState, self.lastAction, reward, current_state, next_action)
-        self.lastState = last_state
-        self.lastAction = last_action   
+        self.ai.learn(last_state, last_action, reward, current_state, next_action)
+
 
     def actionReplay(self, current_state, batch_size):
         return None

@@ -61,8 +61,9 @@ class Agent(aBase.Agent):
 
         # provide the update function to each individual state
         actions = Agent.actionToActions(last_action, self.num_agents, self.action_per_agent)
+        next_actions = Agent.actionToActions(next_action, self.num_agents, self.action_per_agent)
         for i in range(len(last_state)):
-            self.agents[i].update([last_state[i]], actions[i], [current_state[i]], is_finished, reward, next_action = next_action)
+            self.agents[i].update([last_state[i]], actions[i], [current_state[i]], is_finished, reward, next_action = next_actions[i])
         self.score += reward
 
 
