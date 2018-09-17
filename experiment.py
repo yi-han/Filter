@@ -93,7 +93,7 @@ class Experiment:
 
         num_episodes = self.agent_settings.num_episodes
         pre_train_steps = self.agent_settings.pre_train_steps
-        e = self.agent_settings.startE
+        e = 1 # always start full exploration. Gets overwritten in training
         endE = self.agent_settings.endE
         stepDrop = self.agent_settings.stepDrop
         debug = self.is_debug
@@ -230,6 +230,8 @@ class Experiment:
                             e -= stepDrop
                         elif e < endE:
                             e = endE
+                        elif e > startE:
+                            e = startE
 
                         if update_freq and not test and total_steps % (update_freq) == 0:
                             l = agent.actionReplay(net.get_state(), batch_size)

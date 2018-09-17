@@ -47,7 +47,7 @@ class sarsaDecMalias(object):
     annealing_steps = 50000 * max_epLength #1000*max_epLength #60000 * max_epLength 
     
 
-    startE = 0.8 #0.4
+    startE = 0.4 #0.4
     endE = 0.0
     stepDrop = (startE - endE)/annealing_steps
     agent = sarDec.Agent
@@ -156,7 +156,7 @@ gradualIncrease = hostClass.GradualIncrease
 
 
 # experiment = experiment.Experiment(save_attack_path, test, debug, save_attack, SaveAttackEnum, conAttack, NetworkSimpleStandard, sarsaCenMalias)
-experiment = experiment.Experiment(conAttack, GeneralSettings, NetworkSimpleMedium, sarsaDecMalias)
+experiment = experiment.Experiment(conAttack, GeneralSettings, NetworkSimpleBasic, sarsaDecMalias)
 
 
 
