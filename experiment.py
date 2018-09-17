@@ -46,16 +46,21 @@ from network.network_new import *
 
 class Experiment:
 
-    def __init__(self, save_attack_path, test, debug, save_attack, save_attack_enum, adversary_class, NetworkClass, AgentSettings):
-        self.save_attack_path = save_attack_path
-        self.is_test = test
-        self.is_debug = debug
-        self.save_attack = save_attack
-        self.save_attack_enum = save_attack_enum
+    def __init__(self, adversary_class, GeneralSettings, NetworkClass, AgentSettings):
+        self.save_attack_path = GeneralSettings.save_attack_path
+        #self.is_test = GeneralSettings.test
+        self.is_debug = GeneralSettings.debug
+        self.save_attack = GeneralSettings.save_attack
+        self.save_attack_enum = GeneralSettings.SaveAttackEnum
+        self.load_model_enum = GeneralSettings.SaveModelEnum
+        self.load_model = GeneralSettings.save_model
         self.adversary_class = adversary_class
 
         self.network_settings = NetworkClass
         self.agent_settings = AgentSettings
+
+
+
 
         assert(NetworkClass.action_per_agent**NetworkClass.N_state == NetworkClass.N_action)
 
@@ -91,10 +96,11 @@ class Experiment:
         e = self.agent_settings.startE
         endE = self.agent_settings.endE
         stepDrop = self.agent_settings.stepDrop
-        test = self.is_test
         debug = self.is_debug
         max_epLength = self.agent_settings.max_epLength
-        if test:
+
+        test = self.load_model is self.load_model_enum.test
+        if self.load_model is self.load_model_enum.test:
             self.num_episodes = 1000
             self.pre_train_steps = 0
             self.max_epLength = 60
@@ -153,7 +159,7 @@ class Experiment:
         if not os.path.exists(path):
             os.makedirs(path)
 
-        if test:
+        if self.load_model is self.load_model_enum.test:
             run_mode = "test"
         else:
             run_mode = "train"
@@ -171,7 +177,7 @@ class Experiment:
 
         with agent:
 
-            if test == True:
+            if self.load_model in [self.load_model_enum.test, self.load_model_enum.load]:
                 agent.loadModel(load_path)
 
             fail_seg = 0
@@ -195,7 +201,7 @@ class Experiment:
                         rAll += r
                         ### why are we putting in the current state??? Shouldn't it be last state
                         ### or better, shouldn't it involve both the last state and current state?
-                        if not test:
+                        if not (self.load_model is self.load_model_enum.test):
                             agent.update(net.last_state, last_action, net.get_state(), d, r, next_action = a)
 
                         if debug:                
@@ -234,7 +240,7 @@ class Experiment:
                     print("Completed Episode - {0}".format(ep_num))
                     print("E={0} Fails = {1} FailPer = {2}".format(e,fail_seg, (fail_seg*100/(1000*max_epLength))))
                     fail_seg = 0
-                if not test: 
+                if self.load_model is self.load_model_enum.save: 
                     # save the model only every 10,000 steps
                     if ep_num % 10000 == 0:
                         agent.saveModel(load_path, ep_num)

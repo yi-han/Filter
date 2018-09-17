@@ -134,6 +134,15 @@ class NetworkSimpleMedium(object):
     upper_boundary = 8
     iterations_between_action = 10
 
+class GeneralSettings(object):
+    SaveAttackEnum = Enum('SaveAttack', 'neither save load')
+    SaveModelEnum = Enum('SaveModel', 'neither save load test')
+    save_attack_path = "./attack.pkl" # note you shouldn't be repeating this
+    #test = False # handled by saveModel
+    debug = False
+    #load_model = False
+    save_attack = SaveAttackEnum.neither
+    save_model = SaveModelEnum.neither
 
 # The class of the adversary to implement
 conAttack = hostClass.ConstantAttack
@@ -143,19 +152,11 @@ largePulse = hostClass.LargePulse
 gradualIncrease = hostClass.GradualIncrease
 
 
-SaveAttackEnum = Enum('SaveAttack', 'neither save load')
-save_attack_path = "./attack.pkl" # note you shouldn't be repeating this
 
-
-test = False
-debug = False
-load_model = False
-repeats = 1
-save_attack = SaveAttackEnum.neither
 
 
 # experiment = experiment.Experiment(save_attack_path, test, debug, save_attack, SaveAttackEnum, conAttack, NetworkSimpleStandard, sarsaCenMalias)
-experiment = experiment.Experiment(save_attack_path, test, debug, save_attack, SaveAttackEnum, conAttack, NetworkSimpleStandard, sarsaCenMalias)
+experiment = experiment.Experiment(conAttack, GeneralSettings, NetworkSimpleBasic, sarsaDecMalias)
 
 
 
