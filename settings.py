@@ -71,6 +71,7 @@ class ddqnCenSettings(object):
 ### Network Settings. Put this in a class/ object?
 
 class NetworkSimpleStandard(object):
+    name = "simple_standard"
     N_state = 3 #The number of state, i.e., the number of filters
     N_action = 1000 #In the current implementation, each filter has 10 possible actions, so altogether there are 10^N_state actions, 
                     #e.g., action 123 means the drop rates at the three filters are set to 0.1, 0.2 and 0.3, respectively
@@ -88,9 +89,10 @@ class NetworkSimpleStandard(object):
     rate_attack_high = 6
     legal_probability = 0.6 # probability that is a good guys
     upper_boundary = 8
-    iterations_between_action = 50
+    iterations_between_action = 8
 
 class NetworkSimpleBasic(object):
+    name = "simple_basic"
     N_state = 2 #The number of state, i.e., the number of filters
     N_action = 100 #In the current implementation, each filter has 10 possible actions, so altogether there are 10^N_state actions, 
                     #e.g., action 123 means the drop rates at the three filters are set to 0.1, 0.2 and 0.3, respectively
@@ -110,7 +112,9 @@ class NetworkSimpleBasic(object):
     upper_boundary = 8
     iterations_between_action = 5
 
-class NetworkSimpleLarge(object):
+class NetworkSimpleMedium(object):
+    name = "simple_medium"
+
     N_state = 5 #The number of state, i.e., the number of filters
     N_action = 100000 #In the current implementation, each filter has 10 possible actions, so altogether there are 10^N_state actions, 
                     #e.g., action 123 means the drop rates at the three filters are set to 0.1, 0.2 and 0.3, respectively
@@ -151,7 +155,7 @@ save_attack = SaveAttackEnum.neither
 
 
 # experiment = experiment.Experiment(save_attack_path, test, debug, save_attack, SaveAttackEnum, conAttack, NetworkSimpleStandard, sarsaCenMalias)
-experiment = experiment.Experiment(save_attack_path, test, debug, save_attack, SaveAttackEnum, conAttack, NetworkSimpleLarge, sarsaDecMalias)
+experiment = experiment.Experiment(save_attack_path, test, debug, save_attack, SaveAttackEnum, conAttack, NetworkSimpleStandard, sarsaCenMalias)
 
 
 

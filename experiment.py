@@ -142,7 +142,7 @@ class Experiment:
 
 
         name = self.agent_settings.agent.getName() # The name of the Agent used
-        path = agent.getPath() # The path to save model to
+        path = agent.getPath() +  self.network_settings.name # The path to save model to
 
         #path = "/data/projects/punim0621" # for slug
         load_path = path #ideally can move a good one to a seperate location
