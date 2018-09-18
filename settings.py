@@ -122,7 +122,7 @@ class NetworkFourThrottle(object):
     N_action = 10000 #In the current implementation, each filter has 10 possible actions, so altogether there are 10^N_state actions, 
                     #e.g., action 123 means the drop rates at the three filters are set to 0.1, 0.2 and 0.3, respectively
     action_per_agent = 10 # each filter can do 10 actions
-    N_switch = 7 # number of routers in the system
+    N_switch = 8 # number of routers in the system
     host_sources = [3, 3, 4, 4, 6, 6, 7, 7] #ID of the switch that the host is connected to  
 
     servers = [0] #ID of the switch that the server is connected to 
@@ -209,7 +209,7 @@ gradualIncrease = hostClass.GradualIncrease
 
 
 # experiment = experiment.Experiment(save_attack_path, test, debug, save_attack, SaveAttackEnum, conAttack, NetworkSimpleStandard, sarsaCenMalias)
-experiment = experiment.Experiment(conAttack, GeneralSettings, NetworkMalialisSmall, ddqnCenSettings)
+experiment = experiment.Experiment(conAttack, GeneralSettings, NetworkFourThrottle, sarsaDecMalias)
 
 
 
