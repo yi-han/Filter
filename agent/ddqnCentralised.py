@@ -2,7 +2,7 @@ from agent.ddqn import *
 import agent.agentBase as aBase
 import numpy as np
 import os
-
+import sys
 
 class Agent(aBase.Agent):
     def __init__(self, N_action, pre_train_steps, action_per_agent, N_state, tau=0.1, discountFactor=0, debug=False, test=False):
@@ -73,6 +73,7 @@ class Agent(aBase.Agent):
         #Exit if "dying ReLU" occurs
         out = self.sess.run(mainQN.Qout,feed_dict={mainQN.input:[current_state]})[0]
         if out[0] == out [1] and out[0] == out [2] and out[0] == out [3] and out[1] == 0:
+            
             sys.exit(-1)
 
         return l

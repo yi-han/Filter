@@ -94,6 +94,7 @@ class Experiment:
         num_episodes = self.agent_settings.num_episodes
         pre_train_steps = self.agent_settings.pre_train_steps
         e = 1 # always start full exploration. Gets overwritten in training
+        startE = self.agent_settings.startE
         endE = self.agent_settings.endE
         stepDrop = self.agent_settings.stepDrop
         debug = self.is_debug
@@ -149,7 +150,7 @@ class Experiment:
 
         name = self.agent_settings.agent.getName() # The name of the Agent used
         path = agent.getPath() +  self.network_settings.name # The path to save model to
-
+        print("Path is {0}".format(path))
         #path = "/data/projects/punim0621" # for slug
         load_path = path #ideally can move a good one to a seperate location
 
@@ -225,13 +226,14 @@ class Experiment:
                     total_steps += 1
 
                     if total_steps > pre_train_steps:
-                        
-                        if e > endE:
+                        #print("e={0} startE = {1}".format(e, startE))
+                        if e > startE:
+                            e = startE
+                        elif e > endE:
                             e -= stepDrop
                         elif e < endE:
                             e = endE
-                        elif e > startE:
-                            e = startE
+
 
                         if update_freq and not test and total_steps % (update_freq) == 0:
                             l = agent.actionReplay(net.get_state(), batch_size)

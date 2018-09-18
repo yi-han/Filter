@@ -61,7 +61,7 @@ class ddqnCenSettings(object):
     update_freq = 4 #How often to perform a training step.
     batch_size = 32 #How many experiences to use for each training step.
     num_episodes = 100001    
-    pre_train_steps = 20000 * max_epLength
+    pre_train_steps = 20000 * max_epLength #20000 * max_epLength
     annealing_steps = 60000 * max_epLength #1000*max_epLength #60000 * max_epLength 
     
     startE = 1
@@ -113,7 +113,7 @@ class NetworkSimpleBasic(object):
     iterations_between_action = 5
 
 class NetworkSimpleMedium(object):
-    name = "simple_medium"
+    name = "simple_mediumUp12"
 
     N_state = 5 #The number of state, i.e., the number of filters
     N_action = 100000 #In the current implementation, each filter has 10 possible actions, so altogether there are 10^N_state actions, 
@@ -131,8 +131,36 @@ class NetworkSimpleMedium(object):
     rate_attack_low = 2.5 
     rate_attack_high = 6
     legal_probability = 0.6 # probability that is a good guys
-    upper_boundary = 8
+    upper_boundary = 12
     iterations_between_action = 10
+
+class NetworkMalialisMedium(object):
+    name = "malialis_router_medium"
+
+    N_state = 30
+    N_action = 10**30
+    action_per_agent = 10
+    host_sources = [3, 3, 4, 4, 5, 5, 7, 7, 8, 8, 9, 9, 12, 12, 13, 13, 14, 14, \
+        16, 16, 17, 17, 18, 18, 21, 21, 22, 22, 23, 23, 25, 25, 26, 26, 27, 27, \
+        30, 30, 31, 31, 32, 32, 36, 36, 35, 35, ,34, 34, 39, 39, 40, 40, 41, 41, \
+        43, 43, 44, 44, 45, 45]
+
+    servers = [0]
+    filters = [3, 4, 5, 7, 8, 9, 12, 13, 14, 16, 17, 18, 21, 22, 23, 25, 26, 27, \
+        30, 31, 32, 34, 35, 36, 39, 40, 41, 43, 44, 45]
+
+    topologyFile = None
+    
+    rate_legal_high = 1 
+    rate_attack_low = 2.5 
+    rate_attack_high = 6
+    legal_probability = 0.6 # probability that is a good guys
+    upper_boundary = 62
+    iterations_between_action = 5
+
+
+
+
 
 class GeneralSettings(object):
     SaveAttackEnum = Enum('SaveAttack', 'neither save load')
@@ -143,6 +171,7 @@ class GeneralSettings(object):
     #load_model = False
     save_attack = SaveAttackEnum.neither
     save_model = SaveModelEnum.neither
+
 
 # The class of the adversary to implement
 conAttack = hostClass.ConstantAttack
@@ -156,7 +185,7 @@ gradualIncrease = hostClass.GradualIncrease
 
 
 # experiment = experiment.Experiment(save_attack_path, test, debug, save_attack, SaveAttackEnum, conAttack, NetworkSimpleStandard, sarsaCenMalias)
-experiment = experiment.Experiment(conAttack, GeneralSettings, NetworkSimpleBasic, sarsaDecMalias)
+experiment = experiment.Experiment(conAttack, GeneralSettings, NetworkSimpleMedium, ddqnCenSettings)
 
 
 
