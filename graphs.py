@@ -11,5 +11,8 @@ if len(sys.argv)==4:
 else:
     name = None
 
+reward_types = ["reward", "init-reward", "final-reward"]
+# reward_types = ["reward"]
 
-distributions.reward_graph(folder,amount, name)
+for reward_type in reward_types:
+    distributions.reward_graph(folder, reward_type, amount, name)

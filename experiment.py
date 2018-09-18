@@ -165,14 +165,22 @@ class Experiment:
         else:
             run_mode = "train"
 
-
+        # determine reward for a prediction at start of episode, we choose the second step as first step is random
+        initial_reward_file = open("{0}/init-reward-{1}-{2}-{3}.csv".format(path,run_mode, self.adversary_class.getName(), prefix),"w")
         reward_file = open("{0}/reward-{1}-{2}-{3}.csv".format(path,run_mode, self.adversary_class.getName(), prefix),"w")
+        # Similar to init. Different from reward_file as this is if exploration is 0. Measures how accurate it is at the moment.
+        final_reward_file = open("{0}/final-reward-{1}-{2}-{3}.csv".format(path,run_mode, self.adversary_class.getName(), prefix),"w")
+        
         loss_file = open("{0}/loss-{1}-{2}-{3}.csv".format(path,run_mode, self.adversary_class.getName(), prefix) ,"w")
         packet_served_file = open("{0}/packet_served-{1}-{2}-{3}.csv".format(path,run_mode, self.adversary_class.getName(), prefix),"w")
 
         print("Using the {0} agent:".format(name))
 
+        
         reward_file.write("Episode,StepsSoFar,TotalReward,LastReward,LengthEpisode,e\n")
+        initial_reward_file.write("Episode,StepsSoFar,LastReward,LengthEpisode,e\n")
+        final_reward_file.write("Episode,StepsSoFar,LastReward,LengthEpisode,e\n")
+
         packet_served_file.write("Episode,PacketsReceived,PacketsServed,PercentageReceived,ServerFailures\n")
 
 
@@ -205,6 +213,7 @@ class Experiment:
                         if not (self.load_model is self.load_model_enum.test):
                             agent.update(net.last_state, last_action, net.get_state(), d, r, next_action = a)
 
+
                         if debug:                
                             print("current_state: {0}".format(net.get_state()))
                             print("last state: {0}".format(net.last_state))
@@ -219,8 +228,14 @@ class Experiment:
                         if r < 0:
                             fail += 1
                             fail_seg += 1
-
-
+                    
+                    # if step 1 or final step we want to measure how accurate our system is
+                    # to minimise effect on our network we make a prediction then replay the last prior action to undo effect
+                    if step == 1:
+                        temp_a = agent.predict(net.get_state(), total_steps, 0)
+                        temp_r = net.virtual_action(temp_a, a, total_steps)
+                        initial_reward_file.write(str(ep_num) + "," + str(total_steps) + "," + str(temp_r) + "," + str(step) + "," + str(0) + "\n")   
+                            
                     last_action = a 
                     
                     total_steps += 1
@@ -239,6 +254,18 @@ class Experiment:
                             l = agent.actionReplay(net.get_state(), batch_size)
                             if l:
                                 loss.append(l)
+
+                # record final prediciton with exploraiton at 0
+                if e>0:
+                    temp_a = agent.predict(net.get_state(), total_steps, 0)
+                    net.step(a, step) # take the action, update the network
+                    last_reward = net.calculate_reward()
+                else:
+                    last_reward = r
+                final_reward_file.write(str(ep_num) + "," + str(total_steps) + "," + str(last_reward) + "," + str(step) + "," + str(0) + "\n")   
+
+
+
 
                 if ep_num % 1000 == 0:
                     print("Completed Episode - {0}".format(ep_num))
@@ -266,6 +293,8 @@ class Experiment:
 
         reward_file.close()
         loss_file.close()
+        initial_reward_file.close()
+        final_reward_file.close()
 
         print("{0} is:".format(name))
         print("Percent of succesful episodes: " + str(100 - fail*100/total_steps) + "%")

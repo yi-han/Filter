@@ -82,7 +82,7 @@ class NetworkMalialisSmall(object):
     servers = [0] #ID of the switch that the server is connected to 
     filters = [5, 6, 9] #ID of the switch that the filter locates at
 
-    topologyFile = 'topologies/simple_standard.txt'
+    topologyFile = 'topologies/malialis_original.txt'
     rate_legal_low = 0.05 
     rate_legal_high = 1 
     rate_attack_low = 2.5 
@@ -97,8 +97,8 @@ class NetworkSimpleBasic(object):
     N_action = 100 #In the current implementation, each filter has 10 possible actions, so altogether there are 10^N_state actions, 
                     #e.g., action 123 means the drop rates at the three filters are set to 0.1, 0.2 and 0.3, respectively
     action_per_agent = 10 # each filter can do 10 actions
-    N_switch = 6 # number of routers in the system
-    host_sources = [3, 4, 5] #ID of the switch that the host is connected to  
+    N_switch = 3 # number of routers in the system
+    host_sources = [1, 1, 2] #ID of the switch that the host is connected to  
 
     servers = [0] #ID of the switch that the server is connected to 
     filters = [1, 2] #ID of the switch that the filter locates at
@@ -152,7 +152,7 @@ class NetworkSingleTeamMalialisMedium(object):
     rate_attack_low = 2.5 
     rate_attack_high = 6
     legal_probability = 0.6 # probability that is a good guys
-    upper_boundary = 12.5
+    upper_boundary = 24#12.5
     iterations_between_action = 5 
 
 
@@ -207,7 +207,7 @@ gradualIncrease = hostClass.GradualIncrease
 
 
 # experiment = experiment.Experiment(save_attack_path, test, debug, save_attack, SaveAttackEnum, conAttack, NetworkSimpleStandard, sarsaCenMalias)
-experiment = experiment.Experiment(conAttack, GeneralSettings, NetworkMalialisSmall, sarsaDecentralised)
+experiment = experiment.Experiment(conAttack, GeneralSettings, NetworkSingleTeamMalialisMedium, ddqnCenSettings)
 
 
 

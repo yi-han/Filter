@@ -56,8 +56,8 @@ def condense_values(x, y):
 
     return nx, ny
 
-def reward_single(directory):
-    path = "{0}/reward-{1}-{2}.csv".format(directory,"train","Constant-Attack")
+def reward_single(directory,reward_prefix="reward"):
+    path = "{0}/{1}-{2}-{3}.csv".format(directory, reward_prefix, "train","Constant-Attack")
     f = pd.read_csv(path)    
     ep_reward = f.LastReward#[30000:] #f['Totalreward']
     ep = f['Episode']#[30000:]
@@ -65,11 +65,11 @@ def reward_single(directory):
     #(ep, ep_reward) = condense_values(ep, ep_reward)
     return (ep, ep_reward)
 
-def reward_multiple(directory, max_num):
+def reward_multiple(directory, max_num, reward_prefix="reward"):
     # we do first one manually then loop for rest
     
 
-    path = "{0}/reward-{1}-{2}-{3}.csv".format(directory,"train","Constant-Attack",0)
+    path = "{0}/{1}-{2}-{3}-{4}.csv".format(directory, reward_prefix, "train","Constant-Attack",0)
     f = pd.read_csv(path)
     ep_reward = f.LastReward #LastReward
     ep = f['Episode']
@@ -93,15 +93,15 @@ def reward_multiple(directory, max_num):
 
 
 
-def reward_graph(directory, max_num = None, title=None):
+def reward_graph(directory, reward_type, max_num = None, title=None):
     # used for the reward of the training file
     
     #print(path)
    
     if not max_num:
-        (ep, ep_reward) = reward_single(directory)
+        (ep, ep_reward) = reward_single(directory, reward_type)
     else:
-        (ep, ep_reward) = reward_multiple(directory, max_num)
+        (ep, ep_reward) = reward_multiple(directory, max_num, reward_type)
 
 
     plt.ylim((-0.8, 1.2))

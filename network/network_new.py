@@ -375,6 +375,16 @@ class network(object):
 
         self.reset()
 
+    def virtual_action(self, action, prior_action, step_count):
+        # if we want to test what the reward would be for an action without effecting the state
+        # we do this by doing the action, then doing the prior action again
+
+        self.step(action, step_count, False)
+        r = self.calculate_reward()
+        self.step(prior_action, step_count, False)
+        return r
+
+
     def calculate_reward(self):
         
         reward = 0.0
@@ -409,12 +419,12 @@ class network(object):
 
         return clip(-1, 1, reward)
 
-    def step(self, action, step_count):
+    def step(self, action, step_count, update_last_state = True):
         # input the actions. Just sets drop probabilities at the moment
         # ideally i would move calculations here
 
-
-        self.last_state = self.get_state()
+        if update_last_state:
+            self.last_state = self.get_state()
 
         for switch in self.switches:
             switch.resetWindow()
