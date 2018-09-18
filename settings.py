@@ -70,8 +70,8 @@ class ddqnCenSettings(object):
     agent = ddCen.Agent
 ### Network Settings. Put this in a class/ object?
 
-class NetworkSimpleStandard(object):
-    name = "simple_standard"
+class NetworkMalialisSmall(object):
+    name = "malialis_small"
     N_state = 3 #The number of state, i.e., the number of filters
     N_action = 1000 #In the current implementation, each filter has 10 possible actions, so altogether there are 10^N_state actions, 
                     #e.g., action 123 means the drop rates at the three filters are set to 0.1, 0.2 and 0.3, respectively
@@ -89,7 +89,7 @@ class NetworkSimpleStandard(object):
     rate_attack_high = 6
     legal_probability = 0.6 # probability that is a good guys
     upper_boundary = 8
-    iterations_between_action = 8
+    iterations_between_action = 10
 
 class NetworkSimpleBasic(object):
     name = "simple_basic"
@@ -113,7 +113,8 @@ class NetworkSimpleBasic(object):
     iterations_between_action = 5
 
 class NetworkSimpleMedium(object):
-    name = "simple_mediumUp12"
+    # depreciated
+    name = "simple_medium"
 
     N_state = 5 #The number of state, i.e., the number of filters
     N_action = 100000 #In the current implementation, each filter has 10 possible actions, so altogether there are 10^N_state actions, 
@@ -125,7 +126,7 @@ class NetworkSimpleMedium(object):
     servers = [0] #ID of the switch that the server is connected to 
     filters = [3, 4, 9, 10, 12] #ID of the switch that the filter locates at
 
-    topologyFile = 'topologies/simple_large.txt'
+    topologyFile = 'topologies/simple_medium.txt'
     rate_legal_low = 0.05 
     rate_legal_high = 1 
     rate_attack_low = 2.5 
@@ -133,6 +134,27 @@ class NetworkSimpleMedium(object):
     legal_probability = 0.6 # probability that is a good guys
     upper_boundary = 12
     iterations_between_action = 10
+
+class NetworkSingleTeamMalialisMedium(object):
+    name = "single_team_malialis_medium"
+    N_state = 6
+    N_action = 1000000
+
+    action_per_agent = 10
+    N_switch = 10
+    host_sources = [3, 3, 4, 4, 5, 5, 7, 7, 8, 8, 9, 9]
+    servers = [0]
+    filters = [3, 4, 5, 7, 8, 9]
+    
+    topologyFile = 'topologies/single_team_malialis.txt'
+    rate_legal_low = 0.05 
+    rate_legal_high = 1 
+    rate_attack_low = 2.5 
+    rate_attack_high = 6
+    legal_probability = 0.6 # probability that is a good guys
+    upper_boundary = 12.5
+    iterations_between_action = 5 
+
 
 class NetworkMalialisMedium(object):
     name = "malialis_router_medium"
@@ -142,7 +164,7 @@ class NetworkMalialisMedium(object):
     action_per_agent = 10
     host_sources = [3, 3, 4, 4, 5, 5, 7, 7, 8, 8, 9, 9, 12, 12, 13, 13, 14, 14, \
         16, 16, 17, 17, 18, 18, 21, 21, 22, 22, 23, 23, 25, 25, 26, 26, 27, 27, \
-        30, 30, 31, 31, 32, 32, 36, 36, 35, 35, ,34, 34, 39, 39, 40, 40, 41, 41, \
+        30, 30, 31, 31, 32, 32, 36, 36, 35, 35, 34, 34, 39, 39, 40, 40, 41, 41, \
         43, 43, 44, 44, 45, 45]
 
     servers = [0]
@@ -185,7 +207,7 @@ gradualIncrease = hostClass.GradualIncrease
 
 
 # experiment = experiment.Experiment(save_attack_path, test, debug, save_attack, SaveAttackEnum, conAttack, NetworkSimpleStandard, sarsaCenMalias)
-experiment = experiment.Experiment(conAttack, GeneralSettings, NetworkSimpleMedium, ddqnCenSettings)
+experiment = experiment.Experiment(conAttack, GeneralSettings, NetworkMalialisSmall, sarsaDecentralised)
 
 
 
