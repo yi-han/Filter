@@ -71,6 +71,7 @@ class Agent(aBase.Agent):
         self.myBuffer.batch_update(tree_idx, abs_errors)
 
         #Exit if "dying ReLU" occurs
+        print("dying ReLU")
         out = self.sess.run(mainQN.Qout,feed_dict={mainQN.input:[current_state]})[0]
         if out[0] == out [1] and out[0] == out [2] and out[0] == out [3] and out[1] == 0:
             
