@@ -46,7 +46,7 @@ from network.network_new import *
 
 class Experiment:
 
-    def __init__(self, adversary_class, GeneralSettings, NetworkClass, AgentSettings):
+    def __init__(self, adversary_class, GeneralSettings, NetworkClass, AgentSettings, twist = ""):
         self.save_attack_path = GeneralSettings.save_attack_path
         #self.is_test = GeneralSettings.test
         self.is_debug = GeneralSettings.debug
@@ -59,7 +59,7 @@ class Experiment:
         self.network_settings = NetworkClass
         self.agent_settings = AgentSettings
 
-
+        self.twist = twist
 
 
         assert(NetworkClass.action_per_agent**NetworkClass.N_state == NetworkClass.N_action)
@@ -149,7 +149,7 @@ class Experiment:
 
 
         name = self.agent_settings.agent.getName() # The name of the Agent used
-        path = agent.getPath() +  self.network_settings.name # The path to save model to
+        path =  self.network_settings.name + agent.getPath() + self.twist# The path to save model to
         print("Path is {0}".format(path))
         #path = "/data/projects/punim0621" # for slug
         load_path = path #ideally can move a good one to a seperate location

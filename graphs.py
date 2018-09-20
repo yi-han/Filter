@@ -3,7 +3,7 @@ import distributions
 
 assert(len(sys.argv)>=3)
 
-folder = sys.argv[1]
+directory = sys.argv[1]
 amount = int(sys.argv[2])
 
 if len(sys.argv)==4:
@@ -11,8 +11,9 @@ if len(sys.argv)==4:
 else:
     name = None
 
-reward_types = ["reward", "init-reward", "final-reward"]
+reward_types = ["reward"]#, "init-reward", "final-reward"]
 # reward_types = ["reward"]
 
 for reward_type in reward_types:
-    distributions.reward_graph(folder, reward_type, amount, name)
+    distributions.distributions(directory, amount, 75000)
+    distributions.reward_graph(directory, reward_type, amount, name)

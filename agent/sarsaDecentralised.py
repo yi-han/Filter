@@ -92,11 +92,7 @@ class Agent(aBase.Agent):
         return "SarsaDecentralisedAgent"
 
     def getPath(self):
-        if self.test:
-            prefix="./trained"
-        else:
-            prefix = "./filter"
-        return prefix+Agent.getName()
+        return Agent.getName()
 
 
 

@@ -209,7 +209,7 @@ gradualIncrease = hostClass.GradualIncrease
 
 
 # experiment = experiment.Experiment(save_attack_path, test, debug, save_attack, SaveAttackEnum, conAttack, NetworkSimpleStandard, sarsaCenMalias)
-experiment = experiment.Experiment(conAttack, GeneralSettings, NetworkFourThrottle, sarsaDecMalias)
+experiment = experiment.Experiment(conAttack, GeneralSettings, NetworkFourThrottle, ddqnCenSettings, "")
 
 
 
