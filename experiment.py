@@ -231,10 +231,10 @@ class Experiment:
                     
                     # if step 1 or final step we want to measure how accurate our system is
                     # to minimise effect on our network we make a prediction then replay the last prior action to undo effect
-                    if step == 1:
-                        temp_a = agent.predict(net.get_state(), total_steps, 0)
-                        temp_r = net.virtual_action(temp_a, a, total_steps)
-                        initial_reward_file.write(str(ep_num) + "," + str(total_steps) + "," + str(temp_r) + "," + str(step) + "," + str(0) + "\n")   
+                    # if step == 1:
+                    #     temp_a = agent.predict(net.get_state(), total_steps, 0)
+                    #     temp_r = net.virtual_action(temp_a, a, total_steps)
+                    #     initial_reward_file.write(str(ep_num) + "," + str(total_steps) + "," + str(temp_r) + "," + str(step) + "," + str(0) + "\n")   
                             
                     last_action = a 
                     
@@ -256,13 +256,13 @@ class Experiment:
                                 loss.append(l)
 
                 # record final prediciton with exploraiton at 0
-                if e>0:
-                    temp_a = agent.predict(net.get_state(), total_steps, 0)
-                    net.step(a, step) # take the action, update the network
-                    last_reward = net.calculate_reward()
-                else:
-                    last_reward = r
-                final_reward_file.write(str(ep_num) + "," + str(total_steps) + "," + str(last_reward) + "," + str(step) + "," + str(0) + "\n")   
+                # if e>0:
+                #     temp_a = agent.predict(net.get_state(), total_steps, 0)
+                #     net.step(a, step) # take the action, update the network
+                #     last_reward = net.calculate_reward()
+                # else:
+                #     last_reward = r
+                # final_reward_file.write(str(ep_num) + "," + str(total_steps) + "," + str(last_reward) + "," + str(step) + "," + str(0) + "\n")   
 
 
 
