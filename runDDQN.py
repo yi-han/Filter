@@ -42,7 +42,7 @@ gradualIncrease = hostClass.GradualIncrease
 
 
 # experiment = experiment.Experiment(save_attack_path, test, debug, save_attack, SaveAttackEnum, conAttack, NetworkSimpleStandard, sarsaCenMalias)
-experiment = experiment.Experiment(conAttack, GeneralSettings, NetworkMalialisSmall, sarsaDecMaliasNoPT, "standard")
+experiment = experiment.Experiment(conAttack, GeneralSettings, NetworkMalialisSmall, ddqnCenSettings, "standard")
 
 
 start_num = int(sys.argv[1])

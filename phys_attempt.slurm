@@ -11,7 +11,6 @@ module load Python/3.5.2-goolf-2015a
 
 
 # Launch multiple process python code
-
 echo "Starting physical throttle"
 time mpiexec -n 1 python3 helloWorld.py
 

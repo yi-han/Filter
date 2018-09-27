@@ -1,27 +1,28 @@
 #!/bin/bash
-rsync -avz -e 'ssh' \
---include=*/ \
---include='**/*.py' \
---include='**/*.slurm' \
---include='**/*.txt' \
---include='**/*.sh' \
-network \
-agent \
-experiment.py \
-runDDQN.py\
-runSARSA.py\
-networkSettings.py\
-topologies \
-exp_gpgpu_standard.slurm \
-exp_cloud.slurm \
-phys_attempt.slurm \
-helloWorld.py \
-slurms_cloud_standard.sh\
-slurms_gpgpu_standard.sh\
---exclude='*' \
-jpattison@spartan.hpc.unimelb.edu.au:/data/projects/punim0636 #punim0621
-#jpattison@spartan.hpc.unimelb.edu.au:/data/projects/punim0636  punim0621
-
+for dest in punim0621 punim0636; do 
+	rsync -avz -e 'ssh' \
+	--include=*/ \
+	--include='**/*.py' \
+	--include='**/*.slurm' \
+	--include='**/*.txt' \
+	--include='**/*.sh' \
+	network \
+	agent \
+	experiment.py \
+	runDDQN.py \
+	runSARSA.py \
+	networkSettings.py \
+	topologies \
+	exp_gpgpu_standard.slurm \
+	exp_cloud.slurm \
+	phys_attempt.slurm \
+	helloWorld.py \
+	slurms_cloud_standard.sh \
+	slurms_gpgpu_standard.sh \
+	--exclude='*' \
+	jpattison@spartan.hpc.unimelb.edu.au:/data/projects/$dest #punim0621
+	#jpattison@spartan.hpc.unimelb.edu.au:/data/projects/punim0636  punim0621
+done
 
 # jpattison@spartan.hpc.unimelb.edu.au:/home/jpattison/Filter
 
