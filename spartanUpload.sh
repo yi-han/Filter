@@ -7,17 +7,21 @@ rsync -avz -e 'ssh' \
 --include='**/*.sh' \
 network \
 agent \
-run_slups.sh \
 experiment.py \
-settings.py \
-run_multi_core.py \
+runDDQN.py\
+runSARSA.py\
+networkSettings.py\
 topologies \
-exp_one_node_one_core.slurm \
-exp_two_node_one_core.slurm \
+exp_gpgpu_standard.slurm \
+exp_cloud.slurm \
 phys_attempt.slurm \
 helloWorld.py \
+slurms_cloud_standard.sh\
+slurms_gpgpu_standard.sh\
 --exclude='*' \
-jpattison@spartan.hpc.unimelb.edu.au:/home/jpattison/Filter
+jpattison@spartan.hpc.unimelb.edu.au:/data/projects/punim0636 #punim0621
+#jpattison@spartan.hpc.unimelb.edu.au:/data/projects/punim0636  punim0621
+
 
 # jpattison@spartan.hpc.unimelb.edu.au:/home/jpattison/Filter
 
