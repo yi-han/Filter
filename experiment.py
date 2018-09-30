@@ -166,10 +166,8 @@ class Experiment:
             run_mode = "train"
 
         # determine reward for a prediction at start of episode, we choose the second step as first step is random
-        initial_reward_file = open("{0}/init-reward-{1}-{2}-{3}.csv".format(path,run_mode, self.adversary_class.getName(), prefix),"w")
         reward_file = open("{0}/reward-{1}-{2}-{3}.csv".format(path,run_mode, self.adversary_class.getName(), prefix),"w")
         # Similar to init. Different from reward_file as this is if exploration is 0. Measures how accurate it is at the moment.
-        final_reward_file = open("{0}/final-reward-{1}-{2}-{3}.csv".format(path,run_mode, self.adversary_class.getName(), prefix),"w")
         
         loss_file = open("{0}/loss-{1}-{2}-{3}.csv".format(path,run_mode, self.adversary_class.getName(), prefix) ,"w")
         packet_served_file = open("{0}/packet_served-{1}-{2}-{3}.csv".format(path,run_mode, self.adversary_class.getName(), prefix),"w")
@@ -178,8 +176,6 @@ class Experiment:
 
         
         reward_file.write("Episode,StepsSoFar,TotalReward,LastReward,LengthEpisode,e\n")
-        initial_reward_file.write("Episode,StepsSoFar,LastReward,LengthEpisode,e\n")
-        final_reward_file.write("Episode,StepsSoFar,LastReward,LengthEpisode,e\n")
 
         packet_served_file.write("Episode,PacketsReceived,PacketsServed,PercentageReceived,ServerFailures\n")
 
@@ -293,8 +289,6 @@ class Experiment:
 
         reward_file.close()
         loss_file.close()
-        initial_reward_file.close()
-        final_reward_file.close()
 
         print("{0} is:".format(name))
         print("Percent of succesful episodes: " + str(100 - fail*100/total_steps) + "%")

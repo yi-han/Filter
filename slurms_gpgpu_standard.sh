@@ -1,7 +1,14 @@
-sbatch exp_gpgpu.slurm
-sed 's/0 5/5 5/g' exp_gpgpu.slurm > output.slurm
+sbatch exp_gpgpu_single.slurm
+sleep 5
+sed 's/0 3/3 3/g' exp_gpgpu_single.slurm > output.slurm
 sbatch output.slurm
-sed 's/0 5/10 5/g' exp_gpgpu.slurm > output.slurm
+sed 's/0 3/6 3/g' exp_gpgpu_single.slurm > output.slurm
 sbatch output.slurm
-sed 's/0 5/15 5/g' exp_gpgpu.slurm > output.slurm
+sed 's/0 3/9 3/g' exp_gpgpu_single.slurm > output.slurm
+sbatch output.slurm
+sed 's/0 3/12 3/g' exp_gpgpu_single.slurm > output.slurm
+sbatch output.slurm
+sed 's/0 3/15 3/g' exp_gpgpu_single.slurm > output.slurm
+sbatch output.slurm
+sed 's/0 3/18 2/g' exp_gpgpu_single.slurm > output.slurm
 sbatch output.slurm

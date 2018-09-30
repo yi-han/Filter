@@ -104,3 +104,5 @@ class GeneralSettings(object):
     #load_model = False
     save_attack = SaveAttackEnum.neither
     save_model = SaveModelEnum.neither
+
+

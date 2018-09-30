@@ -69,7 +69,21 @@ class sarsaDecMaliasWithPT(object):
     stepDrop = (startE - endE)/annealing_steps
     agent = sarDec.Agent
 
+class sarsaDecPTLarge(object):
+    max_epLength = 30 # or 60 if test
+    y = 0    
+    tau = 0.001 #Rate to update target network toward primary network. 
+    update_freq = None #How often to perform a training step.
+    batch_size = None #How many experiences to use for each training step.
+    num_episodes = 100001 #200001#    
+    pre_train_steps = 20000 * max_epLength #40000 * max_epLength #
+    annealing_steps = 60000 * max_epLength  #120000 * max_epLength  #
 
+
+    startE = 0.4 #0.4
+    endE = 0.0
+    stepDrop = (startE - endE)/annealing_steps
+    agent = sarDec.Agent    
 
 
 # The class of the adversary to implement
@@ -84,7 +98,7 @@ gradualIncrease = hostClass.GradualIncrease
 
 
 # experiment = experiment.Experiment(save_attack_path, test, debug, save_attack, SaveAttackEnum, conAttack, NetworkSimpleStandard, sarsaCenMalias)
-experiment = experiment.Experiment(conAttack, GeneralSettings, NetworkMalialisSmall, sarsaDecMaliasNoPT, "standard")
+experiment = experiment.Experiment(conAttack, GeneralSettings, NetworkSimpleBasic, sarsaDecPTLarge, "LargeTile1")
 
 
 start_num = int(sys.argv[1])

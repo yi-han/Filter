@@ -13,7 +13,7 @@ for dest in punim0621 punim0636; do
 	runSARSA.py \
 	networkSettings.py \
 	topologies \
-	exp_gpgpu_standard.slurm \
+	exp_gpgpu_single.slurm \
 	exp_cloud.slurm \
 	phys_attempt.slurm \
 	helloWorld.py \

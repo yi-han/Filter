@@ -15,5 +15,5 @@ reward_types = ["reward"]#, "init-reward", "final-reward"]
 # reward_types = ["reward"]
 
 for reward_type in reward_types:
-    distributions.distributions(directory, amount, 75000)
+    distributions.distributions(directory, amount, 190000)
     distributions.reward_graph(directory, reward_type, amount, name)

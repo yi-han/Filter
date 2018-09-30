@@ -15,7 +15,7 @@ module load Tensorflow/1.8.0-intel-2017.u2-GCC-6.2.0-CUDA9-Python-3.5.2-GPU
 # Launch multiple process python code
 
 echo "Starting four throttle"
-time mpiexec -n 1 python3 runDDQN.py 0 1
+time mpiexec -n 1 python3 runDDQN.py 0 3
 
 echo "done"
 

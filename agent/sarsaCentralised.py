@@ -134,7 +134,7 @@ def tileState(state):
     # a hack job at tileCoding. Based on 0 research or effort
     newState = []
     for el in state:
-        newState.append(round(el, 0))
+        newState.append(round(el, 2))
     return tuple(newState)
 
 
