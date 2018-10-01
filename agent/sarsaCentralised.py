@@ -25,6 +25,8 @@ class Agent(aBase.Agent):
         self.ai = SarsaAI(
             actions=range(N_action), alpha=alph, gamma=gam)
         self.N_action = N_action
+        self.N_state = N_state
+        print("I have {0} actions".format(self.N_action))
         self.score = 0
         self.test = test
 
@@ -39,6 +41,8 @@ class Agent(aBase.Agent):
         print("__exit__ sarsaCentralised")
         return
 
+    def reset(self):
+        self.ai.reset()
 
     def predict(self, state, total_steps, e):
         randomChoice = super().isRandomGuess(total_steps, e)
@@ -124,8 +128,11 @@ class Agent(aBase.Agent):
         print(self.ai.getData())
 
 
-    def getName():
+    def getName(self=None):
         return "SarsaCentralisedAgent"
+    
+    # def getName(self):
+    #     return Agent.getName()
 
     def getPath(self):
         return Agent.getName()

@@ -14,22 +14,24 @@ def create_generic_dec_sarsa(gs, general_s, ns, sub_agent, group_size):
     gs = generic_settings, ns = network_settings
 
     """
-    agents_not_allocated = ns.N_state
+    throttlers_not_allocated = ns.N_state
     num_teams = math.ceil(ns.N_state/group_size)
 
     sub_agent_list = []
 
     test = (general_s.save_model is general_s.SaveModelEnum.test)
     print(sub_agent)
-    while agents_not_allocated > 0:
-        agent_to_allocate = min(agents_not_allocated, group_size)
-        sub_agent_list.append(sub_agent(ns.N_action**agent_to_allocate, gs.pre_train_steps,
-            ns.action_per_agent, agent_to_allocate, gs.tau, gs.y, general_s.debug,
+    while throttlers_not_allocated > 0:
+        print("currently {0} throttlers_not_allocated".format(throttlers_not_allocated))
+        agent_to_allocate = min(throttlers_not_allocated, group_size)
+        sub_agent_list.append(sub_agent(ns.action_per_throttler**agent_to_allocate, gs.pre_train_steps,
+            ns.action_per_throttler, agent_to_allocate, gs.tau, gs.y, general_s.debug,
             test))
-        agents_not_allocated -= agent_to_allocate
+        throttlers_not_allocated -= agent_to_allocate
 
+    #print("\nTest {0} \n".format(sub_agent_list[0].N_action))
     master = genericDecentralised.AgentOfAgents(
-        ns.N_action, gs.pre_train_steps, ns.action_per_agent, ns.N_state,
+        ns.N_action, gs.pre_train_steps, ns.action_per_throttler, ns.N_state,
             sub_agent_list, gs.tau, gs.y, general_s.debug, 
             test
         )
@@ -140,12 +142,12 @@ gradualIncrease = hostClass.GradualIncrease
 
 
 
-sasGeneric = create_generic_dec_sarsa(SarsaCenGeneric, GeneralSettings, NetworkSimpleBasic, sarCen.Agent, 3)
+sarsaGeneric = create_generic_dec_sarsa(SarsaCenGeneric, GeneralSettings, NetworkSimpleBasic, sarCen.Agent, 1)
 
 # experiment = experiment.Experiment(save_attack_path, test, debug, save_attack, SaveAttackEnum, conAttack, NetworkSimpleStandard, SarsaCenMalias)
 
-"""
-experiment = experiment.Experiment(conAttack, GeneralSettings, NetworkSimpleBasic, SarsaDecPTLarge, "LargeTile1")
+
+experiment = experiment.Experiment(conAttack, GeneralSettings, NetworkSimpleBasic, SarsaCenGeneric, "LargeTile1")
 
 
 start_num = int(sys.argv[1])
@@ -153,6 +155,9 @@ length_core= int(sys.argv[2])
 
 for i in range(length_core):
     print("Im doing it for {0}".format(start_num+i))
-    experiment.run(start_num+i)
+    experiment.run(start_num+i, sarsaGeneric)
 
-"""
+
+
+
+

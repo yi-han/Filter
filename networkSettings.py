@@ -12,7 +12,7 @@ class NetworkSimpleBasic(object):
     N_state = 2 #The number of state, i.e., the number of filters
     N_action = 100 #In the current implementation, each filter has 10 possible actions, so altogether there are 10^N_state actions, 
                     #e.g., action 123 means the drop rates at the three filters are set to 0.1, 0.2 and 0.3, respectively
-    action_per_agent = 10 # each filter can do 10 actions
+    action_per_throttler = 10 # each filter can do 10 actions
     N_switch = 3 # number of routers in the system
     host_sources = [1, 1, 2] #ID of the switch that the host is connected to  
 
@@ -34,7 +34,7 @@ class NetworkMalialisSmall(object):
     N_state = 3 #The number of state, i.e., the number of filters
     N_action = 1000 #In the current implementation, each filter has 10 possible actions, so altogether there are 10^N_state actions, 
                     #e.g., action 123 means the drop rates at the three filters are set to 0.1, 0.2 and 0.3, respectively
-    action_per_agent = 10 # each filter can do 10 actions
+    action_per_throttler = 10 # each filter can do 10 actions
     N_switch = 13 # number of routers in the system
     host_sources = [5, 10, 12, 6, 9, 9] #ID of the switch that the host is connected to  
 
@@ -58,7 +58,7 @@ class NetworkFourThrottle(object):
     N_state = 4 #The number of state, i.e., the number of filters
     N_action = 10000 #In the current implementation, each filter has 10 possible actions, so altogether there are 10^N_state actions, 
                     #e.g., action 123 means the drop rates at the three filters are set to 0.1, 0.2 and 0.3, respectively
-    action_per_agent = 10 # each filter can do 10 actions
+    action_per_throttler = 10 # each filter can do 10 actions
     N_switch = 8 # number of routers in the system
     host_sources = [3, 3, 4, 4, 6, 6, 7, 7] #ID of the switch that the host is connected to  
 
@@ -79,7 +79,7 @@ class NetworkSingleTeamMalialisMedium(object):
     N_state = 6
     N_action = 1000000
 
-    action_per_agent = 10
+    action_per_throttler = 10
     N_switch = 10
     host_sources = [3, 3, 4, 4, 5, 5, 7, 7, 8, 8, 9, 9]
     servers = [0]

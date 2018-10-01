@@ -16,6 +16,7 @@ and shouldn't it be including both the last state and the prior state?
 1)I suspect that if e <1 but step < pretrainign, it might still be not working right
 14) I think sarsa (and tensorflow) files will collide in parrelel
 15) Name dependent on topology
+16) SaveModelEnum being caleled Load_model_enuM???
 #DONE
 
 1) Made SARSA centralised
@@ -62,7 +63,7 @@ class Experiment:
         self.twist = twist
 
 
-        assert(NetworkClass.action_per_agent**NetworkClass.N_state == NetworkClass.N_action)
+        assert(NetworkClass.action_per_throttler**NetworkClass.N_state == NetworkClass.N_action)
 
 
 
@@ -70,7 +71,7 @@ class Experiment:
     def run(self, prefix, preloaded_agent):
         N_action = self.network_settings.N_action
         N_state = self.network_settings.N_state
-        action_per_agent = self.network_settings.action_per_agent
+        action_per_throttler = self.network_settings.action_per_throttler
 
 
 
@@ -108,10 +109,11 @@ class Experiment:
             e = 0
             self.stepDrop = 0
 
-        if self.preloaded_agent:
-            agent = self.preloaded_agent
+        if preloaded_agent:
+            agent = preloaded_agent
+            agent.reset()
         else:
-            agent = self.agent_settings.agent(N_action, pre_train_steps, action_per_agent, N_state, tau, y, debug, test)
+            agent = self.agent_settings.agent(N_action, pre_train_steps, action_per_throttler, N_state, tau, y, debug, test)
 
         reward_overload = -1
 
@@ -123,7 +125,7 @@ class Experiment:
         print("\n Prefix {0}".format(prefix))
 
         # The network
-        # net = network(N_switch, N_action, N_state, action_per_agent, hosts_sources, servers, filters, reward_overload, 
+        # net = network(N_switch, N_action, N_state, action_per_throttler, hosts_sources, servers, filters, reward_overload, 
         #           rate_legal_low, rate_legal_high, rate_attack_low, rate_attack_high, 
         #           legal_probability, upper_boundary, adversary, max_epLength, topologyFile, SaveAttackEnum, save_attack, save_attack_path)
 
@@ -149,8 +151,11 @@ class Experiment:
         # else:
         #     logging.basicConfig(stream=sys.stderr, level=logging.NOTSET)
 
-
-        name = self.agent_settings.agent.getName() # The name of the Agent used
+        if preloaded_agent:
+            name = agent.getName()
+        else:
+            name = self.agent_settings.agent.getName() # The name of the Agent used
+        
         path =  self.network_settings.name + agent.getPath() + self.twist# The path to save model to
         print("Path is {0}".format(path))
         #path = "/data/projects/punim0621" # for slug

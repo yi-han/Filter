@@ -15,6 +15,7 @@ class SarsaAI:
         self.gamma = gamma
         self.actions = actions
 
+
     def getQ(self, state, action):
         # used for associating with reward of new state/action. 
         # Not useful in initial implementation 
@@ -27,6 +28,10 @@ class SarsaAI:
             self.q[(state, action)] = reward 
         else:
             self.q[(state, action)] = oldv + self.alpha * (value - oldv)
+
+    def reset(self):
+        self.q = {}
+
 
     def chooseAction(self, state):
         # as epsilon dealt with by main we going to ignore epsilon logic for now

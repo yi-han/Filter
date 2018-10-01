@@ -11,6 +11,7 @@ class Agent(aBase.Agent):
 
         tf.reset_default_graph() # note remove for the decentralised one
 
+        self.N_state = N_state
         self.mainQN = Qnetwork(N_state, N_action)
         self.targetQN = Qnetwork(N_state, N_action)
         self.init = tf.global_variables_initializer()

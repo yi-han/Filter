@@ -151,7 +151,7 @@ class link(object):
             self.id, self.source_node, self.source_port, self.destination_node, self.destination_port, self.bandwidth))
 
 class network(object):
-    # def __init__(self, N_switch, N_action, N_state, action_per_agent, host_sources, servers, filter_list, reward_overload, 
+    # def __init__(self, N_switch, N_action, N_state, action_per_throttler, host_sources, servers, filter_list, reward_overload, 
     #           rate_legal_low, rate_legal_high, rate_attack_low, rate_attack_high, 
     #           legal_probability, upper_boundary, hostClass, max_epLength, f_link, SaveAttackEnum,
     #           save_attack, save_attack_path):
@@ -180,7 +180,7 @@ class network(object):
         self.N_server = len(self.servers)
         self.N_host = len(self.host_sources)
         self.N_filter = len(self.filter_list)
-        self.action_per_agent = network_settings.action_per_agent # actions each host can take
+        self.action_per_throttler = network_settings.action_per_throttler # actions each host can take
         
         self.reward_overload = reward_overload
         
@@ -233,7 +233,7 @@ class network(object):
             self.switches[i].reset()
             is_filter = i in self.filter_list
             if is_filter:
-                self.switches[i].setThrottle(np.random.randint(0,self.action_per_agent)/self.action_per_agent)
+                self.switches[i].setThrottle(np.random.randint(0,self.action_per_throttler)/self.action_per_throttler)
             #self.switches.append(Switch(i, is_filter))
         
 
@@ -328,12 +328,12 @@ class network(object):
 
         for i in range(self.N_state):
             j = self.N_state - (i + 1) # start at one below host, end at 0
-            divider = self.action_per_agent**j
+            divider = self.action_per_throttler**j
 
             switch_id = self.filter_list[i]
             drop_prob = int(action / divider)
             action = action - (drop_prob*divider)
-            drop_prob /= self.action_per_agent # to turn into a percentage
+            drop_prob /= self.action_per_throttler # to turn into a percentage
             self.switches[switch_id].setThrottle(drop_prob)
 
         assert(action==0) 

@@ -1,4 +1,4 @@
-#from abc import ABCMeta, abstractmethod
+from abc import ABCMeta, abstractmethod
 from numpy import random as random
 
 """
@@ -16,17 +16,17 @@ class Agent():
         self.debug = debug
         self.test= test
 
-    # @abstractmethod
-    # def reset(self):
-    #     pass
+    @abstractmethod
+    def reset(self):
+        pass
 
     # Given state, generate an action
-    # @abstractmethod
+    @abstractmethod
     def predict(self, state, total_steps, e):
         pass
 
     # provided the last state and the current state and prior actoin, update the learning agent
-    # @abstractmethod
+    @abstractmethod
     def update(self, last_state, last_action, current_state,d, r):
         pass
 
