@@ -49,7 +49,7 @@ class AgentOfAgents(aBase.Agent):
         # combination
         action = 0
 
-        for i in range(len(self.agents)):  #range(len(state)):
+        for i in range(len(self.agents)):
             # number of states is number of agents
             
             # print(self.agents[i])
@@ -65,15 +65,24 @@ class AgentOfAgents(aBase.Agent):
 
     def update(self, last_state, action, current_state, is_done, reward, next_action=None):
         # provide the update function to each individual state
+
         actions = AgentOfAgents.actionToActions(action, self.num_agents, self.action_per_throttler)
-        for i in range(len(last_state)):
-            self.agents[i].update([last_state[i]], actions[i], [current_state[i]], is_done, reward)
+        for i in range(len(self.agents)):
+            agent = self.agents[i]
+            N_state = agent.N_state
+            agent.update(last_state[(i*N_state):((i+1)*N_state)], 
+                actions[i], current_state[(i*N_state):((i+1)*N_state)], is_done, reward)
         self.score += reward
 
     def actionReplay(self, current_state, batch_size):
+        # print(batch_size)
+        # print(current_state)
         l = 0
-        for i in range(len(current_state)):
-            l+= self.agents[i].actionReplay([current_state[i]], batch_size)
+        for i in range(len(self.agents)):
+            agent = self.agents[i]
+            N_state = agent.N_state
+            # print("feed it {0} state".format(current_state[(i*N_state):((i+1)*N_state)]))
+            l+= agent.actionReplay(current_state[(i*N_state):((i+1)*N_state)], batch_size)
         return l
 
     def loadModel(self, load_path):

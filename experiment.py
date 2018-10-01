@@ -17,6 +17,8 @@ and shouldn't it be including both the last state and the prior state?
 14) I think sarsa (and tensorflow) files will collide in parrelel
 15) Name dependent on topology
 16) SaveModelEnum being caleled Load_model_enuM???
+17) Don't thing generic update (actionTo...) is compatible with differnt size agents
+18) Why is actionReplay only after pretraining???
 #DONE
 
 1) Made SARSA centralised
@@ -61,8 +63,9 @@ class Experiment:
         self.agent_settings = AgentSettings
 
         self.twist = twist
-
-
+        print(NetworkClass.N_state)
+        print(NetworkClass.action_per_throttler**NetworkClass.N_state)
+        print(NetworkClass.N_action)
         assert(NetworkClass.action_per_throttler**NetworkClass.N_state == NetworkClass.N_action)
 
 
@@ -244,6 +247,8 @@ class Experiment:
                     total_steps += 1
 
                     if total_steps > pre_train_steps:
+                        # print("step: {0} - action: {1} - reward {2}".format(step,last_action,r))
+
                         #print("e={0} startE = {1}".format(e, startE))
                         if e > startE:
                             e = startE

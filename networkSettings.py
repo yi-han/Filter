@@ -94,6 +94,27 @@ class NetworkSingleTeamMalialisMedium(object):
     upper_boundary = 24#12.5
     iterations_between_action = 5 
 
+class NetworkFourTeamThreeAgent(object):
+    name = "four_Team_three_agent"
+    N_state = 12
+    N_action = int(1e12)
+
+    action_per_throttler = 10
+    N_switch = 19
+    host_sources = [3, 3, 3, 4, 4, 4, 5, 5, 5, 7, 7, 7, 8, 8, 8, 9, 9, 9, 12, 12, 12, 13, 13, 13,
+    14, 14, 14, 16, 16, 16, 17, 17, 17, 18, 18, 18]
+    servers = [0]
+    filters = [3, 4, 5, 7, 8, 9, 12, 13, 14, 16, 17, 18]
+    
+    topologyFile = 'topologies/four_team_three_agent.txt'
+    rate_legal_low = 0.05 
+    rate_legal_high = 1 
+    rate_attack_low = 2.5 
+    rate_attack_high = 6
+    legal_probability = 0.6 # probability that is a good guys
+    upper_boundary = 62#12.5
+    iterations_between_action = 5     
+
 
 class GeneralSettings(object):
     SaveAttackEnum = Enum('SaveAttack', 'neither save load')

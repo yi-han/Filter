@@ -4,38 +4,11 @@ import network.hosts as hostClass
 
 import agent.sarsaCentralised as sarCen
 import agent.sarsaDecentralised as sarDec# import agent.ddqnDecentralised as ddDec
-import agent.genericDecentralised as genericDecentralised
 from networkSettings import *
 assert(len(sys.argv)==3)
-import math
+import generic_run
 
-def create_generic_dec_sarsa(gs, general_s, ns, sub_agent, group_size):
-    """
-    gs = generic_settings, ns = network_settings
 
-    """
-    throttlers_not_allocated = ns.N_state
-    num_teams = math.ceil(ns.N_state/group_size)
-
-    sub_agent_list = []
-
-    test = (general_s.save_model is general_s.SaveModelEnum.test)
-    print(sub_agent)
-    while throttlers_not_allocated > 0:
-        print("currently {0} throttlers_not_allocated".format(throttlers_not_allocated))
-        agent_to_allocate = min(throttlers_not_allocated, group_size)
-        sub_agent_list.append(sub_agent(ns.action_per_throttler**agent_to_allocate, gs.pre_train_steps,
-            ns.action_per_throttler, agent_to_allocate, gs.tau, gs.y, general_s.debug,
-            test))
-        throttlers_not_allocated -= agent_to_allocate
-
-    #print("\nTest {0} \n".format(sub_agent_list[0].N_action))
-    master = genericDecentralised.AgentOfAgents(
-        ns.N_action, gs.pre_train_steps, ns.action_per_throttler, ns.N_state,
-            sub_agent_list, gs.tau, gs.y, general_s.debug, 
-            test
-        )
-    return master
 
 class SarsaCenMalias(object):
     
@@ -125,6 +98,8 @@ class SarsaDecGeneric(object):
     endE = 0.0
     stepDrop = (startE - endE)/annealing_steps
     agent = None
+    sub_agent = sarCen.Agent
+    group_size = 1 # number of filters each agent controls
 
 # The class of the adversary to implement
 conAttack = hostClass.ConstantAttack
@@ -135,11 +110,11 @@ gradualIncrease = hostClass.GradualIncrease
 
 
 
-sarsaGeneric = create_generic_dec_sarsa(SarsaDecGeneric, GeneralSettings, NetworkSimpleBasic, sarCen.Agent, 1)
+sarsaGeneric = generic_run.create_generic_dec(SarsaDecGeneric, GeneralSettings, NetworkFourTeamThreeAgent)
 # sarsaGeneric = None
 
-experiment = experiment.Experiment(conAttack, GeneralSettings, NetworkSimpleBasic, SarsaDecGeneric, "Tile1")
-# experiment = experiment.Experiment(conAttack, GeneralSettings, NetworkSimpleBasic, SarsaDecMaliasNoPT, "Tile1")
+# experiment = experiment.Experiment(conAttack, GeneralSettings, NetworkFourTeamThreeAgent, SarsaDecGeneric, "NoPTTile1")
+experiment = experiment.Experiment(conAttack, GeneralSettings, NetworkFourTeamThreeAgent, SarsaDecMaliasNoPT, "NoPTTile1")
 
 
 start_num = int(sys.argv[1])

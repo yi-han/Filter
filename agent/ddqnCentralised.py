@@ -25,7 +25,7 @@ class Agent(aBase.Agent):
         self.sess = tf.Session()
     
     def __enter__(self):
-        print("about to run")
+        print("sess init ddqnCentralised")
         #self.sess = tf.Session()
         self.sess.run(self.init)
 
@@ -92,8 +92,8 @@ class Agent(aBase.Agent):
         self.saver.save(self.sess, load_path+'/model-'+str(iteration)+'.ckpt')
 
 
-    def getName():
+    def getName(self):
         return "CentralisedDDQN"
 
     def getPath(self):
-        return Agent.getName()
+        return self.getName()

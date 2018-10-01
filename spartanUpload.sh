@@ -12,6 +12,7 @@ for dest in punim0621 punim0636; do
 	runDDQN.py \
 	runSARSA.py \
 	networkSettings.py \
+	generic_run.py \
 	topologies \
 	exp_gpgpu_single.slurm \
 	exp_cloud.slurm \
