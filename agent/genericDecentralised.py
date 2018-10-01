@@ -60,7 +60,7 @@ class AgentOfAgents(aBase.Agent):
 
 
             agentAction = agent.predict(agentState, total_steps, e)
-            action = action*self.N_action+agentAction
+            action = action*agent.N_action+agentAction
         return action
 
     def update(self, last_state, action, current_state, is_done, reward, next_action=None):
@@ -90,7 +90,7 @@ class AgentOfAgents(aBase.Agent):
 
     def getName(self):
         #print(self.agents)
-        return ("Dec-"+self.agents[0].getName())
+        return ("GenericDec-"+self.agents[0].getName())
 
     def getPath(self):
         return AgentOfAgents.getName(self)

@@ -26,7 +26,6 @@ class Agent(aBase.Agent):
             actions=range(N_action), alpha=alph, gamma=gam)
         self.N_action = N_action
         self.N_state = N_state
-        print("I have {0} actions".format(self.N_action))
         self.score = 0
         self.test = test
 

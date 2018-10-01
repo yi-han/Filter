@@ -65,9 +65,6 @@ class SarsaDecMaliasNoPT(object):
     tau = 0.1
     update_freq = None
     batch_size = None
-    # num_episodes = 62501
-    # pre_train_steps = 0 * max_epLength
-    # annealing_steps = 50000 * max_epLength #1000*max_epLength #60000 * max_epLength 
     num_episodes = 62501#82501
     pre_train_steps = 0#2000 * max_epLength
     annealing_steps = 50000 * max_epLength #1000*max_epLength #60000 * max_epLength 
@@ -114,21 +111,17 @@ class SarsaDecPTLarge(object):
     agent = sarDec.Agent    
 
 
-class SarsaCenGeneric(object):
+class SarsaDecGeneric(object):
     max_epLength = 30 # or 60 if test
     y = 0
-    tau = 0.001
+    tau = 0.1
     update_freq = None
     batch_size = None
-    # num_episodes = 62501
-    # pre_train_steps = 0 * max_epLength
-    # annealing_steps = 50000 * max_epLength #1000*max_epLength #60000 * max_epLength 
-    num_episodes = 200001
-    pre_train_steps = 60000 * max_epLength
-    annealing_steps = 120001 * max_epLength #1000*max_epLength #60000 * max_epLength 
-    
+    num_episodes = 62501#82501
+    pre_train_steps = 0#2000 * max_epLength
+    annealing_steps = 50000 * max_epLength #1000*max_epLength #60000 * max_epLength 
 
-    startE = 1
+    startE = 0.4 #0.4
     endE = 0.0
     stepDrop = (startE - endE)/annealing_steps
     agent = None
@@ -142,12 +135,11 @@ gradualIncrease = hostClass.GradualIncrease
 
 
 
-sarsaGeneric = create_generic_dec_sarsa(SarsaCenGeneric, GeneralSettings, NetworkSimpleBasic, sarCen.Agent, 1)
+sarsaGeneric = create_generic_dec_sarsa(SarsaDecGeneric, GeneralSettings, NetworkSimpleBasic, sarCen.Agent, 1)
+# sarsaGeneric = None
 
-# experiment = experiment.Experiment(save_attack_path, test, debug, save_attack, SaveAttackEnum, conAttack, NetworkSimpleStandard, SarsaCenMalias)
-
-
-experiment = experiment.Experiment(conAttack, GeneralSettings, NetworkSimpleBasic, SarsaCenGeneric, "LargeTile1")
+experiment = experiment.Experiment(conAttack, GeneralSettings, NetworkSimpleBasic, SarsaDecGeneric, "Tile1")
+# experiment = experiment.Experiment(conAttack, GeneralSettings, NetworkSimpleBasic, SarsaDecMaliasNoPT, "Tile1")
 
 
 start_num = int(sys.argv[1])
@@ -156,6 +148,7 @@ length_core= int(sys.argv[2])
 for i in range(length_core):
     print("Im doing it for {0}".format(start_num+i))
     experiment.run(start_num+i, sarsaGeneric)
+
 
 
 

@@ -68,7 +68,7 @@ class Experiment:
 
 
 
-    def run(self, prefix, preloaded_agent):
+    def run(self, prefix, preloaded_agent=None):
         N_action = self.network_settings.N_action
         N_state = self.network_settings.N_state
         action_per_throttler = self.network_settings.action_per_throttler
@@ -227,7 +227,7 @@ class Experiment:
                         #     print("\n")
                         #     print(net.last_state)
                         #     print(agent.get_action_choices(net.last_state))
-                        #     print("step: {0} - action: {1} - reward {2}".format(step,last_action,r))
+                        # print("step: {0} - action: {1} - reward {2}".format(step,last_action,r))
                         if r < 0:
                             fail += 1
                             fail_seg += 1
