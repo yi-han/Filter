@@ -43,6 +43,7 @@ class ddqnCenDoubleSettings(object):
     stepDrop = (startE - endE)/annealing_steps
     agent = ddCen.Agent
 
+ 
 
 # The class of the adversary to implement
 conAttack = hostClass.ConstantAttack

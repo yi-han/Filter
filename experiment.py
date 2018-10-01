@@ -67,7 +67,7 @@ class Experiment:
 
 
 
-    def run(self, prefix):
+    def run(self, prefix, preloaded_agent):
         N_action = self.network_settings.N_action
         N_state = self.network_settings.N_state
         action_per_agent = self.network_settings.action_per_agent
@@ -108,8 +108,10 @@ class Experiment:
             e = 0
             self.stepDrop = 0
 
-
-        agent = self.agent_settings.agent(N_action, pre_train_steps, action_per_agent, N_state, tau, y, debug, test)
+        if self.preloaded_agent:
+            agent = self.preloaded_agent
+        else:
+            agent = self.agent_settings.agent(N_action, pre_train_steps, action_per_agent, N_state, tau, y, debug, test)
 
         reward_overload = -1
 
