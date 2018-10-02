@@ -6,6 +6,9 @@ Common settings for networks
 ### Network Settings. Put this in a class/ object?
 
 from enum import Enum
+import math
+import agent.genericDecentralised as genericDecentralised
+import agent.sarsaCentralised as sarCen
 
 class NetworkSimpleBasic(object):
     name = "simple_basic"
@@ -116,14 +119,137 @@ class NetworkFourTeamThreeAgent(object):
     iterations_between_action = 5     
 
 
-class GeneralSettings(object):
-    SaveAttackEnum = Enum('SaveAttack', 'neither save load')
-    SaveModelEnum = Enum('SaveModel', 'neither save load test')
-    save_attack_path = "./attack.pkl" # note you shouldn't be repeating this
-    #test = False # handled by saveModel
-    debug = False
-    #load_model = False
-    save_attack = SaveAttackEnum.neither
-    save_model = SaveModelEnum.neither
+
+
+def create_generic_dec(gs, general_s, ns):
+    """
+    gs = generic_settings, ns = network_settings
+
+    """
+    throttlers_not_allocated = ns.N_state
+    group_size = gs.group_size
+    sub_agent = gs.sub_agent
+    num_teams = math.ceil(ns.N_state/group_size)
+
+    sub_agent_list = []
+
+    test = (general_s.save_model is general_s.SaveModelEnum.test)
+    print(sub_agent)
+    while throttlers_not_allocated > 0:
+        print("currently {0} throttlers_not_allocated".format(throttlers_not_allocated))
+        agent_to_allocate = min(throttlers_not_allocated, group_size)
+        sub_agent_list.append(sub_agent(ns.action_per_throttler**agent_to_allocate, gs.pre_train_steps,
+            ns.action_per_throttler, agent_to_allocate, gs.tau, gs.y, general_s.debug,
+            test))
+        throttlers_not_allocated -= agent_to_allocate
+
+    #print("\nTest {0} \n".format(sub_agent_list[0].N_action))
+    master = genericDecentralised.AgentOfAgents(
+        ns.N_action, gs.pre_train_steps, ns.action_per_throttler, ns.N_state,
+            sub_agent_list, gs.tau, gs.y, general_s.debug, 
+            test
+        )
+    return master
+
+
+class SarsaCenMalias(object):
+    
+    max_epLength = 30 # or 60 if test
+    y = 0
+    tau = 0.001
+    update_freq = None
+    batch_size = None
+    # num_episodes = 62501
+    # pre_train_steps = 0 * max_epLength
+    # annealing_steps = 50000 * max_epLength #1000*max_epLength #60000 * max_epLength 
+    num_episodes = 200001
+    pre_train_steps = 60000 * max_epLength
+    annealing_steps = 120001 * max_epLength #1000*max_epLength #60000 * max_epLength 
+    
+
+    startE = 1
+    endE = 0.0
+    stepDrop = (startE - endE)/annealing_steps
+    agent = sarCen.Agent
+
+
+class SarsaDecMaliasNoPT(object):
+    
+    max_epLength = 30 # or 60 if test
+    y = 0
+    tau = 0.1
+    update_freq = None
+    batch_size = None
+    num_episodes = 62501#82501
+    pre_train_steps = 0#2000 * max_epLength
+    annealing_steps = 50000 * max_epLength #1000*max_epLength #60000 * max_epLength 
+    
+
+    startE = 0.4 #0.4
+    endE = 0.0
+    stepDrop = (startE - endE)/annealing_steps
+    agent = None
+    sub_agent = sarCen.Agent
+    group_size = 1 # number of filters each agent controls
+
+class SarsaDecMaliasNoPTLarge(object):
+    
+    max_epLength = 30 # or 60 if test
+    y = 0
+    tau = 0.1
+    update_freq = None
+    batch_size = None
+    num_episodes = 120001#82501
+    pre_train_steps = 0#2000 * max_epLength
+    annealing_steps = 50000 * max_epLength #1000*max_epLength #60000 * max_epLength 
+    
+
+    startE = 0.4 #0.4
+    endE = 0.0
+    stepDrop = (startE - endE)/annealing_steps
+    agent = None
+    sub_agent = sarCen.Agent
+    group_size = 1 # number of filters each agent controls
+
+
+class SarsaDecMaliasWithPT(object):
+    max_epLength = 30 # or 60 if test
+    y = 0
+    tau = 0.1
+    update_freq = None
+    batch_size = None
+    # num_episodes = 62501
+    # pre_train_steps = 0 * max_epLength
+    # annealing_steps = 50000 * max_epLength #1000*max_epLength #60000 * max_epLength 
+    num_episodes = 82501#82501
+    pre_train_steps = 2000#2000 * max_epLength
+    annealing_steps = 50000 * max_epLength #1000*max_epLength #60000 * max_epLength 
+    
+
+    startE = 0.4 #0.4
+    endE = 0.0
+    stepDrop = (startE - endE)/annealing_steps
+    agent = None
+    sub_agent = sarCen.Agent
+    group_size = 1 # number of filters each agent controls
+
+class SarsaDecPTLarge(object):
+    max_epLength = 30 # or 60 if test
+    y = 0    
+    tau = 0.001 #Rate to update target network toward primary network. 
+    update_freq = None #How often to perform a training step.
+    batch_size = None #How many experiences to use for each training step.
+    num_episodes = 100001 #200001#    
+    pre_train_steps = 20000 * max_epLength #40000 * max_epLength #
+    annealing_steps = 60000 * max_epLength  #120000 * max_epLength  #
+
+
+    startE = 0.4 #0.4
+    endE = 0.0
+    stepDrop = (startE - endE)/annealing_steps
+    agent = None
+    sub_agent = sarCen.Agent
+    group_size = 1 # number of filters each agent controls
+
 
 

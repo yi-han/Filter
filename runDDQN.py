@@ -72,10 +72,10 @@ largePulse = hostClass.LargePulse
 gradualIncrease = hostClass.GradualIncrease
 
 
-teamThreeAgent = generic_run.create_generic_dec(ddqnDoubleTeamTwo, GeneralSettings, NetworkFourThrottle)
+teamThreeAgent = generic_run.create_generic_dec(ddqnDoubleTeamTwo, GeneralSettings, NetworkFourTeamThreeAgent)
 # teamThreeAgent = None
 
-experiment = experiment.Experiment(conAttack, GeneralSettings, NetworkFourThrottle, ddqnDoubleTeamTwo, "double")
+experiment = experiment.Experiment(conAttack, GeneralSettings, NetworkFourTeamThreeAgent, ddqnDoubleTeamTwo, "double")
 # experiment = experiment.Experiment(conAttack, GeneralSettings, NetworkFourThrottle, ddqnCenDoubleSettings, "double")
 
 
