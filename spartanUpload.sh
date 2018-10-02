@@ -8,11 +8,11 @@ for dest in punim0621 punim0636; do
 	--include='**/*.sh' \
 	network \
 	agent \
+	attacks.py \ß
 	experiment.py \
 	runDDQN.py \
 	runSARSA.py \
-	networkSettings.py \
-	generic_run.py \
+	mapsAndSettings.py \
 	topologies \
 	exp_gpgpu_single.slurm \
 	exp_cloud.slurm \

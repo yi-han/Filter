@@ -49,12 +49,12 @@ from network.network_new import *
 
 class Experiment:
 
-    def __init__(self, adversary_class, GeneralSettings, NetworkClass, AgentSettings, twist = ""):
-        self.save_attack_path = GeneralSettings.save_attack_path
+    def __init__(self, adversary_class, GeneralSettings, NetworkClass, AgentSettings, load_attack_path= None, twist = ""):
+        self.load_attack_path = load_attack_path
         #self.is_test = GeneralSettings.test
         self.is_debug = GeneralSettings.debug
-        self.save_attack = GeneralSettings.save_attack
-        self.save_attack_enum = GeneralSettings.SaveAttackEnum
+        # self.save_attack = GeneralSettings.save_attack
+        # self.save_attack_enum = GeneralSettings.SaveAttackEnum
         self.load_model_enum = GeneralSettings.SaveModelEnum
         self.load_model = GeneralSettings.save_model
         self.adversary_class = adversary_class
@@ -104,13 +104,17 @@ class Experiment:
         debug = self.is_debug
         max_epLength = self.agent_settings.max_epLength
 
-        test = self.load_model is self.load_model_enum.test
-        if self.load_model is self.load_model_enum.test:
-            self.num_episodes = 1000
-            self.pre_train_steps = 0
-            self.max_epLength = 60
+        if self.load_attack_path:
+            #print("only 50")
+            num_episodes = 50
+            pre_train_steps = 0
+            max_epLength = 60
             e = 0
-            self.stepDrop = 0
+            stepDrop = 0
+
+            test = True
+        else:
+            test = False
 
         if preloaded_agent:
             agent = preloaded_agent
@@ -130,12 +134,12 @@ class Experiment:
         # The network
         # net = network(N_switch, N_action, N_state, action_per_throttler, hosts_sources, servers, filters, reward_overload, 
         #           rate_legal_low, rate_legal_high, rate_attack_low, rate_attack_high, 
-        #           legal_probability, upper_boundary, adversary, max_epLength, topologyFile, SaveAttackEnum, save_attack, save_attack_path)
+        #           legal_probability, upper_boundary, adversary, max_epLength, topologyFile, SaveAttackEnum, save_attack, load_attack_path)
 
 
 
 
-        net = network(self.network_settings, reward_overload, self.save_attack, self.save_attack_enum, self.save_attack_path, self.adversary_class, max_epLength)
+        net = network(self.network_settings, reward_overload, self.adversary_class, max_epLength, load_attack_path=self.load_attack_path)
         #create lists to contain total rewards and steps per episode
         stepList = []
         rList = []
@@ -170,7 +174,7 @@ class Experiment:
         if not os.path.exists(path):
             os.makedirs(path)
 
-        if self.load_model is self.load_model_enum.test:
+        if test:
             run_mode = "test"
         else:
             run_mode = "train"
@@ -197,6 +201,7 @@ class Experiment:
 
             fail_seg = 0
             for ep_num in range(num_episodes):
+                print("loading ep {0} out of {1}".format(ep_num, num_episodes))
                 net.reset() # reset the network
 
                 d = False # indicates that network is finished
@@ -216,7 +221,7 @@ class Experiment:
                         rAll += r
                         ### why are we putting in the current state??? Shouldn't it be last state
                         ### or better, shouldn't it involve both the last state and current state?
-                        if not (self.load_model is self.load_model_enum.test):
+                        if not test:
                             agent.update(net.last_state, last_action, net.get_state(), d, r, next_action = a)
 
 
@@ -246,7 +251,7 @@ class Experiment:
                     
                     total_steps += 1
 
-                    if total_steps > pre_train_steps:
+                    if total_steps > pre_train_steps and not test:
                         # print("step: {0} - action: {1} - reward {2}".format(step,last_action,r))
 
                         #print("e={0} startE = {1}".format(e, startE))
@@ -296,8 +301,8 @@ class Experiment:
                 if len(loss) > 0:
                     loss_file.write(str(ep_num) + "," + str(total_steps) + "," + str(loss[-1]) + "," + str(e) + "\n")
 
-        if self.save_attack is self.save_attack_enum.save:
-            net.save_attacks()
+        # if self.save_attack is self.save_attack_enum.save:
+        #     net.save_attacks()
 
         reward_file.close()
         loss_file.close()

@@ -154,10 +154,10 @@ class network(object):
     # def __init__(self, N_switch, N_action, N_state, action_per_throttler, host_sources, servers, filter_list, reward_overload, 
     #           rate_legal_low, rate_legal_high, rate_attack_low, rate_attack_high, 
     #           legal_probability, upper_boundary, hostClass, max_epLength, f_link, SaveAttackEnum,
-    #           save_attack, save_attack_path):
+    #           save_attack, load_attack_path):
 
     #self.ITERATIONSBETEENACTION = 200 # with 10 ms delay, and throttle agent every 2 seconds, we see 200 messages passed in between
-    def __init__(self, network_settings, reward_overload, save_attack, SaveAttackEnum, save_attack_path, adversary_class, max_epLength):
+    def __init__(self, network_settings, reward_overload, adversary_class, max_epLength, load_attack_path = None, save_attack=False):
         
 
 
@@ -205,9 +205,9 @@ class network(object):
         self.hosts = []
         self.attack_record = [] # list of all attack stats, used if we're saving the attack
 
-        self.SaveAttackEnum = SaveAttackEnum
+        # self.SaveAttackEnum = SaveAttackEnum
         self.save_attack = save_attack
-        self.save_attack_path = save_attack_path
+        self.load_attack_path = load_attack_path
         self.initialise(network_settings.topologyFile)
         self.last_state = np.empty_like(self.get_state())
 
@@ -220,11 +220,11 @@ class network(object):
         #     host.print_host()
 
     def reset(self):
-        if self.save_attack is self.SaveAttackEnum.load:
+        if self.load_attack_path: # if we provide a file to oad from use it
             self.load_attacker()
         else:
             self.set_attackers()
-        if self.save_attack is self.SaveAttackEnum.save:
+        if self.save_attack:# is self.SaveAttackEnum.save:
             self.record_attackers()
         #self.set_rate()
         self.legitimate_all = 0
@@ -288,6 +288,7 @@ class network(object):
 
     def load_attacker(self):
         host_data = self.saved_attack.pop()
+        #print(host_data)
         for i in range(len(host_data)):
             (is_attacker, traffic_rate) = host_data[i]
             self.hosts[i].setRate(is_attacker, traffic_rate)
@@ -370,7 +371,7 @@ class network(object):
                 self.rate_legal_low, self.rate_legal_high, self.max_epLength)
             self.hosts.append(host)
         
-        if self.save_attack is self.SaveAttackEnum.load:
+        if self.load_attack_path:
             self.load_attacker_file()
 
         self.reset()
@@ -449,16 +450,17 @@ class network(object):
             return self.legitimate_served, self.legitimate_all, per, self.server_failures
 
     
-    def save_attacks(self):
-        with open(self.save_attack_path, "wb") as f:
-            print("saving the attack")
-            pickle.dump(self.attack_record, f, pickle.HIGHEST_PROTOCOL)
+    # def save_attacks(self):
+    #     with open(self.load_attack_path, "wb") as f:
+    #         print("saving the attack")
+    #         pickle.dump(self.attack_record, f, pickle.HIGHEST_PROTOCOL)
 
 
     def load_attacker_file(self):
-        with open(self.save_attack_path, 'rb') as f:
+        with open(self.load_attack_path, 'rb') as f:
             print("opening saved attack")
-            self.saved_attack = pickle.load(f)     
+            self.saved_attack = pickle.load(f) 
+            #print("attack {0}".format(self.saved_attack))    
 
     def printState(self):
         for switch in self.switches:

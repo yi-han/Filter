@@ -17,10 +17,10 @@ import pickle
 from mapsAndSettings import *
 
 
-def generateAttacks(map, attackClasses, max_epLength = 60, num_episodes = 50):
-    path = "attackSimulations/{0}/".format(map.name)
-    SaveAttackEnum = Enum('SaveAttack', 'neither save load')
-    save_attack = SaveAttackEnum.save
+def generateAttacks(networkSettings, attackClasses, max_epLength = 60, num_episodes = 100):
+    path = "attackSimulations/{0}/".format(networkSettings.name)
+    # SaveAttackEnum = Enum('SaveAttack', 'neither save load')
+    # save_attack = SaveAttackEnum.save
     
     reward_overload = -1
 
@@ -28,12 +28,12 @@ def generateAttacks(map, attackClasses, max_epLength = 60, num_episodes = 50):
     if not os.path.exists(path):
         os.makedirs(path)
     for attackClass in attackClasses:
-        attack_path = path+attackClass.getName()
+        attack_path = path+attackClass.getName()+".pkl"
         
         with open(attack_path, "wb") as f:
             
             # run all the simulations
-            net = netModule.network(map, reward_overload, save_attack, SaveAttackEnum, None, attackClass, max_epLength)
+            net = netModule.network(networkSettings, reward_overload, attackClass, max_epLength, None, True)
             for _ in range(num_episodes):
                 net.reset()
 

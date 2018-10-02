@@ -30,14 +30,13 @@ assert(len(sys.argv)==3)
 #     group_size = 1 # number of filters each agent controls
 
 class GeneralSettings(object):
-    SaveAttackEnum = Enum('SaveAttack', 'neither save load')
+    # SaveAttackEnum = Enum('SaveAttack', 'neither save load')
     SaveModelEnum = Enum('SaveModel', 'neither save load test')
-    save_attack_path = "./attack.pkl" # note you shouldn't be repeating this
     #test = False # handled by saveModel
     debug = False
     #load_model = False
-    save_attack = SaveAttackEnum.neither
-    save_model = SaveModelEnum.neither
+    # save_attack = SaveAttackEnum.neither
+    save_model = SaveModelEnum.load
 
 
 
@@ -49,15 +48,42 @@ mediumPulse = hostClass.MediumPulse
 largePulse = hostClass.LargePulse
 gradualIncrease = hostClass.GradualIncrease
 
+"""
+Settings to change
 
+
+"""
 assignedNetwork = NetworkMalialisSmall
 assignedAgent = SarsaDecMaliasNoPT
+load_attack_path = "attackSimulations/malialis_small/"
+
+
 
 sarsaGeneric = create_generic_dec(assignedAgent, GeneralSettings, assignedNetwork)
 # sarsaGeneric = None
 
-# experiment = experiment.Experiment(conAttack, GeneralSettings, assignedNetwork, assignedAgent, "NoPTTile1")
-experiment = experiment.Experiment(conAttack, GeneralSettings, assignedNetwork, assignedAgent, "NoPTTile1Save")
+conAttack = hostClass.ConstantAttack
+shortPulse = hostClass.ShortPulse
+mediumPulse = hostClass.MediumPulse
+largePulse = hostClass.LargePulse
+gradualIncrease = hostClass.GradualIncrease
+
+attackClasses = [conAttack, shortPulse, mediumPulse,
+    largePulse, gradualIncrease] 
+
+
+
+
+for attackClass in attackClasses:
+    attack_location = load_attack_path+attackClass.getName()+".pkl"
+
+    exp = experiment.Experiment(conAttack, GeneralSettings, assignedNetwork, 
+        assignedAgent, twist= "PTTile1Save", load_attack_path=attack_location)
+    exp.run(0, sarsaGeneric)
+
+"""
+exp = experiment.Experiment(conAttack, GeneralSettings, assignedNetwork, 
+    assignedAgent, twist= "PTTile1Save", load_attack_path=load_attack_path)
 
 
 start_num = int(sys.argv[1])
@@ -65,10 +91,10 @@ length_core= int(sys.argv[2])
 
 for i in range(length_core):
     print("Im doing it for {0}".format(start_num+i))
-    experiment.run(start_num+i, sarsaGeneric)
+    exp.run(start_num+i, sarsaGeneric)
 
 
-
+"""
 
 
 
