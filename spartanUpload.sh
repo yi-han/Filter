@@ -6,9 +6,11 @@ for dest in punim0621 punim0636; do
 	--include='**/*.slurm' \
 	--include='**/*.txt' \
 	--include='**/*.sh' \
+	--include='**/*.apkl'\
 	network \
 	agent \
-	attacks.py \ß
+	attackSimulations \
+	attacks.py \
 	experiment.py \
 	runDDQN.py \
 	runSARSA.py \

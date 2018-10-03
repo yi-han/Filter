@@ -28,7 +28,7 @@ def generateAttacks(networkSettings, attackClasses, max_epLength = 60, num_episo
     if not os.path.exists(path):
         os.makedirs(path)
     for attackClass in attackClasses:
-        attack_path = path+attackClass.getName()+".pkl"
+        attack_path = path+attackClass.getName()+".apkl"
         
         with open(attack_path, "wb") as f:
             
