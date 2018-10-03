@@ -92,7 +92,7 @@ class Agent(aBase.Agent):
         self.saver.save(self.sess, load_path+'/model-'+str(iteration)+'.ckpt')
 
 
-    def getName(self):
+    def getName(self=None):
         return "CentralisedDDQN"
 
     def getPath(self):
