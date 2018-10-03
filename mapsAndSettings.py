@@ -10,6 +10,7 @@ import math
 import agent.genericDecentralised as genericDecentralised
 import agent.sarsaCentralised as sarCen
 
+
 class NetworkSimpleBasic(object):
     name = "simple_basic"
     N_state = 2 #The number of state, i.e., the number of filters

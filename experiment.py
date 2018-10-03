@@ -201,7 +201,7 @@ class Experiment:
 
             fail_seg = 0
             for ep_num in range(num_episodes):
-                print("loading ep {0} out of {1}".format(ep_num, num_episodes))
+                #print("loading ep {0} out of {1}".format(ep_num, num_episodes))
                 net.reset() # reset the network
 
                 d = False # indicates that network is finished

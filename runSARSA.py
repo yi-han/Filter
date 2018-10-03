@@ -3,7 +3,7 @@ import experiment
 import network.hosts as hostClass
 
 import agent.sarsaCentralised as sarCen
-import agent.sarsaDecentralised as sarDec# import agent.ddqnDecentralised as ddDec
+#import agent.sarsaDecentralised as sarDec# import agent.ddqnDecentralised as ddDec
 from mapsAndSettings import *
 assert(len(sys.argv)==3)
 
@@ -36,7 +36,7 @@ class GeneralSettings(object):
     debug = False
     #load_model = False
     # save_attack = SaveAttackEnum.neither
-    save_model = SaveModelEnum.load
+    save_model = SaveModelEnum.save
 
 
 
@@ -53,13 +53,12 @@ Settings to change
 
 
 """
-assignedNetwork = NetworkMalialisSmall
+assignedNetwork = NetworkFourTeamThreeAgent
 assignedAgent = SarsaDecMaliasNoPT
 load_attack_path = "attackSimulations/malialis_small/"
 
 
 
-sarsaGeneric = create_generic_dec(assignedAgent, GeneralSettings, assignedNetwork)
 # sarsaGeneric = None
 
 conAttack = hostClass.ConstantAttack
@@ -73,17 +72,22 @@ attackClasses = [conAttack, shortPulse, mediumPulse,
 
 
 
-
+"""
 for attackClass in attackClasses:
-    attack_location = load_attack_path+attackClass.getName()+".pkl"
+    sarsaGeneric = create_generic_dec(assignedAgent, GeneralSettings, assignedNetwork)
+
+    attack_location = load_attack_path+attackClass.getName()+".apkl"
 
     exp = experiment.Experiment(conAttack, GeneralSettings, assignedNetwork, 
         assignedAgent, twist= "PTTile1Save", load_attack_path=attack_location)
     exp.run(0, sarsaGeneric)
-
 """
+
+sarsaGeneric = create_generic_dec(assignedAgent, GeneralSettings, assignedNetwork)
+
+
 exp = experiment.Experiment(conAttack, GeneralSettings, assignedNetwork, 
-    assignedAgent, twist= "PTTile1Save", load_attack_path=load_attack_path)
+    assignedAgent, twist= "PTTile1Save", load_attack_path=None)
 
 
 start_num = int(sys.argv[1])
@@ -94,7 +98,7 @@ for i in range(length_core):
     exp.run(start_num+i, sarsaGeneric)
 
 
-"""
+
 
 
 
