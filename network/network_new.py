@@ -11,7 +11,6 @@ import agent # i think this is the other folder but I dont think it would have a
 """
 #TODO
 2) Implement nodes for realistic implementation
-4) Implement a observation window
 5) Do a close inspection of the state at the very start and run through to make sure the network is running right
 6) Confirm rewards...might be incentive to accept everything
 7) Simulate network milliseconds
@@ -19,6 +18,7 @@ import agent # i think this is the other folder but I dont think it would have a
 1) Created flexible adverseary
 2) Seperate 'move_traffic' from 'get_state'
 3) Convert drop_probabilities to dynamic
+4) Implement a observation window
 
 #OTHER
 1) Note whilst calcPercentage is a part of getReward it doesn't evaluate for the first step (so not full)
@@ -37,9 +37,6 @@ def deep_copy_state(state):
     state_copy = np.empty_like(state)
     state_copy[:] = state
     return state_copy
-
-
-
 
 class Switch():
     def __init__(self, switch_id, is_filter):
@@ -70,11 +67,11 @@ class Switch():
         # an initial part of passing traffic along
         num_dests = len(self.destination_links)
         
-        legal_pass = self.legal_traffic * (1-self.throttle_rate)
-        legal_dropped = self.legal_traffic * self.throttle_rate
+        legal_pass = int(self.legal_traffic * (1-self.throttle_rate))
+        legal_dropped = self.legal_traffic - legal_pass
 
-        illegal_pass = self.illegal_traffic * (1 - self.throttle_rate)
-        illegal_dropped = self.illegal_traffic * self.throttle_rate
+        illegal_pass = int(self.illegal_traffic * (1 - self.throttle_rate)) 
+        illegal_dropped = self.illegal_traffic - illegal_pass
 
         # update all other switches with new traffic values
         for dest in self.destination_links:
@@ -162,17 +159,11 @@ class network(object):
 
 
 
-        self.iterations_between_action = network_settings.iterations_between_action# set at 50 just to quarter the amount of time
-
-
-
+        self.iterations_between_action = network_settings.iterations_between_action# ideally set at 200
         self.host_sources = np.empty_like(network_settings.host_sources)
         self.host_sources[:] = network_settings.host_sources
         self.servers = np.empty_like(network_settings.servers)
         self.servers[:] = network_settings.servers # list of the servers. Usually [0]
-        # self.filters = np.empty_like(filters)
-        # self.filters[:] = filters
-        #self.attackers = [] # id corresponds to the host attatched
         self.filter_list = network_settings.filters
         self.N_state = network_settings.N_state
         self.N_switch = network_settings.N_switch # number of nodes?
@@ -181,9 +172,7 @@ class network(object):
         self.N_host = len(self.host_sources)
         self.N_filter = len(self.filter_list)
         self.action_per_throttler = network_settings.action_per_throttler # actions each host can take
-        
         self.reward_overload = reward_overload
-        
         self.rate_legal_low = (network_settings.rate_legal_low / self.iterations_between_action)
         self.rate_legal_high = (network_settings.rate_legal_high / self.iterations_between_action)
         self.rate_attack_low = (network_settings.rate_attack_low / self.iterations_between_action)
@@ -193,13 +182,9 @@ class network(object):
         self.upper_boundary = network_settings.upper_boundary
         self.hostClass = adversary_class
         self.topology = []
-        # self.filter_host = {} - for old implementation of calculating traffic
-        #self.drop_probability = [] # percentage of traffic stopping
         self.max_epLength = max_epLength
 
-
         # specific to new network
-
         self.switches = [] # list of all switches, first one shouuld be attatched to server
         self.links = []
         self.hosts = []
@@ -211,13 +196,6 @@ class network(object):
         self.initialise(network_settings.topologyFile)
         self.last_state = np.empty_like(self.get_state())
 
-
-
-        # for link in self.links:
-        #     link.printLink()
-
-        # for host in self.hosts:
-        #     host.print_host()
 
     def reset(self):
         if self.load_attack_path: # if we provide a file to oad from use it
@@ -234,9 +212,6 @@ class network(object):
             is_filter = i in self.filter_list
             if is_filter:
                 self.switches[i].setThrottle(np.random.randint(0,self.action_per_throttler)/self.action_per_throttler)
-            #self.switches.append(Switch(i, is_filter))
-        
-
         self.server_failures = 0
 
         #self.drop_probability.clear()
@@ -262,9 +237,7 @@ class network(object):
         # I think just replace this if you want to replicate attacks
 
         attackers = []
-
         assert self.N_host!=0 or self.N_host!=1 # to stop infinite loops
-
         while len(attackers) == 0 or len(attackers) == self.N_host:
         #do not allow "none/all attacker"
             attackers.clear()
@@ -303,12 +276,8 @@ class network(object):
             #self.switches[i].printSwitch()
             state.append(self.switches[i].getWindow())
 
-
-
         return state
         
-
-    
     def move_traffic(self, time_step):
         # update the network
 
@@ -322,8 +291,6 @@ class network(object):
 
         for switch in self.switches:
             switch.updateSwitch()
-
-       
 
     def set_drop_probability(self, action):
 
@@ -376,6 +343,7 @@ class network(object):
 
         self.reset()
 
+    """
     def virtual_action(self, action, prior_action, step_count):
         # if we want to test what the reward would be for an action without effecting the state
         # we do this by doing the action, then doing the prior action again
@@ -384,27 +352,16 @@ class network(object):
         r = self.calculate_reward()
         self.step(prior_action, step_count, False)
         return r
-
+    """
 
     def calculate_reward(self):
-        
+        # currently if we're 1.1 times over we receive a punishment of -0.1, seems rather low. Maybe -1.5?        
         reward = 0.0
 
         legitimate_rate = self.switches[0].legal_window
         legitimate_rate_all = self.switches[0].legal_window + self.switches[0].dropped_legal_window
         attacker_rate = self.switches[0].illegal_window
 
-
-
-
-        # for i in range(self.N_filter):
-        #     for j in self.filter_host[self.filters[i]]:
-        #         if j not in self.attackers:
-        #             legitimate_rate += self.adversary.getHostRate()[j] * (1-self.drop_probability[i])
-        #             legitimate_rate_all += self.adversary.getHostRate()[j]
-
-        #         else:
-        #             attacker_rate += self.adversary.getHostRate()[j] * (1-self.drop_probability[i])
 
         if legitimate_rate + attacker_rate > self.upper_boundary:
             #used to set the reward to "reward_overload" in this case, but didn't work well

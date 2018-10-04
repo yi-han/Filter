@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --nodes 1
 #SBATCH --partition gpgpu
-#SBATCH --time 30:00:00
+#SBATCH --time 40:00:00
 #SBATCH --cpus-per-task=2
 #SBATCH --job-name=ddqn_throttle
 #SBATCH --account=punim0621
@@ -15,7 +15,7 @@ module load Tensorflow/1.8.0-intel-2017.u2-GCC-6.2.0-CUDA9-Python-3.5.2-GPU
 # Launch multiple process python code
 
 echo "Starting four throttle"
-time mpiexec -n 1 python3 runDDQN.py 0 1
+time mpiexec -n 1 python3 runDDQN.py 0 2
 
 echo "done"
 

@@ -70,8 +70,9 @@ class AgentOfAgents(aBase.Agent):
         for i in range(len(self.agents)):
             agent = self.agents[i]
             N_state = agent.N_state
-            agent.update(last_state[(i*N_state):((i+1)*N_state)], 
-                actions[i], current_state[(i*N_state):((i+1)*N_state)], is_done, reward)
+            (last_statelet, last_state) = self.getStatelet(last_state, N_state)
+            (current_statelet, current_state) = self.getStatelet(current_state, N_state)
+            agent.update(last_statelet, actions[i], current_statelet, is_done, reward)
         self.score += reward
 
     def actionReplay(self, current_state, batch_size):
@@ -82,7 +83,9 @@ class AgentOfAgents(aBase.Agent):
             agent = self.agents[i]
             N_state = agent.N_state
             # print("feed it {0} state".format(current_state[(i*N_state):((i+1)*N_state)]))
-            l+= agent.actionReplay(current_state[(i*N_state):((i+1)*N_state)], batch_size)
+            (current_statelet, current_state) = self.getStatelet(current_state, N_state)
+            
+            l+= agent.actionReplay(current_statelet, batch_size)
         return l
 
     def loadModel(self, load_path):
@@ -103,6 +106,13 @@ class AgentOfAgents(aBase.Agent):
 
     def getPath(self):
         return AgentOfAgents.getName(self)
+
+    def getStatelet(self, state, sizeOfSegment):
+        # get a segment of state corresponding to the agent, return remaining state as well
+        statelet = state[0:sizeOfSegment]
+        remainingState = state[sizeOfSegment]
+        return (statelet, remainingState)
+
 
     def reset(self):
         for agent in self.agents:

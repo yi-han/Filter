@@ -51,17 +51,12 @@ class Experiment:
 
     def __init__(self, adversary_class, GeneralSettings, NetworkClass, AgentSettings, load_attack_path= None, twist = ""):
         self.load_attack_path = load_attack_path
-        #self.is_test = GeneralSettings.test
         self.is_debug = GeneralSettings.debug
-        # self.save_attack = GeneralSettings.save_attack
-        # self.save_attack_enum = GeneralSettings.SaveAttackEnum
         self.load_model_enum = GeneralSettings.SaveModelEnum
         self.load_model = GeneralSettings.save_model
         self.adversary_class = adversary_class
-
         self.network_settings = NetworkClass
         self.agent_settings = AgentSettings
-
         self.twist = twist
         print(NetworkClass.N_state)
         print(NetworkClass.action_per_throttler**NetworkClass.N_state)
@@ -75,20 +70,6 @@ class Experiment:
         N_action = self.network_settings.N_action
         N_state = self.network_settings.N_state
         action_per_throttler = self.network_settings.action_per_throttler
-
-
-
-        # hosts_sources = self.network_settings.hosts_sources
-        # servers = self.network_settings.servers
-        # filters = self.network_settings.filters
-        # topologyFile = self.network_settings.topologyFile
-        # rate_legal_low = self.network_settings.rate_legal_low
-        # rate_legal_high = self.network_settings.rate_legal_high
-        # rate_attack_high = self.network_settings.rate_attack_high
-        # legal_probability = self.network_settings.legal_probability
-        # upper_boundary = self.network_settings.upper_boundary
-
-
 
         y = self.agent_settings.y
         tau = self.agent_settings.tau
@@ -105,7 +86,6 @@ class Experiment:
         max_epLength = self.agent_settings.max_epLength
 
         if self.load_attack_path:
-            #print("only 50")
             num_episodes = 50
             pre_train_steps = 0
             max_epLength = 60
@@ -121,24 +101,9 @@ class Experiment:
             agent.reset()
         else:
             agent = self.agent_settings.agent(N_action, pre_train_steps, action_per_throttler, N_state, tau, y, debug, test)
-
         reward_overload = -1
 
-
-
-
-
-
         print("\n Prefix {0}".format(prefix))
-
-        # The network
-        # net = network(N_switch, N_action, N_state, action_per_throttler, hosts_sources, servers, filters, reward_overload, 
-        #           rate_legal_low, rate_legal_high, rate_attack_low, rate_attack_high, 
-        #           legal_probability, upper_boundary, adversary, max_epLength, topologyFile, SaveAttackEnum, save_attack, load_attack_path)
-
-
-
-
         net = network(self.network_settings, reward_overload, self.adversary_class, max_epLength, load_attack_path=self.load_attack_path)
         #create lists to contain total rewards and steps per episode
         stepList = []
@@ -150,20 +115,8 @@ class Experiment:
         largest_gradient = 0
         fail = 0 # The total number of fails
 
-
-
-
-        # if debug:
-            #logging.basicConfig(stream=sys.stderr, level=logging.DEBUG)
-        # else:
-        #     logging.basicConfig(stream=sys.stderr, level=logging.NOTSET)
-
-        if preloaded_agent:
-            name = agent.getName()
-        else:
-            name = self.agent_settings.agent.getName() # The name of the Agent used
-        
-        path =  self.network_settings.name + agent.getPath() + self.twist# The path to save model to
+        name = self.agent_settings.name
+        path =  self.network_settings.name + name + self.twist# The path to save model to
         print("Path is {0}".format(path))
         #path = "/data/projects/punim0621" # for slug
         load_path = path #ideally can move a good one to a seperate location
@@ -185,17 +138,11 @@ class Experiment:
         
         loss_file = open("{0}/loss-{1}-{2}-{3}.csv".format(path,run_mode, self.adversary_class.getName(), prefix) ,"w")
         packet_served_file = open("{0}/packet_served-{1}-{2}-{3}.csv".format(path,run_mode, self.adversary_class.getName(), prefix),"w")
-
         print("Using the {0} agent:".format(name))
-
-        
         reward_file.write("Episode,StepsSoFar,TotalReward,LastReward,LengthEpisode,e\n")
-
         packet_served_file.write("Episode,PacketsReceived,PacketsServed,PercentageReceived,ServerFailures\n")
 
-
         with agent:
-
             if self.load_model in [self.load_model_enum.test, self.load_model_enum.load]:
                 agent.loadModel(load_path)
 
@@ -231,30 +178,14 @@ class Experiment:
                             print("step:" + str(step) + ", action:" + str(last_action) + ", reward:" + str(r), end='\n')
                             print("server state: {0}\n".format(net.switches[0].getWindow()))
                         
-                        # if e==endE: # only do this once trained
-                        #     print("\n")
-                        #     print(net.last_state)
-                        #     print(agent.get_action_choices(net.last_state))
-                        # print("step: {0} - action: {1} - reward {2}".format(step,last_action,r))
                         if r < 0:
                             fail += 1
                             fail_seg += 1
-                    
-                    # if step 1 or final step we want to measure how accurate our system is
-                    # to minimise effect on our network we make a prediction then replay the last prior action to undo effect
-                    # if step == 1:
-                    #     temp_a = agent.predict(net.get_state(), total_steps, 0)
-                    #     temp_r = net.virtual_action(temp_a, a, total_steps)
-                    #     initial_reward_file.write(str(ep_num) + "," + str(total_steps) + "," + str(temp_r) + "," + str(step) + "," + str(0) + "\n")   
                             
-                    last_action = a 
-                    
+                    last_action = a   
                     total_steps += 1
-
+                    
                     if total_steps > pre_train_steps and not test:
-                        # print("step: {0} - action: {1} - reward {2}".format(step,last_action,r))
-
-                        #print("e={0} startE = {1}".format(e, startE))
                         if e > startE:
                             e = startE
                         elif e > endE:
@@ -262,29 +193,16 @@ class Experiment:
                         elif e < endE:
                             e = endE
 
-
                         if update_freq and not test and total_steps % (update_freq) == 0:
                             l = agent.actionReplay(net.get_state(), batch_size)
                             if l:
                                 loss.append(l)
 
-                # record final prediciton with exploraiton at 0
-                # if e>0:
-                #     temp_a = agent.predict(net.get_state(), total_steps, 0)
-                #     net.step(a, step) # take the action, update the network
-                #     last_reward = net.calculate_reward()
-                # else:
-                #     last_reward = r
-                # final_reward_file.write(str(ep_num) + "," + str(total_steps) + "," + str(last_reward) + "," + str(step) + "," + str(0) + "\n")   
-
-
-
-
                 if ep_num % 1000 == 0:
                     print("Completed Episode - {0}".format(ep_num))
                     print("E={0} Fails = {1} FailPer = {2}".format(e,fail_seg, (fail_seg*100/(1000*max_epLength))))
                     fail_seg = 0
-                if self.load_model is self.load_model_enum.save: 
+                if self.load_model is self.load_model_enum.save and prefix == 0: # only save the first iteration 
                     # save the model only every 10,000 steps
                     if ep_num % 10000 == 0:
                         agent.saveModel(load_path, ep_num)

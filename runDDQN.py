@@ -14,7 +14,7 @@ from mapsAndSettings import *
 assert(len(sys.argv)==3)
 
 class ddqnCenSettings(object):
-    
+    name = "DDQNCentralised100"
     max_epLength = 30 # or 60 if test
     y = 0    
     tau = 0.001 #Rate to update target network toward primary network. 
@@ -30,7 +30,7 @@ class ddqnCenSettings(object):
     agent = ddCen.Agent
 
 class ddqnCenDoubleSettings(object):
-    
+    name = "DDQNCentralised200"
     max_epLength = 30 # or 60 if test
     y = 0    
     tau = 0.001 #Rate to update target network toward primary network. 
@@ -47,6 +47,7 @@ class ddqnCenDoubleSettings(object):
 
  
 class ddqnDoubleTeamTwo(object):
+    name = "DDQNTeamOfTwo200"
     max_epLength = 30 # or 60 if test
     y = 0    
     tau = 0.001 #Rate to update target network toward primary network. 
@@ -84,33 +85,34 @@ attackClasses = [conAttack, shortPulse, mediumPulse,
     largePulse, gradualIncrease] 
 
 
-assignedNetwork = NetworkFourTeamThreeAgent
+assignedNetwork = NetworkSimpleBasic
 assignedAgent = ddqnCenDoubleSettings
-load_attack_path = "attackSimulations/malialis_small/"
-# load_attack_path = None
-
-genericAgent = create_generic_dec(ddqnDoubleTeamTwo, GeneralSettings, NetworkFourTeamThreeAgent)
+load_attack_path = "attackSimulations/{0}/".format(assignedNetwork.name)
+loadAttacks = False
 # genericAgent = None
 
-"""
-for attackClass in attackClasses:
-    genericAgent = create_generic_dec(ddqnDoubleTeamTwo, GeneralSettings, NetworkFourTeamThreeAgent)
+if loadAttacks:
+    for attackClass in attackClasses:
+        # genericAgent = create_generic_dec(assignedAgent, GeneralSettings, assignedNetwork)
+        genericAgent = None
+        attack_location = load_attack_path+attackClass.getName()+".apkl"
 
-    attack_location = load_attack_path+attackClass.getName()+".apkl"
+        exp = experiment.Experiment(attackClass, GeneralSettings, assignedNetwork, 
+            assignedAgent, twist= "doubleSave", load_attack_path=attack_location)
+        exp.run(0, genericAgent)
+else:
 
-    exp = experiment.Experiment(conAttack, GeneralSettings, assignedNetwork, 
-        assignedAgent, twist= "doubleSave", load_attack_path=attack_location)
-    exp.run(0, genericAgent)
-"""
+    #genericAgent = create_generic_dec(assignedAgent, GeneralSettings, assignedNetwork)
+    genericAgent = None
+    experiment = experiment.Experiment(conAttack, GeneralSettings, assignedNetwork, assignedAgent)
+    # experiment = experiment.Experiment(conAttack, GeneralSettings, assignedNetwork, assignedAgent, "double")
 
 
-experiment = experiment.Experiment(conAttack, GeneralSettings, NetworkFourTeamThreeAgent, ddqnDoubleTeamTwo, twist="double")
-# experiment = experiment.Experiment(conAttack, GeneralSettings, NetworkFourThrottle, ddqnCenDoubleSettings, "double")
+    start_num = int(sys.argv[1])
+    length_core= int(sys.argv[2])
+
+    for i in range(length_core):
+        print("Im doing it for {0}".format(start_num+i))
+        experiment.run(start_num+i, genericAgent)
 
 
-start_num = int(sys.argv[1])
-length_core= int(sys.argv[2])
-
-for i in range(length_core):
-    print("Im doing it for {0}".format(start_num+i))
-    experiment.run(start_num+i, genericAgent)

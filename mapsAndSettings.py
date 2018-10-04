@@ -154,7 +154,7 @@ def create_generic_dec(gs, general_s, ns):
 
 
 class SarsaCenMalias(object):
-    
+    name = "sarsaCen200"
     max_epLength = 30 # or 60 if test
     y = 0
     tau = 0.001
@@ -175,7 +175,7 @@ class SarsaCenMalias(object):
 
 
 class SarsaDecMaliasNoPT(object):
-    
+    name = "sarsaDecGenMalialis"
     max_epLength = 30 # or 60 if test
     y = 0
     tau = 0.1
@@ -194,6 +194,7 @@ class SarsaDecMaliasNoPT(object):
     group_size = 1 # number of filters each agent controls
 
 class SarsaDecMaliasNoPTLarge(object):
+    name = "sarsaDecGenNoPTLarge"    
     
     max_epLength = 30 # or 60 if test
     y = 0
@@ -214,6 +215,8 @@ class SarsaDecMaliasNoPTLarge(object):
 
 
 class SarsaDecMaliasWithPT(object):
+    name = "sarsaDecGenPT"
+    
     max_epLength = 30 # or 60 if test
     y = 0
     tau = 0.1
@@ -225,7 +228,6 @@ class SarsaDecMaliasWithPT(object):
     num_episodes = 82501#82501
     pre_train_steps = 2000#2000 * max_epLength
     annealing_steps = 50000 * max_epLength #1000*max_epLength #60000 * max_epLength 
-    
 
     startE = 0.4 #0.4
     endE = 0.0
@@ -235,6 +237,7 @@ class SarsaDecMaliasWithPT(object):
     group_size = 1 # number of filters each agent controls
 
 class SarsaDecPTLarge(object):
+    name = "sarsaDecGenLarge"
     max_epLength = 30 # or 60 if test
     y = 0    
     tau = 0.001 #Rate to update target network toward primary network. 
