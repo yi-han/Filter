@@ -46,8 +46,9 @@ class ddqnCenDoubleSettings(object):
     agent = ddCen.Agent
 
  
-class ddqnDoubleTeamTwo(object):
-    name = "DDQNTeamOfTwo200"
+class ddqnDoubleTeamGeneric(object):
+    group_size = 1
+    name = "DDQN200TeamOf{0}".format(group_size)
     max_epLength = 30 # or 60 if test
     y = 0    
     tau = 0.001 #Rate to update target network toward primary network. 
@@ -62,7 +63,6 @@ class ddqnDoubleTeamTwo(object):
     stepDrop = (startE - endE)/annealing_steps
     agent = None
     sub_agent = ddCen.Agent
-    group_size = 2
 
 class GeneralSettings(object):
     # SaveAttackEnum = Enum('SaveAttack', 'neither save load')
@@ -86,7 +86,7 @@ attackClasses = [conAttack, shortPulse, mediumPulse,
 
 
 assignedNetwork = NetworkSimpleBasic
-assignedAgent = ddqnCenDoubleSettings
+assignedAgent = ddqnDoubleTeamGeneric
 load_attack_path = "attackSimulations/{0}/".format(assignedNetwork.name)
 loadAttacks = False
 # genericAgent = None
@@ -101,9 +101,6 @@ if loadAttacks:
             assignedAgent, twist= "doubleSave", load_attack_path=attack_location)
         exp.run(0, genericAgent)
 else:
-
-    #genericAgent = create_generic_dec(assignedAgent, GeneralSettings, assignedNetwork)
-    genericAgent = None
     experiment = experiment.Experiment(conAttack, GeneralSettings, assignedNetwork, assignedAgent)
     # experiment = experiment.Experiment(conAttack, GeneralSettings, assignedNetwork, assignedAgent, "double")
 
@@ -112,6 +109,8 @@ else:
     length_core= int(sys.argv[2])
 
     for i in range(length_core):
+        genericAgent = create_generic_dec(assignedAgent, GeneralSettings, assignedNetwork)
+        # genericAgent = None        
         print("Im doing it for {0}".format(start_num+i))
         experiment.run(start_num+i, genericAgent)
 

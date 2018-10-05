@@ -110,7 +110,7 @@ class AgentOfAgents(aBase.Agent):
     def getStatelet(self, state, sizeOfSegment):
         # get a segment of state corresponding to the agent, return remaining state as well
         statelet = state[0:sizeOfSegment]
-        remainingState = state[sizeOfSegment]
+        remainingState = state[sizeOfSegment:]
         return (statelet, remainingState)
 
 
