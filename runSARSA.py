@@ -36,7 +36,7 @@ class GeneralSettings(object):
     debug = False
     #load_model = False
     # save_attack = SaveAttackEnum.neither
-    save_model = SaveModelEnum.load
+    save_model = SaveModelEnum.save
 
 
 
@@ -53,7 +53,7 @@ Settings to change
 
 
 """
-assignedNetwork = NetworkMalialisSmall
+assignedNetwork = NetworkSimpleBasic
 assignedAgent = SarsaDecMaliasNoPT
 load_attack_path = "attackSimulations/malialis_small/"
 
@@ -71,7 +71,7 @@ attackClasses = [conAttack, shortPulse, mediumPulse,
     largePulse, gradualIncrease] 
 
 
-
+"""
 for attackClass in attackClasses:
     sarsaGeneric = create_generic_dec(assignedAgent, GeneralSettings, assignedNetwork)
     # sarsaGeneric = None
@@ -84,22 +84,21 @@ for attackClass in attackClasses:
 
 
 """
-sarsaGeneric = create_generic_dec(assignedAgent, GeneralSettings, assignedNetwork)
 
 
 exp = experiment.Experiment(conAttack, GeneralSettings, assignedNetwork, 
-    assignedAgent, twist= "NoPTTile1Save", load_attack_path=None)
+    assignedAgent, twist= "", load_attack_path=None)
 
 
 start_num = int(sys.argv[1])
 length_core= int(sys.argv[2])
 
 for i in range(length_core):
+    sarsaGeneric = create_generic_dec(assignedAgent, GeneralSettings, assignedNetwork)
     print("Im doing it for {0}".format(start_num+i))
     exp.run(start_num+i, sarsaGeneric)
 
 
-"""
 
 
 

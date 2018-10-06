@@ -66,12 +66,17 @@ class Switch():
     def sendTraffic(self):
         # an initial part of passing traffic along
         num_dests = len(self.destination_links)
-        
-        legal_pass = int(self.legal_traffic * (1-self.throttle_rate))
-        legal_dropped = self.legal_traffic - legal_pass
 
-        illegal_pass = int(self.illegal_traffic * (1 - self.throttle_rate)) 
-        illegal_dropped = self.illegal_traffic - illegal_pass
+
+        legal_pass = self.legal_traffic * (1 - self.throttle_rate)
+        legal_dropped = self.legal_traffic * self.throttle_rate        
+        # legal_pass = int(self.legal_traffic * (1-self.throttle_rate))
+        # legal_dropped = self.legal_traffic - legal_pass
+
+        illegal_pass = self.illegal_traffic * (1 - self.throttle_rate)
+        illegal_dropped = self.illegal_traffic * self.throttle_rate
+        # illegal_pass = int(self.illegal_traffic * (1 - self.throttle_rate)) 
+        # illegal_dropped = self.illegal_traffic - illegal_pass
 
         # update all other switches with new traffic values
         for dest in self.destination_links:

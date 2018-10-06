@@ -85,7 +85,7 @@ attackClasses = [conAttack, shortPulse, mediumPulse,
     largePulse, gradualIncrease] 
 
 
-assignedNetwork = NetworkSimpleBasic
+assignedNetwork = NetworkMalialisSmall
 assignedAgent = ddqnDoubleTeamGeneric
 load_attack_path = "attackSimulations/{0}/".format(assignedNetwork.name)
 loadAttacks = False
