@@ -48,7 +48,7 @@ class AgentOfAgents(aBase.Agent):
         # this is as network only takes a single number for action
         # combination
         action = 0
-
+        #print("\n\nmaking a prediction")
         for i in range(len(self.agents)):
             # number of states is number of agents
             
@@ -56,23 +56,29 @@ class AgentOfAgents(aBase.Agent):
             # print(self.agents[0].N_action)
             agent = self.agents[i]
             N_state = agent.N_state
-            agentState = state[(i*N_state):((i+1)*N_state)] # in a list to mock centralised
+            #agentState = state[(i*N_state):((i+1)*N_state)] # in a list to mock centralised
+            (statelet, state) = self.getStatelet(state, N_state)
 
-
-            agentAction = agent.predict(agentState, total_steps, e)
+            agentAction = agent.predict(statelet, total_steps, e)
+            #print("{0} for {1}".format(agentAction, statelet))
             action = action*agent.N_action+agentAction
         return action
 
-    def update(self, last_state, action, current_state, is_done, reward, next_action=None):
+    def update(self, last_state, network_action, current_state, is_done, reward, next_action=None):
         # provide the update function to each individual state
 
-        actions = AgentOfAgents.actionToActions(action, self.num_agents, self.action_per_throttler)
+        #actions = AgentOfAgents.actionToActions(action, self.num_agents, self.action_per_throttler)
+        N_action_list = [agent.N_action for agent in self.agents]
+        actions = AgentOfAgents.genericActionToactions(network_action, N_action_list)
         for i in range(len(self.agents)):
             agent = self.agents[i]
+            action = actions[i]
             N_state = agent.N_state
             (last_statelet, last_state) = self.getStatelet(last_state, N_state)
             (current_statelet, current_state) = self.getStatelet(current_state, N_state)
-            agent.update(last_statelet, actions[i], current_statelet, is_done, reward)
+            #print("for {0} we have a state of {1} and performed {2}".format(N_state, last_statelet, action))
+            #print("do the actions line up?")
+            agent.update(last_statelet, action, current_statelet, is_done, reward)
         self.score += reward
 
     def actionReplay(self, current_state, batch_size):
@@ -118,7 +124,23 @@ class AgentOfAgents(aBase.Agent):
         for agent in self.agents:
             agent.reset()
 
+    def genericActionToactions(network_action, N_action_list):
+        actions = []
+        #print("")
+        #print(network_action)
+        #print(N_action_list)
+        for N_state in N_action_list[::-1]:
+            action = network_action%N_state
+            #print(action)
+            network_action-=action
+            actions.insert(0,action)
+            assert(network_action%N_state==0)
+            network_action/=N_state
+            network_action=int(network_action)
+        #print(actions)
+        #print("\n")
+        return actions
 
-
+#             action = action*agent.N_action+agentAction
 
 

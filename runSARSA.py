@@ -53,8 +53,8 @@ Settings to change
 
 
 """
-assignedNetwork = NetworkSimpleBasic
-assignedAgent = SarsaDecMaliasNoPT
+assignedNetwork = NetworkMalialisSmall
+assignedAgent = SarsaGenericTeam
 load_attack_path = "attackSimulations/malialis_small/"
 
 

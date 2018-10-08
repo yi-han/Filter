@@ -47,7 +47,7 @@ class ddqnCenDoubleSettings(object):
 
  
 class ddqnDoubleTeamGeneric(object):
-    group_size = 1
+    group_size = 2
     name = "DDQN200TeamOf{0}".format(group_size)
     max_epLength = 30 # or 60 if test
     y = 0    

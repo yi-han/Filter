@@ -139,6 +139,7 @@ def create_generic_dec(gs, general_s, ns):
     while throttlers_not_allocated > 0:
         print("currently {0} throttlers_not_allocated".format(throttlers_not_allocated))
         agent_to_allocate = min(throttlers_not_allocated, group_size)
+        print(agent_to_allocate)
         sub_agent_list.append(sub_agent(ns.action_per_throttler**agent_to_allocate, gs.pre_train_steps,
             ns.action_per_throttler, agent_to_allocate, gs.tau, gs.y, general_s.debug,
             test))
@@ -254,6 +255,33 @@ class SarsaDecPTLarge(object):
     agent = None
     sub_agent = sarCen.Agent
     group_size = 1 # number of filters each agent controls
+
+
+
+class SarsaGenericTeam(object):
+    group_size = 2
+    name = "Sarsa200TeamOf{0}".format(group_size)
+    max_epLength = 30 # or 60 if test
+    y = 0    
+    tau = 0.001 #Rate to update target network toward primary network. 
+    update_freq = None #How often to perform a training step.
+    batch_size = None #How many experiences to use for each training step.
+    num_episodes = 200001 #200001#    
+    pre_train_steps = 40000 * max_epLength #40000 * max_epLength #
+    annealing_steps = 120000 * max_epLength  #120000 * max_epLength  #
+    
+    startE = 1
+    endE = 0.0
+    stepDrop = (startE - endE)/annealing_steps
+    agent = None
+    sub_agent = sarCen.Agent
+
+
+
+
+
+
+
 
 
 

@@ -53,7 +53,7 @@ class Agent(aBase.Agent):
             agent = self.agents[i]
             agentState = [state[i]] # in a list to mock centralised
             agentAction = agent.predict(agentState, total_steps, e)
-            action = action*10+agentAction
+            action = action*self.action_per_agent+agentAction
 
         return action 
 
