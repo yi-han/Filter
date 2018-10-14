@@ -98,8 +98,8 @@ class NetworkSingleTeamMalialisMedium(object):
     upper_boundary = 24#12.5
     iterations_between_action = 5 
 
-class NetworkFourTeamThreeAgent(object):
-    name = "four_Team_three_agent"
+class NetworkTwelveThrottle(object):
+    name = "network_twelve_throttle"
     N_state = 12
     N_action = int(1e12)
 
@@ -116,7 +116,7 @@ class NetworkFourTeamThreeAgent(object):
     rate_attack_low = 2.5 
     rate_attack_high = 6
     legal_probability = 0.6 # probability that is a good guys
-    upper_boundary = 62#12.5
+    upper_boundary = 45#52
     iterations_between_action = 5     
 
 

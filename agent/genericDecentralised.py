@@ -48,7 +48,7 @@ class AgentOfAgents(aBase.Agent):
         # this is as network only takes a single number for action
         # combination
         action = 0
-        #print("\n\nmaking a prediction")
+        # print("\n\nmaking a prediction")
         for i in range(len(self.agents)):
             # number of states is number of agents
             
@@ -60,8 +60,11 @@ class AgentOfAgents(aBase.Agent):
             (statelet, state) = self.getStatelet(state, N_state)
 
             agentAction = agent.predict(statelet, total_steps, e)
-            #print("{0} for {1}".format(agentAction, statelet))
+            # print("{0} for {1}".format(agentAction, statelet))
+            #print("agent has {0} actions".format(agent.N_action))
             action = action*agent.N_action+agentAction
+        # print("final action {0}".format(action))
+
         return action
 
     def update(self, last_state, network_action, current_state, is_done, reward, next_action=None):
@@ -70,12 +73,20 @@ class AgentOfAgents(aBase.Agent):
         #actions = AgentOfAgents.actionToActions(action, self.num_agents, self.action_per_throttler)
         N_action_list = [agent.N_action for agent in self.agents]
         actions = AgentOfAgents.genericActionToactions(network_action, N_action_list)
+        # print("\n\n")
+        # print(N_action_list)
+        # print("state {0}".format(last_state))
+        # print("action was {0}".format(network_action))
         for i in range(len(self.agents)):
             agent = self.agents[i]
             action = actions[i]
             N_state = agent.N_state
             (last_statelet, last_state) = self.getStatelet(last_state, N_state)
+            # print("action was {0}".format(action))
+            # print("statelet for {0} is {1}".format(i, last_statelet))
             (current_statelet, current_state) = self.getStatelet(current_state, N_state)
+            #print("future statelet is {0}".format(current_statelet))
+
             #print("for {0} we have a state of {1} and performed {2}".format(N_state, last_statelet, action))
             #print("do the actions line up?")
             agent.update(last_statelet, action, current_statelet, is_done, reward)

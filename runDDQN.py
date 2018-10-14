@@ -85,7 +85,7 @@ attackClasses = [conAttack, shortPulse, mediumPulse,
     largePulse, gradualIncrease] 
 
 
-assignedNetwork = NetworkMalialisSmall
+assignedNetwork = NetworkFourThrottle
 assignedAgent = ddqnDoubleTeamGeneric
 load_attack_path = "attackSimulations/{0}/".format(assignedNetwork.name)
 loadAttacks = False
@@ -101,7 +101,7 @@ if loadAttacks:
             assignedAgent, twist= "doubleSave", load_attack_path=attack_location)
         exp.run(0, genericAgent)
 else:
-    experiment = experiment.Experiment(conAttack, GeneralSettings, assignedNetwork, assignedAgent)
+    experiment = experiment.Experiment(conAttack, GeneralSettings, assignedNetwork, assignedAgent, twist= "newReward")
     # experiment = experiment.Experiment(conAttack, GeneralSettings, assignedNetwork, assignedAgent, "double")
 
 

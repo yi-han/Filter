@@ -53,8 +53,8 @@ Settings to change
 
 
 """
-assignedNetwork = NetworkMalialisSmall
-assignedAgent = SarsaGenericTeam
+assignedNetwork = NetworkTwelveThrottle
+assignedAgent = SarsaDecMaliasNoPT
 load_attack_path = "attackSimulations/malialis_small/"
 
 
@@ -87,7 +87,7 @@ for attackClass in attackClasses:
 
 
 exp = experiment.Experiment(conAttack, GeneralSettings, assignedNetwork, 
-    assignedAgent, twist= "", load_attack_path=None)
+    assignedAgent, twist= "newReward", load_attack_path=None)
 
 
 start_num = int(sys.argv[1])

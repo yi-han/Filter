@@ -19,6 +19,7 @@ and shouldn't it be including both the last state and the prior state?
 16) SaveModelEnum being caleled Load_model_enuM???
 17) Don't thing generic update (actionTo...) is compatible with differnt size agents
 18) Why is actionReplay only after pretraining???
+19) DOUBLE DOUBLE CHECK THIS IS RIGHT, I THINK THE REWARD IS WRONG
 #DONE
 
 1) Made SARSA centralised
@@ -157,7 +158,7 @@ class Experiment:
                 for step in range(max_epLength):
                     #TODO make sure to do do pre_training_stuff
                     a = agent.predict(net.get_state(), total_steps, e) # generate an action
-                    net.step(a, step) # take the action, update the network
+                    #net.step(a, step) # take the action, update the network
 
                     
                     if step > 0: # when step==0, the actions are chosen randomly, and the state is NULL
@@ -181,6 +182,7 @@ class Experiment:
                         if r < 0:
                             fail += 1
                             fail_seg += 1
+                    net.step(a, step) # take the action, update the network
                             
                     last_action = a   
                     total_steps += 1
