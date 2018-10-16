@@ -31,10 +31,8 @@ assert(len(sys.argv)==3)
 
 class GeneralSettings(object):
     # SaveAttackEnum = Enum('SaveAttack', 'neither save load')
-    SaveModelEnum = Enum('SaveModel', 'neither save load test')
-    #test = False # handled by saveModel
+    SaveModelEnum = Enum('SaveModel', 'neither save load')
     debug = False
-    #load_model = False
     # save_attack = SaveAttackEnum.neither
     save_model = SaveModelEnum.save
 
@@ -53,9 +51,9 @@ Settings to change
 
 
 """
-assignedNetwork = NetworkTwelveThrottle
+assignedNetwork = NetworkFourThrottle
 assignedAgent = SarsaDecMaliasNoPT
-load_attack_path = "attackSimulations/malialis_small/"
+load_attack_path = "attackSimulations/{0}/".format(assignedNetwork.name)
 
 
 
@@ -71,7 +69,37 @@ attackClasses = [conAttack, shortPulse, mediumPulse,
     largePulse, gradualIncrease] 
 
 
+
+
+loadAttacks = False
+
+if loadAttacks:
+    for attackClass in attackClasses:
+        genericAgent = create_generic_dec(assignedAgent, GeneralSettings, assignedNetwork)
+        #genericAgent = None
+        attack_location = load_attack_path+attackClass.getName()+".apkl"
+
+        exp = experiment.Experiment(attackClass, GeneralSettings, assignedNetwork, 
+            assignedAgent, twist= "", load_attack_path=attack_location)
+        exp.run(0, genericAgent)
+else:
+    experiment = experiment.Experiment(conAttack, GeneralSettings, assignedNetwork, assignedAgent)
+    # experiment = experiment.Experiment(conAttack, GeneralSettings, assignedNetwork, assignedAgent, "double")
+
+
+    start_num = int(sys.argv[1])
+    length_core= int(sys.argv[2])
+
+    for i in range(length_core):
+        genericAgent = create_generic_dec(assignedAgent, GeneralSettings, assignedNetwork)
+        # genericAgent = None        
+        print("Im doing it for {0}".format(start_num+i))
+        experiment.run(start_num+i, genericAgent)
+
+
+
 """
+
 for attackClass in attackClasses:
     sarsaGeneric = create_generic_dec(assignedAgent, GeneralSettings, assignedNetwork)
     # sarsaGeneric = None
@@ -81,13 +109,13 @@ for attackClass in attackClasses:
     exp = experiment.Experiment(attackClass, GeneralSettings, assignedNetwork, 
         assignedAgent, twist= "NoPTTile1Save", load_attack_path=attack_location)
     exp.run(0, sarsaGeneric)
-
+"""
 
 """
 
 
 exp = experiment.Experiment(conAttack, GeneralSettings, assignedNetwork, 
-    assignedAgent, twist= "newReward", load_attack_path=None)
+    assignedAgent, load_attack_path=None)
 
 
 start_num = int(sys.argv[1])
@@ -97,8 +125,9 @@ for i in range(length_core):
     sarsaGeneric = create_generic_dec(assignedAgent, GeneralSettings, assignedNetwork)
     print("Im doing it for {0}".format(start_num+i))
     exp.run(start_num+i, sarsaGeneric)
+    # exp.run(start_num+i)
 
-
+"""
 
 
 

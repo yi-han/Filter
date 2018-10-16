@@ -13,9 +13,7 @@ and shouldn't it be including both the last state and the prior state?
 
 
 #TODO
-1)I suspect that if e <1 but step < pretrainign, it might still be not working right
-14) I think sarsa (and tensorflow) files will collide in parrelel
-15) Name dependent on topology
+
 16) SaveModelEnum being caleled Load_model_enuM???
 17) Don't thing generic update (actionTo...) is compatible with differnt size agents
 18) Why is actionReplay only after pretraining???
@@ -35,7 +33,9 @@ and shouldn't it be including both the last state and the prior state?
 11) Allow you to choose adversary
 12) Input the settings
 13) Slurm parrelel
-
+1)I suspect that if e <1 but step < pretrainign, it might still be not working right
+14) I think sarsa (and tensorflow) files will collide in parrelel
+15) Name dependent on topology
 """
 
 from __future__ import division
@@ -144,7 +144,7 @@ class Experiment:
         packet_served_file.write("Episode,PacketsReceived,PacketsServed,PercentageReceived,ServerFailures\n")
 
         with agent:
-            if self.load_model in [self.load_model_enum.test, self.load_model_enum.load]:
+            if self.load_model in [self.load_model_enum.load]: #self.load_model_enum.test
                 agent.loadModel(load_path)
 
             fail_seg = 0
@@ -157,6 +157,7 @@ class Experiment:
                 
                 for step in range(max_epLength):
                     #TODO make sure to do do pre_training_stuff
+                    # print("my prediction is for {0}".format(net.get_state()))
                     a = agent.predict(net.get_state(), total_steps, e) # generate an action
                     #net.step(a, step) # take the action, update the network
 
@@ -173,11 +174,11 @@ class Experiment:
                             agent.update(net.last_state, last_action, net.get_state(), d, r, next_action = a)
 
 
-                        if debug:                
-                            print("current_state: {0}".format(net.get_state()))
-                            print("last state: {0}".format(net.last_state))
-                            print("step:" + str(step) + ", action:" + str(last_action) + ", reward:" + str(r), end='\n')
-                            print("server state: {0}\n".format(net.switches[0].getWindow()))
+                        #if debug:                
+                        # print("current_state: {0}".format(net.get_state()))
+                        # print("last state: {0}".format(net.last_state))
+                        # print("step:" + str(step) + ", action:" + str(last_action) + ", reward:" + str(r), end='\n')
+                        # print("server state: {0}\n".format(net.switches[0].getWindow()))
                         
                         if r < 0:
                             fail += 1

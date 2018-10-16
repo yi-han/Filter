@@ -93,15 +93,15 @@ loadAttacks = False
 
 if loadAttacks:
     for attackClass in attackClasses:
-        # genericAgent = create_generic_dec(assignedAgent, GeneralSettings, assignedNetwork)
-        genericAgent = None
+        genericAgent = create_generic_dec(assignedAgent, GeneralSettings, assignedNetwork)
+        # genericAgent = None
         attack_location = load_attack_path+attackClass.getName()+".apkl"
 
         exp = experiment.Experiment(attackClass, GeneralSettings, assignedNetwork, 
-            assignedAgent, twist= "doubleSave", load_attack_path=attack_location)
+            assignedAgent, twist= "", load_attack_path=attack_location)
         exp.run(0, genericAgent)
 else:
-    experiment = experiment.Experiment(conAttack, GeneralSettings, assignedNetwork, assignedAgent, twist= "newReward")
+    experiment = experiment.Experiment(conAttack, GeneralSettings, assignedNetwork, assignedAgent)
     # experiment = experiment.Experiment(conAttack, GeneralSettings, assignedNetwork, assignedAgent, "double")
 
 

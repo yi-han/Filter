@@ -278,7 +278,7 @@ class network(object):
         #print(self.filter_list)
 
         for i in self.filter_list:
-            #self.switches[i].printSwitch()
+            # self.switches[i].printSwitch()
             state.append(self.switches[i].getWindow())
 
         return state
@@ -366,10 +366,13 @@ class network(object):
         legitimate_rate = self.switches[0].legal_window
         legitimate_rate_all = self.switches[0].legal_window + self.switches[0].dropped_legal_window
         attacker_rate = self.switches[0].illegal_window
-
+        #assert((legitimate_rate+attacker_rate)==self.switches[0].getWindow())
 
         if legitimate_rate + attacker_rate > self.upper_boundary:
             #used to set the reward to "reward_overload" in this case, but didn't work well
+           
+            # print("\n\n\n negative reward")
+            # print(self.upper_boundary)
             reward -= ((legitimate_rate + attacker_rate)/self.upper_boundary - 1.0)
             self.server_failures +=1
         else:
