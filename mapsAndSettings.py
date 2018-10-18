@@ -9,7 +9,7 @@ from enum import Enum
 import math
 import agent.genericDecentralised as genericDecentralised
 import agent.sarsaCentralised as sarCen
-
+import pandas
 
 class NetworkSimpleBasic(object):
     name = "simple_basic"
@@ -178,6 +178,27 @@ def create_generic_dec(gs, general_s, ns):
             test
         )
     return master
+
+
+def getSummary(adversary_classes, load_path, agent):
+    summary = open("{0}/attackSummary.csv".format(load_path), "w")
+    summary.write("Attack Type, Agent, Legal Packets Received, Legal Packets Served, Percentage, Server Failures\n")
+    agentName = agent.name
+    for adversary_class in adversary_classes:
+        attack_type = adversary_class.getName()
+        file_path = "{0}/packet_served-{1}-{2}-{3}.csv".format(load_path,"test", attack_type, 0)
+        packet_file = pandas.read_csv(file_path)
+        #print(packet_file)
+        sum_packets_received = sum(packet_file.PacketsReceived)
+        sum_packets_sent = sum(packet_file.PacketsServed)
+        sum_server_failures = sum(packet_file.ServerFailures)
+        percentage_received = sum_packets_sent/sum_packets_received
+        summary.write("{0}, {1}, {2}, {3}, {4}, {5}\n".format(attack_type, agent.name,
+            sum_packets_received, sum_packets_sent, percentage_received, sum_server_failures))
+    summary.close()
+
+
+
 
 class SarsaCenMaliasOne(object):
     name = "sarsaCen100"

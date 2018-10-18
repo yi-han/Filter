@@ -53,4 +53,4 @@ gradualIncrease = hostClass.GradualIncrease
 attackClasses = [conAttack, shortPulse, mediumPulse,
     largePulse, gradualIncrease] 
 
-generateAttacks(NetworkFourThrottle, attackClasses)
+generateAttacks(NetworkSingleTeamMalialisMedium, attackClasses)

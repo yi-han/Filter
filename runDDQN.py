@@ -85,7 +85,7 @@ attackClasses = [conAttack, shortPulse, mediumPulse,
     largePulse, gradualIncrease] 
 
 
-assignedNetwork = NetworkFourThrottle
+assignedNetwork = NetworkTwelveThrottleLight
 assignedAgent = ddqnDoubleTeamGeneric
 load_attack_path = "attackSimulations/{0}/".format(assignedNetwork.name)
 loadAttacks = False
@@ -100,6 +100,8 @@ if loadAttacks:
         exp = experiment.Experiment(attackClass, GeneralSettings, assignedNetwork, 
             assignedAgent, twist= "", load_attack_path=attack_location)
         exp.run(0, genericAgent)
+
+    getSummary(attackClasses, exp.load_path, assignedAgent)
 else:
     experiment = experiment.Experiment(conAttack, GeneralSettings, assignedNetwork, assignedAgent)
     # experiment = experiment.Experiment(conAttack, GeneralSettings, assignedNetwork, assignedAgent, "double")

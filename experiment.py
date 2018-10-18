@@ -120,7 +120,7 @@ class Experiment:
         path =  self.network_settings.name + name + self.twist# The path to save model to
         print("Path is {0}".format(path))
         #path = "/data/projects/punim0621" # for slug
-        load_path = path #ideally can move a good one to a seperate location
+        self.load_path = path #ideally can move a good one to a seperate location
 
 
         #Make a path for our model to be saved in.
@@ -145,7 +145,7 @@ class Experiment:
 
         with agent:
             if self.load_model in [self.load_model_enum.load]: #self.load_model_enum.test
-                agent.loadModel(load_path)
+                agent.loadModel(self.load_path)
 
             fail_seg = 0
             for ep_num in range(num_episodes):
@@ -208,7 +208,7 @@ class Experiment:
                 if self.load_model is self.load_model_enum.save and prefix == 0: # only save the first iteration 
                     # save the model only every 10,000 steps
                     if ep_num % 10000 == 0:
-                        agent.saveModel(load_path, ep_num)
+                        agent.saveModel(self.load_path, ep_num)
 
 
                 # save data generated
