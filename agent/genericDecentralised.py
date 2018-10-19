@@ -19,7 +19,9 @@ import math
 
 class AgentOfAgents(aBase.Agent):
 
-    def __init__(self, N_action, pre_train_steps, action_per_throttler, N_state, sub_agent_list, tau=0.1, discountFactor=0, debug=False, test=False):
+    def __init__(self, N_action, pre_train_steps, action_per_throttler, N_state, sub_agent_list, 
+        getStateletFunction,
+        tau=0.1, discountFactor=0, debug=False, test=False):
 
         self.num_agents = len(sub_agent_list)
         self.action_per_throttler = action_per_throttler
@@ -28,7 +30,7 @@ class AgentOfAgents(aBase.Agent):
         self.agents = sub_agent_list
         self.score = 0
         self.test = test
-
+        self.getStatelet = getStateletFunction
     def __enter__(self):
         print("__enter__ generic decentralised")
         for agent in self.agents:
@@ -124,11 +126,6 @@ class AgentOfAgents(aBase.Agent):
     def getPath(self):
         return AgentOfAgents.getName(self)
 
-    def getStatelet(self, state, sizeOfSegment):
-        # get a segment of state corresponding to the agent, return remaining state as well
-        statelet = state[0:sizeOfSegment]
-        remainingState = state[sizeOfSegment:]
-        return (statelet, remainingState)
 
 
     def reset(self):

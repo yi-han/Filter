@@ -148,7 +148,7 @@ class NetworkTwelveThrottleHeavy(object):
 
 
 
-def create_generic_dec(gs, general_s, ns):
+def create_generic_dec(gs, general_s, ns, stateletFunction):
     """
     gs = generic_settings, ns = network_settings
 
@@ -174,7 +174,7 @@ def create_generic_dec(gs, general_s, ns):
     #print("\nTest {0} \n".format(sub_agent_list[0].N_action))
     master = genericDecentralised.AgentOfAgents(
         ns.N_action, gs.pre_train_steps, ns.action_per_throttler, ns.N_state,
-            sub_agent_list, gs.tau, gs.y, general_s.debug, 
+            sub_agent_list, stateletFunction, gs.tau, gs.y, general_s.debug, 
             test
         )
     return master
@@ -199,154 +199,14 @@ def getSummary(adversary_classes, load_path, agent):
 
 
 
+def getStateletNoCommunication(state, sizeOfSegment):
+    # get a segment of state corresponding to the agent, return remaining state as well
+    statelet = state[0:sizeOfSegment]
+    remainingState = state[sizeOfSegment:]
+    return (statelet, remainingState)
 
-class SarsaCenMaliasOne(object):
-    name = "sarsaCen100"
-    max_epLength = 30 # or 60 if test
-    y = 0
-    tau = 0.01
-    update_freq = None
-    batch_size = None
-    # num_episodes = 62501
-    # pre_train_steps = 0 * max_epLength
-    # annealing_steps = 50000 * max_epLength #1000*max_epLength #60000 * max_epLength 
-    num_episodes = 100001
-    pre_train_steps = 20000 * max_epLength
-    annealing_steps = 60001 * max_epLength #1000*max_epLength #60000 * max_epLength 
-    
-
-    startE = 1
-    endE = 0.0
-    stepDrop = (startE - endE)/annealing_steps
-    agent = sarCen.Agent
-
-class SarsaCenTwo(object):
-    name = "sarsaCen200"
-    max_epLength = 30 # or 60 if test
-    y = 0
-    tau = 0.001
-    update_freq = None
-    batch_size = None
-    # num_episodes = 62501
-    # pre_train_steps = 0 * max_epLength
-    # annealing_steps = 50000 * max_epLength #1000*max_epLength #60000 * max_epLength 
-    num_episodes = 200001
-    pre_train_steps = 60000 * max_epLength
-    annealing_steps = 120001 * max_epLength #1000*max_epLength #60000 * max_epLength 
-    
-
-    startE = 1
-    endE = 0.0
-    stepDrop = (startE - endE)/annealing_steps
-    agent = sarCen.Agent
-
-
-class SarsaDecMaliasNoPT(object):
-    name = "sarsaDecGenMalialis"
-    max_epLength = 30 # or 60 if test
-    y = 0
-    tau = 0.1
-    update_freq = None
-    batch_size = None
-    num_episodes = 62501#82501
-    pre_train_steps = 0#2000 * max_epLength
-    annealing_steps = 50000 * max_epLength #1000*max_epLength #60000 * max_epLength 
-    
-
-    startE = 0.4 #0.4
-    endE = 0.0
-    stepDrop = (startE - endE)/annealing_steps
-    agent = None
-    sub_agent = sarCen.Agent
-    group_size = 1 # number of filters each agent controls
-
-class SarsaDecMaliasNoPTLarge(object):
-    name = "sarsaDecGenNoPTLarge"    
-    
-    max_epLength = 30 # or 60 if test
-    y = 0
-    tau = 0.1
-    update_freq = None
-    batch_size = None
-    num_episodes = 120001#82501
-    pre_train_steps = 0#2000 * max_epLength
-    annealing_steps = 50000 * max_epLength #1000*max_epLength #60000 * max_epLength 
-    
-
-    startE = 0.4 #0.4
-    endE = 0.0
-    stepDrop = (startE - endE)/annealing_steps
-    agent = None
-    sub_agent = sarCen.Agent
-    group_size = 1 # number of filters each agent controls
-
-
-class SarsaDecMaliasWithPT(object):
-    name = "sarsaDecGenPT"
-    
-    max_epLength = 30 # or 60 if test
-    y = 0
-    tau = 0.1
-    update_freq = None
-    batch_size = None
-    # num_episodes = 62501
-    # pre_train_steps = 0 * max_epLength
-    # annealing_steps = 50000 * max_epLength #1000*max_epLength #60000 * max_epLength 
-    num_episodes = 82501#82501
-    pre_train_steps = 2000#2000 * max_epLength
-    annealing_steps = 50000 * max_epLength #1000*max_epLength #60000 * max_epLength 
-
-    startE = 0.4 #0.4
-    endE = 0.0
-    stepDrop = (startE - endE)/annealing_steps
-    agent = None
-    sub_agent = sarCen.Agent
-    group_size = 1 # number of filters each agent controls
-
-class SarsaDecPTLarge(object):
-    name = "sarsaDecGenLarge"
-    max_epLength = 30 # or 60 if test
-    y = 0    
-    tau = 0.001 #Rate to update target network toward primary network. 
-    update_freq = None #How often to perform a training step.
-    batch_size = None #How many experiences to use for each training step.
-    num_episodes = 100001 #200001#    
-    pre_train_steps = 20000 * max_epLength #40000 * max_epLength #
-    annealing_steps = 60000 * max_epLength  #120000 * max_epLength  #
-
-
-    startE = 0.4 #0.4
-    endE = 0.0
-    stepDrop = (startE - endE)/annealing_steps
-    agent = None
-    sub_agent = sarCen.Agent
-    group_size = 1 # number of filters each agent controls
-
-
-
-class SarsaGenericTeam(object):
-    group_size = 2
-    name = "Sarsa200TeamOf{0}".format(group_size)
-    max_epLength = 30 # or 60 if test
-    y = 0    
-    tau = 0.001 #Rate to update target network toward primary network. 
-    update_freq = None #How often to perform a training step.
-    batch_size = None #How many experiences to use for each training step.
-    num_episodes = 200001 #200001#    
-    pre_train_steps = 40000 * max_epLength #40000 * max_epLength #
-    annealing_steps = 120000 * max_epLength  #120000 * max_epLength  #
-    
-    startE = 1
-    endE = 0.0
-    stepDrop = (startE - endE)/annealing_steps
-    agent = None
-    sub_agent = sarCen.Agent
-
-
-
-
-
-
+def getStateletWithCommunication(state, sizeOfSegment):
+    return (state, state)
 
 
 
