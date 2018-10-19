@@ -148,16 +148,18 @@ class NetworkTwelveThrottleHeavy(object):
 
 
 
-def create_generic_dec(gs, general_s, ns, stateletFunction):
+def create_generic_dec(gs, general_s, ns):
     """
     gs = generic_settings, ns = network_settings
+
+    We can make agents into groups.
 
     """
     throttlers_not_allocated = ns.N_state
     group_size = gs.group_size
     sub_agent = gs.sub_agent
-    num_teams = math.ceil(ns.N_state/group_size)
-
+    #num_teams = math.ceil(ns.N_state/group_size)
+    stateletFunction = gs.stateletFunction
     sub_agent_list = []
 
     test = (general_s.save_model is general_s.SaveModelEnum.load)
@@ -165,9 +167,10 @@ def create_generic_dec(gs, general_s, ns, stateletFunction):
     while throttlers_not_allocated > 0:
         print("currently {0} throttlers_not_allocated".format(throttlers_not_allocated))
         agent_to_allocate = min(throttlers_not_allocated, group_size)
+        state_size = calcStateSize(agent_to_allocate, ns.N_state, gs.isCommunication)
         print(agent_to_allocate)
         sub_agent_list.append(sub_agent(ns.action_per_throttler**agent_to_allocate, gs.pre_train_steps,
-            ns.action_per_throttler, agent_to_allocate, gs.tau, gs.y, general_s.debug,
+            ns.action_per_throttler, state_size, gs.tau, gs.y, general_s.debug,
             test))
         throttlers_not_allocated -= agent_to_allocate
 
@@ -179,6 +182,12 @@ def create_generic_dec(gs, general_s, ns, stateletFunction):
         )
     return master
 
+def create_generic_single_comm(gs, general_s, ns, stateletFunction):
+    """
+    Generic make a decentralised set of singular agents that have access to entire 
+    state. Effectively simmulates full communication
+
+    """
 
 def getSummary(adversary_classes, load_path, agent):
     summary = open("{0}/attackSummary.csv".format(load_path), "w")
@@ -205,9 +214,15 @@ def getStateletNoCommunication(state, sizeOfSegment):
     remainingState = state[sizeOfSegment:]
     return (statelet, remainingState)
 
+
 def getStateletWithCommunication(state, sizeOfSegment):
     return (state, state)
 
 
+def calcStateSize(size_of_group, total_number_states, isCommunication):
+    if isCommunication:
+        return total_number_states
+    else:
+        return size_of_group
 
 

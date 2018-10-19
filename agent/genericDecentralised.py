@@ -55,10 +55,9 @@ class AgentOfAgents(aBase.Agent):
             # number of states is number of agents
             
             # print(self.agents[i])
-            # print(self.agents[0].N_action)
+            #print(self.agents[0].N_action)
             agent = self.agents[i]
             N_state = agent.N_state
-            #agentState = state[(i*N_state):((i+1)*N_state)] # in a list to mock centralised
             (statelet, state) = self.getStatelet(state, N_state)
 
             agentAction = agent.predict(statelet, total_steps, e)
@@ -75,7 +74,7 @@ class AgentOfAgents(aBase.Agent):
         #actions = AgentOfAgents.actionToActions(action, self.num_agents, self.action_per_throttler)
         N_action_list = [agent.N_action for agent in self.agents]
         actions = AgentOfAgents.genericActionToactions(network_action, N_action_list)
-        # print("\n\n")
+        # print("\nupdate")
         # print(N_action_list)
         # print("state {0}".format(last_state))
         # print("action was {0}".format(network_action))
