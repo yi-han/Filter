@@ -6,7 +6,6 @@ for dest in punim0621 punim0636; do
 	--include='**/*.slurm' \
 	--include='**/*.txt' \
 	--include='**/*.sh' \
-	--include='**/*.apkl'\
 	network \
 	agent \
 	attackSimulations \
@@ -21,7 +20,9 @@ for dest in punim0621 punim0636; do
 	phys_attempt.slurm \
 	helloWorld.py \
 	slurms_cloud_standard.sh \
+	slurms_cloud_heavy.sh \
 	slurms_gpgpu_standard.sh \
+	slurms_gpgpu_half.sh \
 	--exclude='*' \
 	jpattison@spartan.hpc.unimelb.edu.au:/data/projects/$dest #punim0621
 	#jpattison@spartan.hpc.unimelb.edu.au:/data/projects/punim0636  punim0621

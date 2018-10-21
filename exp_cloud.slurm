@@ -1,13 +1,13 @@
 #!/bin/bash
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
-#SBATCH --time=0-12:00:00
+#SBATCH --time=2-00:00:00
 #SBATCH --account=punim0636
 #SBATCH --partition=physical
 #SBATCH --job-name=sarsa_throttle
 # Load required modules
 
-module load Python/3.5.2-goolf-2015a
+module load Python/3.6.4-intel-2017.u2-GCC-6.2.0-CUDA9
 
 
 # Launch multiple process python code

@@ -7,6 +7,26 @@ import agent.sarsaCentralised as sarCen
 from mapsAndSettings import *
 assert(len(sys.argv)==3)
 
+class SarsaDoubleSingleCommunicate(object):
+    group_size = 1
+    name = "Sarsa200SingleFullCommunicate"
+    max_epLength = 30 # or 60 if test
+    y = 0    
+    tau = 0.001 #Rate to update target network toward primary network. 
+    update_freq = None #How often to perform a training step.
+    batch_size = None #How many experiences to use for each training step.
+    num_episodes = 200001 #200001#    
+    pre_train_steps = 40000 * max_epLength #40000 * max_epLength #
+    annealing_steps = 120000 * max_epLength  #120000 * max_epLength  #
+    
+    startE = 1
+    endE = 0.0
+    stepDrop = (startE - endE)/annealing_steps
+    agent = None
+    sub_agent = sarCen.Agent
+
+    stateletFunction = getStateletWithCommunication
+    isCommunication = True # flag to demonstrate communication  
 
 class SarsaCenMaliasOne(object):
     name = "sarsaCen100"
@@ -173,7 +193,7 @@ Settings to change
 
 """
 assignedNetwork = NetworkSingleTeamMalialisMedium
-assignedAgent = SarsaDecMaliasNoPT
+assignedAgent = SarsaDoubleSingleCommunicate
 load_attack_path = "attackSimulations/{0}/".format(assignedNetwork.name)
 
 
@@ -196,7 +216,7 @@ loadAttacks = False
 
 if loadAttacks:
     for attackClass in attackClasses:
-        genericAgent = create_generic_dec(assignedAgent, GeneralSettings, assignedNetwork, getStateletNoCommunication)
+        genericAgent = create_generic_dec(assignedAgent, GeneralSettings, assignedNetwork)
         #genericAgent = None
         attack_location = load_attack_path+attackClass.getName()+".apkl"
 
@@ -214,7 +234,7 @@ else:
     length_core= int(sys.argv[2])
 
     for i in range(length_core):
-        genericAgent = create_generic_dec(assignedAgent, GeneralSettings, assignedNetwork, getStateletNoCommunication)
+        genericAgent = create_generic_dec(assignedAgent, GeneralSettings, assignedNetwork)
         # genericAgent = None        
         print("Im doing it for {0}".format(start_num+i))
         experiment.run(start_num+i, genericAgent)

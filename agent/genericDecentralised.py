@@ -88,7 +88,7 @@ class AgentOfAgents(aBase.Agent):
             (current_statelet, current_state) = self.getStatelet(current_state, N_state)
             #print("future statelet is {0}".format(current_statelet))
 
-            #print("for {0} we have a state of {1} and performed {2}".format(N_state, last_statelet, action))
+            # print("for {0} we have a state of {1} and performed {2}".format(N_state, last_statelet, action))
             #print("do the actions line up?")
             agent.update(last_statelet, action, current_statelet, is_done, reward)
         self.score += reward
