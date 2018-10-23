@@ -201,7 +201,7 @@ def getSummary(adversary_classes, load_path, agent):
         sum_packets_received = sum(packet_file.PacketsReceived)
         sum_packets_sent = sum(packet_file.PacketsServed)
         sum_server_failures = sum(packet_file.ServerFailures)
-        percentage_received = sum_packets_sent/sum_packets_received
+        percentage_received = sum_packets_received/sum_packets_sent*100
         summary.write("{0}, {1}, {2}, {3}, {4}, {5}\n".format(attack_type, agent.name,
             sum_packets_received, sum_packets_sent, percentage_received, sum_server_failures))
     summary.close()

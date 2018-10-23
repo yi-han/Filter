@@ -108,7 +108,7 @@ attackClasses = [conAttack, shortPulse, mediumPulse,
     largePulse, gradualIncrease] 
 
 
-assignedNetwork = NetworkTwelveThrottleLight
+assignedNetwork = NetworkFourThrottle
 assignedAgent = ddqnDoubleSingleCommunicate
 load_attack_path = "attackSimulations/{0}/".format(assignedNetwork.name)
 loadAttacks = False

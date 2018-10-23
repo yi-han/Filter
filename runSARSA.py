@@ -87,6 +87,8 @@ class SarsaDecMaliasNoPT(object):
     agent = None
     sub_agent = sarCen.Agent
     group_size = 1 # number of filters each agent controls
+    stateletFunction = getStateletNoCommunication
+    isCommunication = False
 
 class SarsaDecMaliasNoPTLarge(object):
     name = "sarsaDecGenNoPTLarge"    
@@ -193,7 +195,7 @@ Settings to change
 
 """
 assignedNetwork = NetworkSingleTeamMalialisMedium
-assignedAgent = SarsaDoubleSingleCommunicate
+assignedAgent = SarsaDecMaliasNoPT
 load_attack_path = "attackSimulations/{0}/".format(assignedNetwork.name)
 
 
