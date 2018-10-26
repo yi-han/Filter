@@ -102,8 +102,9 @@ class Experiment:
             agent.reset()
         else:
             agent = self.agent_settings.agent(N_action, pre_train_steps, action_per_throttler, N_state, tau, y, debug, test)
-        reward_overload = -1
-
+        reward_overload = self.agent_settings.reward_overload
+        if reward_overload:
+            print("using reward overload")
         print("\n Prefix {0}".format(prefix))
         net = network(self.network_settings, reward_overload, self.adversary_class, max_epLength, load_attack_path=self.load_attack_path)
         #create lists to contain total rewards and steps per episode
@@ -142,6 +143,8 @@ class Experiment:
         print("Using the {0} agent:".format(name))
         reward_file.write("Episode,StepsSoFar,TotalReward,LastReward,LengthEpisode,e\n")
         packet_served_file.write("Episode,PacketsReceived,PacketsServed,PercentageReceived,ServerFailures\n")
+        #self.episode_rewards = []
+
 
         with agent:
             if self.load_model in [self.load_model_enum.load]: #self.load_model_enum.test
@@ -200,6 +203,8 @@ class Experiment:
                             l = agent.actionReplay(net.get_state(), batch_size)
                             if l:
                                 loss.append(l)
+                #self.episode_rewards.append(net.rewards_per_step) DO LATER
+
 
                 if ep_num % 1000 == 0:
                     print("Completed Episode - {0}".format(ep_num))

@@ -10,7 +10,6 @@ import agent # i think this is the other folder but I dont think it would have a
 
 """
 #TODO
-2) Implement nodes for realistic implementation
 5) Do a close inspection of the state at the very start and run through to make sure the network is running right
 6) Confirm rewards...might be incentive to accept everything
 7) Simulate network milliseconds
@@ -19,6 +18,7 @@ import agent # i think this is the other folder but I dont think it would have a
 2) Seperate 'move_traffic' from 'get_state'
 3) Convert drop_probabilities to dynamic
 4) Implement a observation window
+2) Implement nodes for realistic implementation
 
 #OTHER
 1) Note whilst calcPercentage is a part of getReward it doesn't evaluate for the first step (so not full)
@@ -219,6 +219,7 @@ class network(object):
                 self.switches[i].setThrottle(np.random.randint(0,self.action_per_throttler)/self.action_per_throttler)
         self.server_failures = 0
 
+        self.rewards_per_step = [] # keep track of the rewards at every step
         #self.drop_probability.clear()
 
 
@@ -373,7 +374,11 @@ class network(object):
            
             # print("\n\n\n negative reward")
             # print(self.upper_boundary)
-            reward -= ((legitimate_rate + attacker_rate)/self.upper_boundary - 1.0)
+            if self.reward_overload:
+                reward = self.reward_overload
+            else:
+                reward -= ((legitimate_rate + attacker_rate)/self.upper_boundary - 1.0)
+            
             self.server_failures +=1
         else:
             if legitimate_rate_all != 0:
@@ -385,12 +390,22 @@ class network(object):
 
         return clip(-1, 1, reward)
 
-    def step(self, action, step_count, update_last_state = True):
+    # def getPacketServedAtMoment(self):
+    #     """
+    #     Experimental statistic. 
+    #     Calculate the load at the server. If it is above the capacity/steps report 0. 
+    #     Otherwise the % of legitimate packets taht should have arrived.
+    #     Do note there is an accumulative effect so this is very imprecise
+
+    #     """
+
+
+
+    def step(self, action, step_count):
         # input the actions. Just sets drop probabilities at the moment
         # ideally i would move calculations here
 
-        if update_last_state:
-            self.last_state = self.get_state()
+        self.last_state = self.get_state()
 
         for switch in self.switches:
             switch.resetWindow()
@@ -398,7 +413,7 @@ class network(object):
         self.set_drop_probability(action)
         for i in range(self.iterations_between_action): # each time delay is 10 ms, 10*200 = 2000 ms = 2 seconds
            self.move_traffic(step_count)
-
+           #self.rewards_per_step.append(self.calculate_reward())
 
         #self.adversary.takeStep()
         # should pass the data along nodes

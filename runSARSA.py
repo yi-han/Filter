@@ -28,6 +28,51 @@ class SarsaDoubleSingleCommunicate(object):
     stateletFunction = getStateletWithCommunication
     isCommunication = True # flag to demonstrate communication  
 
+class SarsaDecMaliasOriginal(object):
+    name = "sarsaDecGenMalialisOriginal"
+    max_epLength = 30 # or 60 if test
+    y = 0
+    tau = 0.1
+    update_freq = None
+    batch_size = None
+    num_episodes = 62501#82501
+    pre_train_steps = 0#2000 * max_epLength
+    annealing_steps = 50000 * max_epLength #1000*max_epLength #60000 * max_epLength 
+    
+
+    startE = 0.4 #0.4
+    endE = 0.0
+    stepDrop = (startE - endE)/annealing_steps
+    agent = None
+    sub_agent = sarCen.Agent
+    group_size = 1 # number of filters each agent controls
+    stateletFunction = getStateletNoCommunication
+    isCommunication = False
+    reward_overload = -1
+
+class SarsaDecMaliasNoPT(object):
+    name = "sarsaDecGenMalialisNoOpt"
+    max_epLength = 30 # or 60 if test
+    y = 0
+    tau = 0.1
+    update_freq = None
+    batch_size = None
+    num_episodes = 62501#82501
+    pre_train_steps = 0#2000 * max_epLength
+    annealing_steps = 50000 * max_epLength #1000*max_epLength #60000 * max_epLength 
+    
+
+    startE = 0.4 #0.4
+    endE = 0.0
+    stepDrop = (startE - endE)/annealing_steps
+    agent = None
+    sub_agent = sarCen.Agent
+    group_size = 1 # number of filters each agent controls
+    stateletFunction = getStateletNoCommunication
+    isCommunication = False
+    reward_overload = None
+
+"""
 class SarsaCenMaliasOne(object):
     name = "sarsaCen100"
     max_epLength = 30 # or 60 if test
@@ -69,26 +114,7 @@ class SarsaCenTwo(object):
     agent = sarCen.Agent
 
 
-class SarsaDecMaliasNoPT(object):
-    name = "sarsaDecGenMalialis"
-    max_epLength = 30 # or 60 if test
-    y = 0
-    tau = 0.1
-    update_freq = None
-    batch_size = None
-    num_episodes = 62501#82501
-    pre_train_steps = 0#2000 * max_epLength
-    annealing_steps = 50000 * max_epLength #1000*max_epLength #60000 * max_epLength 
-    
 
-    startE = 0.4 #0.4
-    endE = 0.0
-    stepDrop = (startE - endE)/annealing_steps
-    agent = None
-    sub_agent = sarCen.Agent
-    group_size = 1 # number of filters each agent controls
-    stateletFunction = getStateletNoCommunication
-    isCommunication = False
 
 class SarsaDecMaliasNoPTLarge(object):
     name = "sarsaDecGenNoPTLarge"    
@@ -151,7 +177,7 @@ class SarsaDecPTLarge(object):
     agent = None
     sub_agent = sarCen.Agent
     group_size = 1 # number of filters each agent controls
-
+"""
 
 
 class SarsaGenericTeam(object):
@@ -177,7 +203,7 @@ class GeneralSettings(object):
     SaveModelEnum = Enum('SaveModel', 'neither save load')
     debug = False
     # save_attack = SaveAttackEnum.neither
-    save_model = SaveModelEnum.save
+    save_model = SaveModelEnum.load
 
 
 
@@ -194,7 +220,7 @@ Settings to change
 
 
 """
-assignedNetwork = NetworkSingleTeamMalialisMedium
+assignedNetwork = NetworkMalialisSmall
 assignedAgent = SarsaDecMaliasNoPT
 load_attack_path = "attackSimulations/{0}/".format(assignedNetwork.name)
 
@@ -214,7 +240,7 @@ attackClasses = [conAttack, shortPulse, mediumPulse,
 
 
 
-loadAttacks = False
+loadAttacks = True
 
 if loadAttacks:
     for attackClass in attackClasses:
@@ -228,7 +254,7 @@ if loadAttacks:
     getSummary(attackClasses, exp.load_path, assignedAgent)
 
 else:
-    experiment = experiment.Experiment(conAttack, GeneralSettings, assignedNetwork, assignedAgent)
+    experiment = experiment.Experiment(conAttack, GeneralSettings, assignedNetwork, assignedAgent, twist="")
     # experiment = experiment.Experiment(conAttack, GeneralSettings, assignedNetwork, assignedAgent, "double")
 
 

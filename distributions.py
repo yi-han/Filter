@@ -65,11 +65,11 @@ def reward_single(directory,reward_prefix="reward"):
     #(ep, ep_reward) = condense_values(ep, ep_reward)
     return (ep, ep_reward)
 
-def reward_multiple(directory, max_num, reward_prefix="reward"):
+def reward_multiple(directory, max_num, reward_prefix):
     # we do first one manually then loop for rest
     
 
-    path = "{0}/{1}-{2}-{3}-{4}.csv".format(directory, reward_prefix, "train","Constant-Attack",0)
+    path = "{0}/{1}-{2}.csv".format(directory, reward_prefix, 0)
     f = pd.read_csv(path)
     ep_reward = f.LastReward #LastReward
     ep = f['Episode']
@@ -78,11 +78,13 @@ def reward_multiple(directory, max_num, reward_prefix="reward"):
 
     for i in range(max_num):
         print(i)
-        path = "{0}/reward-{1}-{2}-{3}.csv".format(directory,"train","Constant-Attack",i)
+        path = "{0}/{1}-{2}.csv".format(directory, reward_prefix, i)
+        print(path)
         f = pd.read_csv(path)
         ep_reward = np.array(f.LastReward, dtype=float)
         ep_reward.shape=(len(ep),1)
         average_reward += ep_reward
+
     average_reward/=max_num
     average_reward = average_reward.tolist()
     #(ep, average_reward) = condense_values(ep, average_reward)
@@ -181,15 +183,14 @@ def dic_to_summary(results):
     summaryFile.close()
     # creates a quick summary for excel
 
-def distributions(directory, max_num = None, start_point=0):
+def distributions(directory, max_num = None, start_point=0, attack_name=""):
     if not max_num:
         (ep, ep_reward) = reward_single(directory)
     else:
-        (ep, ep_reward) = reward_multiple(directory, max_num)
-
+        (ep, ep_reward) = reward_multiple(directory, max_num, attack_name)
     print(len(ep_reward))
-    ep_reward = np.array(ep_reward[start_point:])
 
+    ep_reward = np.array(ep_reward[start_point:])
     print("Mean = {0}".format(np.mean(ep_reward)))
     print("Median = {0}".format(np.median(ep_reward)))
     print("1Q: {0} - 2Q: {1} 2: {2}".format(np.percentile(ep_reward,25), np.percentile(ep_reward, 50),
