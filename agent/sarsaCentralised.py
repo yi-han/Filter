@@ -17,9 +17,10 @@ import numpy as np
 import pickle
 from pathlib import Path
 import os
+#import tileCoding
 class Agent(aBase.Agent):
 
-    def __init__(self, N_action, pre_train_steps, action_per_agent, N_state, alph=0.1, gam=0, debug=False, test=False):
+    def __init__(self, N_action, pre_train_steps, action_per_agent, N_state, tileCoding, alph=0.1, gam=0, debug=False, test=False):
 
         super().__init__(pre_train_steps, debug, test)
         self.ai = SarsaAI(
@@ -28,6 +29,7 @@ class Agent(aBase.Agent):
         self.N_state = N_state
         self.score = 0
         self.test = test
+        self.tileCoding = tileCoding
 
     def __enter__(self):
         # probably have memory management here
@@ -50,7 +52,7 @@ class Agent(aBase.Agent):
         if randomChoice:
             action = np.random.randint(0,self.N_action)
         else:
-            state = tileState(state)
+            state = self.tileCoding(state)
             action = self.ai.chooseAction(state)
 
         return action 
@@ -70,8 +72,8 @@ class Agent(aBase.Agent):
         Then state and action of planned next?
         """
 
-        last_state = tileState(last_state)
-        current_state = tileState(current_state)
+        last_state = self.tileCoding(last_state)
+        current_state = self.tileCoding(current_state)
         self.score += reward
 
 
@@ -135,14 +137,14 @@ class Agent(aBase.Agent):
 
     def getPath(self):
         return Agent.getName()
-
+"""
 def tileState(state):
     # a hack job at tileCoding. Based on 0 research or effort
     newState = []
     for el in state:
         newState.append(round(el, 1))
     return tuple(newState)
-
+"""
 
 """
 mock stuff to see if i can get it to work

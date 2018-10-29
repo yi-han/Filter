@@ -1,7 +1,7 @@
 import sys
 import experiment
 import network.hosts as hostClass
-
+import agent.tileCoding as tileCoding
 import agent.sarsaCentralised as sarCen
 #import agent.sarsaDecentralised as sarDec# import agent.ddqnDecentralised as ddDec
 from mapsAndSettings import *
@@ -27,6 +27,8 @@ class SarsaDoubleSingleCommunicate(object):
 
     stateletFunction = getStateletWithCommunication
     isCommunication = True # flag to demonstrate communication  
+    reward_overload = False
+
 
 class SarsaDecMaliasOriginal(object):
     name = "sarsaDecGenMalialisOriginal"
@@ -60,8 +62,6 @@ class SarsaDecMaliasNoPT(object):
     num_episodes = 62501#82501
     pre_train_steps = 0#2000 * max_epLength
     annealing_steps = 50000 * max_epLength #1000*max_epLength #60000 * max_epLength 
-    
-
     startE = 0.4 #0.4
     endE = 0.0
     stepDrop = (startE - endE)/annealing_steps
@@ -112,8 +112,6 @@ class SarsaCenTwo(object):
     endE = 0.0
     stepDrop = (startE - endE)/annealing_steps
     agent = sarCen.Agent
-
-
 
 
 class SarsaDecMaliasNoPTLarge(object):
@@ -203,7 +201,8 @@ class GeneralSettings(object):
     SaveModelEnum = Enum('SaveModel', 'neither save load')
     debug = False
     # save_attack = SaveAttackEnum.neither
-    save_model = SaveModelEnum.load
+    save_model = SaveModelEnum.save
+    tileFunction = None
 
 
 
@@ -221,10 +220,15 @@ Settings to change
 
 """
 assignedNetwork = NetworkMalialisSmall
-assignedAgent = SarsaDecMaliasNoPT
+assignedAgent = SarsaDoubleSingleCommunicate
 load_attack_path = "attackSimulations/{0}/".format(assignedNetwork.name)
 
 
+maxBandwidth = len(assignedNetwork.host_sources)*assignedNetwork.rate_attack_high
+maxBandwidth + 5
+tileCoder = tileCoding.myTileInterface(2048, 300, maxBandwidth, 1)
+tileFunction = tileCoder.myTiles
+GeneralSettings.tileFunction = tileFunction
 
 # sarsaGeneric = None
 
@@ -240,7 +244,7 @@ attackClasses = [conAttack, shortPulse, mediumPulse,
 
 
 
-loadAttacks = True
+loadAttacks = False
 
 if loadAttacks:
     for attackClass in attackClasses:
@@ -254,7 +258,7 @@ if loadAttacks:
     getSummary(attackClasses, exp.load_path, assignedAgent)
 
 else:
-    experiment = experiment.Experiment(conAttack, GeneralSettings, assignedNetwork, assignedAgent, twist="")
+    experiment = experiment.Experiment(conAttack, GeneralSettings, assignedNetwork, assignedAgent, twist="withTileCoding240")
     # experiment = experiment.Experiment(conAttack, GeneralSettings, assignedNetwork, assignedAgent, "double")
 
 

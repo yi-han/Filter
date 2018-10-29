@@ -5,7 +5,7 @@ import os
 import sys
 
 class Agent(aBase.Agent):
-    def __init__(self, N_action, pre_train_steps, action_per_agent, N_state, tau=0.1, discountFactor=0, debug=False, test=False):
+    def __init__(self, N_action, pre_train_steps, action_per_agent, N_state, tileFunction, tau=0.1, discountFactor=0, debug=False, test=False):
 
         super().__init__(pre_train_steps, debug, test)
 

@@ -170,7 +170,7 @@ def create_generic_dec(gs, general_s, ns):
         state_size = calcStateSize(agent_to_allocate, ns.N_state, gs.isCommunication)
         print(agent_to_allocate)
         sub_agent_list.append(sub_agent(ns.action_per_throttler**agent_to_allocate, gs.pre_train_steps,
-            ns.action_per_throttler, state_size, gs.tau, gs.y, general_s.debug,
+            ns.action_per_throttler, state_size, general_s.tileFunction, gs.tau, gs.y, general_s.debug,
             test))
         throttlers_not_allocated -= agent_to_allocate
 
@@ -182,12 +182,7 @@ def create_generic_dec(gs, general_s, ns):
         )
     return master
 
-def create_generic_single_comm(gs, general_s, ns, stateletFunction):
-    """
-    Generic make a decentralised set of singular agents that have access to entire 
-    state. Effectively simmulates full communication
 
-    """
 
 def getSummary(adversary_classes, load_path, agent):
     summary = open("{0}/attackSummary.csv".format(load_path), "w")

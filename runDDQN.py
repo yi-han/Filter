@@ -45,7 +45,7 @@ class ddqnCenDoubleSettings(object):
     stepDrop = (startE - endE)/annealing_steps
     agent = ddCen.Agent
 
- 
+""" 
 class ddqnDoubleTeamGeneric(object):
     group_size = 2
     name = "DDQN200TeamOf{0}".format(group_size)
@@ -66,6 +66,7 @@ class ddqnDoubleTeamGeneric(object):
 
     stateletFunction = getStateletNoCommunication
     isCommunication = False
+"""
 class ddqnDoubleSingleCommunicate(object):
     group_size = 1
     name = "DDQN200SingleFullCommunicate"
@@ -83,9 +84,53 @@ class ddqnDoubleSingleCommunicate(object):
     stepDrop = (startE - endE)/annealing_steps
     agent = None
     sub_agent = ddCen.Agent
-
     stateletFunction = getStateletWithCommunication
     isCommunication = True # flag to demonstrate communication    
+    reward_overload = None
+
+class ddqnSingleNoCommunicate(object):
+    group_size = 1
+    name = "DDQN100SingleNoCommunicate"
+    max_epLength = 30 # or 60 if test
+    y = 0    
+    tau = 0.001 #Rate to update target network toward primary network. 
+    update_freq = 4 #How often to perform a training step.
+    batch_size = 32 #How many experiences to use for each training step.
+    num_episodes = 100001 #200001#    
+    pre_train_steps = 20000 * max_epLength #40000 * max_epLength #
+    annealing_steps = 600000 * max_epLength  #120000 * max_epLength  #
+    startE = 1
+    endE = 0.0
+    stepDrop = (startE - endE)/annealing_steps
+    agent = None
+    sub_agent = ddCen.Agent
+    stateletFunction = getStateletNoCommunication
+    isCommunication = False
+    reward_overload = None
+
+class ddqnSingleSarsaCopy(object):
+    # apart from 2000 pretrain this is as close as it gets
+    name = "DDQNDecGenMalialisAttempt" #used to be DDQNDecGenMalialisNoOpt
+    max_epLength = 30 # or 60 if test
+    y = 0
+    tau = 0.1
+    update_freq = 4
+    batch_size = 32
+    num_episodes = 64501#82501
+    pre_train_steps = 2000 * max_epLength
+    annealing_steps = 50000 * max_epLength #1000*max_epLength #60000 * max_epLength 
+    startE = 0.4 #0.4
+    endE = 0.0
+    stepDrop = (startE - endE)/annealing_steps
+    agent = None
+    sub_agent = ddCen.Agent
+    group_size = 1 # number of filters each agent controls
+    stateletFunction = getStateletNoCommunication
+    isCommunication = False
+    reward_overload = None
+
+
+
 
 class GeneralSettings(object):
     # SaveAttackEnum = Enum('SaveAttack', 'neither save load')
@@ -95,6 +140,7 @@ class GeneralSettings(object):
     #load_model = False
     # save_attack = SaveAttackEnum.neither
     save_model = SaveModelEnum.save
+    tileFunction = None
 
 
 # The class of the adversary to implement
@@ -108,7 +154,7 @@ attackClasses = [conAttack, shortPulse, mediumPulse,
     largePulse, gradualIncrease] 
 
 
-assignedNetwork = NetworkFourThrottle
+assignedNetwork = NetworkMalialisSmall
 assignedAgent = ddqnDoubleSingleCommunicate
 load_attack_path = "attackSimulations/{0}/".format(assignedNetwork.name)
 loadAttacks = False
