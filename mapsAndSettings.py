@@ -9,6 +9,7 @@ from enum import Enum
 import math
 import agent.genericDecentralised as genericDecentralised
 import agent.sarsaCentralised as sarCen
+from network.network_new import stateRepresentationEnum
 import pandas
 
 class NetworkSimpleBasic(object):
@@ -159,7 +160,7 @@ def create_generic_dec(gs, general_s, ns):
     group_size = gs.group_size
     sub_agent = gs.sub_agent
     #num_teams = math.ceil(ns.N_state/group_size)
-    stateletFunction = gs.stateletFunction
+    #stateletFunction = gs.stateletFunction
     sub_agent_list = []
 
     test = (general_s.save_model is general_s.SaveModelEnum.load)
@@ -167,7 +168,7 @@ def create_generic_dec(gs, general_s, ns):
     while throttlers_not_allocated > 0:
         print("currently {0} throttlers_not_allocated".format(throttlers_not_allocated))
         agent_to_allocate = min(throttlers_not_allocated, group_size)
-        state_size = calcStateSize(agent_to_allocate, ns.N_state, gs.isCommunication)
+        state_size = calcStateSize(ns.N_state, gs.stateRepresentation)
         print(agent_to_allocate)
         sub_agent_list.append(sub_agent(ns.action_per_throttler**agent_to_allocate, gs.pre_train_steps,
             ns.action_per_throttler, state_size, general_s.tileFunction, gs.tau, gs.y, general_s.debug,
@@ -177,7 +178,7 @@ def create_generic_dec(gs, general_s, ns):
     #print("\nTest {0} \n".format(sub_agent_list[0].N_action))
     master = genericDecentralised.AgentOfAgents(
         ns.N_action, gs.pre_train_steps, ns.action_per_throttler, ns.N_state,
-            sub_agent_list, stateletFunction, gs.tau, gs.y, general_s.debug, 
+            sub_agent_list, gs.tau, gs.y, general_s.debug, 
             test
         )
     return master
@@ -203,21 +204,30 @@ def getSummary(adversary_classes, load_path, agent):
 
 
 
-def getStateletNoCommunication(state, sizeOfSegment):
-    # get a segment of state corresponding to the agent, return remaining state as well
-    statelet = state[0:sizeOfSegment]
-    remainingState = state[sizeOfSegment:]
-    return (statelet, remainingState)
+# def getStateletNoCommunication(state, sizeOfSegment):
+#     # get a segment of state corresponding to the agent, return remaining state as well
+#     statelet = state[0:sizeOfSegment]
+#     remainingState = state[sizeOfSegment:]
+#     return (statelet, remainingState)
 
 
-def getStateletWithCommunication(state, sizeOfSegment):
-    return (state, state)
+# def getStateletWithCommunication(state, sizeOfSegment):
+#     return (state, state)
 
 
-def calcStateSize(size_of_group, total_number_states, isCommunication):
-    if isCommunication:
-        return total_number_states
+# def calcStateSize(size_of_group, total_number_states, isCommunication):
+#     if isCommunication:
+#         return total_number_states
+#     else:
+#         return size_of_group
+
+def calcStateSize(total_throttlers, stateRepresentation):
+    if stateRepresentation == stateRepresentationEnum.throttler:
+        return 1
+    elif stateRepresentation == stateRepresentationEnum.leaderAndIntermediate:
+        return 3
+    elif stateRepresentation == stateRepresentationEnum.allThrottlers:
+        return total_throttlers
     else:
-        return size_of_group
-
+        assert(1==2)
 

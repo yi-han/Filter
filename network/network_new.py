@@ -25,6 +25,14 @@ import agent # i think this is the other folder but I dont think it would have a
 
 """
 
+class stateRepresentationEnum(Enum):
+    throttler = 0 #always
+    leaderAndIntermediate = 1 
+    server = 2  # all the way to the server
+    allThrottlers = 3
+
+
+
 def clip(min_value, max_value, value):
     if value < min_value:
         return min_value
@@ -39,7 +47,7 @@ def deep_copy_state(state):
     return state_copy
 
 class Switch():
-    def __init__(self, switch_id, is_filter):
+    def __init__(self, switch_id, is_filter, representation):
         self.id = switch_id
         self.source_links = []
         self.destination_links = []
@@ -61,12 +69,15 @@ class Switch():
         self.new_illegal = 0
         self.new_dropped_illegal = 0
 
+        self.stateSwitches = [] # list of objects we use for state. If just self it shows only load at self
+
+        self.representation = representation
+
         self.is_filter = is_filter
 
     def sendTraffic(self):
         # an initial part of passing traffic along
         num_dests = len(self.destination_links)
-
 
         legal_pass = self.legal_traffic * (1 - self.throttle_rate)
         legal_dropped = self.legal_traffic * self.throttle_rate        
@@ -132,8 +143,35 @@ class Switch():
         self.new_dropped_illegal = 0
         self.resetWindow()
 
+
+
     def printSwitch(self):
        print("switch_id {0} | load {1} | window {2}".format(self.id, self.legal_traffic + self.illegal_traffic, self.getWindow()))
+
+    def setRepresentation(self, allThrottlers):
+        self.stateSwitches.append(self) #always include self
+        currentNode = self
+        if self.representation == stateRepresentationEnum.throttler:
+            pass
+
+        elif self.representation == stateRepresentationEnum.allThrottlers:
+            self.stateSwitches = allThrottlers
+        elif self.representation == stateRepresentationEnum.leaderAndIntermediate:
+            for i in range(2):
+                currentNode = currentNode.destination_links[0].destination_switch
+                assert currentNode.id!=0 #we shouldn't be getting server
+                #print(currentNode.id)
+                self.stateSwitches.append(currentNode)
+        else:
+            
+            assert(1==2)
+
+    def get_state(self):
+        # get the state for the agent associated with the throttler
+        response = []
+        for switch in self.stateSwitches:
+            response.append(switch.getWindow())
+        return response
 
 class link(object):
     id = -1
@@ -159,7 +197,7 @@ class network(object):
     #           save_attack, load_attack_path):
 
     #self.ITERATIONSBETEENACTION = 200 # with 10 ms delay, and throttle agent every 2 seconds, we see 200 messages passed in between
-    def __init__(self, network_settings, reward_overload, adversary_class, max_epLength, load_attack_path = None, save_attack=False):
+    def __init__(self, network_settings, reward_overload, adversary_class, max_epLength, representationType ,load_attack_path = None, save_attack=False):
         
 
 
@@ -192,13 +230,14 @@ class network(object):
         # specific to new network
         self.switches = [] # list of all switches, first one shouuld be attatched to server
         self.links = []
+        self.throttlers = []
         self.hosts = []
         self.attack_record = [] # list of all attack stats, used if we're saving the attack
 
         # self.SaveAttackEnum = SaveAttackEnum
         self.save_attack = save_attack
         self.load_attack_path = load_attack_path
-        self.initialise(network_settings.topologyFile)
+        self.initialise(network_settings.topologyFile, representationType)
         self.last_state = np.empty_like(self.get_state())
 
 
@@ -212,10 +251,12 @@ class network(object):
         #self.set_rate()
         self.legitimate_all = 0
         self.legitimate_served = 0
+        # print("reset")
         for i in range(self.N_switch):
             self.switches[i].reset()
             is_filter = i in self.filter_list
             if is_filter:
+                # print(i)
                 self.switches[i].setThrottle(np.random.randint(0,self.action_per_throttler)/self.action_per_throttler)
         self.server_failures = 0
 
@@ -274,15 +315,23 @@ class network(object):
 
 
     def get_state(self):
-        # grab the state of the switches we're interested in
-        state = []
-        #print(self.filter_list)
-
+        # get the state for the agent associated with the throttler
+        response = []
         for i in self.filter_list:
-            # self.switches[i].printSwitch()
-            state.append(self.switches[i].getWindow())
+            response.append(self.switches[i].get_state())
+        
+        # error checking. Print out full state
+        # full_state = []
+        # for switch in self.switches:
+        #     full_state.append(switch.getWindow())
 
-        return state
+        # print("given State")
+        # print(response)
+        # print("global State")
+        # print(full_state)
+
+        return response
+
         
     def move_traffic(self, time_step):
         # update the network
@@ -312,7 +361,7 @@ class network(object):
 
         assert(action==0) 
 
-    def initialise(self, f_link):
+    def initialise(self, f_link, representationType):
         for i in range(self.N_switch):
             l = []
             for j in range(self.N_switch):
@@ -323,7 +372,7 @@ class network(object):
         
         for i in range(self.N_switch):
             is_filter = i in self.filter_list
-            self.switches.append(Switch(i, is_filter))
+            self.switches.append(Switch(i, is_filter, representationType))
 
         
         for i in range(0, self.N_switch-1):
@@ -344,6 +393,14 @@ class network(object):
                 self.rate_legal_low, self.rate_legal_high, self.max_epLength)
             self.hosts.append(host)
         
+        # set the state of all switches
+        for i in self.filter_list:
+            self.throttlers.append(self.switches[i])
+
+        for throttler in self.throttlers:
+            throttler.setRepresentation(self.throttlers)
+
+
         if self.load_attack_path:
             self.load_attacker_file()
 

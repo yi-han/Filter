@@ -11,7 +11,7 @@ import agent.ddqnCentralised as ddCen
 # import agent.ddqnDecentralised as ddDec
 
 from mapsAndSettings import *
-assert(len(sys.argv)==3)
+assert(len(sys.argv)==4)
 
 class ddqnCenSettings(object):
     name = "DDQNCentralised100"
@@ -84,16 +84,36 @@ class ddqnDoubleSingleCommunicate(object):
     stepDrop = (startE - endE)/annealing_steps
     agent = None
     sub_agent = ddCen.Agent
-    stateletFunction = getStateletWithCommunication
+    # stateletFunction = getStateletWithCommunication
     isCommunication = True # flag to demonstrate communication    
     reward_overload = None
+
+class ddqnDoubleHierarchical(object):
+    group_size = 1
+    name = "DDQN200"
+    max_epLength = 30 # or 60 if test
+    y = 0    
+    tau = 0.001 #Rate to update target network toward primary network. 
+    update_freq = 4 #How often to perform a training step.
+    batch_size = 32 #How many experiences to use for each training step.
+    num_episodes = 200001 #200001#    
+    pre_train_steps = 40000 * max_epLength #40000 * max_epLength #
+    annealing_steps = 120000 * max_epLength  #120000 * max_epLength  #
+    
+    startE = 1
+    endE = 0.0
+    stepDrop = (startE - endE)/annealing_steps
+    agent = None
+    sub_agent = ddCen.Agent
+    stateRepresentation = stateRepresentationEnum.leaderAndIntermediate
+    reward_overload = None    
 
 class ddqnSingleNoCommunicate(object):
     group_size = 1
     name = "DDQN100SingleNoCommunicate"
     max_epLength = 30 # or 60 if test
     y = 0    
-    tau = 0.001 #Rate to update target network toward primary network. 
+    tau = 0.01 #Rate to update target network toward primary network. 
     update_freq = 4 #How often to perform a training step.
     batch_size = 32 #How many experiences to use for each training step.
     num_episodes = 100001 #200001#    
@@ -104,8 +124,8 @@ class ddqnSingleNoCommunicate(object):
     stepDrop = (startE - endE)/annealing_steps
     agent = None
     sub_agent = ddCen.Agent
-    stateletFunction = getStateletNoCommunication
-    isCommunication = False
+    # stateletFunction = getStateletNoCommunication
+    stateRepresentation = stateRepresentationEnum.throttler
     reward_overload = None
 
 class ddqnSingleSarsaCopy(object):
@@ -125,7 +145,7 @@ class ddqnSingleSarsaCopy(object):
     agent = None
     sub_agent = ddCen.Agent
     group_size = 1 # number of filters each agent controls
-    stateletFunction = getStateletNoCommunication
+    # stateletFunction = getStateletNoCommunication
     isCommunication = False
     reward_overload = None
 
@@ -154,12 +174,13 @@ attackClasses = [conAttack, shortPulse, mediumPulse,
     largePulse, gradualIncrease] 
 
 
-assignedNetwork = NetworkMalialisSmall
-assignedAgent = ddqnDoubleSingleCommunicate
+assignedNetwork = NetworkSingleTeamMalialisMedium
+assignedAgent = ddqnSingleNoCommunicate
 load_attack_path = "attackSimulations/{0}/".format(assignedNetwork.name)
 loadAttacks = False
 # genericAgent = None
 
+#partition = sys.argv[3] #ignore
 if loadAttacks:
     for attackClass in attackClasses:
         genericAgent = create_generic_dec(assignedAgent, GeneralSettings, assignedNetwork)
@@ -172,7 +193,7 @@ if loadAttacks:
 
     getSummary(attackClasses, exp.load_path, assignedAgent)
 else:
-    experiment = experiment.Experiment(conAttack, GeneralSettings, assignedNetwork, assignedAgent)
+    experiment = experiment.Experiment(conAttack, GeneralSettings, assignedNetwork, assignedAgent, twist="")
     # experiment = experiment.Experiment(conAttack, GeneralSettings, assignedNetwork, assignedAgent, "double")
 
 

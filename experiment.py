@@ -59,6 +59,7 @@ class Experiment:
         self.network_settings = NetworkClass
         self.agent_settings = AgentSettings
         self.twist = twist
+        self.representationType = AgentSettings.stateRepresentation
         print(NetworkClass.N_state)
         print(NetworkClass.action_per_throttler**NetworkClass.N_state)
         print(NetworkClass.N_action)
@@ -106,7 +107,7 @@ class Experiment:
         if reward_overload:
             print("using reward overload")
         print("\n Prefix {0}".format(prefix))
-        net = network(self.network_settings, reward_overload, self.adversary_class, max_epLength, load_attack_path=self.load_attack_path)
+        net = network(self.network_settings, reward_overload, self.adversary_class, max_epLength, self.representationType,load_attack_path=self.load_attack_path)
         #create lists to contain total rewards and steps per episode
         stepList = []
         rList = []
@@ -118,7 +119,8 @@ class Experiment:
         fail = 0 # The total number of fails
 
         name = self.agent_settings.name
-        path =  self.network_settings.name + name + self.twist# The path to save model to
+        commStrategy = calc_comm_strategy(self.agent_settings.stateRepresentation)
+        path =  self.network_settings.name + name + commStrategy + self.twist# The path to save model to
         print("Path is {0}".format(path))
         #path = "/data/projects/punim0621" # for slug
         self.load_path = path #ideally can move a good one to a seperate location
@@ -237,5 +239,14 @@ class Experiment:
         print("Percent of succesful episodes: " + str(100 - fail*100/total_steps) + "%")
 
 
-
+def calc_comm_strategy(stateRepresentation):
+    if stateRepresentation == stateRepresentationEnum.throttler:
+        return "Single"
+    elif stateRepresentation == stateRepresentationEnum.leaderAndIntermediate:
+        return "LeadAndInt"
+    elif stateRepresentation == stateRepresentationEnum.server:
+        return "IncludeServer"
+    elif stateRepresentation == stateRepresentationEnum.allThrottlers:
+        return "CommAll"
+ 
 

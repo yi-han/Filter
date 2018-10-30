@@ -17,12 +17,15 @@ for dest in punim0621 punim0636; do
 	topologies \
 	exp_gpgpu_single.slurm \
 	exp_cloud.slurm \
+	exp_physical.slurm \
 	phys_attempt.slurm \
 	helloWorld.py \
 	slurms_cloud_standard.sh \
 	slurms_cloud_heavy.sh \
+	slurms_physical_standard.sh \
 	slurms_gpgpu_standard.sh \
 	slurms_gpgpu_half.sh \
+	slurms_gpgpu_latter.sh \
 	--exclude='*' \
 	jpattison@spartan.hpc.unimelb.edu.au:/data/projects/$dest #punim0621
 	#jpattison@spartan.hpc.unimelb.edu.au:/data/projects/punim0636  punim0621

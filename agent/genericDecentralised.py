@@ -19,8 +19,7 @@ import math
 
 class AgentOfAgents(aBase.Agent):
 
-    def __init__(self, N_action, pre_train_steps, action_per_throttler, N_state, sub_agent_list, 
-        getStateletFunction,
+    def __init__(self, N_action, pre_train_steps, action_per_throttler, N_state, sub_agent_list,
         tau=0.1, discountFactor=0, debug=False, test=False):
 
         self.num_agents = len(sub_agent_list)
@@ -30,7 +29,7 @@ class AgentOfAgents(aBase.Agent):
         self.agents = sub_agent_list
         self.score = 0
         self.test = test
-        self.getStatelet = getStateletFunction
+        #self.getStatelet = getStateletFunction
     def __enter__(self):
         print("__enter__ generic decentralised")
         for agent in self.agents:
@@ -51,15 +50,17 @@ class AgentOfAgents(aBase.Agent):
         # combination
         action = 0
         # print("\n\nmaking a prediction")
+        #print(state)
         for i in range(len(self.agents)):
             # number of states is number of agents
             
             # print(self.agents[i])
             #print(self.agents[0].N_action)
             agent = self.agents[i]
-            N_state = agent.N_state
-            (statelet, state) = self.getStatelet(state, N_state)
-
+            #N_state = agent.N_state
+            #(statelet, state) = self.getStatelet(state, N_state)
+            statelet = state[i]
+            #print(statelet)
             agentAction = agent.predict(statelet, total_steps, e)
             # print("{0} for {1}".format(agentAction, statelet))
             #print("agent has {0} actions".format(agent.N_action))
@@ -82,10 +83,12 @@ class AgentOfAgents(aBase.Agent):
             agent = self.agents[i]
             action = actions[i]
             N_state = agent.N_state
-            (last_statelet, last_state) = self.getStatelet(last_state, N_state)
+            #(last_statelet, last_state) = self.getStatelet(last_state, N_state)
+            last_statelet = last_state[i]
             # print("action was {0}".format(action))
             # print("statelet for {0} is {1}".format(i, last_statelet))
-            (current_statelet, current_state) = self.getStatelet(current_state, N_state)
+            #(current_statelet, current_state) = self.getStatelet(current_state, N_state)
+            current_statelet = current_state[i]
             #print("future statelet is {0}".format(current_statelet))
 
             # print("for {0} we have a state of {1} and performed {2}".format(N_state, last_statelet, action))
@@ -101,8 +104,8 @@ class AgentOfAgents(aBase.Agent):
             agent = self.agents[i]
             N_state = agent.N_state
             # print("feed it {0} state".format(current_state[(i*N_state):((i+1)*N_state)]))
-            (current_statelet, current_state) = self.getStatelet(current_state, N_state)
-            
+            #(current_statelet, current_state) = self.getStatelet(current_state, N_state)
+            current_statelet = current_state[i]
             l+= agent.actionReplay(current_statelet, batch_size)
         return l
 

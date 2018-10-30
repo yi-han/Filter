@@ -1,11 +1,12 @@
 import sys
 import experiment
 import network.hosts as hostClass
+from network.network_new import stateRepresentationEnum # how to represent the state
 import agent.tileCoding as tileCoding
 import agent.sarsaCentralised as sarCen
 #import agent.sarsaDecentralised as sarDec# import agent.ddqnDecentralised as ddDec
 from mapsAndSettings import *
-assert(len(sys.argv)==3)
+assert(len(sys.argv)==4)
 
 class SarsaDoubleSingleCommunicate(object):
     group_size = 1
@@ -25,7 +26,7 @@ class SarsaDoubleSingleCommunicate(object):
     agent = None
     sub_agent = sarCen.Agent
 
-    stateletFunction = getStateletWithCommunication
+    #stateletFunction = getStateletWithCommunication
     isCommunication = True # flag to demonstrate communication  
     reward_overload = False
 
@@ -40,17 +41,37 @@ class SarsaDecMaliasOriginal(object):
     num_episodes = 62501#82501
     pre_train_steps = 0#2000 * max_epLength
     annealing_steps = 50000 * max_epLength #1000*max_epLength #60000 * max_epLength 
-    
-
     startE = 0.4 #0.4
     endE = 0.0
     stepDrop = (startE - endE)/annealing_steps
     agent = None
     sub_agent = sarCen.Agent
     group_size = 1 # number of filters each agent controls
-    stateletFunction = getStateletNoCommunication
-    isCommunication = False
+    #stateletFunction = getStateletNoCommunication
+    #isCommunication = False
     reward_overload = -1
+    stateRepresentation = stateRepresentationEnum.throttler 
+
+class SarsaCTL(object):
+    name = "sarsaCTL"
+    max_epLength = 30 # or 60 if test
+    y = 0
+    tau = 0.05
+    update_freq = None
+    batch_size = None
+    num_episodes = 100001#82501
+    pre_train_steps = 0#2000 * max_epLength
+    annealing_steps = 80000 * max_epLength #1000*max_epLength #60000 * max_epLength 
+    startE = 0.3 #0.4
+    endE = 0.0
+    stepDrop = (startE - endE)/annealing_steps
+    agent = None
+    sub_agent = sarCen.Agent
+    group_size = 1 # number of filters each agent controls
+    #stateletFunction = getStateletNoCommunication
+    #isCommunication = False
+    reward_overload = -1
+    stateRepresentation = stateRepresentationEnum.leaderAndIntermediate
 
 class SarsaDecMaliasNoPT(object):
     name = "sarsaDecGenMalialisNoOpt"
@@ -68,7 +89,7 @@ class SarsaDecMaliasNoPT(object):
     agent = None
     sub_agent = sarCen.Agent
     group_size = 1 # number of filters each agent controls
-    stateletFunction = getStateletNoCommunication
+    #stateletFunction = getStateletNoCommunication
     isCommunication = False
     reward_overload = None
 
@@ -179,6 +200,7 @@ class SarsaDecPTLarge(object):
 
 
 class SarsaGenericTeam(object):
+    # if you end up using this its to demonstrate why centralisation
     group_size = 2
     name = "Sarsa200TeamOf{0}".format(group_size)
     max_epLength = 30 # or 60 if test
@@ -219,14 +241,15 @@ Settings to change
 
 
 """
-assignedNetwork = NetworkMalialisSmall
-assignedAgent = SarsaDoubleSingleCommunicate
+assignedNetwork = NetworkSingleTeamMalialisMedium
+assignedAgent = SarsaCTL
 load_attack_path = "attackSimulations/{0}/".format(assignedNetwork.name)
 
 
 maxBandwidth = len(assignedNetwork.host_sources)*assignedNetwork.rate_attack_high
 maxBandwidth + 5
-tileCoder = tileCoding.myTileInterface(2048, 300, maxBandwidth, 1)
+numTiles = 200
+tileCoder = tileCoding.myTileInterface(2048, numTiles, maxBandwidth, 1)
 tileFunction = tileCoder.myTiles
 GeneralSettings.tileFunction = tileFunction
 
@@ -242,6 +265,7 @@ attackClasses = [conAttack, shortPulse, mediumPulse,
     largePulse, gradualIncrease] 
 
 
+partition = sys.argv[3]
 
 
 loadAttacks = False
@@ -253,12 +277,12 @@ if loadAttacks:
         attack_location = load_attack_path+attackClass.getName()+".apkl"
 
         exp = experiment.Experiment(attackClass, GeneralSettings, assignedNetwork, 
-            assignedAgent, twist= "", load_attack_path=attack_location)
+            assignedAgent, twist= "Alias{0}".format(partition), load_attack_path=attack_location)
         exp.run(0, genericAgent)
     getSummary(attackClasses, exp.load_path, assignedAgent)
 
 else:
-    experiment = experiment.Experiment(conAttack, GeneralSettings, assignedNetwork, assignedAgent, twist="withTileCoding240")
+    experiment = experiment.Experiment(conAttack, GeneralSettings, assignedNetwork, assignedAgent, twist="withTileCoding{0}Alias{1}".format(numTiles, partition))
     # experiment = experiment.Experiment(conAttack, GeneralSettings, assignedNetwork, assignedAgent, "double")
 
 
