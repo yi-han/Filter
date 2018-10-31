@@ -7,7 +7,7 @@ import agent.sarsaCentralised as sarCen
 import agent.linearSarsaCentralised as linCen
 #import agent.sarsaDecentralised as sarDec# import agent.ddqnDecentralised as ddDec
 from mapsAndSettings import *
-assert(len(sys.argv)==4)
+assert(len(sys.argv)>=3)
 
 class SarsaDoubleSingleCommunicate(object):
     group_size = 1
@@ -113,6 +113,27 @@ class LinearSarsaSingular(object):
     #stateletFunction = getStateletNoCommunication
     reward_overload = -1
     stateRepresentation = stateRepresentationEnum.throttler  
+
+
+class LinearSarsaLAI(object):
+    name = "LinearSarsaLAI"
+    max_epLength = 30 # or 60 if test
+    y = 0
+    tau = 0.05
+    update_freq = None
+    batch_size = None
+    num_episodes = 100001#82501
+    pre_train_steps = 0#2000 * max_epLength
+    annealing_steps = 80000 * max_epLength #1000*max_epLength #60000 * max_epLength 
+    startE = 0.3 #0.4
+    endE = 0.0
+    stepDrop = (startE - endE)/annealing_steps
+    agent = None
+    sub_agent = linCen.Agent
+    group_size = 1 # number of filters each agent controls
+    #stateletFunction = getStateletNoCommunication
+    reward_overload = -1
+    stateRepresentation = stateRepresentationEnum.leaderAndIntermediate  
 
 """
 class SarsaCenMaliasOne(object):
@@ -262,19 +283,31 @@ Settings to change
 
 
 """
-assignedNetwork = NetworkMalialisSmall
+assignedNetwork = NetworkMalialisSmall 
 assignedAgent = LinearSarsaSingular
 load_attack_path = "attackSimulations/{0}/".format(assignedNetwork.name)
 
 
-maxBandwidth = len(assignedNetwork.host_sources)*assignedNetwork.rate_attack_high
-#maxBandwidth + 5
+maxThrottlerBandwidth = assignedNetwork.rate_attack_high * 3 # a throttler doesn't face more than 3
 numTiles = 18
 numTilings = 8
-tileCoder = tileCoding.myTileInterface(maxBandwidth, numTiles, numTilings)
+tileCoder = tileCoding.myTileInterface(maxThrottlerBandwidth, numTiles, numTilings)
 #tileFunction = tileCoder.myTiles
 GeneralSettings.encoders = [tileCoder]
+if assignedAgent.stateRepresentation in [stateRepresentationEnum.leaderAndIntermediate,  stateRepresentationEnum.server]:
+    print("providing the leader and intermediate")
+    intermediateBandwidth = maxThrottlerBandwidth*2 # as intermediate has max 2 throttlers
+    GeneralSettings.encoders.append(tileCoding.myTileInterface(intermediateBandwidth, numTiles, numTilings))
+    leaderBandwidth = maxThrottlerBandwidth * 6
+    GeneralSettings.encoders.append(tileCoding.myTileInterface(leaderBandwidth, numTiles, numTilings))
 
+elif assignedAgent.stateRepresentation == stateRepresentationEnum.server:
+    serverMaxBandiwidth = len(assignedNetwork.host_sources)*assignedNetwork.rate_attack_high
+    GeneralSettings.encoders.append(tileCoding.myTileInterface(serverMaxBandiwidth, numTiles, numTilings))
+elif assignedAgent.stateRepresentation == stateRepresentationEnum.allThrottlers:
+    #note this is an inefficietn cheap way. Use the better way if you do this
+    for i in (range(len(assignedNetwork.host_sources))-1):
+        GeneralSettings.encoders.append(tileCoding.myTileInterface(maxThrottlerBandwidth, numTiles, numTilings))
 # sarsaGeneric = None
 
 conAttack = hostClass.ConstantAttack
@@ -286,8 +319,10 @@ gradualIncrease = hostClass.GradualIncrease
 attackClasses = [conAttack, shortPulse, mediumPulse,
     largePulse, gradualIncrease] 
 
-
-partition = sys.argv[3]
+if len(sys.argv)==4:
+    partition = sys.argv[3]
+else:
+    partition = ""
 
 
 loadAttacks = False
@@ -304,7 +339,7 @@ if loadAttacks:
     getSummary(attackClasses, exp.load_path, assignedAgent)
 
 else:
-    experiment = experiment.Experiment(conAttack, GeneralSettings, assignedNetwork, assignedAgent, twist="withTileCoding{0}Alias{1}".format(numTiles, partition))
+    experiment = experiment.Experiment(conAttack, GeneralSettings, assignedNetwork, assignedAgent, twist="withTileCoding{0}Alias{1}V2".format(numTiles, partition))
     # experiment = experiment.Experiment(conAttack, GeneralSettings, assignedNetwork, assignedAgent, "double")
 
 
