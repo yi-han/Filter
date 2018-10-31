@@ -171,7 +171,7 @@ def create_generic_dec(gs, general_s, ns):
         state_size = calcStateSize(ns.N_state, gs.stateRepresentation)
         print(agent_to_allocate)
         sub_agent_list.append(sub_agent(ns.action_per_throttler**agent_to_allocate, gs.pre_train_steps,
-            ns.action_per_throttler, state_size, general_s.tileFunction, gs.tau, gs.y, general_s.debug,
+            ns.action_per_throttler, state_size, general_s.encoders, gs.tau, gs.y, general_s.debug,
             test))
         throttlers_not_allocated -= agent_to_allocate
 

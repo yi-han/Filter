@@ -4,6 +4,7 @@ import network.hosts as hostClass
 from network.network_new import stateRepresentationEnum # how to represent the state
 import agent.tileCoding as tileCoding
 import agent.sarsaCentralised as sarCen
+import agent.linearSarsaCentralised as linCen
 #import agent.sarsaDecentralised as sarDec# import agent.ddqnDecentralised as ddDec
 from mapsAndSettings import *
 assert(len(sys.argv)==4)
@@ -92,6 +93,26 @@ class SarsaDecMaliasNoPT(object):
     #stateletFunction = getStateletNoCommunication
     isCommunication = False
     reward_overload = None
+
+class LinearSarsaSingular(object):
+    name = "LinearSarsaSingular"
+    max_epLength = 30 # or 60 if test
+    y = 0
+    tau = 0.1
+    update_freq = None
+    batch_size = None
+    num_episodes = 62501#82501
+    pre_train_steps = 0#2000 * max_epLength
+    annealing_steps = 50000 * max_epLength #1000*max_epLength #60000 * max_epLength 
+    startE = 0.4 #0.4
+    endE = 0.0
+    stepDrop = (startE - endE)/annealing_steps
+    agent = None
+    sub_agent = linCen.Agent
+    group_size = 1 # number of filters each agent controls
+    #stateletFunction = getStateletNoCommunication
+    reward_overload = -1
+    stateRepresentation = stateRepresentationEnum.throttler  
 
 """
 class SarsaCenMaliasOne(object):
@@ -241,17 +262,18 @@ Settings to change
 
 
 """
-assignedNetwork = NetworkSingleTeamMalialisMedium
-assignedAgent = SarsaCTL
+assignedNetwork = NetworkMalialisSmall
+assignedAgent = LinearSarsaSingular
 load_attack_path = "attackSimulations/{0}/".format(assignedNetwork.name)
 
 
 maxBandwidth = len(assignedNetwork.host_sources)*assignedNetwork.rate_attack_high
-maxBandwidth + 5
-numTiles = 200
-tileCoder = tileCoding.myTileInterface(2048, numTiles, maxBandwidth, 1)
-tileFunction = tileCoder.myTiles
-GeneralSettings.tileFunction = tileFunction
+#maxBandwidth + 5
+numTiles = 18
+numTilings = 8
+tileCoder = tileCoding.myTileInterface(maxBandwidth, numTiles, numTilings)
+#tileFunction = tileCoder.myTiles
+GeneralSettings.encoders = [tileCoder]
 
 # sarsaGeneric = None
 

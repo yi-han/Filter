@@ -54,8 +54,10 @@ class IHT:
         elif readonly: return None
         size = self.size
         count = self.count()
+        print(size-count)
         if count >= size:
             if self.overfullCount==0: print('IHT full, starting to allow collisions')
+            assert(1==2) # never let this happen
             self.overfullCount += 1
             return basehash(obj) % self.size
         else:
@@ -105,20 +107,41 @@ def tileswrap (ihtORsize, numtilings, floats, wrawidths, ints=[], readonly=False
 
 
 class myTileInterface:
-    def __init__(self, maxSize, numTiles, maxBandwidth, numTilings):
-        self.iht = IHT(maxSize)
+    # convert to a vector
+    def __init__(self, maxBandwidth, numTiles, numTilings):
+        self.iht = IHT(numTilings*numTiles) 
+        # note we have set our maxsize to precisely the number of tilings expected.
+        # we are trying to cause a failure if i've misunderstood how this software works
+
+
         self.numTilings = numTilings
         self.scaleFactor = (numTiles*1.0/maxBandwidth)
+        self.numTiles = numTiles
 
+    """
     def myTiles(self, x):
-        # we assume them to be disjunct
+        # transform the state to the desired format
         x = np.array(x)
         x = x*self.scaleFactor
         tileResponse=[]
         for num in range(len(x)):
             tileResponse.append(tiles(self.iht, self.numTilings, x[num:num+1])[0])
         return tuple(tileResponse)
+    """
 
+    def encode(self, x):
+        return tiles(self.iht, self.numTilings, [self.scaleFactor * x])
+
+
+    def encodeToVector(self, x):
+        # make a binary vector of featureSize to represent tilings
+        output = np.zeros(self.featureSize())
+        for tile in self.encode(x):
+            output[tile]=1
+        return output
+
+    def featureSize(self):
+        return self.numTilings*self.numTiles
 
 
 

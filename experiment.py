@@ -182,6 +182,7 @@ class Experiment:
                         #if debug:                
                         # print("current_state: {0}".format(net.get_state()))
                         # print("last state: {0}".format(net.last_state))
+                        # if step==20:
                         # print("step:" + str(step) + ", action:" + str(last_action) + ", reward:" + str(r), end='\n')
                         # print("server state: {0}\n".format(net.switches[0].getWindow()))
                         
