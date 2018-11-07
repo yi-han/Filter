@@ -35,6 +35,10 @@ class IHT:
         self.overfullCount = 0
         self.dictionary = {}
 
+        self.hF = None
+        self.lF = None
+        self.hS = None
+        self.lS = None
     def __str__(self):
         "Prepares a string for printing whenever this object is printed"
         return "Collision table:" + \
@@ -55,8 +59,20 @@ class IHT:
         size = self.size
         count = self.count()
         print(size-count)
+        # print(obj)
+        (f, s) = obj
+        if self.hF is None or f > self.hF:
+            self.hF = f
+        if self.lF is None or f < self.lF:
+            self.lF = f
+        if self.hS is None or s > self.hS:
+            self.hS = s
+        if self.lS is None or s < self.lS:
+            self.lS = s
         if count >= size:
             if self.overfullCount==0: print('IHT full, starting to allow collisions')
+            print("{0} {1} | {2} {3}".format(self.hF, self.lF, self.hS, self.lS))
+            print(self.size)
             assert(1==2) # never let this happen
             self.overfullCount += 1
             return basehash(obj) % self.size
@@ -76,6 +92,7 @@ def tiles (ihtORsize, numtilings, floats, ints=[], readonly=False):
     """returns num-tilings tile indices corresponding to the floats and ints"""
     qfloats = [floor(f*numtilings) for f in floats]
     Tiles = []
+    #assert(floats[0]<=1 and floats[0]>=0)    
     for tiling in range(numtilings):
         tilingX2 = tiling*2
         coords = [tiling]
@@ -84,7 +101,16 @@ def tiles (ihtORsize, numtilings, floats, ints=[], readonly=False):
             coords.append( (q + b) // numtilings )
             b += tilingX2
         coords.extend(ints)
+        
+        # if coords[1] >= 18:
+        #     print("\nbanana")
+        #     print(floats)
+
         Tiles.append(hashcoords(coords, ihtORsize, readonly))
+    #print(coords)
+
+    # assert(coords[1])<18
+
     return Tiles
 
 def tileswrap (ihtORsize, numtilings, floats, wrawidths, ints=[], readonly=False):
@@ -109,14 +135,14 @@ def tileswrap (ihtORsize, numtilings, floats, wrawidths, ints=[], readonly=False
 class myTileInterface:
     # convert to a vector
     def __init__(self, maxBandwidth, numTiles, numTilings):
-        self.iht = IHT(numTilings*numTiles) 
+        self.numTilings = numTilings
+        self.numTiles = numTiles
+        self.iht = IHT(self.featureSize()) 
         # note we have set our maxsize to precisely the number of tilings expected.
         # we are trying to cause a failure if i've misunderstood how this software works
-
-
-        self.numTilings = numTilings
-        self.scaleFactor = (numTiles*1.0/maxBandwidth)
-        self.numTiles = numTiles
+        self.maxBandwidth = maxBandwidth
+        print("\n\nmaxBandwidth = {0}, numTiles = {1}".format(maxBandwidth, numTiles))
+        self.scaleFactor = (numTiles*1.0/(maxBandwidth+0.1))
 
     """
     def myTiles(self, x):
@@ -130,6 +156,9 @@ class myTileInterface:
     """
 
     def encode(self, x):
+        if x > self.maxBandwidth:
+            print(x)
+            assert(1==2)
         return tiles(self.iht, self.numTilings, [self.scaleFactor * x])
 
 
@@ -141,7 +170,7 @@ class myTileInterface:
         return output
 
     def featureSize(self):
-        return self.numTilings*self.numTiles
+        return (self.numTilings+1)*self.numTiles
 
 
 

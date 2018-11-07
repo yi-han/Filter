@@ -90,7 +90,7 @@ class ddqnDoubleSingleCommunicate(object):
 
 class ddqnDoubleHierarchical(object):
     group_size = 1
-    name = "DDQN200"
+    name = "DDQN200Hierarchical"
     max_epLength = 30 # or 60 if test
     y = 0    
     tau = 0.001 #Rate to update target network toward primary network. 
@@ -99,7 +99,6 @@ class ddqnDoubleHierarchical(object):
     num_episodes = 200001 #200001#    
     pre_train_steps = 40000 * max_epLength #40000 * max_epLength #
     annealing_steps = 120000 * max_epLength  #120000 * max_epLength  #
-    
     startE = 1
     endE = 0.0
     stepDrop = (startE - endE)/annealing_steps
@@ -107,6 +106,44 @@ class ddqnDoubleHierarchical(object):
     sub_agent = ddCen.Agent
     stateRepresentation = stateRepresentationEnum.leaderAndIntermediate
     reward_overload = None    
+
+class ddqn100LongHierarchical(object):
+    group_size = 1
+    name = "ddqn100LongHierarchical"
+    max_epLength = 500 # or 60 if test
+    y = 0    
+    tau = 0.001 #Rate to update target network toward primary network. 
+    update_freq = 4 #How often to perform a training step.
+    batch_size = 32 #How many experiences to use for each training step.
+    num_episodes = 100001 #200001#    
+    pre_train_steps = 20000 * max_epLength #40000 * max_epLength #
+    annealing_steps = 60000 * max_epLength  #120000 * max_epLength  #
+    startE = 1
+    endE = 0.0
+    stepDrop = (startE - endE)/annealing_steps
+    agent = None
+    sub_agent = ddCen.Agent
+    stateRepresentation = stateRepresentationEnum.leaderAndIntermediate
+    reward_overload = None    
+
+class ddqn100MediumHierarchical(object):
+    group_size = 1
+    name = "ddqn100MediumHierarchical"
+    max_epLength = 250 # or 60 if test
+    y = 0    
+    tau = 0.001 #Rate to update target network toward primary network. 
+    update_freq = 4 #How often to perform a training step.
+    batch_size = 32 #How many experiences to use for each training step.
+    num_episodes = 100001 #200001#    
+    pre_train_steps = 20000 * max_epLength #40000 * max_epLength #
+    annealing_steps = 60000 * max_epLength  #120000 * max_epLength  #
+    startE = 1
+    endE = 0.0
+    stepDrop = (startE - endE)/annealing_steps
+    agent = None
+    sub_agent = ddCen.Agent
+    stateRepresentation = stateRepresentationEnum.leaderAndIntermediate
+    reward_overload = None   
 
 class ddqnSingleNoCommunicate(object):
     group_size = 1
@@ -161,6 +198,7 @@ class GeneralSettings(object):
     # save_attack = SaveAttackEnum.neither
     save_model = SaveModelEnum.save
     tileFunction = None
+    encoders = None
 
 
 # The class of the adversary to implement
@@ -175,7 +213,7 @@ attackClasses = [conAttack, shortPulse, mediumPulse,
 
 
 assignedNetwork = NetworkSingleTeamMalialisMedium
-assignedAgent = ddqnSingleNoCommunicate
+assignedAgent = ddqn100MediumHierarchical
 load_attack_path = "attackSimulations/{0}/".format(assignedNetwork.name)
 loadAttacks = False
 # genericAgent = None

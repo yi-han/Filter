@@ -2,7 +2,7 @@
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=2
-#SBATCH --time=2-00:00:00
+#SBATCH --time=5-00:00:00
 #SBATCH --account=punim0636
 #SBATCH --partition=cloud
 #SBATCH --job-name=sarsa_throttle

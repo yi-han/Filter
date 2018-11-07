@@ -5,6 +5,7 @@ from network.network_new import stateRepresentationEnum # how to represent the s
 import agent.tileCoding as tileCoding
 import agent.sarsaCentralised as sarCen
 import agent.linearSarsaCentralised as linCen
+import agent.randomAgent as ranAg
 #import agent.sarsaDecentralised as sarDec# import agent.ddqnDecentralised as ddDec
 from mapsAndSettings import *
 assert(len(sys.argv)>=3)
@@ -134,6 +135,28 @@ class LinearSarsaLAI(object):
     #stateletFunction = getStateletNoCommunication
     reward_overload = -1
     stateRepresentation = stateRepresentationEnum.leaderAndIntermediate  
+
+class RandomAgent(object):
+    
+
+    name = "RandomLong"
+    max_epLength = 500 # or 60 if test
+    y = 0
+    tau = 0.05
+    update_freq = None
+    batch_size = None
+    num_episodes = 100001#82501
+    pre_train_steps = 0#2000 * max_epLength
+    annealing_steps = 80000 * max_epLength #1000*max_epLength #60000 * max_epLength 
+    startE = 0.3 #0.4
+    endE = 0.0
+    stepDrop = (startE - endE)/annealing_steps
+    agent = None
+    sub_agent = ranAg.Agent
+    group_size = 1 # number of filters each agent controls
+    #stateletFunction = getStateletNoCommunication
+    reward_overload = -1
+    stateRepresentation = stateRepresentationEnum.leaderAndIntermediate      
 
 """
 class SarsaCenMaliasOne(object):
@@ -283,13 +306,13 @@ Settings to change
 
 
 """
-assignedNetwork = NetworkMalialisSmall 
-assignedAgent = LinearSarsaSingular
+assignedNetwork = NetworkSingleTeamMalialisMedium
+assignedAgent = RandomAgent
 load_attack_path = "attackSimulations/{0}/".format(assignedNetwork.name)
 
 
 maxThrottlerBandwidth = assignedNetwork.rate_attack_high * 3 # a throttler doesn't face more than 3
-numTiles = 18
+numTiles = 36
 numTilings = 8
 tileCoder = tileCoding.myTileInterface(maxThrottlerBandwidth, numTiles, numTilings)
 #tileFunction = tileCoder.myTiles
@@ -339,7 +362,7 @@ if loadAttacks:
     getSummary(attackClasses, exp.load_path, assignedAgent)
 
 else:
-    experiment = experiment.Experiment(conAttack, GeneralSettings, assignedNetwork, assignedAgent, twist="withTileCoding{0}Alias{1}V2".format(numTiles, partition))
+    experiment = experiment.Experiment(conAttack, GeneralSettings, assignedNetwork, assignedAgent, twist="withTileCoding{0}Alias{1}V3".format(numTiles, partition))
     # experiment = experiment.Experiment(conAttack, GeneralSettings, assignedNetwork, assignedAgent, "double")
 
 

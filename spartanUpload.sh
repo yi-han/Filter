@@ -23,6 +23,7 @@ for dest in punim0621 punim0636; do
 	slurms_cloud_standard.sh \
 	slurms_cloud_heavy.sh \
 	slurms_physical_standard.sh \
+	slurms_physical_heavy.sh \
 	slurms_gpgpu_standard.sh \
 	slurms_gpgpu_half.sh \
 	slurms_gpgpu_latter.sh \
