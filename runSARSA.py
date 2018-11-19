@@ -115,6 +115,9 @@ class LinearSarsaSingular(object):
     reward_overload = -1
     stateRepresentation = stateRepresentationEnum.throttler  
 
+class LinearSarsaLong(LinearSarsaSingular):
+    name = "LinearSarsaLong"
+    num_episodes = 100001
 
 class LinearSarsaLAI(object):
     name = "LinearSarsaLAI"

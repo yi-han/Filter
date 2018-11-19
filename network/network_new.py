@@ -190,7 +190,9 @@ class link(object):
         print("id: {0} | source_node {1} | source_port {2} | destination_node {3} | destination_port {4} | bandwidth {5}".format(\
             self.id, self.source_node, self.source_port, self.destination_node, self.destination_port, self.bandwidth))
 
-class network(object):
+class network_full(object):
+    # a network simulator where we try simulate the traffic moving through the system
+
     # def __init__(self, N_switch, N_action, N_state, action_per_throttler, host_sources, servers, filter_list, reward_overload, 
     #           rate_legal_low, rate_legal_high, rate_attack_low, rate_attack_high, 
     #           legal_probability, upper_boundary, hostClass, max_epLength, f_link, SaveAttackEnum,
@@ -510,5 +512,34 @@ class network(object):
 
 
 
+#class network_quick(object):
+    """
+    A quick simulation of a network. It doesn't account for network delays or messages passing. 
+    The idea is to reduce time we spend emulating the network whilst we are developing.
+
+    Design: 
+
+    Use the topology by the proper method then create a quick dictionary 
+    that maps each agent with the respective host. 
+    With assumption of no depth we can use this to quickly generate the data arriving at the server.
 
 
+
+
+
+    """
+    """
+    def __init__(self, network_settings, reward_overload, adversary_class, max_epLength, representationType ,load_attack_path = None, save_attack=False):
+        # we create the original net to access the topology
+        self.proper_net = network_full(network_settings, reward_overload, adversary_class, max_epLength, representationType, load_attack_path= load_attack_path, save_attack=save_attack)
+
+
+    def reset(self)
+
+    def get_state(self)
+
+
+    def calculate_reward(self)
+
+    def step(self, action, stepNum)
+    """
