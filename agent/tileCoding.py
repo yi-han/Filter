@@ -142,7 +142,8 @@ class myTileInterface:
         # we are trying to cause a failure if i've misunderstood how this software works
         self.maxBandwidth = maxBandwidth
         print("\n\nmaxBandwidth = {0}, numTiles = {1}".format(maxBandwidth, numTiles))
-        self.scaleFactor = (numTiles*1.0/(maxBandwidth+0.1))
+        self.scaleFactor = (numTiles*1.0/(maxBandwidth))
+        self.initialise()
 
     """
     def myTiles(self, x):
@@ -165,13 +166,20 @@ class myTileInterface:
     def encodeToVector(self, x):
         # make a binary vector of featureSize to represent tilings
         output = np.zeros(self.featureSize())
+        # print(x)
+        # print(self.encode(x))
         for tile in self.encode(x):
             output[tile]=1
+        #print(output)
         return output
 
     def featureSize(self):
-        return (self.numTilings+1)*self.numTiles
+        return (self.numTilings+1)*(self.numTiles-1) + self.numTilings
 
 
-
+    def initialise(self):
+        # generate all the expected values in increments of 0.01 so that all tiles are initialised
+        # shouldn't make much difference but its good to have everything sorted early
+        for i in np.arange(0.0, self.maxBandwidth+0.1, 0.1):
+            self.encodeToVector(i)
 

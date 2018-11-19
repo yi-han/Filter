@@ -68,6 +68,8 @@ class SarsaFunctionAI:
         for i in range(len(state)):
             encoder = self.encoders[i]
             state_vector.extend(encoder.encodeToVector(state[i]))
+        # print(state)
+        # print(state_vector)
         return np.array(state_vector)
 
     def getQ(self, state, action, error_check = False):
@@ -84,7 +86,7 @@ class SarsaFunctionAI:
             print(w)
             print(w*state_vector)
 
-        return np.sum(w * state_vector)
+        return np.dot(w, state_vector)
 
 
     def reset(self):
@@ -121,6 +123,16 @@ class SarsaFunctionAI:
         coefficient = (self.alpha*(reward - self.getQ(state, action)))
         state_vector = self.feature_converter(state)
         self.w_matrix[action_num] = current_weights + coefficient*self.feature_converter(state)
+        # print("gradient")
+        # print(self.feature_converter(state))
+        # print("original")
+        # print(current_weights)
+        # print("coefficient")
+        # print(coefficient)
+        # print("difference")
+        # print(coefficient/self.alpha)
+        # print("new")
+        # print(self.w_matrix[action_num])
 
 
     def learn(self, state1, action1, reward, state2, action2):

@@ -306,13 +306,13 @@ Settings to change
 
 
 """
-assignedNetwork = NetworkSingleTeamMalialisMedium
-assignedAgent = RandomAgent
+assignedNetwork = NetworkMalialisSmall
+assignedAgent = LinearSarsaSingular
 load_attack_path = "attackSimulations/{0}/".format(assignedNetwork.name)
 
 
 maxThrottlerBandwidth = assignedNetwork.rate_attack_high * 3 # a throttler doesn't face more than 3
-numTiles = 36
+numTiles = 18
 numTilings = 8
 tileCoder = tileCoding.myTileInterface(maxThrottlerBandwidth, numTiles, numTilings)
 #tileFunction = tileCoder.myTiles
@@ -362,7 +362,7 @@ if loadAttacks:
     getSummary(attackClasses, exp.load_path, assignedAgent)
 
 else:
-    experiment = experiment.Experiment(conAttack, GeneralSettings, assignedNetwork, assignedAgent, twist="withTileCoding{0}Alias{1}V3".format(numTiles, partition))
+    experiment = experiment.Experiment(conAttack, GeneralSettings, assignedNetwork, assignedAgent, twist="withReducedTileCoding{0}Alias{1}".format(numTiles, partition))
     # experiment = experiment.Experiment(conAttack, GeneralSettings, assignedNetwork, assignedAgent, "double")
 
 
