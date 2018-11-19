@@ -388,13 +388,13 @@ class network_full(object):
                     self.switches[i].source_links.append(l)
                     self.switches[j].destination_links.append(l)                                    
 
-        
+
         for i in self.host_sources:
 
             host = self.hostClass(self.switches[i], self.rate_attack_low, self.rate_attack_high,
                 self.rate_legal_low, self.rate_legal_high, self.max_epLength)
             self.hosts.append(host)
-        
+        # assert(1==2)        
         # set the state of all switches
         for i in self.filter_list:
             self.throttlers.append(self.switches[i])
@@ -512,7 +512,7 @@ class network_full(object):
 
 
 
-#class network_quick(object):
+class network_quick(object):
     """
     A quick simulation of a network. It doesn't account for network delays or messages passing. 
     The idea is to reduce time we spend emulating the network whilst we are developing.
@@ -523,23 +523,126 @@ class network_full(object):
     that maps each agent with the respective host. 
     With assumption of no depth we can use this to quickly generate the data arriving at the server.
 
-
-
-
+    
+    Assumptions I'm making:
+    1) That every host goes through an agent at some point
+    2) That the number of agents it will go through is limited to one
+    3) At the moment I'm assuming constant traffic. I think test variable traffic of proper (or update in future)
+    4) That each switch has one one destination link
+    5) we are NOT catering to communication
 
     """
-    """
+    
     def __init__(self, network_settings, reward_overload, adversary_class, max_epLength, representationType ,load_attack_path = None, save_attack=False):
         # we create the original net to access the topology
+        network_settings.iterations_between_action = 1 # we override the number of actions between a round 
         self.proper_net = network_full(network_settings, reward_overload, adversary_class, max_epLength, representationType, load_attack_path= load_attack_path, save_attack=save_attack)
+        self.host_switches = [host.destination_switch for host in self.proper_net.hosts] 
+        self.throttlers = self.proper_net.throttlers
+        self.server = self.proper_net.servers[0]
+        assert(load_attack_path==None)
+        self.throttlerDic = {} # list of all filters and the hosts associated
+
+        for host in self.host_switches:
+            # create associations
+            traverse(host, self.throttlers, self.throttlerDic)
+        # sanity check
+        for throttler in self.throttlers:
+            assert(throttler in self.throttlerDic)
+        self.legitimate_served = 0
+        self.legitimate_all = 0
+        self.server_failures = 0
 
 
-    def reset(self)
 
-    def get_state(self)
+    def reset(self):
+        self.proper_net.reset()       
+
+    def get_state(self):
+        response = []
+        for throttler in self.throttlers:
+            total = 0.0
+            for host_switch in self.throttlerDic[throttler]:
+                # print("num associated hosts for switch")
+                assert(len(host_switch.attatched_hosts)<=2)
+                for host in host_switch.attatched_hosts:
+                    total += host.traffic_rate
+            response.append([total])
+        return response
 
 
-    def calculate_reward(self)
+    def calculate_reward(self):
+        legitimate_rate = 0
+        legitimate_rate_all = 0
+        attacker_rate = 0
+        reward = 0
+        for throttler in self.throttlers:
+            throttle_rate = throttler.throttle_rate
+            # print(throttle_rate)
+            # print(self.throttlerDic[throttler])
+            for host_switch in self.throttlerDic[throttler]:
+                for host in host_switch.attatched_hosts:
+                    # there should only be one for the record
+                    if host.is_attacker:
+                        attacker_rate += host.traffic_rate * throttle_rate
+                    else:
+                        legitimate_rate += host.traffic_rate * throttle_rate
+                        legitimate_served = host.traffic_rate
+                        self.legitimate_served += legitimate_served
+                        legitimate_rate_all += legitimate_served
+        
+        if legitimate_rate + attacker_rate > self.proper_net.upper_boundary:
+            #used to set the reward to "reward_overload" in this case, but didn't work well
+           
+            # print("\n\n\n negative reward")
+            # print(self.proper_net.upper_boundary)
+            if self.proper_net.reward_overload:
+                reward = self.proper_net.reward_overload
+            else:
+                reward -= ((legitimate_rate + attacker_rate)/self.proper_net.upper_boundary - 1.0)
+            
+            self.server_failures +=1
+        else:
+            # print("\n\n positive reward")
+            if legitimate_rate_all != 0:
+                reward += legitimate_rate/legitimate_rate_all
+        
+            self.proper_net.legitimate_served += legitimate_rate
+        
+        self.legitimate_all += legitimate_rate_all
 
-    def step(self, action, stepNum)
-    """
+        return clip(-1, 1, reward)        
+
+
+
+    def step(self, action, stepNum):
+        self.last_state = self.get_state()
+        self.proper_net.set_drop_probability(action)
+        for host_switch in self.host_switches:
+            for host in host_switch.attatched_hosts:
+                host.sendTraffic(stepNum) # this should be sending traffic into the void. But also updating the rate
+
+    def getLegitStats(self):
+        # returns % of packets served in an episode
+        # meant to be used at end of an epsisode
+        if self.legitimate_all == 0:
+            return (0, 0, 0)
+        else:
+            per = self.legitimate_served / self.legitimate_all
+            return self.legitimate_served, self.legitimate_all, per, self.server_failures
+
+
+def traverse(origin, targets, targetDic):
+    # Starting at origin, travel along the network until we get a target
+    # then update our dictionary to keep record of what is connected to what
+    currentPosition = origin # a node of the network
+
+    while (not currentPosition in targets):
+        currentPosition = currentPosition.destination_links[0].destination_switch
+        # should break if doesnt exist
+    if not currentPosition in targetDic:
+        targetDic[currentPosition] = []
+    if not origin in targetDic[currentPosition]:
+        targetDic[currentPosition].append(origin)
+
+    

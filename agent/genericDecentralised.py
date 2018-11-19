@@ -49,8 +49,7 @@ class AgentOfAgents(aBase.Agent):
         # this is as network only takes a single number for action
         # combination
         action = 0
-        # print("\n\nmaking a prediction")
-        #print(state)
+
         for i in range(len(self.agents)):
             # number of states is number of agents
             

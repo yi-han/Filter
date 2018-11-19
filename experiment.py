@@ -107,10 +107,10 @@ class Experiment:
         if reward_overload:
             print("using reward overload")
         print("\n Prefix {0}".format(prefix))
-        print("using proper network")
-        net = network_full(self.network_settings, reward_overload, self.adversary_class, max_epLength, self.representationType,load_attack_path=self.load_attack_path)
-        #print("using quick network")
-        #net = network_quick(self.network_settings, reward_overload, self.adversary_class, max_epLength, self.representationType, load_attack_path = self.load_attack_path)
+        # print("using proper network")
+        # net = network_full(self.network_settings, reward_overload, self.adversary_class, max_epLength, self.representationType,load_attack_path=self.load_attack_path)
+        print("using quick network")
+        net = network_quick(self.network_settings, reward_overload, self.adversary_class, max_epLength, self.representationType, load_attack_path = self.load_attack_path)
         #create lists to contain total rewards and steps per episode
         stepList = []
         rList = []
@@ -179,6 +179,7 @@ class Experiment:
                         ### why are we putting in the current state??? Shouldn't it be last state
                         ### or better, shouldn't it involve both the last state and current state?
                         if not test:
+
                             agent.update(net.last_state, last_action, net.get_state(), d, r, next_action = a)
 
 

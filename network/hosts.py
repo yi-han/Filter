@@ -11,8 +11,8 @@ class Host():
     def __init__(self, destination_switch, rate_attack_low, rate_attack_high, rate_legal_low, rate_legal_high,
         max_epLength):
 
+        destination_switch.attatched_hosts.append(self)
         self.destination_switch = destination_switch
-
         self.rate_attack_low = rate_attack_low
         self.rate_attack_high = rate_attack_high
         self.rate_legal_low = rate_legal_low
@@ -50,7 +50,6 @@ class ConstantAttack(Host):
             traffic_rate = self.rate_attack_low + np.random.rand()*(self.rate_attack_high - self.rate_attack_low)
         else:
             traffic_rate = self.rate_legal_low + np.random.rand()*(self.rate_legal_high - self.rate_legal_low)
-
         super().reset(is_attacker, traffic_rate)
 
     def sendTraffic(self, time_step):
