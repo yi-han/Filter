@@ -174,7 +174,7 @@ class myTileInterface:
         return output
 
     def featureSize(self):
-        return (self.numTilings-1)*(self.numTiles+1) + self.numTiles + 1
+        return (self.numTilings-1)*(self.numTiles+1) + self.numTiles
 
 
     def initialise(self):
