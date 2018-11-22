@@ -1,6 +1,7 @@
 import sys
 import experiment
 import network.hosts as hostClass
+import network.network_new
 from network.network_new import stateRepresentationEnum # how to represent the state
 import agent.tileCoding as tileCoding
 import agent.sarsaCentralised as sarCen
@@ -316,11 +317,14 @@ Settings to change
 
 
 """
-assignedNetwork = NetworkSingleTeamMalialisMedium
-assignedAgent = LinearSarsaLAI
+assignedNetwork = NetworkMalialisSmall
+assignedAgent = LinearSarsaLong
 load_attack_path = "attackSimulations/{0}/".format(assignedNetwork.name)
+network_emulator = network.network_new.network_quick # network_full
 
 
+
+assignedNetwork.emulator = network_emulator
 """
 This is the encoder for the sarsa, this might be better positioned somewhere else
 """
@@ -337,6 +341,7 @@ for max_hosts in assignedNetwork.max_hosts_per_level:
     encoders.append(tileCoder)
     level += 1
 GeneralSettings.encoders = encoders
+
 
 
 
@@ -389,7 +394,7 @@ if loadAttacks:
     getSummary(attackClasses, exp.load_path, assignedAgent)
 
 else:
-    experiment = experiment.Experiment(conAttack, GeneralSettings, assignedNetwork, assignedAgent, twist="NetworkProper{0}Alias{1}".format(numTiles, partition))
+    experiment = experiment.Experiment(conAttack, GeneralSettings, assignedNetwork, assignedAgent, twist="{2}{0}Alias{1}".format(numTiles, partition, network_emulator.name))
     # experiment = experiment.Experiment(conAttack, GeneralSettings, assignedNetwork, assignedAgent, "double")
 
 

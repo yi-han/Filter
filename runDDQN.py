@@ -2,6 +2,7 @@ import sys
 import experiment
 import network.hosts as hostClass
 import agent.ddqnCentralised as ddCen
+import network.network_new
 
 #import generic_run
 
@@ -224,6 +225,10 @@ load_attack_path = "attackSimulations/{0}/".format(assignedNetwork.name)
 loadAttacks = False
 # genericAgent = None
 
+network_emulator = network.network_new.network_quick # network_full
+assignedNetwork.emulator = network_emulator
+
+
 #partition = sys.argv[3] #ignore
 if loadAttacks:
     for attackClass in attackClasses:
@@ -237,7 +242,7 @@ if loadAttacks:
 
     getSummary(attackClasses, exp.load_path, assignedAgent)
 else:
-    experiment = experiment.Experiment(conAttack, GeneralSettings, assignedNetwork, assignedAgent, twist="")
+    experiment = experiment.Experiment(conAttack, GeneralSettings, assignedNetwork, assignedAgent, twist="{0}".format(network_emulator.name))
     # experiment = experiment.Experiment(conAttack, GeneralSettings, assignedNetwork, assignedAgent, "double")
 
 

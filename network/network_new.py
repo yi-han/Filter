@@ -199,6 +199,8 @@ class network_full(object):
     #           save_attack, load_attack_path):
 
     #self.ITERATIONSBETEENACTION = 200 # with 10 ms delay, and throttle agent every 2 seconds, we see 200 messages passed in between
+    name = "Network_Full"
+
     def __init__(self, network_settings, reward_overload, adversary_class, max_epLength, representationType ,load_attack_path = None, save_attack=False):
         
 
@@ -531,7 +533,8 @@ class network_quick(object):
     5) we are NOT catering to communication
 
     """
-    
+    name = "Network_Quick"
+
     def __init__(self, network_settings, reward_overload, adversary_class, max_epLength, representationType ,load_attack_path = None, save_attack=False):
         # we create the original net to access the topology
         network_settings.iterations_between_action = 1 # we override the number of actions between a round 
