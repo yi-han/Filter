@@ -1,5 +1,6 @@
 #!/bin/bash
 for dest in punim0621 punim0636; do 
+# for dest in punim0636; do 
 	rsync -avz -e 'ssh' \
 	--include=*/ \
 	--include='**/*.py' \

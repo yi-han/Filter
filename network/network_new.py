@@ -394,7 +394,6 @@ class network_full(object):
             host = self.hostClass(self.switches[i], self.rate_attack_low, self.rate_attack_high,
                 self.rate_legal_low, self.rate_legal_high, self.max_epLength)
             self.hosts.append(host)
-        # assert(1==2)        
         # set the state of all switches
         for i in self.filter_list:
             self.throttlers.append(self.switches[i])
@@ -561,15 +560,20 @@ class network_quick(object):
     def get_state(self):
         response = []
         for throttler in self.throttlers:
-            total = 0.0
-            for host_switch in self.throttlerDic[throttler]:
+
                 # print("num associated hosts for switch")
-                assert(len(host_switch.attatched_hosts)<=2)
-                for host in host_switch.attatched_hosts:
-                    total += host.traffic_rate
-            response.append([total])
+            throttler_state = self.get_throttler_state(throttler)
+            response.append([throttler_state])
         return response
 
+    def get_throttler_state(self, throttler):
+    
+        total = 0.0
+        for host_switch in self.throttlerDic[throttler]:        
+            assert(len(host_switch.attatched_hosts)<=2)
+            for host in host_switch.attatched_hosts:
+                total += host.traffic_rate      
+        return total  
 
     def calculate_reward(self):
         legitimate_rate = 0
@@ -618,6 +622,14 @@ class network_quick(object):
     def step(self, action, stepNum):
         self.last_state = self.get_state()
         self.proper_net.set_drop_probability(action)
+        # print("\n\nthrottlers")
+        # for throttler in self.throttlerDic:
+        #     print("throtler")
+        #     print(self.get_throttler_state(throttler))
+        #     print(throttler.throttle_rate)
+
+
+
         for host_switch in self.host_switches:
             for host in host_switch.attatched_hosts:
                 host.sendTraffic(stepNum) # this should be sending traffic into the void. But also updating the rate

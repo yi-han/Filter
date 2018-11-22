@@ -19,7 +19,11 @@ import numpy as np
 
 
 
-class Estimator():
+
+
+
+
+class SarsaFunctionAI:
     """
     Value Function approximator.
     #DONE
@@ -36,10 +40,6 @@ class Estimator():
     3) Add the normaliser at the end. CONFIRM?
 
     """
-
-
-
-class SarsaFunctionAI:
     
     def __init__(self, actions, encoders, alpha, gamma): 
         # note i set gamma to 0 to reflect the implementation by Malialis
@@ -123,16 +123,20 @@ class SarsaFunctionAI:
         coefficient = (self.alpha*(reward - self.getQ(state, action)))
         state_vector = self.feature_converter(state)
         self.w_matrix[action_num] = current_weights + coefficient*self.feature_converter(state)
-        # print("gradient")
-        # print(self.feature_converter(state))
-        # print("original")
-        # print(current_weights)
-        # print("coefficient")
-        # print(coefficient)
-        # print("difference")
-        # print(coefficient/self.alpha)
-        # print("new")
-        # print(self.w_matrix[action_num])
+        
+        if False :#current_weights[-38] != 0:
+            print("\naction")
+            print(action)
+            # print("gradient")
+            # print(self.feature_converter(state))
+            # print("original")
+            print(current_weights)
+            print("coefficient")
+            # print(coefficient)
+            # print("difference")
+            # print(coefficient/self.alpha)
+            # print("new")
+            # print(self.w_matrix[action_num])
 
 
     def learn(self, state1, action1, reward, state2, action2):

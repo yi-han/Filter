@@ -27,7 +27,12 @@ class ddqnCenSettings(object):
     startE = 1
     endE = 0.0
     stepDrop = (startE - endE)/annealing_steps
-    agent = ddCen.Agent
+    agent = None
+    sub_agent = ddCen.Agent
+    isCommunication = False # flag to demonstrate communication    
+    reward_overload = None
+    stateRepresentation = stateRepresentationEnum.throttler
+    group_size = 1
 
 class ddqnCenDoubleSettings(object):
     name = "DDQNCentralised200"
@@ -185,6 +190,7 @@ class ddqnSingleSarsaCopy(object):
     # stateletFunction = getStateletNoCommunication
     isCommunication = False
     reward_overload = None
+    stateRepresentation = stateRepresentationEnum.throttler
 
 
 
@@ -212,8 +218,8 @@ attackClasses = [conAttack, shortPulse, mediumPulse,
     largePulse, gradualIncrease] 
 
 
-assignedNetwork = NetworkSingleTeamMalialisMedium
-assignedAgent = ddqn100MediumHierarchical
+assignedNetwork = NetworkMalialisSmall #NetworkSingleTeamMalialisMedium
+assignedAgent = ddqnSingleSarsaCopy #ddqn100MediumHierarchical
 load_attack_path = "attackSimulations/{0}/".format(assignedNetwork.name)
 loadAttacks = False
 # genericAgent = None

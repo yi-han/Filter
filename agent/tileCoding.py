@@ -58,7 +58,7 @@ class IHT:
         elif readonly: return None
         size = self.size
         count = self.count()
-        print(size-count)
+        #print(size-count)
         # print(obj)
         (f, s) = obj
         if self.hF is None or f > self.hF:

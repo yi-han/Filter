@@ -96,6 +96,7 @@ class SarsaDecMaliasNoPT(object):
     reward_overload = None
 
 class LinearSarsaSingular(object):
+    # note we have two dependencies
     name = "LinearSarsaSingular"
     max_epLength = 30 # or 60 if test
     y = 0
@@ -118,6 +119,12 @@ class LinearSarsaSingular(object):
 class LinearSarsaLong(LinearSarsaSingular):
     name = "LinearSarsaLong"
     num_episodes = 100001
+
+class LinearSarsaSingularNoOverload(LinearSarsaSingular):
+    name = "LinearSarsaSingularNoOverload"
+    reward_overload = None
+
+
 
 class LinearSarsaLAI(object):
     name = "LinearSarsaLAI"
@@ -310,7 +317,7 @@ Settings to change
 
 """
 assignedNetwork = NetworkMalialisSmall
-assignedAgent = LinearSarsaSingular
+assignedAgent = LinearSarsaSingularNoOverload
 load_attack_path = "attackSimulations/{0}/".format(assignedNetwork.name)
 
 
@@ -365,7 +372,7 @@ if loadAttacks:
     getSummary(attackClasses, exp.load_path, assignedAgent)
 
 else:
-    experiment = experiment.Experiment(conAttack, GeneralSettings, assignedNetwork, assignedAgent, twist="withReducedTileCoding{0}Alias{1}".format(numTiles, partition))
+    experiment = experiment.Experiment(conAttack, GeneralSettings, assignedNetwork, assignedAgent, twist="NetworkQuick{0}Alias{1}".format(numTiles, partition))
     # experiment = experiment.Experiment(conAttack, GeneralSettings, assignedNetwork, assignedAgent, "double")
 
 
