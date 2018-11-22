@@ -65,11 +65,14 @@ class SarsaFunctionAI:
 
     def feature_converter(self, state):
         state_vector = []
+        # print(state)
         for i in range(len(state)):
             encoder = self.encoders[i]
             state_vector.extend(encoder.encodeToVector(state[i]))
         # print(state)
         # print(state_vector)
+        #print(np.array(state_vector))
+        # print(len(state_vector))
         return np.array(state_vector)
 
     def getQ(self, state, action, error_check = False):

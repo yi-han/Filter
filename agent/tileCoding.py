@@ -58,7 +58,7 @@ class IHT:
         elif readonly: return None
         size = self.size
         count = self.count()
-        #print(size-count)
+        print(size-count)
         # print(obj)
         (f, s) = obj
         if self.hF is None or f > self.hF:
@@ -174,12 +174,12 @@ class myTileInterface:
         return output
 
     def featureSize(self):
-        return (self.numTilings+1)*(self.numTiles-1) + self.numTilings
+        return (self.numTilings-1)*(self.numTiles+1) + self.numTiles + 1
 
 
     def initialise(self):
         # generate all the expected values in increments of 0.01 so that all tiles are initialised
         # shouldn't make much difference but its good to have everything sorted early
-        for i in np.arange(0.0, self.maxBandwidth+0.1, 0.1):
+        for i in np.arange(0.0, self.maxBandwidth, 0.1):
             self.encodeToVector(i)
 

@@ -78,6 +78,8 @@ class NetworkMalialisSmall(object):
     upper_boundary = 8
     iterations_between_action = 10
 
+    max_hosts_per_level = [3] # no communication therefore just one
+
 
 class NetworkSingleTeamMalialisMedium(object):
     name = "single_team_malialis_medium"
@@ -98,6 +100,8 @@ class NetworkSingleTeamMalialisMedium(object):
     legal_probability = 0.6 # probability that is a good guys
     upper_boundary = 12.5
     iterations_between_action = 5 
+
+    max_hosts_per_level = [2, 6, 12]
 
 class NetworkTwelveThrottleLight(object):
     name = "network_twelve_throttle_light"

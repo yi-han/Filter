@@ -128,7 +128,7 @@ class LinearSarsaSingularNoOverload(LinearSarsaSingular):
 
 class LinearSarsaLAI(object):
     name = "LinearSarsaLAI"
-    max_epLength = 30 # or 60 if test
+    max_epLength = 500
     y = 0
     tau = 0.05
     update_freq = None
@@ -316,17 +316,32 @@ Settings to change
 
 
 """
-assignedNetwork = NetworkMalialisSmall
-assignedAgent = LinearSarsaSingularNoOverload
+assignedNetwork = NetworkSingleTeamMalialisMedium
+assignedAgent = LinearSarsaLAI
 load_attack_path = "attackSimulations/{0}/".format(assignedNetwork.name)
 
 
-maxThrottlerBandwidth = assignedNetwork.rate_attack_high * 3 # a throttler doesn't face more than 3
-numTiles = 18
-numTilings = 8
-tileCoder = tileCoding.myTileInterface(maxThrottlerBandwidth, numTiles, numTilings)
-#tileFunction = tileCoder.myTiles
-GeneralSettings.encoders = [tileCoder]
+"""
+This is the encoder for the sarsa, this might be better positioned somewhere else
+"""
+encoders = []
+level = 0 # level 0 is throttlers, level 1 is intermeditary etc
+for max_hosts in assignedNetwork.max_hosts_per_level:
+    maxThrottlerBandwidth = assignedNetwork.rate_attack_high * max_hosts # a throttler doesn't face more than X
+    if level == 0:
+        numTiles = 6 * max_hosts
+    else:
+        numTiles = 6 # just set at 6.
+    numTilings = 8
+    tileCoder = tileCoding.myTileInterface(maxThrottlerBandwidth, numTiles, numTilings)
+    encoders.append(tileCoder)
+    level += 1
+GeneralSettings.encoders = encoders
+
+
+
+""" Might be useful?
+
 if assignedAgent.stateRepresentation in [stateRepresentationEnum.leaderAndIntermediate,  stateRepresentationEnum.server]:
     print("providing the leader and intermediate")
     intermediateBandwidth = maxThrottlerBandwidth*2 # as intermediate has max 2 throttlers
@@ -342,6 +357,8 @@ elif assignedAgent.stateRepresentation == stateRepresentationEnum.allThrottlers:
     for i in (range(len(assignedNetwork.host_sources))-1):
         GeneralSettings.encoders.append(tileCoding.myTileInterface(maxThrottlerBandwidth, numTiles, numTilings))
 # sarsaGeneric = None
+"""
+
 
 conAttack = hostClass.ConstantAttack
 shortPulse = hostClass.ShortPulse
@@ -372,7 +389,7 @@ if loadAttacks:
     getSummary(attackClasses, exp.load_path, assignedAgent)
 
 else:
-    experiment = experiment.Experiment(conAttack, GeneralSettings, assignedNetwork, assignedAgent, twist="NetworkQuick{0}Alias{1}".format(numTiles, partition))
+    experiment = experiment.Experiment(conAttack, GeneralSettings, assignedNetwork, assignedAgent, twist="NetworkProper{0}Alias{1}".format(numTiles, partition))
     # experiment = experiment.Experiment(conAttack, GeneralSettings, assignedNetwork, assignedAgent, "double")
 
 
