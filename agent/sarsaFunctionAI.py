@@ -165,7 +165,7 @@ class SarsaFunctionAI:
         # the current experiment and then load the q values
 
         if dataDict['alpha'] != self.alpha or dataDict['gamma'] != self.gamma or \
-            dataDict['actions'] != self.actions or data['n_features'] != self.n_features:
+            dataDict['actions'] != self.actions or dataDict['n_features'] != self.n_features:
             raise ValueError('Experiments parameters do not match saved file')
         else:
             self.w_matrix = dataDict['w_matrix']
