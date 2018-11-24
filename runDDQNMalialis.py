@@ -131,6 +131,7 @@ class ddqnSingleNoCommunicate(object):
     stepDrop = (startE - endE)/annealing_steps
     agent = None
     sub_agent = ddCen.Agent
+    # stateletFunction = getStateletNoCommunication
     stateRepresentation = stateRepresentationEnum.throttler
     reward_overload = None
 
@@ -155,6 +156,14 @@ class ddqnSingleSarsaCopy(object):
     isCommunication = False
     reward_overload = None
     stateRepresentation = stateRepresentationEnum.throttler
+
+
+class ddqnMalialisReplica(ddqnSingleSarsaCopy):
+    # the exact repilca, including overload
+    name = "DDQNMalialiasExactReplica"
+    num_episodes = 62501
+    pre_train_steps = 0
+    reward_overload = True
 
 
 
@@ -183,7 +192,7 @@ attackClasses = [conAttack, shortPulse, mediumPulse,
 
 
 assignedNetwork = NetworkMalialisSmall #NetworkSingleTeamMalialisMedium
-assignedAgent = ddqnSingleSarsaCopy #ddqn100MediumHierarchical
+assignedAgent = ddqnMalialisReplica #ddqn100MediumHierarchical
 load_attack_path = "attackSimulations/{0}/".format(assignedNetwork.name)
 loadAttacks = False
 # genericAgent = None
@@ -200,7 +209,7 @@ if loadAttacks:
         attack_location = load_attack_path+attackClass.getName()+".apkl"
 
         exp = experiment.Experiment(attackClass, GeneralSettings, assignedNetwork, 
-            assignedAgent, twist="{0}".format(network_emulator.name), load_attack_path=attack_location)
+            assignedAgent, twist= "", load_attack_path=attack_location)
         exp.run(0, genericAgent)
 
     getSummary(attackClasses, exp.load_path, assignedAgent)

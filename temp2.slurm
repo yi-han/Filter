@@ -14,7 +14,7 @@ module load Python/3.6.4-intel-2017.u2-GCC-6.2.0-CUDA9
 # Launch multiple process python code
 
 echo "Starting physical throttle"
-time mpiexec -n 1 python3 runSarsaDDQNCopy.py 0 2 "ddqnCopy"
+time mpiexec -n 1 python3 runSarsaDDQNCopy.py 0 5 "ddqnCopy"
 
 echo "done"
 

@@ -126,10 +126,6 @@ class LinearSarsaNoOverloadLong(LinearSarsaSingular):
     num_episodes = 100001
     reward_overload = None
 
-class LinearSarsaNoOverload(LinearSarsaSingular):
-    name = "LinearSarsaSingularNoOverload"
-    reward_overload = None
-
 class LinearSarsaSingularDDQNCopy(object):
     # copy from ddqnSingleNoCommunicate
     name = "LinearSarsaSingularDDQNCopy"
@@ -150,6 +146,7 @@ class LinearSarsaSingularDDQNCopy(object):
     stateRepresentation = stateRepresentationEnum.throttler
     reward_overload = None
     group_size = 1 # number of filters each agent controls
+
 
 
 
@@ -345,7 +342,7 @@ Settings to change
 
 """
 assignedNetwork = NetworkMalialisSmall
-assignedAgent = LinearSarsaNoOverload
+assignedAgent = LinearSarsaSingularDDQNCopy
 load_attack_path = "attackSimulations/{0}/".format(assignedNetwork.name)
 network_emulator = network.network_new.network_full # network_quick # network_full
 
@@ -360,7 +357,7 @@ level = 0 # level 0 is throttlers, level 1 is intermeditary etc
 for max_hosts in assignedNetwork.max_hosts_per_level:
     maxThrottlerBandwidth = assignedNetwork.rate_attack_high * max_hosts # a throttler doesn't face more than X
     if level == 0:
-        numTiles = 6 * max_hosts
+        numTiles = 15 * max_hosts
     else:
         numTiles = 6 # just set at 6.
     numTilings = 8
@@ -416,7 +413,7 @@ if loadAttacks:
         attack_location = load_attack_path+attackClass.getName()+".apkl"
 
         exp = experiment.Experiment(attackClass, GeneralSettings, assignedNetwork, 
-            assignedAgent, twist="{2}{0}Alias{1}".format(numTiles, partition, network_emulator.name), load_attack_path=attack_location)
+            assignedAgent, twist= "Alias{0}".format(partition), load_attack_path=attack_location)
         exp.run(0, genericAgent)
     getSummary(attackClasses, exp.load_path, assignedAgent)
 

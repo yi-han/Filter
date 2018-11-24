@@ -121,36 +121,9 @@ class LinearSarsaLong(LinearSarsaSingular):
     name = "LinearSarsaLong"
     num_episodes = 100001
 
-class LinearSarsaNoOverloadLong(LinearSarsaSingular):
-    name = "LinearNoOverloadLong"
-    num_episodes = 100001
-    reward_overload = None
-
-class LinearSarsaNoOverload(LinearSarsaSingular):
+class LinearSarsaSingularNoOverload(LinearSarsaSingular):
     name = "LinearSarsaSingularNoOverload"
     reward_overload = None
-
-class LinearSarsaSingularDDQNCopy(object):
-    # copy from ddqnSingleNoCommunicate
-    name = "LinearSarsaSingularDDQNCopy"
-    reward_overload = None
-    max_epLength = 30 # or 60 if test
-    y = 0    
-    tau = 0.01 #Rate to update target network toward primary network. 
-    update_freq = None #How often to perform a training step.
-    batch_size = None #How many experiences to use for each training step.
-    num_episodes = 100001 #200001#    
-    pre_train_steps = 20000 * max_epLength #40000 * max_epLength #
-    annealing_steps = 600000 * max_epLength  #120000 * max_epLength  #
-    startE = 1
-    endE = 0.0
-    stepDrop = (startE - endE)/annealing_steps
-    agent = None
-    sub_agent = linCen.Agent
-    stateRepresentation = stateRepresentationEnum.throttler
-    reward_overload = None
-    group_size = 1 # number of filters each agent controls
-
 
 
 
@@ -345,7 +318,7 @@ Settings to change
 
 """
 assignedNetwork = NetworkMalialisSmall
-assignedAgent = LinearSarsaNoOverload
+assignedAgent = LinearSarsaSingular
 load_attack_path = "attackSimulations/{0}/".format(assignedNetwork.name)
 network_emulator = network.network_new.network_full # network_quick # network_full
 
@@ -416,7 +389,7 @@ if loadAttacks:
         attack_location = load_attack_path+attackClass.getName()+".apkl"
 
         exp = experiment.Experiment(attackClass, GeneralSettings, assignedNetwork, 
-            assignedAgent, twist="{2}{0}Alias{1}".format(numTiles, partition, network_emulator.name), load_attack_path=attack_location)
+            assignedAgent, twist= "Alias{0}".format(partition), load_attack_path=attack_location)
         exp.run(0, genericAgent)
     getSummary(attackClasses, exp.load_path, assignedAgent)
 

@@ -73,7 +73,26 @@ class ddqnDoubleTeamGeneric(object):
     stateletFunction = getStateletNoCommunication
     isCommunication = False
 """
-
+class ddqnDoubleSingleCommunicate(object):
+    group_size = 1
+    name = "DDQN200SingleFullCommunicate"
+    max_epLength = 30 # or 60 if test
+    y = 0    
+    tau = 0.001 #Rate to update target network toward primary network. 
+    update_freq = 4 #How often to perform a training step.
+    batch_size = 32 #How many experiences to use for each training step.
+    num_episodes = 200001 #200001#    
+    pre_train_steps = 40000 * max_epLength #40000 * max_epLength #
+    annealing_steps = 120000 * max_epLength  #120000 * max_epLength  #
+    
+    startE = 1
+    endE = 0.0
+    stepDrop = (startE - endE)/annealing_steps
+    agent = None
+    sub_agent = ddCen.Agent
+    # stateletFunction = getStateletWithCommunication
+    isCommunication = True # flag to demonstrate communication    
+    reward_overload = None
 
 class ddqnDoubleHierarchical(object):
     group_size = 1
@@ -94,7 +113,24 @@ class ddqnDoubleHierarchical(object):
     stateRepresentation = stateRepresentationEnum.leaderAndIntermediate
     reward_overload = None    
 
-
+class ddqn100LongHierarchical(object):
+    group_size = 1
+    name = "ddqn100LongHierarchical"
+    max_epLength = 500 # or 60 if test
+    y = 0    
+    tau = 0.001 #Rate to update target network toward primary network. 
+    update_freq = 4 #How often to perform a training step.
+    batch_size = 32 #How many experiences to use for each training step.
+    num_episodes = 100001 #200001#    
+    pre_train_steps = 20000 * max_epLength #40000 * max_epLength #
+    annealing_steps = 60000 * max_epLength  #120000 * max_epLength  #
+    startE = 1
+    endE = 0.0
+    stepDrop = (startE - endE)/annealing_steps
+    agent = None
+    sub_agent = ddCen.Agent
+    stateRepresentation = stateRepresentationEnum.leaderAndIntermediate
+    reward_overload = None    
 
 class ddqn100MediumHierarchical(object):
     group_size = 1
@@ -131,6 +167,7 @@ class ddqnSingleNoCommunicate(object):
     stepDrop = (startE - endE)/annealing_steps
     agent = None
     sub_agent = ddCen.Agent
+    # stateletFunction = getStateletNoCommunication
     stateRepresentation = stateRepresentationEnum.throttler
     reward_overload = None
 
@@ -188,7 +225,7 @@ load_attack_path = "attackSimulations/{0}/".format(assignedNetwork.name)
 loadAttacks = False
 # genericAgent = None
 
-network_emulator = network.network_new.network_full #network_quick # network_full
+network_emulator = network.network_new.network_quick #network_quick # network_full
 assignedNetwork.emulator = network_emulator
 
 
@@ -200,7 +237,7 @@ if loadAttacks:
         attack_location = load_attack_path+attackClass.getName()+".apkl"
 
         exp = experiment.Experiment(attackClass, GeneralSettings, assignedNetwork, 
-            assignedAgent, twist="{0}".format(network_emulator.name), load_attack_path=attack_location)
+            assignedAgent, twist= "", load_attack_path=attack_location)
         exp.run(0, genericAgent)
 
     getSummary(attackClasses, exp.load_path, assignedAgent)

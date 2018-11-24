@@ -19,6 +19,7 @@ for dest in punim0621 punim0636; do
 	exp_gpgpu_single.slurm \
 	exp_cloud.slurm \
 	exp_physical.slurm \
+	exp_physical_ddqn.slurm \
 	phys_attempt.slurm \
 	helloWorld.py \
 	slurms_cloud_standard.sh \
@@ -28,6 +29,15 @@ for dest in punim0621 punim0636; do
 	slurms_gpgpu_standard.sh \
 	slurms_gpgpu_half.sh \
 	slurms_gpgpu_latter.sh \
+	slurms_gpgpu_v2.sh \
+	slurms_physical_v2.sh \
+	slurms_ddqn_physical.sh \
+	runDDQNNetQuick.py \
+	runDDQNMalialis.py \
+	runDDQNHundred.py \
+	runSarsaNoOverdrive.py \
+	runSarsaOriginal.py \
+	runSarsaDDQNCopy.py \
 	--exclude='*' \
 	jpattison@spartan.hpc.unimelb.edu.au:/data/projects/$dest #punim0621
 	#jpattison@spartan.hpc.unimelb.edu.au:/data/projects/punim0636  punim0621

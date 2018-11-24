@@ -75,6 +75,7 @@ class ddqnDoubleTeamGeneric(object):
 """
 
 
+
 class ddqnDoubleHierarchical(object):
     group_size = 1
     name = "DDQN200Hierarchical"
@@ -131,6 +132,7 @@ class ddqnSingleNoCommunicate(object):
     stepDrop = (startE - endE)/annealing_steps
     agent = None
     sub_agent = ddCen.Agent
+    # stateletFunction = getStateletNoCommunication
     stateRepresentation = stateRepresentationEnum.throttler
     reward_overload = None
 
@@ -183,7 +185,7 @@ attackClasses = [conAttack, shortPulse, mediumPulse,
 
 
 assignedNetwork = NetworkMalialisSmall #NetworkSingleTeamMalialisMedium
-assignedAgent = ddqnSingleSarsaCopy #ddqn100MediumHierarchical
+assignedAgent = ddqnSingleNoCommunicate #ddqn100MediumHierarchical
 load_attack_path = "attackSimulations/{0}/".format(assignedNetwork.name)
 loadAttacks = False
 # genericAgent = None
@@ -200,7 +202,7 @@ if loadAttacks:
         attack_location = load_attack_path+attackClass.getName()+".apkl"
 
         exp = experiment.Experiment(attackClass, GeneralSettings, assignedNetwork, 
-            assignedAgent, twist="{0}".format(network_emulator.name), load_attack_path=attack_location)
+            assignedAgent, twist= "", load_attack_path=attack_location)
         exp.run(0, genericAgent)
 
     getSummary(attackClasses, exp.load_path, assignedAgent)
