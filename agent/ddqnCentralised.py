@@ -82,7 +82,6 @@ class Agent(aBase.Agent):
 
     def loadModel(self, load_path):
         print("Loading Model...")
-        print(load_path)
         ckpt = tf.train.get_checkpoint_state(load_path)
         self.saver.restore(self.sess,ckpt.model_checkpoint_path)
 
