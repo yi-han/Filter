@@ -81,13 +81,15 @@ class SarsaFunctionAI:
         # print(self.w_matrix)
         w = self.w_matrix[action_num]
         state_vector = self.feature_converter(state)
-        if error_check:
-            print("\nstate")
+        if False:
+            print("\n\nstate")
             print(state)
-            print(state_vector)
-            print("weight")
-            print(w)
-            print(w*state_vector)
+            #print(state_vector)
+            print(action)
+            #print("weight")
+            #print(w)
+            #print(w*state_vector)
+            print(np.dot(w, state_vector))
 
         return np.dot(w, state_vector)
 
@@ -130,6 +132,8 @@ class SarsaFunctionAI:
         if False :#current_weights[-38] != 0:
             print("\naction")
             print(action)
+            print(state)
+            print(state_vector)
             # print("gradient")
             # print(self.feature_converter(state))
             # print("original")

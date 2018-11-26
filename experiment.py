@@ -179,7 +179,6 @@ class Experiment:
                         ### why are we putting in the current state??? Shouldn't it be last state
                         ### or better, shouldn't it involve both the last state and current state?
                         if not test:
-
                             agent.update(net.last_state, last_action, net.get_state(), d, r, next_action = a)
 
 

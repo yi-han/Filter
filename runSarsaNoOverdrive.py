@@ -55,26 +55,7 @@ class SarsaDecMaliasOriginal(object):
     reward_overload = -1
     stateRepresentation = stateRepresentationEnum.throttler 
 
-class SarsaCTL(object):
-    name = "sarsaCTL"
-    max_epLength = 30 # or 60 if test
-    y = 0
-    tau = 0.05
-    update_freq = None
-    batch_size = None
-    num_episodes = 100001#82501
-    pre_train_steps = 0#2000 * max_epLength
-    annealing_steps = 80000 * max_epLength #1000*max_epLength #60000 * max_epLength 
-    startE = 0.3 #0.4
-    endE = 0.0
-    stepDrop = (startE - endE)/annealing_steps
-    agent = None
-    sub_agent = sarCen.Agent
-    group_size = 1 # number of filters each agent controls
-    #stateletFunction = getStateletNoCommunication
-    #isCommunication = False
-    reward_overload = -1
-    stateRepresentation = stateRepresentationEnum.leaderAndIntermediate
+
 
 class SarsaDecMaliasNoPT(object):
     name = "sarsaDecGenMalialisNoOpt"
@@ -121,12 +102,58 @@ class LinearSarsaLong(LinearSarsaSingular):
     name = "LinearSarsaLong"
     num_episodes = 100001
 
-class LinearSarsaSingularNoOverload(LinearSarsaSingular):
+class LinearSarsaNoOverloadLong(LinearSarsaSingular):
+    name = "LinearNoOverloadLong"
+    num_episodes = 100001
+    reward_overload = None
+
+class LinearSarsaNoOverload(LinearSarsaSingular):
     name = "LinearSarsaSingularNoOverload"
     reward_overload = None
 
+class LinearSarsaSingularDDQNCopy(object):
+    # copy from ddqnSingleNoCommunicate
+    name = "LinearSarsaSingularDDQNCopy"
+    reward_overload = None
+    max_epLength = 30 # or 60 if test
+    y = 0    
+    tau = 0.01 #Rate to update target network toward primary network. 
+    update_freq = None #How often to perform a training step.
+    batch_size = None #How many experiences to use for each training step.
+    num_episodes = 100001 #200001#    
+    pre_train_steps = 20000 * max_epLength #40000 * max_epLength #
+    annealing_steps = 60000 * max_epLength  #120000 * max_epLength  #
+    startE = 1
+    endE = 0.0
+    stepDrop = (startE - endE)/annealing_steps
+    agent = None
+    sub_agent = linCen.Agent
+    stateRepresentation = stateRepresentationEnum.throttler
+    reward_overload = None
+    group_size = 1 # number of filters each agent controls
 
-
+"""
+class SarsaCTL(object):
+    name = "sarsaCTL"
+    max_epLength = 30 # or 60 if test
+    y = 0
+    tau = 0.05
+    update_freq = None
+    batch_size = None
+    num_episodes = 100001#82501
+    pre_train_steps = 0#2000 * max_epLength
+    annealing_steps = 80000 * max_epLength #1000*max_epLength #60000 * max_epLength 
+    startE = 0.3 #0.4
+    endE = 0.0
+    stepDrop = (startE - endE)/annealing_steps
+    agent = None
+    sub_agent = sarCen.Agent
+    group_size = 1 # number of filters each agent controls
+    #stateletFunction = getStateletNoCommunication
+    #isCommunication = False
+    reward_overload = -1
+    stateRepresentation = stateRepresentationEnum.leaderAndIntermediate
+"""
 class LinearSarsaLAI(object):
     name = "LinearSarsaLAI"
     max_epLength = 500
@@ -272,7 +299,7 @@ class SarsaDecPTLarge(object):
     agent = None
     sub_agent = sarCen.Agent
     group_size = 1 # number of filters each agent controls
-"""
+
 
 
 class SarsaGenericTeam(object):
@@ -293,7 +320,7 @@ class SarsaGenericTeam(object):
     stepDrop = (startE - endE)/annealing_steps
     agent = None
     sub_agent = sarCen.Agent
-
+"""
 class GeneralSettings(object):
     # SaveAttackEnum = Enum('SaveAttack', 'neither save load')
     SaveModelEnum = Enum('SaveModel', 'neither save load')
@@ -318,9 +345,9 @@ Settings to change
 
 """
 assignedNetwork = NetworkMalialisSmall
-assignedAgent = LinearSarsaSingularNoOverload
+assignedAgent = LinearSarsaSingularDDQNCopy
 load_attack_path = "attackSimulations/{0}/".format(assignedNetwork.name)
-network_emulator = network.network_new.network_full #network_quick # network_full
+network_emulator = network.network_new.network_quick # network_quick # network_full
 
 
 
@@ -333,7 +360,7 @@ level = 0 # level 0 is throttlers, level 1 is intermeditary etc
 for max_hosts in assignedNetwork.max_hosts_per_level:
     maxThrottlerBandwidth = assignedNetwork.rate_attack_high * max_hosts # a throttler doesn't face more than X
     if level == 0:
-        numTiles = 6 * max_hosts
+        numTiles = 10 * max_hosts
     else:
         numTiles = 6 # just set at 6.
     numTilings = 8
@@ -389,7 +416,7 @@ if loadAttacks:
         attack_location = load_attack_path+attackClass.getName()+".apkl"
 
         exp = experiment.Experiment(attackClass, GeneralSettings, assignedNetwork, 
-            assignedAgent, twist= "Alias{0}".format(partition), load_attack_path=attack_location)
+            assignedAgent, twist="{2}{0}Alias{1}".format(numTiles, partition, network_emulator.name), load_attack_path=attack_location)
         exp.run(0, genericAgent)
     getSummary(attackClasses, exp.load_path, assignedAgent)
 

@@ -14,6 +14,7 @@ import agent.ddqnCentralised as ddCen
 from mapsAndSettings import *
 assert(len(sys.argv)==4)
 
+"""
 class ddqnCenSettings(object):
     name = "DDQNCentralised100"
     max_epLength = 30 # or 60 if test
@@ -50,7 +51,7 @@ class ddqnCenDoubleSettings(object):
     endE = 0.0
     stepDrop = (startE - endE)/annealing_steps
     agent = ddCen.Agent
-
+"""
 """ 
 class ddqnDoubleTeamGeneric(object):
     group_size = 2
@@ -125,7 +126,7 @@ class ddqnSingleNoCommunicate(object):
     batch_size = 32 #How many experiences to use for each training step.
     num_episodes = 100001 #200001#    
     pre_train_steps = 20000 * max_epLength #40000 * max_epLength #
-    annealing_steps = 600000 * max_epLength  #120000 * max_epLength  #
+    annealing_steps = 60000 * max_epLength  #120000 * max_epLength  #
     startE = 1
     endE = 0.0
     stepDrop = (startE - endE)/annealing_steps
@@ -135,7 +136,7 @@ class ddqnSingleNoCommunicate(object):
     reward_overload = None
 
 class ddqnSingleSarsaCopy(object):
-    # apart from 2000 pretrain this is as close as it gets
+    # apart from 2000 pretrain and overload this is as close as it gets
     name = "DDQNDecGenMalialisAttempt" #used to be DDQNDecGenMalialisNoOpt
     max_epLength = 30 # or 60 if test
     y = 0
@@ -156,6 +157,10 @@ class ddqnSingleSarsaCopy(object):
     reward_overload = None
     stateRepresentation = stateRepresentationEnum.throttler
 
+class ddqnMalialisTrue(ddqnSingleSarsaCopy):
+    # is the singleSarsaCopy but with reward overload
+    name = "DDQNDecGenMalialisTrue"
+    reward_overload = -1
 
 
 
@@ -182,8 +187,8 @@ attackClasses = [conAttack, shortPulse, mediumPulse,
     largePulse, gradualIncrease] 
 
 
-assignedNetwork = NetworkMalialisSmall #NetworkSingleTeamMalialisMedium
-assignedAgent = ddqnSingleSarsaCopy #ddqn100MediumHierarchical
+assignedNetwork = NetworkSingleTeamMalialisMedium #NetworkSingleTeamMalialisMedium
+assignedAgent = ddqnSingleNoCommunicate #ddqn100MediumHierarchical
 load_attack_path = "attackSimulations/{0}/".format(assignedNetwork.name)
 loadAttacks = False
 # genericAgent = None

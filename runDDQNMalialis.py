@@ -14,6 +14,7 @@ import agent.ddqnCentralised as ddCen
 from mapsAndSettings import *
 assert(len(sys.argv)==4)
 
+"""
 class ddqnCenSettings(object):
     name = "DDQNCentralised100"
     max_epLength = 30 # or 60 if test
@@ -50,7 +51,7 @@ class ddqnCenDoubleSettings(object):
     endE = 0.0
     stepDrop = (startE - endE)/annealing_steps
     agent = ddCen.Agent
-
+"""
 """ 
 class ddqnDoubleTeamGeneric(object):
     group_size = 2
@@ -125,13 +126,12 @@ class ddqnSingleNoCommunicate(object):
     batch_size = 32 #How many experiences to use for each training step.
     num_episodes = 100001 #200001#    
     pre_train_steps = 20000 * max_epLength #40000 * max_epLength #
-    annealing_steps = 600000 * max_epLength  #120000 * max_epLength  #
+    annealing_steps = 60000 * max_epLength  #120000 * max_epLength  #
     startE = 1
     endE = 0.0
     stepDrop = (startE - endE)/annealing_steps
     agent = None
     sub_agent = ddCen.Agent
-    # stateletFunction = getStateletNoCommunication
     stateRepresentation = stateRepresentationEnum.throttler
     reward_overload = None
 
@@ -156,14 +156,6 @@ class ddqnSingleSarsaCopy(object):
     isCommunication = False
     reward_overload = None
     stateRepresentation = stateRepresentationEnum.throttler
-
-
-class ddqnMalialisReplica(ddqnSingleSarsaCopy):
-    # the exact repilca, including overload
-    name = "DDQNMalialiasExactReplica"
-    num_episodes = 62501
-    pre_train_steps = 0
-    reward_overload = True
 
 
 
@@ -191,8 +183,8 @@ attackClasses = [conAttack, shortPulse, mediumPulse,
     largePulse, gradualIncrease] 
 
 
-assignedNetwork = NetworkMalialisSmall #NetworkSingleTeamMalialisMedium
-assignedAgent = ddqnMalialisReplica #ddqn100MediumHierarchical
+assignedNetwork = NetworkSingleTeamMalialisMedium #NetworkSingleTeamMalialisMedium
+assignedAgent = ddqnSingleNoCommunicate #ddqn100MediumHierarchical
 load_attack_path = "attackSimulations/{0}/".format(assignedNetwork.name)
 loadAttacks = False
 # genericAgent = None
@@ -209,7 +201,7 @@ if loadAttacks:
         attack_location = load_attack_path+attackClass.getName()+".apkl"
 
         exp = experiment.Experiment(attackClass, GeneralSettings, assignedNetwork, 
-            assignedAgent, twist= "", load_attack_path=attack_location)
+            assignedAgent, twist="{0}".format(network_emulator.name), load_attack_path=attack_location)
         exp.run(0, genericAgent)
 
     getSummary(attackClasses, exp.load_path, assignedAgent)

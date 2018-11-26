@@ -1,7 +1,7 @@
-sed 's/runDDQN/runDDQN/g' exp_physical_ddqn.slurm > temp1.slurm
-sed 's/sampleDDQNText/DDQNsarsaCopy/g' temp1.slurm > temp2.slurm
-sed 's/sampleDDQNText/DDQNsarsaCopy/g' temp1.slurm > output.slurm
-sbatch output.slurm
+sed 's/runDDQN/runDDQNMalialis/g' exp_physical_ddqn.slurm > temp1.slurm
+sed 's/sampleDDQNText/DDmalTrue/g' temp1.slurm > temp2.slurm
+sed 's/sampleDDQNText/DDmalTrue/g' temp1.slurm > output.slurm
+sbatch temp2.slurm
 sleep 5
 sed 's/0 2/2 2/g' temp2.slurm > output.slurm
 sbatch output.slurm
