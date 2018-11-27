@@ -347,7 +347,7 @@ Settings to change
 assignedNetwork = NetworkMalialisSmall
 assignedAgent = LinearSarsaSingularDDQNCopy
 load_attack_path = "attackSimulations/{0}/".format(assignedNetwork.name)
-network_emulator = network.network_new.network_quick # network_quick # network_full
+network_emulator = network.network_new.network_full # network_quick # network_full
 
 
 

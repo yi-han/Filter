@@ -170,6 +170,8 @@ class SarsaFunctionAI:
 
         if dataDict['alpha'] != self.alpha or dataDict['gamma'] != self.gamma or \
             dataDict['actions'] != self.actions or dataDict['n_features'] != self.n_features:
+            print(dataDict)
+            
             raise ValueError('Experiments parameters do not match saved file')
         else:
             self.w_matrix = dataDict['w_matrix']
