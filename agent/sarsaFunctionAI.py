@@ -14,14 +14,40 @@ to do some sort of transformation.
 
 import random
 import numpy as np
-
+import agent.tileCoding
 #env = gym.envs.make("MountainCar-v0")
 
 
 
+class TileWrapper(object):
+    # A cheap method of introducing the bias term whilst we still work out if necessary
+    def __init__(self, encoders, bias_term = False):
+        self.encoders = encoders
+        self.bias_term = bias_term
+
+    def featureSize(self):
+        count = 0
+        for encoder in self.encoders:
+            count += encoder.featureSize()
+        if self.bias_term:
+            count += 1
+            print("\n\nadding bias")
+        return count
 
 
-
+    def feature_converter(self, state):
+        state_vector = []
+        # print(state)
+        for i in range(len(state)):
+            encoder = self.encoders[i]
+            state_vector.extend(encoder.encodeToVector(state[i]))
+        if self.bias_term:
+                state_vector.append(1)
+        # print(state)
+        # print(state_vector)
+        #print(np.array(state_vector))
+        # print(len(state_vector))
+        return np.array(state_vector)
 
 class SarsaFunctionAI:
     """
@@ -51,36 +77,21 @@ class SarsaFunctionAI:
         self.gamma = gamma
         self.w_matrix = []
         
-        n_features = 0
-        self.encoders=[]
-        for encoder in encoders:
-            n_features+=encoder.featureSize()
-            self.encoders.append(encoder)
-
-        self.n_features = n_features
+        self.tile_wrapper = TileWrapper(encoders)
+        self.n_features = self.tile_wrapper.featureSize()
         
         self.reset()
 
 
 
-    def feature_converter(self, state):
-        state_vector = []
-        # print(state)
-        for i in range(len(state)):
-            encoder = self.encoders[i]
-            state_vector.extend(encoder.encodeToVector(state[i]))
-        # print(state)
-        # print(state_vector)
-        #print(np.array(state_vector))
-        # print(len(state_vector))
-        return np.array(state_vector)
+
 
     def getQ(self, state, action, error_check = False):
         # convert action into a vector
         action_num = self.actions.index(action)
         # print(self.w_matrix)
         w = self.w_matrix[action_num]
-        state_vector = self.feature_converter(state)
+        state_vector = self.tile_wrapper.feature_converter(state)
         if False:
             print("\n\nstate")
             print(state)
@@ -126,8 +137,8 @@ class SarsaFunctionAI:
         action_num = self.actions.index(action)        
         current_weights = self.w_matrix[action_num]
         coefficient = (self.alpha*(reward - self.getQ(state, action)))
-        state_vector = self.feature_converter(state)
-        self.w_matrix[action_num] = current_weights + coefficient*self.feature_converter(state)
+        state_vector = self.tile_wrapper.feature_converter(state)
+        self.w_matrix[action_num] = current_weights + coefficient*state_vector
         
         if False :#current_weights[-38] != 0:
             print("\naction")
@@ -135,7 +146,7 @@ class SarsaFunctionAI:
             print(state)
             print(state_vector)
             # print("gradient")
-            # print(self.feature_converter(state))
+            # print(self.tile_wrapper.feature_converter(state))
             # print("original")
             print(current_weights)
             print("coefficient")

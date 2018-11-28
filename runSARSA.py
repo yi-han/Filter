@@ -111,6 +111,10 @@ class LinearSarsaNoOverload(LinearSarsaSingular):
     name = "LinearSarsaSingularNoOverload"
     reward_overload = None
 
+class LinearSarsaReducedLearning(LinearSarsaSingular):
+    name = "LinearSarsaReducedLearning"
+    tau = 0.0125
+
 class LinearSarsaSingularDDQNCopy(object):
     # copy from ddqnSingleNoCommunicate
     name = "LinearSarsaSingularDDQNCopy"
@@ -345,7 +349,7 @@ Settings to change
 
 """
 assignedNetwork = NetworkMalialisSmall
-assignedAgent = LinearSarsaSingularDDQNCopy
+assignedAgent = LinearSarsaReducedLearning
 load_attack_path = "attackSimulations/{0}/".format(assignedNetwork.name)
 network_emulator = network.network_new.network_full # network_quick # network_full
 
