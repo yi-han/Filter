@@ -440,6 +440,20 @@ class network_full(object):
                 reward -= ((legitimate_rate + attacker_rate)/self.upper_boundary - 1.0)
             
             self.server_failures +=1
+
+            # throttle the traffic at the server down to capacity
+            # the negative is you're having to throttle at the server as opposed to at the enemy
+            # I deactivated it as the results (apart from gradually increasing) all were closer without
+            if False:
+                traffic_level = legitimate_rate + attacker_rate
+                overload_amount = traffic_level - self.upper_boundary
+                overload_percent = overload_amount/traffic_level
+                server_throttle_level = 1-overload_percent
+                assert(abs(server_throttle_level * traffic_level - self.upper_boundary )< 0.001) 
+                new_legit_rate = legitimate_rate * server_throttle_level
+                #print("{0} vs {1}".format(new_legit_rate, legitimate_rate_all))
+                self.legitimate_served += new_legit_rate
+
         else:
             if legitimate_rate_all != 0:
                 reward += legitimate_rate/legitimate_rate_all

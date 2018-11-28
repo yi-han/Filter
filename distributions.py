@@ -65,13 +65,17 @@ def reward_single(directory,reward_prefix="reward"):
     #(ep, ep_reward) = condense_values(ep, ep_reward)
     return (ep, ep_reward)
 
-def reward_multiple(directory, max_num, reward_prefix):
+def reward_multiple(directory, max_num, reward_prefix, PerLegitTraffic=False):
     # we do first one manually then loop for rest
     
 
     path = "{0}/{1}-{2}.csv".format(directory, reward_prefix, 0)
     f = pd.read_csv(path)
-    ep_reward = f.LastReward #LastReward
+    if PerLegitTraffic:
+        ep_reward = f.PerPacketIdeal#PerPacketIdeal #LastReward
+    else:
+        ep_reward = f.LastReward
+
     ep = f['Episode']
 
     average_reward = np.zeros((len(ep),1), dtype=float)
@@ -81,7 +85,10 @@ def reward_multiple(directory, max_num, reward_prefix):
         path = "{0}/{1}-{2}.csv".format(directory, reward_prefix, i)
         print(path)
         f = pd.read_csv(path)
-        ep_reward = np.array(f.LastReward, dtype=float)
+        if PerLegitTraffic:
+            ep_reward = np.array(f.PerPacketIdeal, dtype=float)  #PerPacketIdeal, dtype=float)
+        else:
+            ep_reward = np.array(f.LastReward, dtype=float)
         ep_reward.shape=(len(ep),1)
         average_reward += ep_reward
 
@@ -95,7 +102,7 @@ def reward_multiple(directory, max_num, reward_prefix):
 
 
 
-def reward_graph(directory, reward_type, max_num = None, title=None):
+def reward_graph(directory, reward_type, max_num = None, title=None, PerLegitTraffic = False):
     # used for the reward of the training file
     
     #print(path)
@@ -103,10 +110,12 @@ def reward_graph(directory, reward_type, max_num = None, title=None):
     if not max_num:
         (ep, ep_reward) = reward_single(directory, reward_type)
     else:
-        (ep, ep_reward) = reward_multiple(directory, max_num, reward_type)
+        (ep, ep_reward) = reward_multiple(directory, max_num, reward_type, PerLegitTraffic)
 
-
-    plt.ylim((-0.8, 1.2))
+    if PerLegitTraffic:
+        plt.ylim(0, 1)#((-0.8, 1.2))
+    else:
+        plt.ylim(-0.8, 1.2)
     plt.plot(ep,ep_reward, 'o-')
     if title:
         plt.title(title)

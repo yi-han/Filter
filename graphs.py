@@ -34,6 +34,7 @@ if not testAttacks:
         attackName = "reward-train-{0}".format(attackType.getName())
         distributions.distributions(directory, repetitions, averageFrom, attackName) #190000
         distributions.reward_graph(directory, attackName, repetitions, name)
+        distributions.reward_graph(directory, attackName, repetitions, PerLegitTraffic = True, title = "\% Legit Traffic")
 
 else:
     for attackType in attackClasses:
