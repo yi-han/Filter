@@ -1,5 +1,5 @@
-sed 's/sample_sarsa_name/malOrigBias/g' exp_physical.slurm > temp1.slurm
-sed 's/runSARSA/runSarsaOriginal/g' temp1.slurm > temp2.slurm
+sed 's/sample_sarsa_name/midNormal/g' exp_physical.slurm > temp1.slurm
+sed 's/runSARSA/runSARSA/g' temp1.slurm > temp2.slurm
 
 sed 's/0 5/0 2/g' temp2.slurm > output.slurm
 sbatch output.slurm

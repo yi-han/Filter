@@ -162,7 +162,7 @@ class LinearSarsaLAI(object):
     name = "LinearSarsaLAI"
     max_epLength = 500
     y = 0
-    tau = 0.05
+    tau = 0.00625
     update_freq = None
     batch_size = None
     num_episodes = 100001#82501
@@ -177,6 +177,10 @@ class LinearSarsaLAI(object):
     #stateletFunction = getStateletNoCommunication
     reward_overload = -1
     stateRepresentation = stateRepresentationEnum.leaderAndIntermediate  
+
+class LinearSarsaLAIshort(LinearSarsaLAI):
+    name = "LinearLAIshort"
+    max_epLength = 30
 
 class RandomAgent(object):
     
@@ -348,8 +352,8 @@ Settings to change
 
 
 """
-assignedNetwork = NetworkMalialisSmall
-assignedAgent = LinearSarsaReducedLearning
+assignedNetwork = NetworkSingleTeamMalialisMedium
+assignedAgent = LinearSarsaLAI
 load_attack_path = "attackSimulations/{0}/".format(assignedNetwork.name)
 network_emulator = network.network_new.network_full # network_quick # network_full
 

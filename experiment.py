@@ -146,7 +146,7 @@ class Experiment:
         loss_file = open("{0}/loss-{1}-{2}-{3}.csv".format(path,run_mode, self.adversary_class.getName(), prefix) ,"w")
         packet_served_file = open("{0}/packet_served-{1}-{2}-{3}.csv".format(path,run_mode, self.adversary_class.getName(), prefix),"w")
         print("Using the {0} agent:".format(name))
-        reward_file.write("Episode,StepsSoFar,TotalReward,LastReward,LengthEpisode,e\n")
+        reward_file.write("Episode,StepsSoFar,TotalReward,LastReward,LengthEpisode,e,%PacketIdeal\n")
         packet_served_file.write("Episode,PacketsReceived,PacketsServed,PercentageReceived,ServerFailures\n")
         #self.episode_rewards = []
 
@@ -213,6 +213,10 @@ class Experiment:
                 #self.episode_rewards.append(net.rewards_per_step) DO LATER
 
 
+
+
+
+
                 if ep_num % 1000 == 0:
                     print("Completed Episode - {0}".format(ep_num))
                     print("E={0} Fails = {1} FailPer = {2}".format(e,fail_seg, (fail_seg*100/(1000*max_epLength))))
@@ -227,10 +231,20 @@ class Experiment:
                 stepList.append(step)
                 rList.append(rAll)
 
+                # grab stats before doing two more
                 legit_served, legit_all, legit_per, server_failures = net.getLegitStats()
+                
+                for f_step in range(2):
+                    # do two steps without learning (so nothing implicit) and see if we can see how well it performs
+                    a = agent.predict(net.get_state(), total_steps, 0)
+                    net.step(a, step+f_step)
+
+                # how well the system performs assuming no exploration (only useful for training)
+                agent_performance = net.getPacketServedAtMoment()
+
                 packet_served_file.write("{0}, {1}, {2}, {3}, {4}\n".format(ep_num, legit_served, legit_all, legit_per, server_failures))
 
-                reward_file.write(str(ep_num) + "," + str(total_steps) + "," + str(rList[-1]) + "," + str(r) + "," + str(stepList[-1]) + "," + str(e) + "\n")
+                reward_file.write("{0},{1},{2},{3},{4},{5},{6}\n".format(ep_num, total_steps, rList[-1], r, stepList[-1], e, agent_performance))
                 if len(loss) > 0:
                     loss_file.write(str(ep_num) + "," + str(total_steps) + "," + str(loss[-1]) + "," + str(e) + "\n")
 

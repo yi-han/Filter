@@ -100,7 +100,7 @@ class ddqnDoubleHierarchical(object):
 class ddqn100MediumHierarchical(object):
     group_size = 1
     name = "ddqn100MediumHierarchical"
-    max_epLength = 250 # or 60 if test
+    max_epLength = 30 # or 60 if test
     y = 0    
     tau = 0.001 #Rate to update target network toward primary network. 
     update_freq = 4 #How often to perform a training step.
@@ -108,7 +108,7 @@ class ddqn100MediumHierarchical(object):
     num_episodes = 100001 #200001#    
     pre_train_steps = 20000 * max_epLength #40000 * max_epLength #
     annealing_steps = 60000 * max_epLength  #120000 * max_epLength  #
-    startE = 1
+    startE = 0.3
     endE = 0.0
     stepDrop = (startE - endE)/annealing_steps
     agent = None
@@ -187,8 +187,8 @@ attackClasses = [conAttack, shortPulse, mediumPulse,
     largePulse, gradualIncrease] 
 
 
-assignedNetwork = NetworkMalialisSmall #NetworkSingleTeamMalialisMedium
-assignedAgent = ddqnSingleNoCommunicate #ddqn100MediumHierarchical
+assignedNetwork = NetworkSingleTeamMalialisMedium #NetworkSingleTeamMalialisMedium
+assignedAgent = ddqn100MediumHierarchical #ddqn100MediumHierarchical
 load_attack_path = "attackSimulations/{0}/".format(assignedNetwork.name)
 loadAttacks = False
 # genericAgent = None

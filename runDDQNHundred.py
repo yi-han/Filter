@@ -14,6 +14,7 @@ import agent.ddqnCentralised as ddCen
 from mapsAndSettings import *
 assert(len(sys.argv)==4)
 
+"""
 class ddqnCenSettings(object):
     name = "DDQNCentralised100"
     max_epLength = 30 # or 60 if test
@@ -50,7 +51,7 @@ class ddqnCenDoubleSettings(object):
     endE = 0.0
     stepDrop = (startE - endE)/annealing_steps
     agent = ddCen.Agent
-
+"""
 """ 
 class ddqnDoubleTeamGeneric(object):
     group_size = 2
@@ -73,7 +74,6 @@ class ddqnDoubleTeamGeneric(object):
     stateletFunction = getStateletNoCommunication
     isCommunication = False
 """
-
 
 
 class ddqnDoubleHierarchical(object):
@@ -100,7 +100,7 @@ class ddqnDoubleHierarchical(object):
 class ddqn100MediumHierarchical(object):
     group_size = 1
     name = "ddqn100MediumHierarchical"
-    max_epLength = 250 # or 60 if test
+    max_epLength = 30 # or 60 if test
     y = 0    
     tau = 0.001 #Rate to update target network toward primary network. 
     update_freq = 4 #How often to perform a training step.
@@ -108,7 +108,7 @@ class ddqn100MediumHierarchical(object):
     num_episodes = 100001 #200001#    
     pre_train_steps = 20000 * max_epLength #40000 * max_epLength #
     annealing_steps = 60000 * max_epLength  #120000 * max_epLength  #
-    startE = 1
+    startE = 0.3
     endE = 0.0
     stepDrop = (startE - endE)/annealing_steps
     agent = None
@@ -126,18 +126,17 @@ class ddqnSingleNoCommunicate(object):
     batch_size = 32 #How many experiences to use for each training step.
     num_episodes = 100001 #200001#    
     pre_train_steps = 20000 * max_epLength #40000 * max_epLength #
-    annealing_steps = 600000 * max_epLength  #120000 * max_epLength  #
+    annealing_steps = 60000 * max_epLength  #120000 * max_epLength  #
     startE = 1
     endE = 0.0
     stepDrop = (startE - endE)/annealing_steps
     agent = None
     sub_agent = ddCen.Agent
-    # stateletFunction = getStateletNoCommunication
     stateRepresentation = stateRepresentationEnum.throttler
     reward_overload = None
 
 class ddqnSingleSarsaCopy(object):
-    # apart from 2000 pretrain this is as close as it gets
+    # apart from 2000 pretrain and overload this is as close as it gets
     name = "DDQNDecGenMalialisAttempt" #used to be DDQNDecGenMalialisNoOpt
     max_epLength = 30 # or 60 if test
     y = 0
@@ -158,6 +157,10 @@ class ddqnSingleSarsaCopy(object):
     reward_overload = None
     stateRepresentation = stateRepresentationEnum.throttler
 
+class ddqnMalialisTrue(ddqnSingleSarsaCopy):
+    # is the singleSarsaCopy but with reward overload
+    name = "DDQNDecGenMalialisTrue"
+    reward_overload = -1
 
 
 
@@ -185,7 +188,7 @@ attackClasses = [conAttack, shortPulse, mediumPulse,
 
 
 assignedNetwork = NetworkMalialisSmall #NetworkSingleTeamMalialisMedium
-assignedAgent = ddqnSingleNoCommunicate #ddqn100MediumHierarchical
+assignedAgent = ddqnSingleSarsaCopy #ddqn100MediumHierarchical
 load_attack_path = "attackSimulations/{0}/".format(assignedNetwork.name)
 loadAttacks = False
 # genericAgent = None
@@ -202,7 +205,7 @@ if loadAttacks:
         attack_location = load_attack_path+attackClass.getName()+".apkl"
 
         exp = experiment.Experiment(attackClass, GeneralSettings, assignedNetwork, 
-            assignedAgent, twist= "", load_attack_path=attack_location)
+            assignedAgent, twist="{0}".format(network_emulator.name), load_attack_path=attack_location)
         exp.run(0, genericAgent)
 
     getSummary(attackClasses, exp.load_path, assignedAgent)

@@ -450,15 +450,22 @@ class network_full(object):
 
         return clip(-1, 1, reward)
 
-    # def getPacketServedAtMoment(self):
-    #     """
-    #     Experimental statistic. 
-    #     Calculate the load at the server. If it is above the capacity/steps report 0. 
-    #     Otherwise the % of legitimate packets taht should have arrived.
-    #     Do note there is an accumulative effect so this is very imprecise
+    def getPacketServedAtMoment(self):
+        """
+        Experimental statistic. 
+        Calculate the load at the server. If it is above the capacity/steps report 0. 
+        Otherwise the % of legitimate packets taht should have arrived.
+        Do note there is an accumulative effect so this is very imprecise
 
-    #     """
+        """
+        legitimate_rate = self.switches[0].legal_window
+        legitimate_sent = self.switches[0].legal_window + self.switches[0].dropped_legal_window
+        attacker_rate = self.switches[0].illegal_window
 
+        if legitimate_rate + attacker_rate > self.upper_boundary:
+            return 0.0
+        else:
+            return legitimate_rate/legitimate_sent
 
 
     def step(self, action, step_count):

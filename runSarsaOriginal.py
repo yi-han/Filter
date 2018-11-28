@@ -111,6 +111,10 @@ class LinearSarsaNoOverload(LinearSarsaSingular):
     name = "LinearSarsaSingularNoOverload"
     reward_overload = None
 
+class LinearSarsaReducedLearning(LinearSarsaSingular):
+    name = "LinearSarsaReducedLearning"
+    tau = 0.0125
+
 class LinearSarsaSingularDDQNCopy(object):
     # copy from ddqnSingleNoCommunicate
     name = "LinearSarsaSingularDDQNCopy"
@@ -158,7 +162,7 @@ class LinearSarsaLAI(object):
     name = "LinearSarsaLAI"
     max_epLength = 500
     y = 0
-    tau = 0.05
+    tau = 0.00625
     update_freq = None
     batch_size = None
     num_episodes = 100001#82501
@@ -173,6 +177,10 @@ class LinearSarsaLAI(object):
     #stateletFunction = getStateletNoCommunication
     reward_overload = -1
     stateRepresentation = stateRepresentationEnum.leaderAndIntermediate  
+
+class LinearSarsaLAIshort(LinearSarsaLAI):
+    name = "LinearLAIshort"
+    max_epLength = 30
 
 class RandomAgent(object):
     
@@ -344,8 +352,8 @@ Settings to change
 
 
 """
-assignedNetwork = NetworkMalialisSmall
-assignedAgent = LinearSarsaSingular
+assignedNetwork = NetworkSingleTeamMalialisMedium
+assignedAgent = LinearSarsaLAIshort
 load_attack_path = "attackSimulations/{0}/".format(assignedNetwork.name)
 network_emulator = network.network_new.network_full # network_quick # network_full
 
@@ -421,7 +429,7 @@ if loadAttacks:
     getSummary(attackClasses, exp.load_path, assignedAgent)
 
 else:
-    experiment = experiment.Experiment(conAttack, GeneralSettings, assignedNetwork, assignedAgent, twist="{2}{0}Alias{1}WithBiasTerm".format(numTiles, partition, network_emulator.name))
+    experiment = experiment.Experiment(conAttack, GeneralSettings, assignedNetwork, assignedAgent, twist="{2}{0}Alias{1}".format(numTiles, partition, network_emulator.name))
     # experiment = experiment.Experiment(conAttack, GeneralSettings, assignedNetwork, assignedAgent, "double")
 
 

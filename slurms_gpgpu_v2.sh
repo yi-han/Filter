@@ -1,4 +1,4 @@
-sed 's/runDDQN/runDDQN/g' exp_gpgpu_single.slurm > temp1.slurm
+sed 's/runDDQN/runDDQNHundred/g' exp_gpgpu_single.slurm > temp1.slurm
 sed 's/sampleDDQNText/DDQN100/g' temp1.slurm > temp2.slurm
 sed 's/sampleDDQNText/DDQN100/g' temp1.slurm > output.slurm
 sbatch output.slurm
