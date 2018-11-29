@@ -251,9 +251,9 @@ class Experiment:
         # if self.save_attack is self.save_attack_enum.save:
         #     net.save_attacks()
 
-        if self.load_model is self.load_model_enum.save and prefix == 0: # only save the first iteration 
-            # save the model only every 10,000 steps
-            agent.saveModel(self.load_path, ep_num)
+            if self.load_model is self.load_model_enum.save and prefix == 0: # only save the first iteration 
+                # save the model only every 10,000 steps
+                agent.saveModel(self.load_path, ep_num)
 
 
         reward_file.close()
