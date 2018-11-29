@@ -146,7 +146,7 @@ class Experiment:
         loss_file = open("{0}/loss-{1}-{2}-{3}.csv".format(path,run_mode, self.adversary_class.getName(), prefix) ,"w")
         packet_served_file = open("{0}/packet_served-{1}-{2}-{3}.csv".format(path,run_mode, self.adversary_class.getName(), prefix),"w")
         print("Using the {0} agent:".format(name))
-        reward_file.write("Episode,StepsSoFar,TotalReward,LastReward,LengthEpisode,e,%PacketIdeal\n")
+        reward_file.write("Episode,StepsSoFar,TotalReward,LastReward,LengthEpisode,e,PerPacketIdeal\n")
         packet_served_file.write("Episode,PacketsReceived,PacketsServed,PercentageReceived,ServerFailures\n")
         #self.episode_rewards = []
 
@@ -250,6 +250,11 @@ class Experiment:
 
         # if self.save_attack is self.save_attack_enum.save:
         #     net.save_attacks()
+
+        if self.load_model is self.load_model_enum.save and prefix == 0: # only save the first iteration 
+            # save the model only every 10,000 steps
+            agent.saveModel(self.load_path, ep_num)
+
 
         reward_file.close()
         loss_file.close()
