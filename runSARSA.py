@@ -91,9 +91,29 @@ class LinearSarsaLAI(object):
     reward_overload = -1
     stateRepresentation = stateRepresentationEnum.leaderAndIntermediate  
 
+class LinearSarsaLAIreduced(LinearSarsaLAI):
+    # same concept as the DDQN, lower learning rate ~ better results?
+    name = "LinearSarsaLAIreduced"
+    tau = 0.001
+
+
 class LinearSarsaLAIshort(LinearSarsaLAI):
     name = "LinearLAIshort"
     max_epLength = 30
+    annealing_steps = 80000 * max_epLength #1000*max_epLength #60000 * max_epLength 
+
+class LinearSarsaLAIDDQN200(LinearSarsaLAI):
+    # Idea (without using a ridiculous number of epLength, set the learning rate even lower and give proper exploration)
+    name = "LinearDDQN200"
+    max_epLength = 30
+    tau = 0.001
+    num_episodes = 200001 #200001#    
+    pre_train_steps = 40000 * max_epLength #40000 * max_epLength #
+    annealing_steps = 120000 * max_epLength  #120000 * max_epLength  #
+    startE = 1
+    endE = 0.0
+    stepDrop = (startE - endE)/annealing_steps    
+
 
 class RandomAgent(object):
     
@@ -142,8 +162,8 @@ Settings to change
 
 
 """
-assignedNetwork = NetworkMalialisSmall
-assignedAgent = LinearSarsaReducedLearning
+assignedNetwork = NetworkSingleTeamMalialisMedium
+assignedAgent = LinearSarsaLAIDDQN200
 load_attack_path = "attackSimulations/{0}/".format(assignedNetwork.name)
 network_emulator = network.network_new.network_full # network_quick # network_full
 
@@ -159,6 +179,8 @@ for max_hosts in assignedNetwork.max_hosts_per_level:
     maxThrottlerBandwidth = assignedNetwork.rate_attack_high * max_hosts # a throttler doesn't face more than X
     if level == 0:
         numTiles = 6 * max_hosts
+    elif assignedAgent.stateRepresentation == stateRepresentationEnum.throttler:
+        continue
     else:
         numTiles = 6 # just set at 6.
     numTilings = 8
