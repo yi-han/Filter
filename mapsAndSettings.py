@@ -103,6 +103,44 @@ class NetworkSingleTeamMalialisMedium(object):
 
     max_hosts_per_level = [2, 6, 12]
 
+class NetworkSingleTeamFour(NetworkSingleTeamMalialisMedium):
+    # 4 attackers per throttler.
+    name = "single_team_six_four"
+    host_sources = [3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5,
+    7, 7, 7, 7, 8, 8, 8, 8, 9, 9, 9, 9]
+    upper_boundary = 25
+    max_hosts_per_level = [4, 12, 24]
+
+class NetworkMalialisTeamFull(object):
+    name = "full_team_malialias"
+    N_state = 30
+    N_action = 1000000000000000000000000000000
+    action_per_throttler = 10
+    N_switch = 47
+    host_sources = [4, 4, 5, 5, 6, 6, 44, 44, 45, 45, 46, 46, 
+    9, 9, 10, 10, 11, 11, 13, 13, 14, 14, 15, 15, 
+    18, 18, 19, 19, 20, 20, 22, 22, 23, 23, 24, 24,
+    27, 27, 28, 28, 29, 29, 31, 31, 32, 32, 33, 33,
+    36, 36, 37, 37, 38, 38, 40, 40, 41, 41, 42, 42]
+
+    servers = [0]
+    filters = [4, 5, 6, 44, 45, 46,
+    9, 10, 11, 13, 14, 15,
+    18, 19, 20, 22, 23, 24,
+    27, 28, 29, 31, 32, 33,
+    36, 37, 38, 40, 41, 42]
+
+    topologyFile = 'topologies/full_team.txt'
+    rate_legal_low = 0.05 
+    rate_legal_high = 1 
+    rate_attack_low = 2.5 
+    rate_attack_high = 6
+    legal_probability = 0.6 # probability that is a good guys
+    upper_boundary = 12.5
+    iterations_between_action = 5 
+    max_hosts_per_level = [2, 6, 12, 60]    
+
+
 class NetworkTwelveThrottleLight(object):
     name = "network_twelve_throttle_light"
     N_state = 12
@@ -230,6 +268,8 @@ def calcStateSize(total_throttlers, stateRepresentation):
         return 1
     elif stateRepresentation == stateRepresentationEnum.leaderAndIntermediate:
         return 3
+    elif stateRepresentation == stateRepresentationEnum.server:
+        return 4
     elif stateRepresentation == stateRepresentationEnum.allThrottlers:
         return total_throttlers
     else:
