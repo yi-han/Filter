@@ -197,8 +197,8 @@ Settings to change
 
 
 """
-assignedNetwork = NetworkMalialisSmall
-assignedAgent = LinearButPT
+assignedNetwork = NetworkSingleTeamFour
+assignedAgent = LinearSarsaReducedLearning
 load_attack_path = "attackSimulations/{0}/".format(assignedNetwork.name)
 network_emulator = network.network_new.network_full # network_quick # network_full
 
@@ -225,26 +225,6 @@ for max_hosts in assignedNetwork.max_hosts_per_level:
 GeneralSettings.encoders = encoders
 
 
-
-
-""" Might be useful?
-
-if assignedAgent.stateRepresentation in [stateRepresentationEnum.leaderAndIntermediate,  stateRepresentationEnum.server]:
-    print("providing the leader and intermediate")
-    intermediateBandwidth = maxThrottlerBandwidth*2 # as intermediate has max 2 throttlers
-    GeneralSettings.encoders.append(tileCoding.myTileInterface(intermediateBandwidth, numTiles, numTilings))
-    leaderBandwidth = maxThrottlerBandwidth * 6
-    GeneralSettings.encoders.append(tileCoding.myTileInterface(leaderBandwidth, numTiles, numTilings))
-
-elif assignedAgent.stateRepresentation == stateRepresentationEnum.server:
-    serverMaxBandiwidth = len(assignedNetwork.host_sources)*assignedNetwork.rate_attack_high
-    GeneralSettings.encoders.append(tileCoding.myTileInterface(serverMaxBandiwidth, numTiles, numTilings))
-elif assignedAgent.stateRepresentation == stateRepresentationEnum.allThrottlers:
-    #note this is an inefficietn cheap way. Use the better way if you do this
-    for i in (range(len(assignedNetwork.host_sources))-1):
-        GeneralSettings.encoders.append(tileCoding.myTileInterface(maxThrottlerBandwidth, numTiles, numTilings))
-# sarsaGeneric = None
-"""
 
 
 conAttack = hostClass.ConstantAttack
