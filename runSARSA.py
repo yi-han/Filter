@@ -78,7 +78,6 @@ class LinearPtNoOverload(LinearButPT):
 class LinearSarsaSingularDDQNCopy(object):
     # copy from ddqnSingleNoCommunicate
     name = "LinearSarsaSingularDDQNCopy"
-    reward_overload = None
     max_epLength = 30 # or 60 if test
     y = 0    
     tau = 0.01 #Rate to update target network toward primary network. 
@@ -150,6 +149,26 @@ class LinearSarsaLAIDDQN100Short(LinearSarsaLAI):
     endE = 0.0
     stepDrop = (startE - endE)/annealing_steps  
 
+
+class LinearTeamCommunicate(object):
+    # communication up till the server
+    name = "LinearTeamCommunicate"
+    max_epLength = 30 # or 60 if test
+    y = 0    
+    tau = 0.001 #Rate to update target network toward primary network. 
+    update_freq = None #How often to perform a training step.
+    batch_size = None #How many experiences to use for each training step.
+    num_episodes = 100001 #200001#    
+    pre_train_steps = 40000 * max_epLength #40000 * max_epLength #
+    annealing_steps = 120000 * max_epLength  #120000 * max_epLength  #
+    startE = 1
+    endE = 0.0
+    stepDrop = (startE - endE)/annealing_steps
+    agent = None
+    sub_agent = linCen.Agent
+    stateRepresentation = stateRepresentationEnum.server
+    reward_overload = -1
+    group_size = 1 # number of filters each agent controls
 class RandomAgent(object):
     
 
@@ -179,7 +198,7 @@ class GeneralSettings(object):
     SaveModelEnum = Enum('SaveModel', 'neither save load')
     debug = False
     # save_attack = SaveAttackEnum.neither
-    save_model = SaveModelEnum.load
+    save_model = SaveModelEnum.save
     tileFunction = None
 
 
@@ -197,8 +216,8 @@ Settings to change
 
 
 """
-assignedNetwork = NetworkSingleTeamMalialisMedium
-assignedAgent = LinearSarsaReducedLearning
+assignedNetwork = NetworkMalialisTeamFull
+assignedAgent = LinearTeamCommunicate
 load_attack_path = "attackSimulations/{0}/".format(assignedNetwork.name)
 network_emulator = network.network_new.network_full # network_quick # network_full
 
@@ -242,7 +261,7 @@ else:
     partition = ""
 
 
-loadAttacks = True
+loadAttacks = False
 
 if loadAttacks:
     for attackClass in attackClasses:
