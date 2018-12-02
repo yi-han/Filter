@@ -71,6 +71,7 @@ class Switch():
 
         self.stateSwitches = [] # list of objects we use for state. If just self it shows only load at self
 
+        self.associated_throttlers = [] ### only used by network_quick
         self.representation = representation
 
         self.is_filter = is_filter
@@ -576,6 +577,13 @@ class network_quick(object):
         self.legitimate_all = 0
         self.server_failures = 0
 
+        self.intermeditaries = []
+        for throttler in self.throttlers:
+            for switch in throttler.stateSwitches:
+                if switch not in self.intermeditaries:
+                    self.intermeditaries.append(switch)
+                    self.activate_intermeditary(switch, throttler)
+
 
 
     def reset(self):
@@ -584,26 +592,43 @@ class network_quick(object):
     def get_state(self):
         response = []
         for throttler in self.throttlers:
-
+            state = []
                 # print("num associated hosts for switch")
-            throttler_state = self.get_throttler_state(throttler)
-            response.append([throttler_state])
+            
+            for switch in throttler.stateSwitches:
+                if switch == throttler:
+                    throttler_state = self.get_throttler_state(throttler)
+                    state.append(throttler_state)
+                else:
+                    int_state = self.get_int_state(switch)
+                    state.append(int_state)
+
+            response.append(state)
+
+        for intermeditary in self.intermeditaries:
+            self.reset_switch(intermeditary)
+
+
+
+        # Go through all intermeditaries here and set them to 0
         return response
 
     def get_throttler_state(self, throttler):
     
         total = 0.0
+
+        if throttler.traffic_level != 0:
+            return throttler.traffic_level
         for host_switch in self.throttlerDic[throttler]:        
             assert(len(host_switch.attatched_hosts)<=2)
             for host in host_switch.attatched_hosts:
                 total += host.traffic_rate      
         return total  
 
-    def calculate_reward(self):
+    def getServerPerformance(self):
         legitimate_rate = 0
         legitimate_rate_all = 0
         attacker_rate = 0
-        reward = 0
         for throttler in self.throttlers:
             throttle_rate = throttler.throttle_rate
             # print(throttle_rate)
@@ -618,7 +643,19 @@ class network_quick(object):
                         legitimate_served = host.traffic_rate
                         self.legitimate_served += legitimate_served
                         legitimate_rate_all += legitimate_served
-        
+        return legitimate_rate, attacker_rate, legitimate_rate_all
+
+    def getPacketServedAtMoment(self):
+        # original idea is to make use of getServerPerformance but purpose of quick is
+        # less calculations
+
+        return 0
+
+
+    def calculate_reward(self):
+        reward = 0
+
+        legitimate_rate, attacker_rate, legitimate_rate_all = self.getServerPerformance()
         if legitimate_rate + attacker_rate > self.proper_net.upper_boundary:
             #used to set the reward to "reward_overload" in this case, but didn't work well
            
@@ -667,6 +704,32 @@ class network_quick(object):
             per = self.legitimate_served / self.legitimate_all
             return self.legitimate_served, self.legitimate_all, per, self.server_failures
 
+
+    def activate_intermeditary(self, intermeditary, throttler):
+        intermeditary.traffic_level = 0
+        
+        if intermeditary!= throttler and not throttler in intermeditary.associated_throttlers:
+            intermeditary.associated_throttlers.append(throttler)
+
+    def get_int_state(self, intermeditary):
+        # get the state for an intermeditarte router
+        # we just scan through all the associated throttlers, look at their rate and use that
+
+
+        ### defs can use some caching to speed this up
+
+        load = 0
+
+        for throttler in intermeditary.associated_throttlers:
+            throttle_state = self.get_throttler_state(throttler)
+            load += throttler.throttle_rate * throttle_state
+        return load
+
+
+
+
+    def reset_switch(self, switch):
+        switch.traffic_level = 0
 
 def traverse(origin, targets, targetDic):
     # Starting at origin, travel along the network until we get a target
