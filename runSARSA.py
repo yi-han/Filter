@@ -96,7 +96,6 @@ class LinearSarsaLAIreduced(LinearSarsaLAI):
     name = "LinearSarsaLAIreduced"
     tau = 0.001
 
-
 class LinearSarsaLAIshort(LinearSarsaLAI):
     name = "LinearLAIshort"
     max_epLength = 30
@@ -114,6 +113,17 @@ class LinearSarsaLAIDDQN200(LinearSarsaLAI):
     endE = 0.0
     stepDrop = (startE - endE)/annealing_steps    
 
+class LinearSarsaLAIDDQN100Short(LinearSarsaLAI):
+    # Idea (without using a ridiculous number of epLength, set the learning rate even lower and give proper exploration)
+    name = "LinearDDQN100Short"
+    max_epLength = 30
+    tau = 0.001
+    num_episodes = 100001 #200001#    
+    pre_train_steps = 2000 * max_epLength #40000 * max_epLength #
+    annealing_steps = 78000 * max_epLength  #120000 * max_epLength  #
+    startE = 0.3
+    endE = 0.0
+    stepDrop = (startE - endE)/annealing_steps  
 
 class RandomAgent(object):
     
@@ -144,7 +154,7 @@ class GeneralSettings(object):
     SaveModelEnum = Enum('SaveModel', 'neither save load')
     debug = False
     # save_attack = SaveAttackEnum.neither
-    save_model = SaveModelEnum.save
+    save_model = SaveModelEnum.load
     tileFunction = None
 
 
@@ -162,8 +172,8 @@ Settings to change
 
 
 """
-assignedNetwork = NetworkSingleTeamMalialisMedium
-assignedAgent = LinearSarsaLAIDDQN200
+assignedNetwork = NetworkMalialisSmall
+assignedAgent = LinearSarsaReducedLearning
 load_attack_path = "attackSimulations/{0}/".format(assignedNetwork.name)
 network_emulator = network.network_new.network_full # network_quick # network_full
 
@@ -227,7 +237,7 @@ else:
     partition = ""
 
 
-loadAttacks = False
+loadAttacks = True
 
 if loadAttacks:
     for attackClass in attackClasses:
