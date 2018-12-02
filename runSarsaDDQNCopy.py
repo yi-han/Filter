@@ -11,71 +11,6 @@ import agent.randomAgent as ranAg
 from mapsAndSettings import *
 assert(len(sys.argv)>=3)
 
-class SarsaDoubleSingleCommunicate(object):
-    group_size = 1
-    name = "Sarsa200SingleFullCommunicate"
-    max_epLength = 30 # or 60 if test
-    y = 0    
-    tau = 0.001 #Rate to update target network toward primary network. 
-    update_freq = None #How often to perform a training step.
-    batch_size = None #How many experiences to use for each training step.
-    num_episodes = 200001 #200001#    
-    pre_train_steps = 40000 * max_epLength #40000 * max_epLength #
-    annealing_steps = 120000 * max_epLength  #120000 * max_epLength  #
-    
-    startE = 1
-    endE = 0.0
-    stepDrop = (startE - endE)/annealing_steps
-    agent = None
-    sub_agent = sarCen.Agent
-
-    #stateletFunction = getStateletWithCommunication
-    isCommunication = True # flag to demonstrate communication  
-    reward_overload = False
-
-
-class SarsaDecMaliasOriginal(object):
-    name = "sarsaDecGenMalialisOriginal"
-    max_epLength = 30 # or 60 if test
-    y = 0
-    tau = 0.1
-    update_freq = None
-    batch_size = None
-    num_episodes = 62501#82501
-    pre_train_steps = 0#2000 * max_epLength
-    annealing_steps = 50000 * max_epLength #1000*max_epLength #60000 * max_epLength 
-    startE = 0.4 #0.4
-    endE = 0.0
-    stepDrop = (startE - endE)/annealing_steps
-    agent = None
-    sub_agent = sarCen.Agent
-    group_size = 1 # number of filters each agent controls
-    #stateletFunction = getStateletNoCommunication
-    #isCommunication = False
-    reward_overload = -1
-    stateRepresentation = stateRepresentationEnum.throttler 
-
-
-
-class SarsaDecMaliasNoPT(object):
-    name = "sarsaDecGenMalialisNoOpt"
-    max_epLength = 30 # or 60 if test
-    y = 0
-    tau = 0.1
-    update_freq = None
-    batch_size = None
-    num_episodes = 62501#82501
-    pre_train_steps = 0#2000 * max_epLength
-    annealing_steps = 50000 * max_epLength #1000*max_epLength #60000 * max_epLength 
-    startE = 0.4 #0.4
-    endE = 0.0
-    stepDrop = (startE - endE)/annealing_steps
-    agent = None
-    sub_agent = sarCen.Agent
-    group_size = 1 # number of filters each agent controls
-    #stateletFunction = getStateletNoCommunication
-    isCommunication = False
-    reward_overload = None
 
 class LinearSarsaSingular(object):
     # note we have two dependencies
@@ -111,6 +46,35 @@ class LinearSarsaNoOverload(LinearSarsaSingular):
     name = "LinearSarsaSingularNoOverload"
     reward_overload = None
 
+class LinearSarsaReducedLearning(LinearSarsaSingular):
+    name = "LinearSarsaReducedLearning"
+    tau = 0.0125
+
+class LinearButPT(object):
+    name = "LinButPT"
+    max_epLength = 30 # or 60 if test
+    y = 0
+    tau = 0.0125
+    update_freq = None
+    batch_size = None
+    num_episodes = 64501#82501
+    pre_train_steps = 2000 * max_epLength
+    annealing_steps = 50000 * max_epLength #1000*max_epLength #60000 * max_epLength 
+    startE = 0.4 #0.4
+    endE = 0.0
+    stepDrop = (startE - endE)/annealing_steps
+    agent = None
+    sub_agent = linCen.Agent
+    group_size = 1 # number of filters each agent controls
+    #stateletFunction = getStateletNoCommunication
+    reward_overload = -1
+    stateRepresentation = stateRepresentationEnum.throttler  
+
+class LinearPtNoOverload(LinearButPT):
+    name = "LinearPtNoOverload"
+    reward_overload = None
+
+
 class LinearSarsaSingularDDQNCopy(object):
     # copy from ddqnSingleNoCommunicate
     name = "LinearSarsaSingularDDQNCopy"
@@ -132,33 +96,11 @@ class LinearSarsaSingularDDQNCopy(object):
     reward_overload = None
     group_size = 1 # number of filters each agent controls
 
-"""
-class SarsaCTL(object):
-    name = "sarsaCTL"
-    max_epLength = 30 # or 60 if test
-    y = 0
-    tau = 0.05
-    update_freq = None
-    batch_size = None
-    num_episodes = 100001#82501
-    pre_train_steps = 0#2000 * max_epLength
-    annealing_steps = 80000 * max_epLength #1000*max_epLength #60000 * max_epLength 
-    startE = 0.3 #0.4
-    endE = 0.0
-    stepDrop = (startE - endE)/annealing_steps
-    agent = None
-    sub_agent = sarCen.Agent
-    group_size = 1 # number of filters each agent controls
-    #stateletFunction = getStateletNoCommunication
-    #isCommunication = False
-    reward_overload = -1
-    stateRepresentation = stateRepresentationEnum.leaderAndIntermediate
-"""
 class LinearSarsaLAI(object):
     name = "LinearSarsaLAI"
     max_epLength = 500
     y = 0
-    tau = 0.05
+    tau = 0.00625
     update_freq = None
     batch_size = None
     num_episodes = 100001#82501
@@ -173,6 +115,40 @@ class LinearSarsaLAI(object):
     #stateletFunction = getStateletNoCommunication
     reward_overload = -1
     stateRepresentation = stateRepresentationEnum.leaderAndIntermediate  
+
+class LinearSarsaLAIreduced(LinearSarsaLAI):
+    # same concept as the DDQN, lower learning rate ~ better results?
+    name = "LinearSarsaLAIreduced"
+    tau = 0.001
+
+class LinearSarsaLAIshort(LinearSarsaLAI):
+    name = "LinearLAIshort"
+    max_epLength = 30
+    annealing_steps = 80000 * max_epLength #1000*max_epLength #60000 * max_epLength 
+
+class LinearSarsaLAIDDQN200(LinearSarsaLAI):
+    # Idea (without using a ridiculous number of epLength, set the learning rate even lower and give proper exploration)
+    name = "LinearDDQN200"
+    max_epLength = 30
+    tau = 0.001
+    num_episodes = 200001 #200001#    
+    pre_train_steps = 40000 * max_epLength #40000 * max_epLength #
+    annealing_steps = 120000 * max_epLength  #120000 * max_epLength  #
+    startE = 1
+    endE = 0.0
+    stepDrop = (startE - endE)/annealing_steps    
+
+class LinearSarsaLAIDDQN100Short(LinearSarsaLAI):
+    # Idea (without using a ridiculous number of epLength, set the learning rate even lower and give proper exploration)
+    name = "LinearDDQN100Short"
+    max_epLength = 30
+    tau = 0.001
+    num_episodes = 100001 #200001#    
+    pre_train_steps = 2000 * max_epLength #40000 * max_epLength #
+    annealing_steps = 78000 * max_epLength  #120000 * max_epLength  #
+    startE = 0.3
+    endE = 0.0
+    stepDrop = (startE - endE)/annealing_steps  
 
 class RandomAgent(object):
     
@@ -196,131 +172,8 @@ class RandomAgent(object):
     reward_overload = -1
     stateRepresentation = stateRepresentationEnum.leaderAndIntermediate      
 
-"""
-class SarsaCenMaliasOne(object):
-    name = "sarsaCen100"
-    max_epLength = 30 # or 60 if test
-    y = 0
-    tau = 0.01
-    update_freq = None
-    batch_size = None
-    # num_episodes = 62501
-    # pre_train_steps = 0 * max_epLength
-    # annealing_steps = 50000 * max_epLength #1000*max_epLength #60000 * max_epLength 
-    num_episodes = 100001
-    pre_train_steps = 20000 * max_epLength
-    annealing_steps = 60001 * max_epLength #1000*max_epLength #60000 * max_epLength 
-    
-
-    startE = 1
-    endE = 0.0
-    stepDrop = (startE - endE)/annealing_steps
-    agent = sarCen.Agent
-
-class SarsaCenTwo(object):
-    name = "sarsaCen200"
-    max_epLength = 30 # or 60 if test
-    y = 0
-    tau = 0.001
-    update_freq = None
-    batch_size = None
-    # num_episodes = 62501
-    # pre_train_steps = 0 * max_epLength
-    # annealing_steps = 50000 * max_epLength #1000*max_epLength #60000 * max_epLength 
-    num_episodes = 200001
-    pre_train_steps = 60000 * max_epLength
-    annealing_steps = 120001 * max_epLength #1000*max_epLength #60000 * max_epLength 
-    
-
-    startE = 1
-    endE = 0.0
-    stepDrop = (startE - endE)/annealing_steps
-    agent = sarCen.Agent
 
 
-class SarsaDecMaliasNoPTLarge(object):
-    name = "sarsaDecGenNoPTLarge"    
-    
-    max_epLength = 30 # or 60 if test
-    y = 0
-    tau = 0.1
-    update_freq = None
-    batch_size = None
-    num_episodes = 120001#82501
-    pre_train_steps = 0#2000 * max_epLength
-    annealing_steps = 50000 * max_epLength #1000*max_epLength #60000 * max_epLength 
-    
-
-    startE = 0.4 #0.4
-    endE = 0.0
-    stepDrop = (startE - endE)/annealing_steps
-    agent = None
-    sub_agent = sarCen.Agent
-    group_size = 1 # number of filters each agent controls
-
-
-class SarsaDecMaliasWithPT(object):
-    name = "sarsaDecGenPT"
-    
-    max_epLength = 30 # or 60 if test
-    y = 0
-    tau = 0.1
-    update_freq = None
-    batch_size = None
-    # num_episodes = 62501
-    # pre_train_steps = 0 * max_epLength
-    # annealing_steps = 50000 * max_epLength #1000*max_epLength #60000 * max_epLength 
-    num_episodes = 82501#82501
-    pre_train_steps = 2000#2000 * max_epLength
-    annealing_steps = 50000 * max_epLength #1000*max_epLength #60000 * max_epLength 
-
-    startE = 0.4 #0.4
-    endE = 0.0
-    stepDrop = (startE - endE)/annealing_steps
-    agent = None
-    sub_agent = sarCen.Agent
-    group_size = 1 # number of filters each agent controls
-
-class SarsaDecPTLarge(object):
-    name = "sarsaDecGenLarge"
-    max_epLength = 30 # or 60 if test
-    y = 0    
-    tau = 0.001 #Rate to update target network toward primary network. 
-    update_freq = None #How often to perform a training step.
-    batch_size = None #How many experiences to use for each training step.
-    num_episodes = 100001 #200001#    
-    pre_train_steps = 20000 * max_epLength #40000 * max_epLength #
-    annealing_steps = 60000 * max_epLength  #120000 * max_epLength  #
-
-
-    startE = 0.4 #0.4
-    endE = 0.0
-    stepDrop = (startE - endE)/annealing_steps
-    agent = None
-    sub_agent = sarCen.Agent
-    group_size = 1 # number of filters each agent controls
-
-
-
-class SarsaGenericTeam(object):
-    # if you end up using this its to demonstrate why centralisation
-    group_size = 2
-    name = "Sarsa200TeamOf{0}".format(group_size)
-    max_epLength = 30 # or 60 if test
-    y = 0    
-    tau = 0.001 #Rate to update target network toward primary network. 
-    update_freq = None #How often to perform a training step.
-    batch_size = None #How many experiences to use for each training step.
-    num_episodes = 200001 #200001#    
-    pre_train_steps = 40000 * max_epLength #40000 * max_epLength #
-    annealing_steps = 120000 * max_epLength  #120000 * max_epLength  #
-    
-    startE = 1
-    endE = 0.0
-    stepDrop = (startE - endE)/annealing_steps
-    agent = None
-    sub_agent = sarCen.Agent
-"""
 class GeneralSettings(object):
     # SaveAttackEnum = Enum('SaveAttack', 'neither save load')
     SaveModelEnum = Enum('SaveModel', 'neither save load')
@@ -345,9 +198,9 @@ Settings to change
 
 """
 assignedNetwork = NetworkMalialisSmall
-assignedAgent = LinearSarsaSingularDDQNCopy
+assignedAgent = LinearButPT
 load_attack_path = "attackSimulations/{0}/".format(assignedNetwork.name)
-network_emulator = network.network_new.network_quick # network_quick # network_full
+network_emulator = network.network_new.network_full # network_quick # network_full
 
 
 
@@ -360,7 +213,9 @@ level = 0 # level 0 is throttlers, level 1 is intermeditary etc
 for max_hosts in assignedNetwork.max_hosts_per_level:
     maxThrottlerBandwidth = assignedNetwork.rate_attack_high * max_hosts # a throttler doesn't face more than X
     if level == 0:
-        numTiles = 8 * max_hosts
+        numTiles = 6 * max_hosts
+    elif assignedAgent.stateRepresentation == stateRepresentationEnum.throttler:
+        continue
     else:
         numTiles = 6 # just set at 6.
     numTilings = 8

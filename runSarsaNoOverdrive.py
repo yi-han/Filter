@@ -50,6 +50,31 @@ class LinearSarsaReducedLearning(LinearSarsaSingular):
     name = "LinearSarsaReducedLearning"
     tau = 0.0125
 
+class LinearButPT(object):
+    name = "LinButPT"
+    max_epLength = 30 # or 60 if test
+    y = 0
+    tau = 0.0125
+    update_freq = None
+    batch_size = None
+    num_episodes = 64501#82501
+    pre_train_steps = 2000 * max_epLength
+    annealing_steps = 50000 * max_epLength #1000*max_epLength #60000 * max_epLength 
+    startE = 0.4 #0.4
+    endE = 0.0
+    stepDrop = (startE - endE)/annealing_steps
+    agent = None
+    sub_agent = linCen.Agent
+    group_size = 1 # number of filters each agent controls
+    #stateletFunction = getStateletNoCommunication
+    reward_overload = -1
+    stateRepresentation = stateRepresentationEnum.throttler  
+
+class LinearPtNoOverload(LinearButPT):
+    name = "LinearPtNoOverload"
+    reward_overload = None
+
+
 class LinearSarsaSingularDDQNCopy(object):
     # copy from ddqnSingleNoCommunicate
     name = "LinearSarsaSingularDDQNCopy"
@@ -96,7 +121,6 @@ class LinearSarsaLAIreduced(LinearSarsaLAI):
     name = "LinearSarsaLAIreduced"
     tau = 0.001
 
-
 class LinearSarsaLAIshort(LinearSarsaLAI):
     name = "LinearLAIshort"
     max_epLength = 30
@@ -114,6 +138,17 @@ class LinearSarsaLAIDDQN200(LinearSarsaLAI):
     endE = 0.0
     stepDrop = (startE - endE)/annealing_steps    
 
+class LinearSarsaLAIDDQN100Short(LinearSarsaLAI):
+    # Idea (without using a ridiculous number of epLength, set the learning rate even lower and give proper exploration)
+    name = "LinearDDQN100Short"
+    max_epLength = 30
+    tau = 0.001
+    num_episodes = 100001 #200001#    
+    pre_train_steps = 2000 * max_epLength #40000 * max_epLength #
+    annealing_steps = 78000 * max_epLength  #120000 * max_epLength  #
+    startE = 0.3
+    endE = 0.0
+    stepDrop = (startE - endE)/annealing_steps  
 
 class RandomAgent(object):
     
@@ -162,8 +197,8 @@ Settings to change
 
 
 """
-assignedNetwork = NetworkSingleTeamMalialisMedium
-assignedAgent = LinearSarsaLAIreduced
+assignedNetwork = NetworkMalialisSmall
+assignedAgent = LinearPtNoOverload
 load_attack_path = "attackSimulations/{0}/".format(assignedNetwork.name)
 network_emulator = network.network_new.network_full # network_quick # network_full
 

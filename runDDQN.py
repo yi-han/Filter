@@ -14,126 +14,6 @@ import agent.ddqnCentralised as ddCen
 from mapsAndSettings import *
 assert(len(sys.argv)==4)
 
-"""
-class ddqnCenSettings(object):
-    name = "DDQNCentralised100"
-    max_epLength = 30 # or 60 if test
-    y = 0    
-    tau = 0.001 #Rate to update target network toward primary network. 
-    update_freq = 4 #How often to perform a training step.
-    batch_size = 32 #How many experiences to use for each training step.
-    num_episodes = 100001 #200001#    
-    pre_train_steps = 20000 * max_epLength #40000 * max_epLength #
-    annealing_steps = 60000 * max_epLength  #120000 * max_epLength  #
-    
-    startE = 1
-    endE = 0.0
-    stepDrop = (startE - endE)/annealing_steps
-    agent = None
-    sub_agent = ddCen.Agent
-    isCommunication = False # flag to demonstrate communication    
-    reward_overload = None
-    stateRepresentation = stateRepresentationEnum.throttler
-    group_size = 1
-
-class ddqnCenDoubleSettings(object):
-    name = "DDQNCentralised200"
-    max_epLength = 30 # or 60 if test
-    y = 0    
-    tau = 0.001 #Rate to update target network toward primary network. 
-    update_freq = 4 #How often to perform a training step.
-    batch_size = 32 #How many experiences to use for each training step.
-    num_episodes = 200001 #200001#    
-    pre_train_steps = 40000 * max_epLength #40000 * max_epLength #
-    annealing_steps = 120000 * max_epLength  #120000 * max_epLength  #
-    
-    startE = 1
-    endE = 0.0
-    stepDrop = (startE - endE)/annealing_steps
-    agent = ddCen.Agent
-"""
-""" 
-class ddqnDoubleTeamGeneric(object):
-    group_size = 2
-    name = "DDQN200TeamOf{0}".format(group_size)
-    max_epLength = 30 # or 60 if test
-    y = 0    
-    tau = 0.001 #Rate to update target network toward primary network. 
-    update_freq = 4 #How often to perform a training step.
-    batch_size = 32 #How many experiences to use for each training step.
-    num_episodes = 200001 #200001#    
-    pre_train_steps = 40000 * max_epLength #40000 * max_epLength #
-    annealing_steps = 120000 * max_epLength  #120000 * max_epLength  #
-    
-    startE = 1
-    endE = 0.0
-    stepDrop = (startE - endE)/annealing_steps
-    agent = None
-    sub_agent = ddCen.Agent
-
-    stateletFunction = getStateletNoCommunication
-    isCommunication = False
-"""
-
-
-class ddqnDoubleHierarchical(object):
-    group_size = 1
-    name = "DDQN200Hierarchical"
-    max_epLength = 30 # or 60 if test
-    y = 0    
-    tau = 0.001 #Rate to update target network toward primary network. 
-    update_freq = 4 #How often to perform a training step.
-    batch_size = 32 #How many experiences to use for each training step.
-    num_episodes = 200001 #200001#    
-    pre_train_steps = 40000 * max_epLength #40000 * max_epLength #
-    annealing_steps = 120000 * max_epLength  #120000 * max_epLength  #
-    startE = 1
-    endE = 0.0
-    stepDrop = (startE - endE)/annealing_steps
-    agent = None
-    sub_agent = ddCen.Agent
-    stateRepresentation = stateRepresentationEnum.leaderAndIntermediate
-    reward_overload = None    
-
-class ddqn100MediumHierarchical(object):
-    group_size = 1
-    name = "ddqn100MediumHierarchical"
-    max_epLength = 30 # or 60 if test
-    y = 0    
-    tau = 0.001 #Rate to update target network toward primary network. 
-    update_freq = 4 #How often to perform a training step.
-    batch_size = 32 #How many experiences to use for each training step.
-    num_episodes = 100001 #200001#    
-    pre_train_steps = 20000 * max_epLength #40000 * max_epLength #
-    annealing_steps = 60000 * max_epLength  #120000 * max_epLength  #
-    startE = 0.3
-    endE = 0.0
-    stepDrop = (startE - endE)/annealing_steps
-    agent = None
-    sub_agent = ddCen.Agent
-    stateRepresentation = stateRepresentationEnum.leaderAndIntermediate
-    reward_overload = None   
-
-class ddqn100HierarchicalShort(object):
-    # same as above but reduceing hte pre-train down by factor of 10
-    group_size = 1
-    name = "ddqn100Short"
-    max_epLength = 30 # or 60 if test
-    y = 0    
-    tau = 0.001 #Rate to update target network toward primary network. 
-    update_freq = 4 #How often to perform a training step.
-    batch_size = 32 #How many experiences to use for each training step.
-    num_episodes = 100001 #200001#    
-    pre_train_steps = 2000 * max_epLength #40000 * max_epLength #
-    annealing_steps = 78000 * max_epLength  #120000 * max_epLength  #
-    startE = 0.3
-    endE = 0.0
-    stepDrop = (startE - endE)/annealing_steps
-    agent = None
-    sub_agent = ddCen.Agent
-    stateRepresentation = stateRepresentationEnum.leaderAndIntermediate
-    reward_overload = None       
-
 class ddqnSingleNoCommunicate(object):
     group_size = 1
     name = "DDQN100SingleNoCommunicate"
@@ -181,6 +61,78 @@ class ddqnMalialisTrue(ddqnSingleSarsaCopy):
     reward_overload = -1
 
 
+class ddqnDoubleHierarchical(object):
+    group_size = 1
+    name = "DDQN200Hierarchical"
+    max_epLength = 30 # or 60 if test
+    y = 0    
+    tau = 0.001 #Rate to update target network toward primary network. 
+    update_freq = 4 #How often to perform a training step.
+    batch_size = 32 #How many experiences to use for each training step.
+    num_episodes = 200001 #200001#    
+    pre_train_steps = 40000 * max_epLength #40000 * max_epLength #
+    annealing_steps = 120000 * max_epLength  #120000 * max_epLength  #
+    startE = 1
+    endE = 0.0
+    stepDrop = (startE - endE)/annealing_steps
+    agent = None
+    sub_agent = ddCen.Agent
+    stateRepresentation = stateRepresentationEnum.leaderAndIntermediate
+    reward_overload = None    
+
+class ddqnLAIlow(ddqnDoubleHierarchical):
+    name = "ddqnLAIlowLearn"
+
+    tau = 0.0005
+
+class ddqnLAIhigh(ddqnDoubleHierarchical):
+    name = "ddqnLAIhighLearn"
+
+    tau = 0.005
+
+
+class ddqn100MediumHierarchical(object):
+    group_size = 1
+    name = "ddqn100MediumHierarchical"
+    max_epLength = 30 # or 60 if test
+    y = 0    
+    tau = 0.001 #Rate to update target network toward primary network. 
+    update_freq = 4 #How often to perform a training step.
+    batch_size = 32 #How many experiences to use for each training step.
+    num_episodes = 100001 #200001#    
+    pre_train_steps = 20000 * max_epLength #40000 * max_epLength #
+    annealing_steps = 60000 * max_epLength  #120000 * max_epLength  #
+    startE = 0.3
+    endE = 0.0
+    stepDrop = (startE - endE)/annealing_steps
+    agent = None
+    sub_agent = ddCen.Agent
+    stateRepresentation = stateRepresentationEnum.leaderAndIntermediate
+    reward_overload = None   
+
+class ddqn100HierarchicalShort(object):
+    # same as above but reduceing hte pre-train down by factor of 10
+    group_size = 1
+    name = "ddqn100Short"
+    max_epLength = 30 # or 60 if test
+    y = 0    
+    tau = 0.001 #Rate to update target network toward primary network. 
+    update_freq = 4 #How often to perform a training step.
+    batch_size = 32 #How many experiences to use for each training step.
+    num_episodes = 100001 #200001#    
+    pre_train_steps = 2000 * max_epLength #40000 * max_epLength #
+    annealing_steps = 78000 * max_epLength  #120000 * max_epLength  #
+    startE = 0.3
+    endE = 0.0
+    stepDrop = (startE - endE)/annealing_steps
+    agent = None
+    sub_agent = ddCen.Agent
+    stateRepresentation = stateRepresentationEnum.leaderAndIntermediate
+    reward_overload = None       
+
+
+
+
 
 class GeneralSettings(object):
     # SaveAttackEnum = Enum('SaveAttack', 'neither save load')
@@ -206,7 +158,7 @@ attackClasses = [conAttack, shortPulse, mediumPulse,
 
 
 assignedNetwork = NetworkSingleTeamMalialisMedium #NetworkSingleTeamMalialisMedium
-assignedAgent = ddqn100HierarchicalShort #ddqn100MediumHierarchical
+assignedAgent = ddqnLAIlow #ddqn100MediumHierarchical
 load_attack_path = "attackSimulations/{0}/".format(assignedNetwork.name)
 loadAttacks = False
 # genericAgent = None

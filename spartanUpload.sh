@@ -30,6 +30,7 @@ for dest in punim0621 punim0636; do
 	slurms_gpgpu_half.sh \
 	slurms_gpgpu_latter.sh \
 	slurms_gpgpu_v2.sh \
+	slurms_gpgpu_v3.sh \
 	slurms_physical_v2.sh \
 	slurms_ddqn_physical.sh \
 	runDDQNNetQuick.py \
