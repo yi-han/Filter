@@ -163,6 +163,12 @@ class Switch():
                 assert currentNode.id!=0 #we shouldn't be getting server
                 #print(currentNode.id)
                 self.stateSwitches.append(currentNode)
+        elif self.representation == stateRepresentationEnum.server:
+            for i in range(3):
+                currentNode = currentNode.destination_links[0].destination_switch
+                assert currentNode.id!=0 #we shouldn't be getting server
+                #print(currentNode.id)
+                self.stateSwitches.append(currentNode)            
         else:
             
             assert(1==2)
@@ -242,9 +248,9 @@ class network_full(object):
         # self.SaveAttackEnum = SaveAttackEnum
         self.save_attack = save_attack
         self.load_attack_path = load_attack_path
+        self.current_state = None
         self.initialise(network_settings.topologyFile, representationType)
         self.last_state = np.empty_like(self.get_state())
-
 
     def reset(self):
         if self.load_attack_path: # if we provide a file to oad from use it
@@ -321,6 +327,10 @@ class network_full(object):
 
     def get_state(self):
         # get the state for the agent associated with the throttler
+        
+        if self.current_state:
+            return self.current_state
+
         response = []
         for i in self.filter_list:
             response.append(self.switches[i].get_state())
@@ -335,6 +345,7 @@ class network_full(object):
         # print("global State")
         # print(full_state)
 
+        self.current_state = response
         return response
 
         
@@ -488,7 +499,7 @@ class network_full(object):
         # ideally i would move calculations here
 
         self.last_state = self.get_state()
-
+        self.current_state = None # we need to reset the state to undo the cache
         for switch in self.switches:
             switch.resetWindow()
         
