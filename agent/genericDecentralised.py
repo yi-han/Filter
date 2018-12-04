@@ -136,18 +136,20 @@ class AgentOfAgents(aBase.Agent):
     def genericActionToactions(network_action, N_action_list):
         actions = []
         #print("")
-        #print(network_action)
-        #print(N_action_list)
+
         for N_state in N_action_list[::-1]:
             action = network_action%N_state
-            #print(action)
             network_action-=action
             actions.insert(0,action)
-            assert(network_action%N_state==0)
+            if network_action%N_state!=0:
+                print(network_action)
+                print(N_action_list)
+                print(action)
+                assert(1==2)              
             network_action/=N_state
             network_action=int(network_action)
-        #print(actions)
-        #print("\n")
+        # print(actions)
+        # print("\n")
         return actions
 
 #             action = action*agent.N_action+agentAction

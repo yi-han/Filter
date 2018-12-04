@@ -13,6 +13,7 @@ import numpy as np
 import pickle
 from pathlib import Path
 import os
+from sklearn.externals import joblib
 class Agent(aBase.Agent):
 
     def __init__(self, N_action, pre_train_steps, action_per_agent, N_state, encoders, alph=0.1, gam=0, debug=False, test=False):
@@ -109,13 +110,18 @@ class Agent(aBase.Agent):
 
         with open(checkpoint_path, 'w') as checkpoint_file:
             # update checkpoint to point to new datafile
-            checkpoint_file = open(checkpoint_path, 'w')
+            #checkpoint_file = open(checkpoint_path, 'w')
             checkpoint_file.write(name)
         
         if last_checkpoint and Path(load_path+'/'+last_checkpoint).is_file():
             # delete redundant datafile that was prior checkpoint
             # this happens at the end
             os.remove(load_path+'/'+last_checkpoint)
+
+        with open(load_path+"/joblibBackup.sav", 'wb') as backupSave:
+            # backupPickle.write("hello")
+            joblib.dump(dataDict, backupSave) 
+
         return
     def printStats(self):
         print(self.ai.getData())
