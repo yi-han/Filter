@@ -26,7 +26,7 @@ attackClasses = [conAttack, shortPulse, mediumPulse,
 
 
 testAttacks = False
-averageFrom =  90000 #90000 #60000 #190000
+averageFrom =  180000 #90000 #60000 #190000
 
 
 if not testAttacks:
@@ -35,6 +35,7 @@ if not testAttacks:
         distributions.distributions(directory, repetitions, averageFrom, attackName) #190000
         distributions.reward_graph(directory, attackName, repetitions, name)
         distributions.reward_graph(directory, attackName, repetitions, PerLegitTraffic = True, title = "\% Legit Traffic")
+        distributions.distributions(directory, repetitions, averageFrom, attackName, PerLegitTraffic = True) #190000
 
 else:
     for attackType in attackClasses:

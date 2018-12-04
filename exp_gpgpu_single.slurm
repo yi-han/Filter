@@ -8,6 +8,15 @@
 
 #SBATCH --gres=gpu:1
 
+# Send yourself an email when the job:
+# aborts abnormally (fails)
+#SBATCH --mail-type=FAIL
+# ends successfully
+#SBATCH --mail-type=END
+
+# Use this email address:
+#SBATCH --mail-user=jpattison@student.unimelb.edu.au
+
 module load Tensorflow/1.8.0-intel-2017.u2-GCC-6.2.0-CUDA9-Python-3.5.2-GPU
 
 # module load Python/3.5.2-goolf-2015a

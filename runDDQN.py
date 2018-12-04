@@ -132,15 +132,15 @@ class ddqn100HierarchicalShort(object):
 
 class ddqnServerCommunicate(object):
     group_size = 1
-    name = "ddqn200ServerCommunicate"
+    name = "ddqn120ServerCommunicate"
     max_epLength = 30 # or 60 if test
     y = 0    
     tau = 0.001 #Rate to update target network toward primary network. 
     update_freq = 4 #How often to perform a training step.
     batch_size = 32 #How many experiences to use for each training step.
-    num_episodes = 200001 #200001#    
-    pre_train_steps = 40000 * max_epLength #40000 * max_epLength #
-    annealing_steps = 120000 * max_epLength  #120000 * max_epLength  #
+    num_episodes = 120001 #200001#    
+    pre_train_steps = 20000 * max_epLength #40000 * max_epLength #
+    annealing_steps = 80000 * max_epLength  #120000 * max_epLength  #
     startE = 1
     endE = 0.0
     stepDrop = (startE - endE)/annealing_steps
@@ -156,7 +156,7 @@ class GeneralSettings(object):
     debug = False
     #load_model = False
     # save_attack = SaveAttackEnum.neither
-    save_model = SaveModelEnum.save
+    save_model = SaveModelEnum.load
     tileFunction = None
     encoders = None
 
@@ -172,10 +172,10 @@ attackClasses = [conAttack, shortPulse, mediumPulse,
     largePulse, gradualIncrease] 
 
 
-assignedNetwork = NetworkSingleTeamFour #NetworkSingleTeamMalialisMedium
-assignedAgent = ddqn100HierarchicalShort #ddqn100MediumHierarchical
+assignedNetwork = NetworkSingleTeamMalialisMedium #NetworkSingleTeamMalialisMedium
+assignedAgent = ddqn100MediumHierarchical #ddqn100MediumHierarchical
 load_attack_path = "attackSimulations/{0}/".format(assignedNetwork.name)
-loadAttacks = False
+loadAttacks = True
 # genericAgent = None
 
 network_emulator = network.network_new.network_full #network_quick # network_full

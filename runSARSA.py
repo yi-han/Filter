@@ -50,6 +50,11 @@ class LinearSarsaReducedLearning(LinearSarsaSingular):
     name = "LinearSarsaReducedLearning"
     tau = 0.0125
 
+class LinearReducedNoOverload(LinearSarsaReducedLearning):
+    name = "LinearReducedNoOverload"
+    reward_overload = None
+
+
 class LinearButPT(object):
     name = "LinButPT"
     max_epLength = 30 # or 60 if test
@@ -124,6 +129,11 @@ class LinearSarsaLAIshort(LinearSarsaLAI):
     name = "LinearLAIshort"
     max_epLength = 30
     annealing_steps = 80000 * max_epLength #1000*max_epLength #60000 * max_epLength 
+
+class LinearLAIshortReduced(LinearSarsaLAIshort):
+    name = "LAIshortAndReduced"
+    tau = 0.003
+
 
 class LinearSarsaLAIDDQN200(LinearSarsaLAI):
     # Idea (without using a ridiculous number of epLength, set the learning rate even lower and give proper exploration)
@@ -216,8 +226,8 @@ Settings to change
 
 
 """
-assignedNetwork = NetworkMalialisTeamFull
-assignedAgent = LinearTeamCommunicate
+assignedNetwork = NetworkSixFour
+assignedAgent = LinearSarsaLAIDDQN200
 load_attack_path = "attackSimulations/{0}/".format(assignedNetwork.name)
 network_emulator = network.network_new.network_full # network_quick # network_full
 

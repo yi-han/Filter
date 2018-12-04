@@ -17,6 +17,7 @@ for dest in punim0621 punim0636; do
 	mapsAndSettings.py \
 	topologies \
 	exp_gpgpu_single.slurm \
+	exp_gpgpu_heavy.slurm \
 	exp_cloud.slurm \
 	exp_physical.slurm \
 	exp_physical_ddqn.slurm \

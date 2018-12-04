@@ -192,11 +192,11 @@ def dic_to_summary(results):
     summaryFile.close()
     # creates a quick summary for excel
 
-def distributions(directory, max_num = None, start_point=0, attack_name=""):
+def distributions(directory, max_num = None, start_point=0, attack_name="", PerLegitTraffic = False):
     if not max_num:
         (ep, ep_reward) = reward_single(directory)
     else:
-        (ep, ep_reward) = reward_multiple(directory, max_num, attack_name)
+        (ep, ep_reward) = reward_multiple(directory, max_num, attack_name, PerLegitTraffic)
     print(len(ep_reward))
 
     ep_reward = np.array(ep_reward[start_point:])

@@ -6,6 +6,16 @@
 #SBATCH --account=punim0636
 #SBATCH --partition=physical
 #SBATCH --job-name=sample_sarsa_name
+
+# Send yourself an email when the job:
+# aborts abnormally (fails)
+#SBATCH --mail-type=FAIL
+# ends successfully
+#SBATCH --mail-type=END
+
+# Use this email address:
+#SBATCH --mail-user=jpattison@student.unimelb.edu.au
+
 # Load required modules
 
 module load Python/3.6.4-intel-2017.u2-GCC-6.2.0-CUDA9
