@@ -33,7 +33,7 @@ def generateAttacks(networkSettings, attackClasses, max_epLength = 60, num_episo
         with open(attack_path, "wb") as f:
             
             # run all the simulations
-            net = netModule.network(networkSettings, reward_overload, attackClass, max_epLength, None, True)
+            net = netModule.network_full(networkSettings, reward_overload, attackClass, max_epLength, netModule.stateRepresentationEnum.throttler, None, True)
             for _ in range(num_episodes):
                 net.reset()
 
@@ -53,4 +53,4 @@ gradualIncrease = hostClass.GradualIncrease
 attackClasses = [conAttack, shortPulse, mediumPulse,
     largePulse, gradualIncrease] 
 
-generateAttacks(NetworkSingleTeamMalialisMedium, attackClasses)
+generateAttacks(NetworkSingleTeamFour, attackClasses)
