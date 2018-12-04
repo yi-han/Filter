@@ -103,9 +103,9 @@ class NetworkSingleTeamMalialisMedium(object):
 
     max_hosts_per_level = [2, 6, 12]
 
-class NetworkSingleTeamFour(NetworkSingleTeamMalialisMedium):
+class NetworkSixFour(NetworkSingleTeamMalialisMedium):
     # 4 attackers per throttler.
-    name = "single_team_six_four"
+    name = "six_four"
     host_sources = [3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5,
     7, 7, 7, 7, 8, 8, 8, 8, 9, 9, 9, 9]
     upper_boundary = 25
