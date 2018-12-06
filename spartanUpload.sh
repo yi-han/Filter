@@ -7,6 +7,7 @@ for dest in punim0621 punim0636; do
 	--include='**/*.slurm' \
 	--include='**/*.txt' \
 	--include='**/*.sh' \
+	--include='**/*.apkl' \
 	network \
 	agent \
 	attackSimulations \
@@ -40,6 +41,7 @@ for dest in punim0621 punim0636; do
 	runSarsaNoOverdrive.py \
 	runSarsaOriginal.py \
 	runSarsaDDQNCopy.py \
+	runAttacks.py \
 	--exclude='*' \
 	jpattison@spartan.hpc.unimelb.edu.au:/data/projects/$dest #punim0621
 	#jpattison@spartan.hpc.unimelb.edu.au:/data/projects/punim0636  punim0621

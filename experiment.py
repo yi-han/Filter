@@ -44,7 +44,7 @@ import numpy as np
 import os#, sys, logging
 from enum import Enum
 from network.network_new import *
-
+import runAttacks
 
 
 
@@ -68,7 +68,7 @@ class Experiment:
 
 
 
-    def run(self, prefix, preloaded_agent=None):
+    def run(self, prefix, preloaded_agent):
         N_action = self.network_settings.N_action
         N_state = self.network_settings.N_state
         action_per_throttler = self.network_settings.action_per_throttler
@@ -98,11 +98,10 @@ class Experiment:
         else:
             test = False
 
-        if preloaded_agent:
-            agent = preloaded_agent
-            agent.reset()
-        else:
-            agent = self.agent_settings.agent(N_action, pre_train_steps, action_per_throttler, N_state, tau, y, debug, test)
+        agent = preloaded_agent
+        agent.reset()
+        
+
         reward_overload = self.agent_settings.reward_overload
         if reward_overload:
             print("using reward overload")
@@ -262,6 +261,8 @@ class Experiment:
         print("{0} is:".format(name))
         print("Percent of succesful episodes: " + str(100 - fail*100/total_steps) + "%")
 
+        if prefix == 0:
+            runAttacks.run_attacks(agent, self.twist, self.network_settings, self.agent_settings)
 
 def calc_comm_strategy(stateRepresentation):
     if stateRepresentation == stateRepresentationEnum.throttler:

@@ -236,7 +236,7 @@ class GeneralSettings(object):
     SaveModelEnum = Enum('SaveModel', 'neither save load')
     debug = False
     # save_attack = SaveAttackEnum.neither
-    save_model = SaveModelEnum.load
+    save_model = SaveModelEnum.save
     tileFunction = None
 
 
@@ -254,8 +254,8 @@ Settings to change
 
 
 """
-assignedNetwork = NetworkSixFour
-assignedAgent = LinearSarsaLAIDDQN200
+assignedNetwork = NetworkMalialisSmall
+assignedAgent = LinearSarsaLong
 load_attack_path = "attackSimulations/{0}/".format(assignedNetwork.name)
 network_emulator = network.network_new.network_full # network_quick # network_full
 
@@ -299,7 +299,7 @@ else:
     partition = ""
 
 
-loadAttacks = True
+loadAttacks = False
 
 if loadAttacks:
     for attackClass in attackClasses:
