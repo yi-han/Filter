@@ -76,14 +76,21 @@ class Agent(aBase.Agent):
     def actionReplay(self, current_state, batch_size):
         return None
 
-    def loadModel(self, load_path):
+    def loadModel(self, load_path, usePickle = True):
         # let above work out the load_path especially with the decentralised part
-        with open(load_path+"/checkpoint", 'r') as checkpoint_file:
-            last_checkpoint = checkpoint_file.readline()
+        print("Loading {0}".format(load_path))
+        if usePickle:
+            with open(load_path+"/checkpoint", 'r') as checkpoint_file:
+                last_checkpoint = checkpoint_file.readline()
 
-        with open(load_path+"/"+last_checkpoint, 'rb') as f:
-            dataDict = pickle.load(f)
-            print("datadic is loaded \n")
+            print(last_checkpoint)
+            with open(load_path+"/"+last_checkpoint, 'rb') as f:
+                dataDict = pickle.load(f)
+                print("datadic is loaded \n")
+                self.ai.loadData(dataDict)
+        else:
+            print("using joblib")
+            dataDict = joblib.load(load_path+"/joblibBackup.sav") 
             self.ai.loadData(dataDict)
 
 
