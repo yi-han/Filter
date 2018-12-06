@@ -17,7 +17,7 @@ import pickle
 from mapsAndSettings import *
 
 
-def generateAttacks(networkSettings, attackClasses, max_epLength = 60, num_episodes = 100):
+def generateAttacks(networkSettings, attackClasses, max_epLength = 60, num_episodes = 500):
     path = "attackSimulations/{0}/".format(networkSettings.name)
     # SaveAttackEnum = Enum('SaveAttack', 'neither save load')
     # save_attack = SaveAttackEnum.save
@@ -53,4 +53,4 @@ gradualIncrease = hostClass.GradualIncrease
 attackClasses = [conAttack, shortPulse, mediumPulse,
     largePulse, gradualIncrease] 
 
-generateAttacks(NetworkSingleTeamFour, attackClasses)
+generateAttacks(NetworkSixFour, attackClasses)

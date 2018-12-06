@@ -88,7 +88,7 @@ class Experiment:
         max_epLength = self.agent_settings.max_epLength
 
         if self.load_attack_path:
-            num_episodes = 50
+            num_episodes = 500
             pre_train_steps = 0
             max_epLength = 60
             e = 0

@@ -248,7 +248,6 @@ class network_full(object):
         # self.SaveAttackEnum = SaveAttackEnum
         self.save_attack = save_attack
         self.load_attack_path = load_attack_path
-        self.current_state = None
         self.initialise(network_settings.topologyFile, representationType)
         self.last_state = np.empty_like(self.get_state())
 
@@ -260,6 +259,7 @@ class network_full(object):
         if self.save_attack:# is self.SaveAttackEnum.save:
             self.record_attackers()
         #self.set_rate()
+        self.current_state = None
         self.legitimate_all = 0
         self.legitimate_served = 0
         # print("reset")
@@ -329,6 +329,7 @@ class network_full(object):
         # get the state for the agent associated with the throttler
         
         if self.current_state:
+            # we're trying to cache the current state
             return self.current_state
 
         response = []

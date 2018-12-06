@@ -229,7 +229,7 @@ def create_generic_dec(gs, general_s, ns):
 
 def getSummary(adversary_classes, load_path, agent):
     summary = open("{0}/attackSummary.csv".format(load_path), "w")
-    summary.write("Attack Type, Agent, Legal Packets Received, Legal Packets Served, Percentage, Server Failures\n")
+    summary.write("Attack Type, Agent, Legal Packets Received, Legal Packets Served, Percentage, Server Failures, tau, pretraining, annealing, total_episodes, start_e, overload\n")
     agentName = agent.name
     for adversary_class in adversary_classes:
         attack_type = adversary_class.getName()
@@ -240,8 +240,21 @@ def getSummary(adversary_classes, load_path, agent):
         sum_packets_sent = sum(packet_file.PacketsServed)
         sum_server_failures = sum(packet_file.ServerFailures)
         percentage_received = sum_packets_received/sum_packets_sent*100
-        summary.write("{0}, {1}, {2}, {3}, {4}, {5}\n".format(attack_type, agent.name,
-            sum_packets_received, sum_packets_sent, percentage_received, sum_server_failures))
+        tau = agent.tau
+        pretraining = agent.pre_train_steps / agent.max_epLength
+        annealing = agent.annealing_steps / agent.max_epLength
+        total_episodes = agent.num_episodes
+        start_e = agent.startE
+        if agent.reward_overload==-1:
+            overload = '-1'
+        elif agent.reward_overload == None:
+            overload = 'None'
+        else:
+            overload = 'misc'
+
+        summary.write("{0}, {1}, {2}, {3}, {4}, {5}, {6}, {7}, {8}, {9}, {10}, {11}\n".format(attack_type, agent.name,
+            sum_packets_received, sum_packets_sent, percentage_received, sum_server_failures,
+            tau, pretraining, annealing, total_episodes, start_e, overload))
     summary.close()
 
 
