@@ -39,3 +39,7 @@ def run_attacks(genericAgent, twist, assignedNetwork, assignedAgent):
 
         exp.run(0, genericAgent)
     mapsAndSettings.getSummary(attackClasses, exp.load_path, assignedAgent)
+
+
+
+

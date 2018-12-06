@@ -88,7 +88,7 @@ class Experiment:
         max_epLength = self.agent_settings.max_epLength
 
         if self.load_attack_path:
-            num_episodes = 500
+            num_episodes = 500 #500
             pre_train_steps = 0
             max_epLength = 60
             e = 0
@@ -261,7 +261,8 @@ class Experiment:
         print("{0} is:".format(name))
         print("Percent of succesful episodes: " + str(100 - fail*100/total_steps) + "%")
 
-        if prefix == 0:
+        if prefix == 0 and not test:
+            # only run if we aren't already in a test
             runAttacks.run_attacks(agent, self.twist, self.network_settings, self.agent_settings)
 
 def calc_comm_strategy(stateRepresentation):

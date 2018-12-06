@@ -12,6 +12,8 @@ from mapsAndSettings import *
 assert(len(sys.argv)>=3)
 
 
+
+
 class LinearSarsaSingular(object):
     # note we have two dependencies
     name = "LinearSarsaSingular"
@@ -81,6 +83,8 @@ class LinearPtNoOverload(LinearButPT):
     reward_overload = None
 
 """
+
+
 class LinearSarsaSingularDDQNCopy(object):
     # copy from ddqnSingleNoCommunicate
     name = "LinearSarsaSingularDDQNCopy"
@@ -255,7 +259,7 @@ Settings to change
 
 """
 assignedNetwork = NetworkMalialisSmall
-assignedAgent = LinearSarsaLong
+assignedAgent = RandomAgent
 load_attack_path = "attackSimulations/{0}/".format(assignedNetwork.name)
 network_emulator = network.network_new.network_full # network_quick # network_full
 
