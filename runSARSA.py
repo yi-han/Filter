@@ -47,6 +47,7 @@ class LinearSarsaNoOverload(LinearSarsaSingular):
     reward_overload = None
 
 class LinearSarsaReducedLearning(LinearSarsaSingular):
+    # this is malialis one i think
     name = "LinearSarsaReducedLearning"
     tau = 0.0125
 
@@ -54,7 +55,7 @@ class LinearReducedNoOverload(LinearSarsaReducedLearning):
     name = "LinearReducedNoOverload"
     reward_overload = None
 
-
+"""
 class LinearButPT(object):
     name = "LinButPT"
     max_epLength = 30 # or 60 if test
@@ -79,7 +80,7 @@ class LinearPtNoOverload(LinearButPT):
     name = "LinearPtNoOverload"
     reward_overload = None
 
-
+"""
 class LinearSarsaSingularDDQNCopy(object):
     # copy from ddqnSingleNoCommunicate
     name = "LinearSarsaSingularDDQNCopy"
@@ -145,7 +146,12 @@ class LinearSarsaLAIDDQN200(LinearSarsaLAI):
     annealing_steps = 120000 * max_epLength  #120000 * max_epLength  #
     startE = 1
     endE = 0.0
-    stepDrop = (startE - endE)/annealing_steps    
+    stepDrop = (startE - endE)/annealing_steps
+    reward_overload = None  
+
+class LinSarDDQN200HighTau(LinearSarsaLAIDDQN200):
+    name = "LinearDDQN200HighTau"
+    tau = 0.005
 
 class LinearSarsaLAIDDQN100Short(LinearSarsaLAI):
     # Idea (without using a ridiculous number of epLength, set the learning rate even lower and give proper exploration)
@@ -158,6 +164,27 @@ class LinearSarsaLAIDDQN100Short(LinearSarsaLAI):
     startE = 0.3
     endE = 0.0
     stepDrop = (startE - endE)/annealing_steps  
+    reward_overload = None
+
+class LinearLaiManyEpisodes(object):
+    name = "LinearLaiManyEpisodes"
+    max_epLength = 60
+    y = 0
+    tau = 0.001
+    update_freq = None
+    batch_size = None
+    num_episodes = 1000001#82501
+    pre_train_steps = 0#2000 * max_epLength
+    annealing_steps = 800000 * max_epLength #1000*max_epLength #60000 * max_epLength 
+    startE = 0.3 #0.4
+    endE = 0.0
+    stepDrop = (startE - endE)/annealing_steps
+    agent = None
+    sub_agent = linCen.Agent
+    group_size = 1 # number of filters each agent controls
+    #stateletFunction = getStateletNoCommunication
+    reward_overload = None
+    stateRepresentation = stateRepresentationEnum.leaderAndIntermediate  
 
 
 class LinearTeamCommunicate(object):
@@ -179,9 +206,10 @@ class LinearTeamCommunicate(object):
     stateRepresentation = stateRepresentationEnum.server
     reward_overload = -1
     group_size = 1 # number of filters each agent controls
-class RandomAgent(object):
-    
 
+
+
+class RandomAgent(object):
     name = "RandomLong"
     max_epLength = 500 # or 60 if test
     y = 0
@@ -208,7 +236,7 @@ class GeneralSettings(object):
     SaveModelEnum = Enum('SaveModel', 'neither save load')
     debug = False
     # save_attack = SaveAttackEnum.neither
-    save_model = SaveModelEnum.save
+    save_model = SaveModelEnum.load
     tileFunction = None
 
 
@@ -271,7 +299,7 @@ else:
     partition = ""
 
 
-loadAttacks = False
+loadAttacks = True
 
 if loadAttacks:
     for attackClass in attackClasses:

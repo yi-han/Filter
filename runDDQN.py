@@ -173,7 +173,7 @@ attackClasses = [conAttack, shortPulse, mediumPulse,
 
 
 assignedNetwork = NetworkSingleTeamMalialisMedium #NetworkSingleTeamMalialisMedium
-assignedAgent = ddqn100MediumHierarchical #ddqn100MediumHierarchical
+assignedAgent = ddqn100HierarchicalShort #ddqn100MediumHierarchical
 load_attack_path = "attackSimulations/{0}/".format(assignedNetwork.name)
 loadAttacks = True
 # genericAgent = None

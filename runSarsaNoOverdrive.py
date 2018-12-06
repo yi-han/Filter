@@ -47,9 +47,15 @@ class LinearSarsaNoOverload(LinearSarsaSingular):
     reward_overload = None
 
 class LinearSarsaReducedLearning(LinearSarsaSingular):
+    # this is malialis one i think
     name = "LinearSarsaReducedLearning"
     tau = 0.0125
 
+class LinearReducedNoOverload(LinearSarsaReducedLearning):
+    name = "LinearReducedNoOverload"
+    reward_overload = None
+
+"""
 class LinearButPT(object):
     name = "LinButPT"
     max_epLength = 30 # or 60 if test
@@ -74,7 +80,7 @@ class LinearPtNoOverload(LinearButPT):
     name = "LinearPtNoOverload"
     reward_overload = None
 
-
+"""
 class LinearSarsaSingularDDQNCopy(object):
     # copy from ddqnSingleNoCommunicate
     name = "LinearSarsaSingularDDQNCopy"
@@ -126,6 +132,7 @@ class LinearSarsaLAIshort(LinearSarsaLAI):
     annealing_steps = 80000 * max_epLength #1000*max_epLength #60000 * max_epLength 
 
 class LinearLAIshortReduced(LinearSarsaLAIshort):
+    name = "LAIshortAndReduced"
     tau = 0.003
 
 
@@ -139,7 +146,8 @@ class LinearSarsaLAIDDQN200(LinearSarsaLAI):
     annealing_steps = 120000 * max_epLength  #120000 * max_epLength  #
     startE = 1
     endE = 0.0
-    stepDrop = (startE - endE)/annealing_steps    
+    stepDrop = (startE - endE)/annealing_steps
+    reward_overload = None  
 
 class LinearSarsaLAIDDQN100Short(LinearSarsaLAI):
     # Idea (without using a ridiculous number of epLength, set the learning rate even lower and give proper exploration)
@@ -152,7 +160,7 @@ class LinearSarsaLAIDDQN100Short(LinearSarsaLAI):
     startE = 0.3
     endE = 0.0
     stepDrop = (startE - endE)/annealing_steps  
-
+    reward_overload = None
 
 class LinearTeamCommunicate(object):
     # communication up till the server
@@ -220,7 +228,7 @@ Settings to change
 
 
 """
-assignedNetwork = NetworkSingleTeamFour
+assignedNetwork = NetworkSingleTeamMalialisMedium
 assignedAgent = LinearSarsaLAIDDQN200
 load_attack_path = "attackSimulations/{0}/".format(assignedNetwork.name)
 network_emulator = network.network_new.network_full # network_quick # network_full

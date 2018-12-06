@@ -1,13 +1,13 @@
-sed 's/sample_sarsa_name/64LinDD200/g' exp_physical.slurm > temp1.slurm
+sed 's/sample_sarsa_name/linLAIRedShort/g' exp_physical.slurm > temp1.slurm
 sed 's/runSARSA/runSARSA/g' temp1.slurm > temp2.slurm
 
-sed 's/0 5/0 2/g' temp2.slurm > output.slurm
+sed 's/0 5/0 1/g' temp2.slurm > output.slurm
 sbatch output.slurm
-sleep 5
-sed 's/0 5/2 2/g' temp2.slurm > output.slurm
-sbatch output.slurm
-sed 's/0 5/4 2/g' temp2.slurm > output.slurm
-sbatch output.slurm
+# sleep 5
+# sed 's/0 5/2 2/g' temp2.slurm > output.slurm
+# sbatch output.slurm
+# sed 's/0 5/4 2/g' temp2.slurm > output.slurm
+# sbatch output.slurm
 # sed 's/0 5/6 2/g' temp2.slurm > output.slurm
 # sbatch output.slurm
 # sed 's/0 5/8 2/g' temp2.slurm > output.slurm

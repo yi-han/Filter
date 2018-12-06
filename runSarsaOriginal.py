@@ -47,13 +47,43 @@ class LinearSarsaNoOverload(LinearSarsaSingular):
     reward_overload = None
 
 class LinearSarsaReducedLearning(LinearSarsaSingular):
+    # this is malialis one i think
     name = "LinearSarsaReducedLearning"
     tau = 0.0125
 
+class LinearReducedNoOverload(LinearSarsaReducedLearning):
+    name = "LinearReducedNoOverload"
+    reward_overload = None
+
+"""
+class LinearButPT(object):
+    name = "LinButPT"
+    max_epLength = 30 # or 60 if test
+    y = 0
+    tau = 0.0125
+    update_freq = None
+    batch_size = None
+    num_episodes = 64501#82501
+    pre_train_steps = 2000 * max_epLength
+    annealing_steps = 50000 * max_epLength #1000*max_epLength #60000 * max_epLength 
+    startE = 0.4 #0.4
+    endE = 0.0
+    stepDrop = (startE - endE)/annealing_steps
+    agent = None
+    sub_agent = linCen.Agent
+    group_size = 1 # number of filters each agent controls
+    #stateletFunction = getStateletNoCommunication
+    reward_overload = -1
+    stateRepresentation = stateRepresentationEnum.throttler  
+
+class LinearPtNoOverload(LinearButPT):
+    name = "LinearPtNoOverload"
+    reward_overload = None
+
+"""
 class LinearSarsaSingularDDQNCopy(object):
     # copy from ddqnSingleNoCommunicate
     name = "LinearSarsaSingularDDQNCopy"
-    reward_overload = None
     max_epLength = 30 # or 60 if test
     y = 0    
     tau = 0.01 #Rate to update target network toward primary network. 
@@ -91,18 +121,66 @@ class LinearSarsaLAI(object):
     reward_overload = -1
     stateRepresentation = stateRepresentationEnum.leaderAndIntermediate  
 
+class LinearSarsaLAIreduced(LinearSarsaLAI):
+    # same concept as the DDQN, lower learning rate ~ better results?
+    name = "LinearSarsaLAIreduced"
+    tau = 0.001
+
 class LinearSarsaLAIshort(LinearSarsaLAI):
     name = "LinearLAIshort"
     max_epLength = 30
     annealing_steps = 80000 * max_epLength #1000*max_epLength #60000 * max_epLength 
+
+class LinearLAIshortReduced(LinearSarsaLAIshort):
+    name = "LAIshortAndReduced"
+    tau = 0.003
+
 
 class LinearSarsaLAIDDQN200(LinearSarsaLAI):
     # Idea (without using a ridiculous number of epLength, set the learning rate even lower and give proper exploration)
     name = "LinearDDQN200"
     max_epLength = 30
     tau = 0.001
+    num_episodes = 200001 #200001#    
+    pre_train_steps = 40000 * max_epLength #40000 * max_epLength #
+    annealing_steps = 120000 * max_epLength  #120000 * max_epLength  #
+    startE = 1
+    endE = 0.0
+    stepDrop = (startE - endE)/annealing_steps
+    reward_overload = None  
 
+class LinearSarsaLAIDDQN100Short(LinearSarsaLAI):
+    # Idea (without using a ridiculous number of epLength, set the learning rate even lower and give proper exploration)
+    name = "LinearDDQN100Short"
+    max_epLength = 30
+    tau = 0.001
+    num_episodes = 100001 #200001#    
+    pre_train_steps = 2000 * max_epLength #40000 * max_epLength #
+    annealing_steps = 78000 * max_epLength  #120000 * max_epLength  #
+    startE = 0.3
+    endE = 0.0
+    stepDrop = (startE - endE)/annealing_steps  
+    reward_overload = None
 
+class LinearTeamCommunicate(object):
+    # communication up till the server
+    name = "LinearTeamCommunicate"
+    max_epLength = 30 # or 60 if test
+    y = 0    
+    tau = 0.001 #Rate to update target network toward primary network. 
+    update_freq = None #How often to perform a training step.
+    batch_size = None #How many experiences to use for each training step.
+    num_episodes = 100001 #200001#    
+    pre_train_steps = 40000 * max_epLength #40000 * max_epLength #
+    annealing_steps = 120000 * max_epLength  #120000 * max_epLength  #
+    startE = 1
+    endE = 0.0
+    stepDrop = (startE - endE)/annealing_steps
+    agent = None
+    sub_agent = linCen.Agent
+    stateRepresentation = stateRepresentationEnum.server
+    reward_overload = -1
+    group_size = 1 # number of filters each agent controls
 class RandomAgent(object):
     
 
@@ -150,8 +228,8 @@ Settings to change
 
 
 """
-assignedNetwork = NetworkSingleTeamMalialisMedium
-assignedAgent = LinearSarsaLAIshort
+assignedNetwork = NetworkSixFour
+assignedAgent = LinearSarsaLAIDDQN200
 load_attack_path = "attackSimulations/{0}/".format(assignedNetwork.name)
 network_emulator = network.network_new.network_full # network_quick # network_full
 
@@ -178,26 +256,6 @@ for max_hosts in assignedNetwork.max_hosts_per_level:
 GeneralSettings.encoders = encoders
 
 
-
-
-""" Might be useful?
-
-if assignedAgent.stateRepresentation in [stateRepresentationEnum.leaderAndIntermediate,  stateRepresentationEnum.server]:
-    print("providing the leader and intermediate")
-    intermediateBandwidth = maxThrottlerBandwidth*2 # as intermediate has max 2 throttlers
-    GeneralSettings.encoders.append(tileCoding.myTileInterface(intermediateBandwidth, numTiles, numTilings))
-    leaderBandwidth = maxThrottlerBandwidth * 6
-    GeneralSettings.encoders.append(tileCoding.myTileInterface(leaderBandwidth, numTiles, numTilings))
-
-elif assignedAgent.stateRepresentation == stateRepresentationEnum.server:
-    serverMaxBandiwidth = len(assignedNetwork.host_sources)*assignedNetwork.rate_attack_high
-    GeneralSettings.encoders.append(tileCoding.myTileInterface(serverMaxBandiwidth, numTiles, numTilings))
-elif assignedAgent.stateRepresentation == stateRepresentationEnum.allThrottlers:
-    #note this is an inefficietn cheap way. Use the better way if you do this
-    for i in (range(len(assignedNetwork.host_sources))-1):
-        GeneralSettings.encoders.append(tileCoding.myTileInterface(maxThrottlerBandwidth, numTiles, numTilings))
-# sarsaGeneric = None
-"""
 
 
 conAttack = hostClass.ConstantAttack
