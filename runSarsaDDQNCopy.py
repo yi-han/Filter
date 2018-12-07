@@ -12,6 +12,8 @@ from mapsAndSettings import *
 assert(len(sys.argv)>=3)
 
 
+
+
 class LinearSarsaSingular(object):
     # note we have two dependencies
     name = "LinearSarsaSingular"
@@ -81,6 +83,8 @@ class LinearPtNoOverload(LinearButPT):
     reward_overload = None
 
 """
+
+
 class LinearSarsaSingularDDQNCopy(object):
     # copy from ddqnSingleNoCommunicate
     name = "LinearSarsaSingularDDQNCopy"
@@ -152,7 +156,7 @@ class LinearSarsaLAIDDQN200(LinearSarsaLAI):
 class LinSarDDQN200HighTau(LinearSarsaLAIDDQN200):
     name = "LinearDDQN200HighTau"
     tau = 0.005
-    
+
 class LinearSarsaLAIDDQN100Short(LinearSarsaLAI):
     # Idea (without using a ridiculous number of epLength, set the learning rate even lower and give proper exploration)
     name = "LinearDDQN100Short"
@@ -165,6 +169,27 @@ class LinearSarsaLAIDDQN100Short(LinearSarsaLAI):
     endE = 0.0
     stepDrop = (startE - endE)/annealing_steps  
     reward_overload = None
+
+class LinearLaiManyEpisodes(object):
+    name = "LinearLaiManyEpisodes"
+    max_epLength = 60
+    y = 0
+    tau = 0.001
+    update_freq = None
+    batch_size = None
+    num_episodes = 1000001#82501
+    pre_train_steps = 0#2000 * max_epLength
+    annealing_steps = 800000 * max_epLength #1000*max_epLength #60000 * max_epLength 
+    startE = 0.3 #0.4
+    endE = 0.0
+    stepDrop = (startE - endE)/annealing_steps
+    agent = None
+    sub_agent = linCen.Agent
+    group_size = 1 # number of filters each agent controls
+    #stateletFunction = getStateletNoCommunication
+    reward_overload = None
+    stateRepresentation = stateRepresentationEnum.leaderAndIntermediate  
+
 
 class LinearTeamCommunicate(object):
     # communication up till the server
@@ -185,9 +210,10 @@ class LinearTeamCommunicate(object):
     stateRepresentation = stateRepresentationEnum.server
     reward_overload = -1
     group_size = 1 # number of filters each agent controls
-class RandomAgent(object):
-    
 
+
+
+class RandomAgent(object):
     name = "RandomLong"
     max_epLength = 500 # or 60 if test
     y = 0
@@ -232,7 +258,7 @@ Settings to change
 
 
 """
-assignedNetwork = NetworkSixFour
+assignedNetwork = NetworkSingleTeamMalialisMedium
 assignedAgent = LinSarDDQN200HighTau
 load_attack_path = "attackSimulations/{0}/".format(assignedNetwork.name)
 network_emulator = network.network_new.network_full # network_quick # network_full

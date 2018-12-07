@@ -258,8 +258,8 @@ Settings to change
 
 
 """
-assignedNetwork = NetworkMalialisSmall
-assignedAgent = RandomAgent
+assignedNetwork = NetworkSingleTeamMalialisMedium
+assignedAgent = LinearSarsaLAIDDQN200
 load_attack_path = "attackSimulations/{0}/".format(assignedNetwork.name)
 network_emulator = network.network_new.network_full # network_quick # network_full
 
