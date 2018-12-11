@@ -213,7 +213,7 @@ def create_generic_dec(gs, general_s, ns):
         state_size = calcStateSize(ns.N_state, gs.stateRepresentation)
         print(agent_to_allocate)
         sub_agent_list.append(sub_agent(ns.action_per_throttler**agent_to_allocate, gs.pre_train_steps,
-            ns.action_per_throttler, state_size, general_s.encoders, gs, gs.tau, gs.y, general_s.debug,
+            ns.action_per_throttler, state_size, gs.encoders, gs, gs.tau, gs.y, general_s.debug,
             test))
         throttlers_not_allocated -= agent_to_allocate
 
@@ -259,22 +259,13 @@ def getSummary(adversary_classes, load_path, agent):
 
 
 
-# def getStateletNoCommunication(state, sizeOfSegment):
-#     # get a segment of state corresponding to the agent, return remaining state as well
-#     statelet = state[0:sizeOfSegment]
-#     remainingState = state[sizeOfSegment:]
-#     return (statelet, remainingState)
+def getPathName(network_settings, agent_settings, commStrategy, twist, host_train):
+    # host train is the type of host the agent was trained on. 
+
+    return host_train.getName() + network_settings.name + agent_settings.name + commStrategy  + twist
 
 
-# def getStateletWithCommunication(state, sizeOfSegment):
-#     return (state, state)
 
-
-# def calcStateSize(size_of_group, total_number_states, isCommunication):
-#     if isCommunication:
-#         return total_number_states
-#     else:
-#         return size_of_group
 
 def calcStateSize(total_throttlers, stateRepresentation):
     if stateRepresentation == stateRepresentationEnum.throttler:
@@ -287,4 +278,15 @@ def calcStateSize(total_throttlers, stateRepresentation):
         return total_throttlers
     else:
         assert(1==2)
+
+
+def calc_comm_strategy(stateRepresentation):
+    if stateRepresentation == stateRepresentationEnum.throttler:
+        return "Single"
+    elif stateRepresentation == stateRepresentationEnum.leaderAndIntermediate:
+        return "LeadAndInt"
+    elif stateRepresentation == stateRepresentationEnum.server:
+        return "IncludeServer"
+    elif stateRepresentation == stateRepresentationEnum.allThrottlers:
+        return "CommAll"
 

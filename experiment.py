@@ -44,13 +44,12 @@ import numpy as np
 import os#, sys, logging
 from enum import Enum
 from network.network_new import *
-import runAttacks
 
 
 
 class Experiment:
 
-    def __init__(self, adversary_class, GeneralSettings, NetworkClass, AgentSettings, load_attack_path= None, twist = ""):
+    def __init__(self, adversary_class, GeneralSettings, NetworkClass, AgentSettings, load_attack_path= None):
         self.load_attack_path = load_attack_path
         self.is_debug = GeneralSettings.debug
         self.load_model_enum = GeneralSettings.SaveModelEnum
@@ -58,7 +57,6 @@ class Experiment:
         self.adversary_class = adversary_class
         self.network_settings = NetworkClass
         self.agent_settings = AgentSettings
-        self.twist = twist
         self.representationType = AgentSettings.stateRepresentation
         print(NetworkClass.N_state)
         print(NetworkClass.action_per_throttler**NetworkClass.N_state)
@@ -66,12 +64,12 @@ class Experiment:
         assert(NetworkClass.action_per_throttler**NetworkClass.N_state == NetworkClass.N_action)
 
 
-
-
-    def run(self, prefix, preloaded_agent):
+    def run(self, prefix, preloaded_agent, file_path):
         N_action = self.network_settings.N_action
         N_state = self.network_settings.N_state
         action_per_throttler = self.network_settings.action_per_throttler
+        
+        self.file_path = file_path
 
         y = self.agent_settings.y
         tau = self.agent_settings.tau
@@ -121,17 +119,16 @@ class Experiment:
         fail = 0 # The total number of fails
 
         name = self.agent_settings.name
-        commStrategy = calc_comm_strategy(self.agent_settings.stateRepresentation)
-        path =  self.network_settings.name + name + commStrategy + self.twist# The path to save model to
-        print("Path is {0}".format(path))
-        #path = "/data/projects/punim0621" # for slug
-        self.load_path = path #ideally can move a good one to a seperate location
+
+        
+
+        print("Path is {0}".format(self.file_path))
 
 
         #Make a path for our model to be saved in.
 
-        if not os.path.exists(path):
-            os.makedirs(path)
+        if not os.path.exists(file_path):
+            os.makedirs(file_path)
 
         if test:
             run_mode = "test"
@@ -139,11 +136,11 @@ class Experiment:
             run_mode = "train"
 
         # determine reward for a prediction at start of episode, we choose the second step as first step is random
-        reward_file = open("{0}/reward-{1}-{2}-{3}.csv".format(path,run_mode, self.adversary_class.getName(), prefix),"w")
+        reward_file = open("{0}/reward-{1}-{2}-{3}.csv".format(file_path,run_mode, self.adversary_class.getName(), prefix),"w")
         # Similar to init. Different from reward_file as this is if exploration is 0. Measures how accurate it is at the moment.
         
-        loss_file = open("{0}/loss-{1}-{2}-{3}.csv".format(path,run_mode, self.adversary_class.getName(), prefix) ,"w")
-        packet_served_file = open("{0}/packet_served-{1}-{2}-{3}.csv".format(path,run_mode, self.adversary_class.getName(), prefix),"w")
+        loss_file = open("{0}/loss-{1}-{2}-{3}.csv".format(file_path,run_mode, self.adversary_class.getName(), prefix) ,"w")
+        packet_served_file = open("{0}/packet_served-{1}-{2}-{3}.csv".format(file_path,run_mode, self.adversary_class.getName(), prefix),"w")
         print("Using the {0} agent:".format(name))
         reward_file.write("Episode,StepsSoFar,TotalReward,LastReward,LengthEpisode,e,PerPacketIdeal\n")
         packet_served_file.write("Episode,PacketsReceived,PacketsServed,PercentageReceived,ServerFailures\n")
@@ -152,7 +149,7 @@ class Experiment:
 
         with agent:
             if self.load_model in [self.load_model_enum.load]: #self.load_model_enum.test
-                agent.loadModel(self.load_path)
+                agent.loadModel(self.file_path)
 
             fail_seg = 0
             for ep_num in range(num_episodes):
@@ -223,7 +220,7 @@ class Experiment:
                 if self.load_model is self.load_model_enum.save and prefix == 0: # only save the first iteration 
                     # save the model only every 10,000 steps
                     if ep_num % 10000 == 0:
-                        agent.saveModel(self.load_path, ep_num)
+                        agent.saveModel(self.file_path, ep_num)
 
 
                 # save data generated
@@ -252,7 +249,7 @@ class Experiment:
 
             if self.load_model is self.load_model_enum.save and prefix == 0: # only save the first iteration 
                 # save the model only every 10,000 steps
-                agent.saveModel(self.load_path, ep_num)
+                agent.saveModel(self.file_path, ep_num)
 
 
         reward_file.close()
@@ -261,18 +258,7 @@ class Experiment:
         print("{0} is:".format(name))
         print("Percent of succesful episodes: " + str(100 - fail*100/total_steps) + "%")
 
-        if prefix == 0 and not test:
-            # only run if we aren't already in a test
-            runAttacks.run_attacks(agent, self.twist, self.network_settings, self.agent_settings)
 
-def calc_comm_strategy(stateRepresentation):
-    if stateRepresentation == stateRepresentationEnum.throttler:
-        return "Single"
-    elif stateRepresentation == stateRepresentationEnum.leaderAndIntermediate:
-        return "LeadAndInt"
-    elif stateRepresentation == stateRepresentationEnum.server:
-        return "IncludeServer"
-    elif stateRepresentation == stateRepresentationEnum.allThrottlers:
-        return "CommAll"
+
  
 

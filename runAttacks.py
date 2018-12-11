@@ -25,20 +25,23 @@ class GeneralSettingsObject(object):
     # save_attack = SaveAttackEnum.neither
     save_model = SaveModelEnum.load
 
-def run_attacks(genericAgent, twist, assignedNetwork, assignedAgent):
+def run_attacks(assignedNetwork, assignedAgent, file_path):
 
     load_attack_path = "attackSimulations/{0}/".format(assignedNetwork.name)
     network_emulator = network_new.network_full # network_quick # network_full
     assignedNetwork.emulator = network_emulator
 
+    genericAgent = mapsAndSettings.create_generic_dec(assignedAgent, GeneralSettingsObject, assignedNetwork)
+
     for attackClass in attackClasses:
+        print(attackClass.getName())
         attack_location = load_attack_path+attackClass.getName()+".apkl"
 
         exp = experiment.Experiment(attackClass, GeneralSettingsObject, assignedNetwork, 
-            assignedAgent, twist=twist, load_attack_path=attack_location)
+            assignedAgent, load_attack_path=attack_location)
 
-        exp.run(0, genericAgent)
-    mapsAndSettings.getSummary(attackClasses, exp.load_path, assignedAgent)
+        exp.run(0, genericAgent, file_path)
+    mapsAndSettings.getSummary(attackClasses, file_path, assignedAgent)
 
 
 
