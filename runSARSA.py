@@ -277,7 +277,7 @@ largePulse = hostClass.LargePulse
 gradualIncrease = hostClass.GradualIncrease
 
 driftAttack = hostClass.DriftAttack
-
+coordAttack = hostClass.CoordinatedRandomNotGradual
 
 attackClasses = [conAttack, shortPulse, mediumPulse,
     largePulse, gradualIncrease] 
@@ -290,7 +290,7 @@ else:
 
 loadAttacks = False
 
-trainHost = driftAttack # conAttack #driftAttack
+trainHost = coordAttack # conAttack #driftAttack
 
 
 """

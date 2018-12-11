@@ -1,4 +1,5 @@
 import numpy as np
+import random
 """
 1) Shouldn't be keeping a counter, use the one provided by experiment
 2) update to be handle variable
@@ -9,9 +10,11 @@ class Host():
     # ideally you want to merge host with switch somewhat
 
     def __init__(self, destination_switch, rate_attack_low, rate_attack_high, rate_legal_low, rate_legal_high,
-        max_epLength):
+        max_epLength, appendToSwitch = True):
 
-        destination_switch.attatched_hosts.append(self)
+        if appendToSwitch:
+            destination_switch.attatched_hosts.append(self)
+        
         self.destination_switch = destination_switch
         self.rate_attack_low = rate_attack_low
         self.rate_attack_high = rate_attack_high
@@ -19,6 +22,11 @@ class Host():
         self.rate_legal_high = rate_legal_high
         self.max_epLength = max_epLength
         self.reset(False) # initates all values
+
+    @staticmethod
+    def classReset():
+        return
+
 
     def reset(self, is_attacker, traffic_rate):
         self.is_attacker = is_attacker
@@ -41,6 +49,32 @@ class Host():
     def getName():
         return "Generic-Host"
 
+
+
+class DriftAttack(Host):
+    # pretty much like a constant attack except a small amount of the traffic will be considred legitimate traffic
+    # as this is experimental we'll assume 5% of all traffic is set as legit
+
+
+    def reset(self, is_attacker):
+
+        if is_attacker:
+            traffic_rate = self.rate_attack_low + np.random.rand()*(self.rate_attack_high - self.rate_attack_low)
+        else:
+            traffic_rate = self.rate_legal_low + np.random.rand()*(self.rate_legal_high - self.rate_legal_low)
+        super().reset(is_attacker, traffic_rate)
+
+    def sendTraffic(self, time_step):
+        if self.is_attacker:
+            self.destination_switch.new_illegal += self.traffic_rate*0.95
+            self.destination_switch.new_legal += self.traffic_rate*0.05
+        else:
+            self.destination_switch.new_legal += self.traffic_rate
+    
+    def getName():
+        return "Drift-Attack"
+
+
 class ConstantAttack(Host):
 
 
@@ -61,11 +95,11 @@ class ConstantAttack(Host):
 class Pulse(Host):
     # pulse attack that changes every 2 seconds
     def __init__(self, time_flip, destination_switch, rate_attack_low, rate_attack_high, rate_legal_low, rate_legal_high,
-        max_epLength):
+        max_epLength, appendToSwitch = True):
 
         self.time_flip = time_flip
         super().__init__(destination_switch, rate_attack_low, rate_attack_high, rate_legal_low, rate_legal_high,
-        max_epLength)
+        max_epLength, appendToSwitch)
 
     def sendTraffic(self, time_step):
         time_reduced = time_step % (2*self.time_flip) #split episode into two periods
@@ -86,18 +120,18 @@ class Pulse(Host):
 
 class ShortPulse(Pulse):
     def __init__(self, destination_switch, rate_attack_low, rate_attack_high, rate_legal_low, rate_legal_high,
-        max_epLength):
+        max_epLength, appendToSwitch = True):
         super().__init__(2, destination_switch, rate_attack_low, rate_attack_high, rate_legal_low, rate_legal_high,
-        max_epLength)
+        max_epLength, appendToSwitch)
 
     def getName():
         return "Pulse-Short"
 
 class MediumPulse(Pulse):
     def __init__(self, destination_switch, rate_attack_low, rate_attack_high, rate_legal_low, rate_legal_high,
-        max_epLength):
+        max_epLength, appendToSwitch = True):
         super().__init__(4, destination_switch, rate_attack_low, rate_attack_high, rate_legal_low, rate_legal_high,
-        max_epLength)
+        max_epLength, appendToSwitch)
 
     def getName():
         return "Pulse-Medium"
@@ -105,9 +139,9 @@ class MediumPulse(Pulse):
 
 class LargePulse(Pulse):
     def __init__(self, destination_switch, rate_attack_low, rate_attack_high, rate_legal_low, rate_legal_high,
-        max_epLength):
+        max_epLength, appendToSwitch = True):
         super().__init__(10, destination_switch, rate_attack_low, rate_attack_high, rate_legal_low, rate_legal_high,
-        max_epLength)
+        max_epLength, appendToSwitch)
     def getName():
         return "Pulse-Large"
 
@@ -134,6 +168,50 @@ class GradualIncrease(Host):
 
         super().reset(is_attacker, traffic_rate)
 
+class CoordinatedRandomNotGradual(Host):
+    """
+    everything but gradual attacks. Note all hosts work together (not a multivector attack)
+
+    Things to be careful of:
+    1) In the init of Host we attach our object to the switch. Quite likely that the switch might call us via switch
+    so we can't be creating mulitple objects connected to switch. Best practice is to create a dummy switch for the fakes
+    """
+    possibleClasses = [ShortPulse, MediumPulse, LargePulse, ConstantAttack]
+    assignedClass = None # this is iteratively updated based on the type of attack we're doing
+    @staticmethod
+    def classReset():
+        CoordinatedRandomNotGradual.assignedClass = random.choice(CoordinatedRandomNotGradual.possibleClasses)
+
+
+    def __init__(self, destination_switch, rate_attack_low, rate_attack_high, rate_legal_low, rate_legal_high,
+        max_epLength):
+
+        # create a bunch of alterantive hosts that we can switch between
+        self.active_host = None # the host that we are
+        self.all_hosts = {}
+        for hostClass in CoordinatedRandomNotGradual.possibleClasses:
+            # the appendToSwitch=False is SUPER important
+            self.all_hosts[hostClass] = (hostClass(destination_switch, rate_attack_low, rate_attack_high, rate_legal_low, rate_legal_high,
+                max_epLength, appendToSwitch = False))
+
+        super().__init__(destination_switch, rate_attack_low, rate_attack_high, rate_legal_low, rate_legal_high,
+        max_epLength)
+
+
+
+    def getName():
+        return "RandomNotGradual"
+
+
+    def reset(self, is_attacker):
+        # create a temporary host of the assigned class
+        self.active_host = CoordinatedRandomNotGradual.assignedClass
+        #print("setting host as {0}".format(self.active_host))
+        self.all_hosts[self.active_host].reset(is_attacker)
+
+
+    def sendTraffic(self, time_step):
+        self.all_hosts[self.active_host].sendTraffic(time_step)
 
 """
 

@@ -248,6 +248,7 @@ class network_full(object):
         # self.SaveAttackEnum = SaveAttackEnum
         self.save_attack = save_attack
         self.load_attack_path = load_attack_path
+        self.hostClass.classReset()
         self.initialise(network_settings.topologyFile, representationType)
         self.last_state = np.empty_like(self.get_state())
 
@@ -303,6 +304,8 @@ class network_full(object):
                 if np.random.rand() >= self.legal_probability:
                     attackers.append(i)
 
+        
+        self.hostClass.classReset()
         for i in range(len(self.hosts)):
             if i in attackers:
                 self.hosts[i].reset(is_attacker=True)

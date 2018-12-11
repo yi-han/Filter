@@ -6,6 +6,7 @@ import network.network_new
 
 #import generic_run
 
+import runAttacks
 
 
 import agent.ddqnCentralised as ddCen
@@ -91,6 +92,25 @@ class ddqnLAIhigh(ddqnDoubleHierarchical):
     tau = 0.005
 
 
+class ddqn50MediumHierachical(object):
+    group_size = 1
+    name = "ddqn50MediumHierachical"
+    max_epLength = 30 # or 60 if test
+    y = 0    
+    tau = 0.001 #Rate to update target network toward primary network. 
+    update_freq = 4 #How often to perform a training step.
+    batch_size = 32 #How many experiences to use for each training step.
+    num_episodes = 50000 #200001#    
+    pre_train_steps = 10000 * max_epLength #40000 * max_epLength #
+    annealing_steps = 30000 * max_epLength  #120000 * max_epLength  #
+    startE = 0.3
+    endE = 0.0
+    stepDrop = (startE - endE)/annealing_steps
+    agent = None
+    sub_agent = ddCen.Agent
+    stateRepresentation = stateRepresentationEnum.leaderAndIntermediate
+    reward_overload = None       
+
 class ddqn100MediumHierarchical(object):
     group_size = 1
     name = "ddqn100MediumHierarchical"
@@ -158,7 +178,7 @@ class GeneralSettings(object):
     # save_attack = SaveAttackEnum.neither
     save_model = SaveModelEnum.save
     tileFunction = None
-    encoders = None
+    
 
 
 # The class of the adversary to implement
@@ -168,21 +188,64 @@ mediumPulse = hostClass.MediumPulse
 largePulse = hostClass.LargePulse
 gradualIncrease = hostClass.GradualIncrease
 
+driftAttack = hostClass.DriftAttack
+
 attackClasses = [conAttack, shortPulse, mediumPulse,
     largePulse, gradualIncrease] 
 
 
-assignedNetwork = NetworkSixFour #NetworkSingleTeamMalialisMedium
-assignedAgent = ddqnSingleSarsaCopy #ddqn100MediumHierarchical
+assignedNetwork = NetworkSingleTeamMalialisMedium #NetworkSingleTeamMalialisMedium
+assignedAgent = ddqn50MediumHierachical #ddqn100MediumHierarchical
 load_attack_path = "attackSimulations/{0}/".format(assignedNetwork.name)
 loadAttacks = False
+
+assignedAgent.encoders = None
+trainHost = driftAttack#driftAttack #conAttack
 # genericAgent = None
+
+
+
 
 network_emulator = network.network_new.network_full #network_quick # network_full
 assignedNetwork.emulator = network_emulator
 
 
-#partition = sys.argv[3] #ignore
+twist="{0}".format(network_emulator.name)
+commStrategy = calc_comm_strategy(assignedAgent.stateRepresentation)
+file_path = getPathName(assignedNetwork, assignedAgent, commStrategy, twist, trainHost)
+
+if loadAttacks:
+    for attackClass in attackClasses:
+        genericAgent = create_generic_dec(assignedAgent, GeneralSettings, assignedNetwork)
+        #genericAgent = None
+        attack_location = load_attack_path+attackClass.getName()+".apkl"
+
+        exp = experiment.Experiment(attackClass, GeneralSettings, assignedNetwork, 
+            assignedAgent, load_attack_path=attack_location)
+        exp.run(0, genericAgent, file_path)
+    getSummary(attackClasses, file_path, assignedAgent)
+
+else:
+    #experiment = experiment.Experiment(conAttack, GeneralSettings, assignedNetwork, assignedAgent, twist="{2}{0}Alias{1}".format(numTiles, partition, network_emulator.name))
+
+    experiment = experiment.Experiment(trainHost, GeneralSettings, assignedNetwork, assignedAgent)
+
+    start_num = int(sys.argv[1])
+    length_core= int(sys.argv[2])
+
+    for i in range(length_core):
+        genericAgent = create_generic_dec(assignedAgent, GeneralSettings, assignedNetwork)
+        # genericAgent = None        
+        print("Im doing it for {0}".format(start_num+i))
+        experiment.run(start_num+i, genericAgent, file_path)
+
+    if start_num==0:
+        genericAgent = create_generic_dec(assignedAgent, GeneralSettings, assignedNetwork)
+        runAttacks.run_attacks(assignedNetwork, assignedAgent, file_path)
+
+
+
+"""
 if loadAttacks:
     for attackClass in attackClasses:
         genericAgent = create_generic_dec(assignedAgent, GeneralSettings, assignedNetwork)
@@ -207,5 +270,5 @@ else:
         # genericAgent = None        
         print("Im doing it for {0}".format(start_num+i))
         experiment.run(start_num+i, genericAgent)
-
+"""
 

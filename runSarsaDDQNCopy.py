@@ -9,7 +9,9 @@ import agent.linearSarsaCentralised as linCen
 import agent.randomAgent as ranAg
 #import agent.sarsaDecentralised as sarDec# import agent.ddqnDecentralised as ddDec
 from mapsAndSettings import *
+import runAttacks
 assert(len(sys.argv)>=3)
+
 
 
 
@@ -259,13 +261,38 @@ Settings to change
 
 """
 assignedNetwork = NetworkSingleTeamMalialisMedium
-assignedAgent = LinSarDDQN200HighTau
+assignedAgent = LinearReducedNoOverload
 load_attack_path = "attackSimulations/{0}/".format(assignedNetwork.name)
 network_emulator = network.network_new.network_full # network_quick # network_full
 
 
 
 assignedNetwork.emulator = network_emulator
+
+
+conAttack = hostClass.ConstantAttack
+shortPulse = hostClass.ShortPulse
+mediumPulse = hostClass.MediumPulse
+largePulse = hostClass.LargePulse
+gradualIncrease = hostClass.GradualIncrease
+
+driftAttack = hostClass.DriftAttack
+
+
+attackClasses = [conAttack, shortPulse, mediumPulse,
+    largePulse, gradualIncrease] 
+
+if len(sys.argv)==4:
+    partition = sys.argv[3]
+else:
+    partition = ""
+
+
+loadAttacks = False
+
+trainHost = driftAttack # conAttack #driftAttack
+
+
 """
 This is the encoder for the sarsa, this might be better positioned somewhere else
 """
@@ -283,27 +310,12 @@ for max_hosts in assignedNetwork.max_hosts_per_level:
     tileCoder = tileCoding.myTileInterface(maxThrottlerBandwidth, numTiles, numTilings)
     encoders.append(tileCoder)
     level += 1
-GeneralSettings.encoders = encoders
+assignedAgent.encoders = encoders
 
 
-
-
-conAttack = hostClass.ConstantAttack
-shortPulse = hostClass.ShortPulse
-mediumPulse = hostClass.MediumPulse
-largePulse = hostClass.LargePulse
-gradualIncrease = hostClass.GradualIncrease
-
-attackClasses = [conAttack, shortPulse, mediumPulse,
-    largePulse, gradualIncrease] 
-
-if len(sys.argv)==4:
-    partition = sys.argv[3]
-else:
-    partition = ""
-
-
-loadAttacks = False
+twist = "{2}{0}Alias{1}".format(numTiles, partition, network_emulator.name)
+commStrategy = calc_comm_strategy(assignedAgent.stateRepresentation)
+file_path = getPathName(assignedNetwork, assignedAgent, commStrategy, twist, trainHost)
 
 if loadAttacks:
     for attackClass in attackClasses:
@@ -312,14 +324,14 @@ if loadAttacks:
         attack_location = load_attack_path+attackClass.getName()+".apkl"
 
         exp = experiment.Experiment(attackClass, GeneralSettings, assignedNetwork, 
-            assignedAgent, twist="{2}{0}Alias{1}".format(numTiles, partition, network_emulator.name), load_attack_path=attack_location)
-        exp.run(0, genericAgent)
-    getSummary(attackClasses, exp.load_path, assignedAgent)
+            assignedAgent, load_attack_path=attack_location)
+        exp.run(0, genericAgent, file_path)
+    getSummary(attackClasses, file_path, assignedAgent)
 
 else:
-    experiment = experiment.Experiment(conAttack, GeneralSettings, assignedNetwork, assignedAgent, twist="{2}{0}Alias{1}".format(numTiles, partition, network_emulator.name))
-    # experiment = experiment.Experiment(conAttack, GeneralSettings, assignedNetwork, assignedAgent, "double")
+    #experiment = experiment.Experiment(conAttack, GeneralSettings, assignedNetwork, assignedAgent, twist="{2}{0}Alias{1}".format(numTiles, partition, network_emulator.name))
 
+    experiment = experiment.Experiment(trainHost, GeneralSettings, assignedNetwork, assignedAgent)
 
     start_num = int(sys.argv[1])
     length_core= int(sys.argv[2])
@@ -328,9 +340,11 @@ else:
         genericAgent = create_generic_dec(assignedAgent, GeneralSettings, assignedNetwork)
         # genericAgent = None        
         print("Im doing it for {0}".format(start_num+i))
-        experiment.run(start_num+i, genericAgent)
+        experiment.run(start_num+i, genericAgent, file_path)
 
-
+    if start_num==0:
+        
+        runAttacks.run_attacks(assignedNetwork, assignedAgent, file_path)
 
 """
 
