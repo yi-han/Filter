@@ -38,10 +38,10 @@ class Host():
         else:
             self.destination_switch.new_legal += send_rate
 
-    def setRate(self, is_attacker, traffic_rate):
-        # manual alternative to resetting a host
-        self.is_attacker = is_attacker
-        self.traffic_rate = traffic_rate        
+    # def setRate(self, host_object):
+    #     # manual alternative to resetting a host
+    #     self.is_attacker = host_object.is_attacker
+    #     self.traffic_rate = host_object.traffic_rate        
 
     def print_host(self):
         print("destination {0}".format(self.destination_switch.id))
@@ -50,7 +50,13 @@ class Host():
         return "Generic-Host"
 
 
+    def get_details(self):
+        return (self.is_attacker, self.traffic_rate)
 
+    def load_details(self, details):
+        (is_attacker, traffic_rate) = details
+        self.is_attacker = is_attacker
+        self.traffic_rate = traffic_rate
 class DriftAttack(Host):
     # pretty much like a constant attack except a small amount of the traffic will be considred legitimate traffic
     # as this is experimental we'll assume 5% of all traffic is set as legit
@@ -212,6 +218,18 @@ class CoordinatedRandomNotGradual(Host):
 
     def sendTraffic(self, time_step):
         self.all_hosts[self.active_host].sendTraffic(time_step)
+
+
+    def get_details(self):
+
+        (is_attacker, traffic_rate) = self.all_hosts[self.active_host].get_details()
+        return (is_attacker, traffic_rate, self.active_host)
+
+    def load_details(self, details):
+        (is_attacker, traffic_rate, active_host) = details
+        self.active_host = active_host
+        self.active_host.load_details((is_attacker, traffic_rate))
+
 
 """
 

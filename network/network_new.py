@@ -313,19 +313,18 @@ class network_full(object):
                self.hosts[i].reset(is_attacker=False) 
      
     def record_attackers(self):
-        details = []
+        host_details = []
         for host in self.hosts:
-            details.append((host.is_attacker, host.traffic_rate))
+            host_details.append(host.get_details())
 
-        self.attack_record.append(details)
+        self.attack_record.append(host_details)
 
 
     def load_attacker(self):
         host_data = self.saved_attack.pop()
         #print(host_data)
         for i in range(len(host_data)):
-            (is_attacker, traffic_rate) = host_data[i]
-            self.hosts[i].setRate(is_attacker, traffic_rate)
+            self.hosts[i].load_details(host_data[i])
 
 
     def get_state(self):
