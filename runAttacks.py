@@ -31,10 +31,11 @@ def run_attacks(assignedNetwork, assignedAgent, file_path):
     network_emulator = network_new.network_full # network_quick # network_full
     assignedNetwork.emulator = network_emulator
 
-    genericAgent = mapsAndSettings.create_generic_dec(assignedAgent, GeneralSettingsObject, assignedNetwork)
 
     for attackClass in attackClasses:
         print(attackClass.getName())
+        genericAgent = mapsAndSettings.create_generic_dec(assignedAgent, GeneralSettingsObject, assignedNetwork)
+        
         attack_location = load_attack_path+attackClass.getName()+".apkl"
 
         exp = experiment.Experiment(attackClass, GeneralSettingsObject, assignedNetwork, 

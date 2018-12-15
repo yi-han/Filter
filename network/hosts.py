@@ -96,7 +96,7 @@ class ConstantAttack(Host):
         super().sendTraffic(time_step, self.traffic_rate)
     
     def getName():
-        return "Constant-Attack"
+        return "ConstantAttack"
 
 class Pulse(Host):
     # pulse attack that changes every 2 seconds
@@ -122,7 +122,7 @@ class Pulse(Host):
         super().reset(is_attacker, traffic_rate)
 
     def getName():
-        return "Pulse-Generic"
+        return "PulseGeneric"
 
 class ShortPulse(Pulse):
     def __init__(self, destination_switch, rate_attack_low, rate_attack_high, rate_legal_low, rate_legal_high,
@@ -131,7 +131,7 @@ class ShortPulse(Pulse):
         max_epLength, appendToSwitch)
 
     def getName():
-        return "Pulse-Short"
+        return "PulseShort"
 
 class MediumPulse(Pulse):
     def __init__(self, destination_switch, rate_attack_low, rate_attack_high, rate_legal_low, rate_legal_high,
@@ -140,7 +140,7 @@ class MediumPulse(Pulse):
         max_epLength, appendToSwitch)
 
     def getName():
-        return "Pulse-Medium"
+        return "PulseMedium"
 
 
 class LargePulse(Pulse):
@@ -149,7 +149,7 @@ class LargePulse(Pulse):
         super().__init__(10, destination_switch, rate_attack_low, rate_attack_high, rate_legal_low, rate_legal_high,
         max_epLength, appendToSwitch)
     def getName():
-        return "Pulse-Large"
+        return "PulseLarge"
 
 class GradualIncrease(Host):
 
@@ -163,7 +163,7 @@ class GradualIncrease(Host):
         super().sendTraffic(time_step, rate_traffic)
 
     def getName():
-        return "Gradual-Increase"
+        return "GradualIncrease"
 
     def reset(self, is_attacker):
 

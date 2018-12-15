@@ -150,6 +150,10 @@ class ddqn100HierarchicalShort(object):
     stateRepresentation = stateRepresentationEnum.leaderAndIntermediate
     reward_overload = None       
 
+class ddqn100HierarchicalOverload(ddqn100MediumHierarchical):
+    name = "ddqn100Overload"
+    reward_overload = -1
+
 class ddqnServerCommunicate(object):
     group_size = 1
     name = "ddqn120ServerCommunicate"
@@ -189,18 +193,21 @@ largePulse = hostClass.LargePulse
 gradualIncrease = hostClass.GradualIncrease
 
 driftAttack = hostClass.DriftAttack
+coordAttack = hostClass.CoordinatedRandomNotGradual
+
+
 
 attackClasses = [conAttack, shortPulse, mediumPulse,
     largePulse, gradualIncrease] 
 
 
-assignedNetwork = NetworkSingleTeamMalialisMedium #NetworkSingleTeamMalialisMedium
-assignedAgent = ddqnDoubleHierarchical #ddqn100MediumHierarchical
+assignedNetwork = NetworkSixFour #NetworkSingleTeamMalialisMedium
+assignedAgent = ddqn100HierarchicalOverload #ddqn100MediumHierarchical
 load_attack_path = "attackSimulations/{0}/".format(assignedNetwork.name)
 loadAttacks = False
 
 assignedAgent.encoders = None
-trainHost = driftAttack#driftAttack #conAttack
+trainHost = conAttack #coordAttack # conAttack #driftAttack
 # genericAgent = None
 
 
@@ -215,15 +222,17 @@ commStrategy = calc_comm_strategy(assignedAgent.stateRepresentation)
 file_path = getPathName(assignedNetwork, assignedAgent, commStrategy, twist, trainHost)
 
 if loadAttacks:
-    for attackClass in attackClasses:
-        genericAgent = create_generic_dec(assignedAgent, GeneralSettings, assignedNetwork)
-        #genericAgent = None
-        attack_location = load_attack_path+attackClass.getName()+".apkl"
+    runAttacks.run_attacks(assignedNetwork, assignedAgent, file_path)
 
-        exp = experiment.Experiment(attackClass, GeneralSettings, assignedNetwork, 
-            assignedAgent, load_attack_path=attack_location)
-        exp.run(0, genericAgent, file_path)
-    getSummary(attackClasses, file_path, assignedAgent)
+    # for attackClass in attackClasses:
+    #     genericAgent = create_generic_dec(assignedAgent, GeneralSettings, assignedNetwork)
+    #     #genericAgent = None
+    #     attack_location = load_attack_path+attackClass.getName()+".apkl"
+
+    #     exp = experiment.Experiment(attackClass, GeneralSettings, assignedNetwork, 
+    #         assignedAgent, load_attack_path=attack_location)
+    #     exp.run(0, genericAgent, file_path)
+    # getSummary(attackClasses, file_path, assignedAgent)
 
 else:
     #experiment = experiment.Experiment(conAttack, GeneralSettings, assignedNetwork, assignedAgent, twist="{2}{0}Alias{1}".format(numTiles, partition, network_emulator.name))
