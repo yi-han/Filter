@@ -65,7 +65,7 @@ class DriftAttack(Host):
     def reset(self, is_attacker):
 
         if is_attacker:
-            traffic_rate = self.rate_attack_low + np.random.rand()*(self.rate_attack_high - self.rate_attack_low)
+            self.traffic_rate = self.rate_attack_low + np.random.rand()*(self.rate_attack_high - self.rate_attack_low)
         else:
             traffic_rate = self.rate_legal_low + np.random.rand()*(self.rate_legal_high - self.rate_legal_low)
         super().reset(is_attacker, traffic_rate)
@@ -156,9 +156,9 @@ class GradualIncrease(Host):
     def sendTraffic(self, time_step):
         if not self.is_attacker:
             super().sendTraffic(time_step, self.traffic_rate)
-        min_traffic = self.rate_attack_low
         percentageAttack = time_step/self.max_epLength
-        rate_traffic = min_traffic + ((self.traffic_rate) - min_traffic)*percentageAttack
+        assert(percentageAttack<=1)
+        rate_traffic = self.init_traffic + (self.traffic_rate - self.init_traffic)*percentageAttack
 
         super().sendTraffic(time_step, rate_traffic)
 
@@ -169,6 +169,8 @@ class GradualIncrease(Host):
 
         if is_attacker:
             traffic_rate = self.rate_attack_low + np.random.rand()*(self.rate_attack_high - self.rate_attack_low)
+            # start the attack somewhat below the minimum attack but higher than the legal traffic
+            self.init_traffic = self.rate_legal_high + np.random.rand()*(self.rate_attack_low - self.rate_legal_high)
         else:
             traffic_rate = self.rate_legal_low + np.random.rand()*(self.rate_legal_high - self.rate_legal_low)
 

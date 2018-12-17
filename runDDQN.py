@@ -201,8 +201,8 @@ attackClasses = [conAttack, shortPulse, mediumPulse,
     largePulse, gradualIncrease] 
 
 
-assignedNetwork = NetworkSixFour #NetworkSingleTeamMalialisMedium
-assignedAgent = ddqn100HierarchicalOverload #ddqn100MediumHierarchical
+assignedNetwork = NetworkMalialisSmall #NetworkSingleTeamMalialisMedium
+assignedAgent = ddqnSingleSarsaCopy #ddqn100MediumHierarchical
 load_attack_path = "attackSimulations/{0}/".format(assignedNetwork.name)
 loadAttacks = False
 

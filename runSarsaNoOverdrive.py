@@ -159,6 +159,11 @@ class LinSarDDQN200HighTau(LinearSarsaLAIDDQN200):
     name = "LinearDDQN200HighTau"
     tau = 0.005
 
+class LinLaiOverload(LinearSarsaLAIDDQN200):
+    name = "LinLaiOverload"
+    reward_overload = -1
+
+
 class LinearSarsaLAIDDQN100Short(LinearSarsaLAI):
     # Idea (without using a ridiculous number of epLength, set the learning rate even lower and give proper exploration)
     name = "LinearDDQN100Short"
@@ -260,8 +265,8 @@ Settings to change
 
 
 """
-assignedNetwork = NetworkSingleTeamMalialisMedium
-assignedAgent = LinearSarsaReducedLearning
+assignedNetwork = NetworkMalialisSmall
+assignedAgent = LinearReducedNoOverload
 load_attack_path = "attackSimulations/{0}/".format(assignedNetwork.name)
 network_emulator = network.network_new.network_full # network_quick # network_full
 
@@ -277,7 +282,7 @@ largePulse = hostClass.LargePulse
 gradualIncrease = hostClass.GradualIncrease
 
 driftAttack = hostClass.DriftAttack
-
+coordAttack = hostClass.CoordinatedRandomNotGradual
 
 attackClasses = [conAttack, shortPulse, mediumPulse,
     largePulse, gradualIncrease] 
@@ -290,7 +295,7 @@ else:
 
 loadAttacks = False
 
-trainHost = driftAttack # conAttack #driftAttack
+trainHost = conAttack #coordAttack # conAttack #driftAttack
 
 
 """
@@ -318,15 +323,17 @@ commStrategy = calc_comm_strategy(assignedAgent.stateRepresentation)
 file_path = getPathName(assignedNetwork, assignedAgent, commStrategy, twist, trainHost)
 
 if loadAttacks:
-    for attackClass in attackClasses:
-        genericAgent = create_generic_dec(assignedAgent, GeneralSettings, assignedNetwork)
-        #genericAgent = None
-        attack_location = load_attack_path+attackClass.getName()+".apkl"
+    # for attackClass in attackClasses:
+    #     genericAgent = create_generic_dec(assignedAgent, GeneralSettings, assignedNetwork)
+    #     #genericAgent = None
+    #     attack_location = load_attack_path+attackClass.getName()+".apkl"
 
-        exp = experiment.Experiment(attackClass, GeneralSettings, assignedNetwork, 
-            assignedAgent, load_attack_path=attack_location)
-        exp.run(0, genericAgent, file_path)
-    getSummary(attackClasses, file_path, assignedAgent)
+    #     exp = experiment.Experiment(attackClass, GeneralSettings, assignedNetwork, 
+    #         assignedAgent, load_attack_path=attack_location)
+    #     exp.run(0, genericAgent, file_path)
+    # getSummary(attackClasses, file_path, assignedAgent)
+    runAttacks.run_attacks(assignedNetwork, assignedAgent, file_path)
+
 
 else:
     #experiment = experiment.Experiment(conAttack, GeneralSettings, assignedNetwork, assignedAgent, twist="{2}{0}Alias{1}".format(numTiles, partition, network_emulator.name))
