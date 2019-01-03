@@ -233,6 +233,57 @@ class CoordinatedRandomNotGradual(Host):
         self.active_host.load_details((is_attacker, traffic_rate))
 
 
+
+class adversarialRandom(object):
+    """
+    This is the host wrapper that pretends to be a set of hosts but in reality connects with 
+    the adversarial Random Agent. We refer to it as random as we randomally assign the attack values
+    It has many leaves, each which the network believes to be a host
+    """
+
+
+class adversarialLeaf(object):
+    def __init__(self, destination_switch, rate_attack_low, rate_attack_high, rate_legal_low, rate_legal_high,
+        max_epLength, appendToSwitch = True, adversarialMaster = None):
+
+        assert(adversarialMaster != None)
+        self.destination_switch = destination_switch
+
+        if appendToSwitch:
+            destination_switch.attatched_hosts.append(self)
+
+        self.is_attacker = False # initiate as False
+
+        self.rate_attack_low = rate_attack_low
+        self.rate_attack_high = rate_attack_high
+        self.rate_legal_low = rate_legal_low
+        self.rate_legal_high = rate_legal_high
+
+        self.adversarialMaster = adversarialMaster
+        self.adversarialMaster.assignLeaf(self)
+
+
+    def getName():
+        return "AdversarialRandomMaster"
+
+    def reset(self, is_attacker):
+        if is_attacker:
+            self.traffic_rate = self.rate_attack_low + np.random.rand()*(self.rate_attack_high - self.rate_attack_low)
+        else:
+            self.traffic_rate = self.rate_legal_low + np.random.rand()*(self.rate_legal_high - self.rate_legal_low)
+
+    def setAgent(self, assignedAgent):
+        # Adversarial Master will assign an agent this leaf belongs to
+        self.agent = assignedAgent
+    
+    def classReset():
+        return
+
+
+
+
+
+
 """
 
 class Pulse():

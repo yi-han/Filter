@@ -9,6 +9,7 @@ from enum import Enum
 import math
 import agent.genericDecentralised as genericDecentralised
 import agent.sarsaCentralised as sarCen
+import adversary.ddRandomMaster as ddRandomMaster
 from network.network_new import stateRepresentationEnum
 import pandas
 
@@ -187,6 +188,22 @@ class NetworkTwelveThrottleHeavy(object):
     legal_probability = 0.6 # probability that is a good guys
     upper_boundary = 45#52
     iterations_between_action = 5 
+
+
+class DdRandoomMasterSettings(object):
+    pre_train_steps = 20000
+    num_episodes = 100001
+    tau = 0.001
+    discount_factor = 0.8
+    annealing_episodes = 78000
+    startE = 0.3
+    endE = 0.0
+    update_freq = 4
+    batch_size = 32
+    adversary_class = ddRandomMaster.RandomAdvMaster
+
+
+    action_per_agent = 11
 
 
 

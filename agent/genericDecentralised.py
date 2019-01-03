@@ -24,7 +24,7 @@ class AgentOfAgents(aBase.Agent):
 
         self.num_agents = len(sub_agent_list)
         self.action_per_throttler = action_per_throttler
-        self.N_action = N_action # number of actions by each subAgent
+        #self.N_action = N_action # number of actions by each subAgent
         #assert action_per_throttler**self.num_agents==N_action # confirm the numbers add up
         self.agents = sub_agent_list
         self.score = 0

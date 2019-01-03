@@ -11,6 +11,7 @@ for dest in punim0621 punim0636; do
 	network \
 	agent \
 	attackSimulations \
+	adversary \
 	attacks.py \
 	experiment.py \
 	runDDQN.py \

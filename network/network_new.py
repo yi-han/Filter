@@ -5,8 +5,7 @@ import numpy as np
 #import copy
 from enum import Enum
 import pickle
-
-import agent # i think this is the other folder but I dont think it would have access to this?
+#import agent # i think this is the other folder but I dont think it would have access to this?
 
 """
 #TODO
@@ -14,7 +13,11 @@ import agent # i think this is the other folder but I dont think it would have a
 6) Confirm rewards...might be incentive to accept everything
 7) Simulate network milliseconds
 #DONE
-1) Created flexible adverseary
+
+if self.adversarialAgent != None:
+self.adversarialAgent 1) Cr
+
+eated flexible adversary
 2) Seperate 'move_traffic' from 'get_state'
 3) Convert drop_probabilities to dynamic
 4) Implement a observation window
@@ -31,6 +34,9 @@ class stateRepresentationEnum(Enum):
     server = 2  # all the way to the server
     allThrottlers = 3
 
+class advesaryTypeEnum(Enum):
+    standard = 0
+    ddRandomMaster = 1 
 
 
 def clip(min_value, max_value, value):
@@ -170,7 +176,7 @@ class Switch():
                 #print(currentNode.id)
                 self.stateSwitches.append(currentNode)            
         else:
-            
+            print(self.representation)
             assert(1==2)
 
     def get_state(self):
@@ -208,7 +214,7 @@ class network_full(object):
     #self.ITERATIONSBETEENACTION = 200 # with 10 ms delay, and throttle agent every 2 seconds, we see 200 messages passed in between
     name = "Network_Full"
 
-    def __init__(self, network_settings, reward_overload, adversary_class, max_epLength, representationType ,load_attack_path = None, save_attack=False):
+    def __init__(self, network_settings, reward_overload, host_class, max_epLength, representationType, adversaryMaster, load_attack_path = None, save_attack=False):
         
 
 
@@ -234,7 +240,7 @@ class network_full(object):
         
         self.legal_probability = network_settings.legal_probability # odds of host being an attacker
         self.upper_boundary = network_settings.upper_boundary
-        self.hostClass = adversary_class
+        self.hostClass = host_class
         self.topology = []
         self.max_epLength = max_epLength
 
@@ -244,6 +250,10 @@ class network_full(object):
         self.throttlers = []
         self.hosts = []
         self.attack_record = [] # list of all attack stats, used if we're saving the attack
+
+        self.adversaryMaster = adversaryMaster
+ 
+
 
         # self.SaveAttackEnum = SaveAttackEnum
         self.save_attack = save_attack
@@ -352,12 +362,15 @@ class network_full(object):
         return response
 
         
-    def move_traffic(self, time_step):
+    def move_traffic(self, time_step, adv_action):
         # update the network
+        if adv_action:
+            assert( self.adversaryMaster!=None)
 
-
-        for host in self.hosts:
-            host.sendTraffic(time_step)
+            self.adversaryMaster.sendTraffic(adv_action)
+        else:
+            for host in self.hosts:
+                host.sendTraffic(time_step)
 
         for switch in self.switches:
             # ensure all traffic sent before we update
@@ -409,7 +422,7 @@ class network_full(object):
         for i in self.host_sources:
 
             host = self.hostClass(self.switches[i], self.rate_attack_low, self.rate_attack_high,
-                self.rate_legal_low, self.rate_legal_high, self.max_epLength)
+                self.rate_legal_low, self.rate_legal_high, self.max_epLength, adversarialMaster = self.adversaryMaster)
             self.hosts.append(host)
         # set the state of all switches
         for i in self.filter_list:
@@ -436,6 +449,10 @@ class network_full(object):
     """
 
     def calculate_reward(self):
+        
+        if self.cache_reward != None:
+            return self.cache_reward
+
         # currently if we're 1.1 times over we receive a punishment of -0.1, seems rather low. Maybe -1.5?        
         reward = 0.0
 
@@ -477,7 +494,10 @@ class network_full(object):
         
         self.legitimate_all += legitimate_rate_all
 
-        return clip(-1, 1, reward)
+        reward = clip(-1, 1, reward)
+
+        self.cache_reward = reward
+        return reward
 
     def getPacketServedAtMoment(self):
         """
@@ -497,19 +517,25 @@ class network_full(object):
             return legitimate_rate/legitimate_sent
 
 
-    def step(self, action, step_count):
+    def step(self, action, step_count, adv_action = None):
         # input the actions. Just sets drop probabilities at the moment
         # ideally i would move calculations here
-
+        # adv action is action by adversary
+        self.cache_reward = None 
         self.last_state = self.get_state()
         self.current_state = None # we need to reset the state to undo the cache
         for switch in self.switches:
             switch.resetWindow()
         
         self.set_drop_probability(action)
+        
+
+
         for i in range(self.iterations_between_action): # each time delay is 10 ms, 10*200 = 2000 ms = 2 seconds
-           self.move_traffic(step_count)
+           self.move_traffic(step_count, adv_action)
            #self.rewards_per_step.append(self.calculate_reward())
+
+
 
         #self.adversary.takeStep()
         # should pass the data along nodes
@@ -571,10 +597,10 @@ class network_quick(object):
     """
     name = "Network_Quick"
 
-    def __init__(self, network_settings, reward_overload, adversary_class, max_epLength, representationType ,load_attack_path = None, save_attack=False):
+    def __init__(self, network_settings, reward_overload, host_class, max_epLength, representationType ,load_attack_path = None, save_attack=False):
         # we create the original net to access the topology
         network_settings.iterations_between_action = 1 # we override the number of actions between a round 
-        self.proper_net = network_full(network_settings, reward_overload, adversary_class, max_epLength, representationType, load_attack_path= load_attack_path, save_attack=save_attack)
+        self.proper_net = network_full(network_settings, reward_overload, host_class, max_epLength, representationType, load_attack_path= load_attack_path, save_attack=save_attack)
         self.host_switches = [host.destination_switch for host in self.proper_net.hosts] 
         self.throttlers = self.proper_net.throttlers
         self.server = self.proper_net.servers[0]
@@ -667,6 +693,9 @@ class network_quick(object):
 
 
     def calculate_reward(self):
+
+
+
         reward = 0
 
         legitimate_rate, attacker_rate, legitimate_rate_all = self.getServerPerformance()

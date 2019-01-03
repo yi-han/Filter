@@ -266,7 +266,7 @@ Settings to change
 
 """
 assignedNetwork = NetworkMalialisSmall
-assignedAgent = LinearSarsaSingular
+assignedAgent = LinearSarsaReducedLearning
 load_attack_path = "attackSimulations/{0}/".format(assignedNetwork.name)
 network_emulator = network.network_new.network_full # network_quick # network_full
 
@@ -284,6 +284,8 @@ gradualIncrease = hostClass.GradualIncrease
 driftAttack = hostClass.DriftAttack
 coordAttack = hostClass.CoordinatedRandomNotGradual
 
+adversarialLeaf = hostClass.adversarialLeaf
+
 attackClasses = [conAttack, shortPulse, mediumPulse,
     largePulse, gradualIncrease] 
 
@@ -295,7 +297,7 @@ else:
 
 loadAttacks = False
 
-trainHost = conAttack #coordAttack # conAttack #driftAttack
+trainHost = adversarialLeaf #coordAttack # conAttack #driftAttack
 
 
 """
@@ -338,7 +340,7 @@ if loadAttacks:
 else:
     #experiment = experiment.Experiment(conAttack, GeneralSettings, assignedNetwork, assignedAgent, twist="{2}{0}Alias{1}".format(numTiles, partition, network_emulator.name))
 
-    experiment = experiment.Experiment(trainHost, GeneralSettings, assignedNetwork, assignedAgent)
+    experiment = experiment.Experiment(trainHost, GeneralSettings, assignedNetwork, assignedAgent, DdRandoomMasterSettings)
 
     start_num = int(sys.argv[1])
     length_core= int(sys.argv[2])
