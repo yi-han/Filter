@@ -35,7 +35,7 @@ class RandomAdvMaster():
         self.agents = []
         self.defender = defender_object
 
-        N_adv_state = self.num_agents*4
+        N_adv_state = self.num_agents*7
         for _ in range(self.num_agents):
             self.agents.append(ddAdvAgent.ddAdvAgent(N_adv_state, adv_settings))
 
@@ -86,7 +86,7 @@ class RandomAdvMaster():
 
 
 
-    def get_state(self):
+    def get_state(self, net):
         """ 
         Provide the bandwidth capacity for each agent,
         and bandwidth emmitted by each agent over last 3 steps
@@ -98,6 +98,10 @@ class RandomAdvMaster():
         for prior_action in self.prior_actions:
             state.extend(prior_action)
 
+
+        for throttler in net.throttlers:
+            state.extend(throttler.past_throttles)
+        print(state)
         return np.array(state)
 
     def initiate_episode(self):

@@ -273,12 +273,12 @@ network_emulator = network.network_new.network_full # network_quick # network_fu
 
 assignedAgent.save_model_mode = defender_mode_enum.save
 
-DdRandomMasterSettings = None
-#DdRandomMasterSettings.save_model_mode = defender_mode_enum.save
+# DdRandomMasterSettings = None
+DdRandomMasterSettings.save_model_mode = defender_mode_enum.save
 
 loadAttacks = False
 
-trainHost = conAttack #coordAttack # conAttack #driftAttack #adversarialLeaf
+trainHost = adversarialLeaf #coordAttack # conAttack #driftAttack #adversarialLeaf
 
 ###
 

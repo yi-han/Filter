@@ -188,7 +188,7 @@ class Experiment:
                     # print("my prediction is for {0}".format(net.get_state()))
 
                     if self.adversarialMaster != None:
-                        adv_state = self.adversarialMaster.get_state()
+                        adv_state = self.adversarialMaster.get_state(net)
                         advAction = self.adversarialMaster.predict(adv_state, total_steps, adv_e)
                     else:
                         advAction = None

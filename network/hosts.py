@@ -268,6 +268,7 @@ class adversarialLeaf(object):
         return "AdversarialRandomMaster"
 
     def reset(self, is_attacker):
+        self.is_attacker = is_attacker
         if is_attacker:
             self.traffic_rate = self.rate_attack_low + np.random.rand()*(self.rate_attack_high - self.rate_attack_low)
         else:

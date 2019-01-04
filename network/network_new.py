@@ -73,6 +73,7 @@ class Switch():
         self.representation = representation
 
         self.is_filter = is_filter
+        self.resetWindow()
 
     def sendTraffic(self):
         # an initial part of passing traffic along
@@ -120,6 +121,7 @@ class Switch():
         self.illegal_window = 0
         self.dropped_legal_window = 0
         self.dropped_illegal_window = 0
+        self.past_throttles = [0, 0, 0]
 
     def getWindow(self):
         return self.legal_window + self.illegal_window
@@ -130,6 +132,8 @@ class Switch():
     def setThrottle(self, throttle_rate):
         assert(self.is_filter)
         self.throttle_rate = throttle_rate
+        self.past_throttles.append(throttle_rate)
+        self.past_throttles.pop(0)
 
     def reset(self):
         self.legal_traffic = 0
@@ -208,9 +212,6 @@ class network_full(object):
 
     def __init__(self, network_settings, reward_overload, host_class, max_epLength, representationType, adversaryMaster, load_attack_path = None, save_attack=False):
         
-
-
-
         self.iterations_between_action = network_settings.iterations_between_action# ideally set at 200
         self.host_sources = np.empty_like(network_settings.host_sources)
         self.host_sources[:] = network_settings.host_sources
