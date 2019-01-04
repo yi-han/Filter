@@ -73,7 +73,7 @@ class Switch():
         self.representation = representation
 
         self.is_filter = is_filter
-        self.resetWindow()
+        self.reset()
 
     def sendTraffic(self):
         # an initial part of passing traffic along
@@ -121,7 +121,7 @@ class Switch():
         self.illegal_window = 0
         self.dropped_legal_window = 0
         self.dropped_illegal_window = 0
-        self.past_throttles = [0, 0, 0]
+        
 
     def getWindow(self):
         return self.legal_window + self.illegal_window
@@ -144,6 +144,7 @@ class Switch():
         self.new_dropped_legal = 0
         self.new_illegal = 0
         self.new_dropped_illegal = 0
+        self.past_throttles = [0, 0, 0]
         self.resetWindow()
 
 

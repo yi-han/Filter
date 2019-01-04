@@ -94,14 +94,19 @@ class RandomAdvMaster():
         """
         assert(len(self.prior_actions) == 3)
         
+        # print("\n\n")
         state = self.bandwidths.copy() # start off with bandwidths
+        # print(state)
+        # print(self.prior_actions)
         for prior_action in self.prior_actions:
             state.extend(prior_action)
 
-
+        # pThrottles = []
         for throttler in net.throttlers:
             state.extend(throttler.past_throttles)
-        print(state)
+        #     pThrottles.append(throttler.past_throttles)
+        # print(pThrottles)
+        # print(state)
         return np.array(state)
 
     def initiate_episode(self):

@@ -20,7 +20,7 @@ class LinearSarsaSingular(object):
     name = "LinearSarsaSingular"
     max_epLength = 30 # or 60 if test
     y = 0
-    tau = 0.1
+    tau = 0.0125
     update_freq = None
     batch_size = None
     num_episodes = 62501#82501
@@ -49,14 +49,6 @@ class LinearSarsaNoOverload(LinearSarsaSingular):
     name = "LinearSarsaSingularNoOverload"
     reward_overload = None
 
-class LinearSarsaReducedLearning(LinearSarsaSingular):
-    # this is malialis one i think
-    name = "LinearSarsaReducedLearning"
-    tau = 0.0125
-
-class LinearReducedNoOverload(LinearSarsaReducedLearning):
-    name = "LinearReducedNoOverload"
-    reward_overload = None
 
 """
 class LinearButPT(object):
@@ -266,7 +258,7 @@ Settings to change
 
 """
 assignedNetwork = NetworkMalialisSmall
-assignedAgent = LinearSarsaReducedLearning
+assignedAgent = LinearSarsaSingular
 load_attack_path = "attackSimulations/{0}/".format(assignedNetwork.name)
 network_emulator = network.network_new.network_full # network_quick # network_full
 
