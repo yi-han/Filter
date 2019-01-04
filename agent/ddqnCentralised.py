@@ -5,9 +5,9 @@ import os
 import sys
 
 class Agent(aBase.Agent):
-    def __init__(self, N_action, pre_train_steps, action_per_agent, N_state, tileFunction, agent_settings, tau=0.1, discountFactor=0, debug=False, test=False):
+    def __init__(self, N_action, pre_train_steps, action_per_agent, N_state, tileFunction, agent_settings, tau, discountFactor):
 
-        super().__init__(pre_train_steps, debug, test)
+        super().__init__(pre_train_steps)
 
         tf.reset_default_graph() # note remove for the decentralised one
 

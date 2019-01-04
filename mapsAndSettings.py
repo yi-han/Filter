@@ -10,8 +10,25 @@ import math
 import agent.genericDecentralised as genericDecentralised
 import agent.sarsaCentralised as sarCen
 import adversary.ddRandomMaster as ddRandomMaster
-from network.network_new import stateRepresentationEnum
 import pandas
+
+# defender_mode_enum = Enum('SaveModel', 'neither save load test_short')
+
+class defender_mode_enum(Enum):
+    neither = 0
+    save = 1
+    load = 2
+    test_short = 3
+class stateRepresentationEnum(Enum):
+    throttler = 0 #always
+    leaderAndIntermediate = 1 
+    server = 2  # all the way to the server
+    allThrottlers = 3
+
+class advesaryTypeEnum(Enum):
+    standard = 0
+    ddRandomMaster = 1 
+
 
 class NetworkSimpleBasic(object):
     name = "simple_basic"
@@ -190,7 +207,7 @@ class NetworkTwelveThrottleHeavy(object):
     iterations_between_action = 5 
 
 
-class DdRandoomMasterSettings(object):
+class DdRandomMasterSettings(object):
     pre_train_steps = 20000
     num_episodes = 100001
     tau = 0.001
@@ -202,43 +219,40 @@ class DdRandoomMasterSettings(object):
     batch_size = 32
     adversary_class = ddRandomMaster.RandomAdvMaster
 
-
     action_per_agent = 11
 
 
 
 
-def create_generic_dec(gs, general_s, ns):
+def create_generic_dec(ds, ns):
     """
-    gs = generic_settings, ns = network_settings
+    ds = defender_settings, ns = network_settings
 
     We can make agents into groups.
 
     """
     throttlers_not_allocated = ns.N_state
-    group_size = gs.group_size
-    sub_agent = gs.sub_agent
+    group_size = ds.group_size
+    sub_agent = ds.sub_agent
     #num_teams = math.ceil(ns.N_state/group_size)
-    #stateletFunction = gs.stateletFunction
+    #stateletFunction = ds.stateletFunction
     sub_agent_list = []
 
-    test = (general_s.save_model is general_s.SaveModelEnum.load)
     print(sub_agent)
     while throttlers_not_allocated > 0:
         print("currently {0} throttlers_not_allocated".format(throttlers_not_allocated))
         agent_to_allocate = min(throttlers_not_allocated, group_size)
-        state_size = calcStateSize(ns.N_state, gs.stateRepresentation)
+        state_size = calcStateSize(ns.N_state, ds.stateRepresentation)
         print(agent_to_allocate)
-        sub_agent_list.append(sub_agent(ns.action_per_throttler**agent_to_allocate, gs.pre_train_steps,
-            ns.action_per_throttler, state_size, gs.encoders, gs, gs.tau, gs.y, general_s.debug,
-            test))
+        sub_agent_list.append(sub_agent(ns.action_per_throttler**agent_to_allocate, ds.pre_train_steps,
+            ns.action_per_throttler, state_size, ds.encoders, ds, ds.tau, ds.y
+            ))
         throttlers_not_allocated -= agent_to_allocate
 
     #print("\nTest {0} \n".format(sub_agent_list[0].N_action))
     master = genericDecentralised.AgentOfAgents(
-        ns.N_action, gs.pre_train_steps, ns.action_per_throttler, ns.N_state,
-            sub_agent_list, gs.tau, gs.y, general_s.debug, 
-            test
+        ns.N_action, ds.pre_train_steps, ns.action_per_throttler, ns.N_state,
+            sub_agent_list, ds.tau, ds.y
         )
     return master
 
@@ -306,4 +320,6 @@ def calc_comm_strategy(stateRepresentation):
         return "IncludeServer"
     elif stateRepresentation == stateRepresentationEnum.allThrottlers:
         return "CommAll"
+
+
 

@@ -13,7 +13,7 @@ import adversary.ddAdvAgent as ddAdvAgent
 import numpy as np
 class RandomAdvMaster():
 
-    def __init__(self, adv_settings, network_setting):
+    def __init__(self, adv_settings, network_setting, defender_object):
 
 
 
@@ -33,7 +33,7 @@ class RandomAdvMaster():
 
 
         self.agents = []
-
+        self.defender = defender_object
 
         N_adv_state = self.num_agents*4
         for _ in range(self.num_agents):
@@ -153,20 +153,17 @@ class RandomAdvMaster():
         # note we are going to use the index of the array as an id
         print("loading all models")
         for i in range(len(self.agents)):
-            individual_path = load_path+'/{0}'.format(i)
+            individual_path = load_path+'/{0}Adv'.format(i)
             self.agents[i].loadModel(individual_path)
 
     def saveModel(self,load_path, interation):
         for i in range(len(self.agents)):
-            individual_path = load_path+'/{0}'.format(i)
+            individual_path = load_path+'/{0}Adv'.format(i)
             self.agents[i].saveModel(individual_path, interation)
 
-    def getName(self):
-        #print(self.agents)
-        return ("GenericDec-"+self.agents[0].getName())
 
     def getPath(self):
-        return AgentOfAgents.getName(self)
+        return "{0}/smartAdversary".format(self.defender.getPath())
 
 
 

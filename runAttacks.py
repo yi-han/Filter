@@ -18,12 +18,12 @@ attackClasses = [conAttack, shortPulse, mediumPulse,
     largePulse, gradualIncrease] 
 
 
-class GeneralSettingsObject(object):
-    # SaveAttackEnum = Enum('SaveAttack', 'neither save load')
-    SaveModelEnum = Enum('SaveModel', 'neither save load')
-    debug = False
-    # save_attack = SaveAttackEnum.neither
-    save_model = SaveModelEnum.load
+# class GeneralSettingsObject(object):
+#     # SaveAttackEnum = Enum('SaveAttack', 'neither save load')
+#     SaveModelEnum = Enum('SaveModel', 'neither save load')
+#     debug = False
+#     # save_attack = SaveAttackEnum.neither
+#     save_model = SaveModelEnum.load
 
 def run_attacks(assignedNetwork, assignedAgent, file_path):
 
@@ -31,6 +31,7 @@ def run_attacks(assignedNetwork, assignedAgent, file_path):
     network_emulator = network_new.network_full # network_quick # network_full
     assignedNetwork.emulator = network_emulator
 
+    assignedAgent.save_model_mode = mapsAndSettings.defender_mode_enum.test_short
 
     for attackClass in attackClasses:
         print(attackClass.getName())

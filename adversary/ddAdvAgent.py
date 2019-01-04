@@ -138,11 +138,11 @@ class ddAdvAgent():
         self.saver.save(self.sess, load_path+'/model-'+str(iteration)+'.ckpt')
 
 
-    def getName(self=None):
-        return "ddAdvAgent"
+    # def getName(self=None):
+    #     return "ddAdvAgent"
 
-    def getPath(self):
-        return self.getName()
+    # def getPath(self):
+    #     return self.getName()
 
 
     def isRandomGuess(self, total_steps, e):

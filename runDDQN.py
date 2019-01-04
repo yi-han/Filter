@@ -3,6 +3,7 @@ import experiment
 import network.hosts as hostClass
 import agent.ddqnCentralised as ddCen
 import network.network_new
+from mapsAndSettings import *
 
 #import generic_run
 
@@ -13,7 +14,7 @@ import agent.ddqnCentralised as ddCen
 # import agent.ddqnDecentralised as ddDec
 
 from mapsAndSettings import *
-assert(len(sys.argv)==4)
+assert(len(sys.argv)>= 3)
 
 class ddqnSingleNoCommunicate(object):
     group_size = 1
@@ -173,15 +174,13 @@ class ddqnServerCommunicate(object):
     stateRepresentation = stateRepresentationEnum.server
     reward_overload = None  
 
-class GeneralSettings(object):
-    # SaveAttackEnum = Enum('SaveAttack', 'neither save load')
-    SaveModelEnum = Enum('SaveModel', 'neither save load test')
-    #test = False # handled by saveModel
-    debug = False
-    #load_model = False
-    # save_attack = SaveAttackEnum.neither
-    save_model = SaveModelEnum.save
-    tileFunction = None
+# class GeneralSettings(object):
+#     # SaveAttackEnum = Enum('SaveAttack', 'neither save load')
+#     #test = False # handled by saveModel
+#     debug = False
+#     #load_model = False
+#     # save_attack = SaveAttackEnum.neither
+#     tileFunction = None
     
 
 
@@ -191,31 +190,38 @@ shortPulse = hostClass.ShortPulse
 mediumPulse = hostClass.MediumPulse
 largePulse = hostClass.LargePulse
 gradualIncrease = hostClass.GradualIncrease
-
 driftAttack = hostClass.DriftAttack
 coordAttack = hostClass.CoordinatedRandomNotGradual
+adversarialLeaf = hostClass.adversarialLeaf
 
 
 
 attackClasses = [conAttack, shortPulse, mediumPulse,
     largePulse, gradualIncrease] 
 
-
+###
+# Settings
 assignedNetwork = NetworkMalialisSmall #NetworkSingleTeamMalialisMedium
 assignedAgent = ddqnSingleSarsaCopy #ddqn100MediumHierarchical
 load_attack_path = "attackSimulations/{0}/".format(assignedNetwork.name)
 loadAttacks = False
-
 assignedAgent.encoders = None
-trainHost = conAttack #coordAttack # conAttack #driftAttack
-# genericAgent = None
 
+assignedAgent.save_model_mode = defender_mode_enum.save
 
+trainHost = conAttack #coordAttack # conAttack #driftAttack #adversarialLeaf
 
+assignedAgent.save_model_mode = defender_mode_enum.save
+
+DdRandomMasterSettings = None
+#DdRandomMasterSettings.save_model_mode = defender_mode_enum.save
 
 network_emulator = network.network_new.network_full #network_quick # network_full
-assignedNetwork.emulator = network_emulator
 
+###
+
+
+assignedNetwork.emulator = network_emulator
 
 twist="{0}".format(network_emulator.name)
 commStrategy = calc_comm_strategy(assignedAgent.stateRepresentation)
@@ -237,19 +243,19 @@ if loadAttacks:
 else:
     #experiment = experiment.Experiment(conAttack, GeneralSettings, assignedNetwork, assignedAgent, twist="{2}{0}Alias{1}".format(numTiles, partition, network_emulator.name))
 
-    experiment = experiment.Experiment(trainHost, GeneralSettings, assignedNetwork, assignedAgent)
+    experiment = experiment.Experiment(trainHost, assignedNetwork, assignedAgent, DdRandomMasterSettings)
 
     start_num = int(sys.argv[1])
     length_core= int(sys.argv[2])
 
     for i in range(length_core):
-        genericAgent = create_generic_dec(assignedAgent, GeneralSettings, assignedNetwork)
+        genericAgent = create_generic_dec(assignedAgent, assignedNetwork)
         # genericAgent = None        
         print("Im doing it for {0}".format(start_num+i))
         experiment.run(start_num+i, genericAgent, file_path)
 
     if start_num==0:
-        genericAgent = create_generic_dec(assignedAgent, GeneralSettings, assignedNetwork)
+        genericAgent = create_generic_dec(assignedAgent, assignedNetwork)
         runAttacks.run_attacks(assignedNetwork, assignedAgent, file_path)
 
 

@@ -10,7 +10,7 @@ class Host():
     # ideally you want to merge host with switch somewhat
 
     def __init__(self, destination_switch, rate_attack_low, rate_attack_high, rate_legal_low, rate_legal_high,
-        max_epLength, appendToSwitch = True):
+        max_epLength, adversarialMaster, appendToSwitch=True):
 
         if appendToSwitch:
             destination_switch.attatched_hosts.append(self)
@@ -23,6 +23,7 @@ class Host():
         self.max_epLength = max_epLength
         self.reset(False) # initates all values
 
+        assert(adversarialMaster == None)
     @staticmethod
     def classReset():
         return
@@ -101,11 +102,11 @@ class ConstantAttack(Host):
 class Pulse(Host):
     # pulse attack that changes every 2 seconds
     def __init__(self, time_flip, destination_switch, rate_attack_low, rate_attack_high, rate_legal_low, rate_legal_high,
-        max_epLength, appendToSwitch = True):
+        max_epLength, adversarialMaster = None, appendToSwitch = True):
 
         self.time_flip = time_flip
         super().__init__(destination_switch, rate_attack_low, rate_attack_high, rate_legal_low, rate_legal_high,
-        max_epLength, appendToSwitch)
+        max_epLength, adversarialMaster, appendToSwitch)
 
     def sendTraffic(self, time_step):
         time_reduced = time_step % (2*self.time_flip) #split episode into two periods
@@ -126,18 +127,18 @@ class Pulse(Host):
 
 class ShortPulse(Pulse):
     def __init__(self, destination_switch, rate_attack_low, rate_attack_high, rate_legal_low, rate_legal_high,
-        max_epLength, appendToSwitch = True):
+        max_epLength, adversarialMaster = None, appendToSwitch = True):
         super().__init__(2, destination_switch, rate_attack_low, rate_attack_high, rate_legal_low, rate_legal_high,
-        max_epLength, appendToSwitch)
+        max_epLength, adversarialMaster, appendToSwitch)
 
     def getName():
         return "PulseShort"
 
 class MediumPulse(Pulse):
     def __init__(self, destination_switch, rate_attack_low, rate_attack_high, rate_legal_low, rate_legal_high,
-        max_epLength, appendToSwitch = True):
+        max_epLength, adversarialMaster = None, appendToSwitch = True):
         super().__init__(4, destination_switch, rate_attack_low, rate_attack_high, rate_legal_low, rate_legal_high,
-        max_epLength, appendToSwitch)
+        max_epLength, adversarialMaster, appendToSwitch)
 
     def getName():
         return "PulseMedium"
@@ -145,9 +146,9 @@ class MediumPulse(Pulse):
 
 class LargePulse(Pulse):
     def __init__(self, destination_switch, rate_attack_low, rate_attack_high, rate_legal_low, rate_legal_high,
-        max_epLength, appendToSwitch = True):
+        max_epLength, adversarialMaster = None, appendToSwitch = True):
         super().__init__(10, destination_switch, rate_attack_low, rate_attack_high, rate_legal_low, rate_legal_high,
-        max_epLength, appendToSwitch)
+        max_epLength, adversarialMaster, appendToSwitch)
     def getName():
         return "PulseLarge"
 
@@ -192,15 +193,15 @@ class CoordinatedRandomNotGradual(Host):
 
 
     def __init__(self, destination_switch, rate_attack_low, rate_attack_high, rate_legal_low, rate_legal_high,
-        max_epLength):
-
+        max_epLength, adversarialMaster = None, appendToSwitch = False):
+        assert(appendToSwitch==False)
         # create a bunch of alterantive hosts that we can switch between
         self.active_host = None # the host that we are
         self.all_hosts = {}
         for hostClass in CoordinatedRandomNotGradual.possibleClasses:
             # the appendToSwitch=False is SUPER important
             self.all_hosts[hostClass] = (hostClass(destination_switch, rate_attack_low, rate_attack_high, rate_legal_low, rate_legal_high,
-                max_epLength, appendToSwitch = False))
+                max_epLength, adversarialMaster, appendToSwitch))
 
         super().__init__(destination_switch, rate_attack_low, rate_attack_high, rate_legal_low, rate_legal_high,
         max_epLength)
@@ -244,7 +245,7 @@ class adversarialRandom(object):
 
 class adversarialLeaf(object):
     def __init__(self, destination_switch, rate_attack_low, rate_attack_high, rate_legal_low, rate_legal_high,
-        max_epLength, appendToSwitch = True, adversarialMaster = None):
+        max_epLength, adversarialMaster = None, appendToSwitch = True):
 
         assert(adversarialMaster != None)
         self.destination_switch = destination_switch

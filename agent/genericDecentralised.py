@@ -20,7 +20,7 @@ import math
 class AgentOfAgents(aBase.Agent):
 
     def __init__(self, N_action, pre_train_steps, action_per_throttler, N_state, sub_agent_list,
-        tau=0.1, discountFactor=0, debug=False, test=False):
+        tau, discountFactor):
 
         self.num_agents = len(sub_agent_list)
         self.action_per_throttler = action_per_throttler
@@ -28,7 +28,6 @@ class AgentOfAgents(aBase.Agent):
         #assert action_per_throttler**self.num_agents==N_action # confirm the numbers add up
         self.agents = sub_agent_list
         self.score = 0
-        self.test = test
         #self.getStatelet = getStateletFunction
     def __enter__(self):
         print("__enter__ generic decentralised")

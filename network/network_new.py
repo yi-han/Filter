@@ -3,8 +3,8 @@
 import numpy as np
 #import math
 #import copy
-from enum import Enum
 import pickle
+from mapsAndSettings import stateRepresentationEnum, advesaryTypeEnum
 #import agent # i think this is the other folder but I dont think it would have access to this?
 
 """
@@ -28,15 +28,7 @@ eated flexible adversary
 
 """
 
-class stateRepresentationEnum(Enum):
-    throttler = 0 #always
-    leaderAndIntermediate = 1 
-    server = 2  # all the way to the server
-    allThrottlers = 3
 
-class advesaryTypeEnum(Enum):
-    standard = 0
-    ddRandomMaster = 1 
 
 
 def clip(min_value, max_value, value):
