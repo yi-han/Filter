@@ -19,7 +19,7 @@ import math
 
 class AgentOfAgents(aBase.Agent):
 
-    def __init__(self, N_action, pre_train_steps, action_per_throttler, N_state, sub_agent_list,
+    def __init__(self, N_action, action_per_throttler, N_state, sub_agent_list,
         tau, discountFactor):
 
         self.num_agents = len(sub_agent_list)

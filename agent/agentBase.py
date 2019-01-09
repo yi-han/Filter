@@ -11,10 +11,8 @@ and by only these conditions nothing changes
 class Agent():    
 
     #@abstractmethod
-    def __init__(self, pre_train_steps, debug=False, test=False):
-        self.pre_train_steps = pre_train_steps
-        self.debug = debug
-        self.test= test
+    def __init__(self):
+        return
 
     @abstractmethod
     def reset(self):
@@ -59,7 +57,7 @@ class Agent():
 
     def isRandomGuess(self, total_steps, e):
         # calculate if meant to do choose a random
-        return (random.rand(1) < e or total_steps < self.pre_train_steps) and not self.debug and not self.test
+        return (random.rand(1) < e)
 
     def actionToActions(action, num_agents, action_per_agent):
     # takes the action presented to network and returns

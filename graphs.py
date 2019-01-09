@@ -28,12 +28,12 @@ attackClasses = [conAttack, shortPulse, mediumPulse,
 
 
 testAttacks = False
-averageFrom =  180000 #90000 #60000 #190000
+averageFrom =  60000 #90000 #60000 #190000
 
 
 if not testAttacks:
     for attackType in [conAttack]:
-        attackName = "reward-train-{0}".format(attackType.getName())
+        attackName = "reward-save-{0}".format(attackType.getName())
         distributions.distributions(directory, repetitions, averageFrom, attackName) #190000
         distributions.reward_graph(directory, attackName, repetitions, name)
         distributions.reward_graph(directory, attackName, repetitions, PerLegitTraffic = True, title = "\% Legit Traffic")

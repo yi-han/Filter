@@ -11,7 +11,7 @@ import agent.genericDecentralised as genericDecentralised
 import agent.sarsaCentralised as sarCen
 import adversary.ddRandomMaster as ddRandomMaster
 import pandas
-
+import network.hosts as hosts
 # defender_mode_enum = Enum('SaveModel', 'neither save load test_short')
 
 class defender_mode_enum(Enum):
@@ -208,10 +208,10 @@ class NetworkTwelveThrottleHeavy(object):
 
 
 class DdRandomMasterSettings(object):
-    pre_train_steps = 20000
-    num_episodes = 100001
+    pre_train_steps = 1000
+    num_episodes = 120001
     tau = 0.001
-    discount_factor = 0.8
+    discount_factor = 0.5
     annealing_episodes = 78000
     startE = 0.3
     endE = 0.0
@@ -244,14 +244,14 @@ def create_generic_dec(ds, ns):
         agent_to_allocate = min(throttlers_not_allocated, group_size)
         state_size = calcStateSize(ns.N_state, ds.stateRepresentation)
         print(agent_to_allocate)
-        sub_agent_list.append(sub_agent(ns.action_per_throttler**agent_to_allocate, ds.pre_train_steps,
+        sub_agent_list.append(sub_agent(ns.action_per_throttler**agent_to_allocate,
             ns.action_per_throttler, state_size, ds.encoders, ds, ds.tau, ds.y
             ))
         throttlers_not_allocated -= agent_to_allocate
 
     #print("\nTest {0} \n".format(sub_agent_list[0].N_action))
     master = genericDecentralised.AgentOfAgents(
-        ns.N_action, ds.pre_train_steps, ns.action_per_throttler, ns.N_state,
+        ns.N_action, ns.action_per_throttler, ns.N_state,
             sub_agent_list, ds.tau, ds.y
         )
     return master
@@ -264,7 +264,7 @@ def getSummary(adversary_classes, load_path, agent):
     agentName = agent.name
     for adversary_class in adversary_classes:
         attack_type = adversary_class.getName()
-        file_path = "{0}/packet_served-{1}-{2}-{3}.csv".format(load_path,"test", attack_type, 0)
+        file_path = "{0}/packet_served-{1}-{2}-{3}.csv".format(load_path,agent.save_model_mode.name, attack_type, 0)
         packet_file = pandas.read_csv(file_path)
         #print(packet_file)
         sum_packets_received = sum(packet_file.PacketsReceived)

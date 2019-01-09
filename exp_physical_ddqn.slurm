@@ -37,7 +37,7 @@ if [ "x$SLURM_JOB_ID" == "x" ]; then
 fi
 
 # Run the job from this directory:
-cd /data/projects/punim0636/
+# cd /data/projects/punim0636/
 
 # The modules to load:
 module load Tensorflow/1.3.0-intel-2017.u2-Python-3.5.2

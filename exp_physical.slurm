@@ -18,7 +18,8 @@
 
 # Load required modules
 
-module load Python/3.6.4-intel-2017.u2-GCC-6.2.0-CUDA9
+# module load Python/3.6.4-intel-2017.u2-GCC-6.2.0-CUDA9
+module load Tensorflow/1.3.0-intel-2017.u2-Python-3.5.2
 
 
 # Launch multiple process python code

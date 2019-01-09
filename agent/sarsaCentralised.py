@@ -20,9 +20,8 @@ import os
 #import tileCoding
 class Agent(aBase.Agent):
 
-    def __init__(self, N_action, pre_train_steps, action_per_agent, N_state, tileCoding, alph=0.1, gam=0, debug=False, test=False):
+    def __init__(self, N_action, action_per_agent, N_state, tileCoding, alph=0.1, gam=0, debug=False, test=False):
 
-        super().__init__(pre_train_steps, debug, test)
         self.ai = SarsaAI(
             actions=range(N_action), alpha=alph, gamma=gam)
         self.N_action = N_action

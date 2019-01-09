@@ -14,8 +14,11 @@ mediumPulse = hostClass.MediumPulse
 largePulse = hostClass.LargePulse
 gradualIncrease = hostClass.GradualIncrease
 
-attackClasses = [conAttack, shortPulse, mediumPulse,
-    largePulse, gradualIncrease] 
+adversarialLeaf = hostClass.adversarialLeaf
+
+
+attackClasses = [conAttack, gradualIncrease, shortPulse, mediumPulse,
+    largePulse ] 
 
 
 # class GeneralSettingsObject(object):
@@ -25,7 +28,7 @@ attackClasses = [conAttack, shortPulse, mediumPulse,
 #     # save_attack = SaveAttackEnum.neither
 #     save_model = SaveModelEnum.load
 
-def run_attacks(assignedNetwork, assignedAgent, file_path):
+def run_attacks(assignedNetwork, assignedAgent, file_path, adversaryAttacker):
 
     load_attack_path = "attackSimulations/{0}/".format(assignedNetwork.name)
     network_emulator = network_new.network_full # network_quick # network_full
@@ -35,14 +38,28 @@ def run_attacks(assignedNetwork, assignedAgent, file_path):
 
     for attackClass in attackClasses:
         print(attackClass.getName())
-        genericAgent = mapsAndSettings.create_generic_dec(assignedAgent, GeneralSettingsObject, assignedNetwork)
+        genericAgent = mapsAndSettings.create_generic_dec(assignedAgent, assignedNetwork)
         
         attack_location = load_attack_path+attackClass.getName()+".apkl"
 
-        exp = experiment.Experiment(attackClass, GeneralSettingsObject, assignedNetwork, 
-            assignedAgent, load_attack_path=attack_location)
+        exp = experiment.Experiment(attackClass, assignedNetwork, 
+            assignedAgent, None, load_attack_path=attack_location)
 
         exp.run(0, genericAgent, file_path)
+    if adversaryAttacker:
+        adversaryAttacker.save_model_mode = mapsAndSettings.defender_mode_enum.test_short
+
+        attackClasses.append(adversarialLeaf)
+        print("doing adversaryAttacker")
+        attackClass = adversarialLeaf
+
+        genericAgent = mapsAndSettings.create_generic_dec(assignedAgent, assignedNetwork)
+        attack_location = load_attack_path+attackClass.getName()+".apkl"
+        exp = experiment.Experiment(attackClass, assignedNetwork, 
+            assignedAgent, adversaryAttacker, load_attack_path=attack_location)
+
+        exp.run(0, genericAgent, file_path)
+
     mapsAndSettings.getSummary(attackClasses, file_path, assignedAgent)
 
 

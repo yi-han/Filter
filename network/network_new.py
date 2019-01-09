@@ -132,7 +132,7 @@ class Switch():
     def setThrottle(self, throttle_rate):
         assert(self.is_filter)
         self.throttle_rate = throttle_rate
-        self.past_throttles.append(throttle_rate)
+        self.past_throttles.append(throttle_rate*10)
         self.past_throttles.pop(0)
 
     def reset(self):

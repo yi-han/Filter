@@ -17,7 +17,7 @@ import pickle
 from mapsAndSettings import *
 
 
-def generateAttacks(networkSettings, attackClasses, max_epLength = 60, num_episodes = 500):
+def generateAttacks(networkSettings, attackClasses, max_epLength = -1, num_episodes = 500):
     path = "attackSimulations/{0}/".format(networkSettings.name)
     # SaveAttackEnum = Enum('SaveAttack', 'neither save load')
     # save_attack = SaveAttackEnum.save
@@ -33,7 +33,7 @@ def generateAttacks(networkSettings, attackClasses, max_epLength = 60, num_episo
         with open(attack_path, "wb") as f:
             
             # run all the simulations
-            net = netModule.network_full(networkSettings, reward_overload, attackClass, max_epLength, netModule.stateRepresentationEnum.throttler, None, True)
+            net = netModule.network_full(networkSettings, reward_overload, attackClass, max_epLength, netModule.stateRepresentationEnum.throttler, None, None, True)
             for _ in range(num_episodes):
                 net.reset()
 
@@ -50,9 +50,14 @@ mediumPulse = hostClass.MediumPulse
 largePulse = hostClass.LargePulse
 gradualIncrease = hostClass.GradualIncrease
 
-attackClasses = [conAttack, shortPulse, mediumPulse,
-    largePulse, gradualIncrease] 
+adversarialLeaf = hostClass.adversarialLeaf
 
-generateAttacks(NetworkMalialisTeamFull, attackClasses)
+attackClasses = [conAttack, shortPulse, mediumPulse,
+    largePulse, gradualIncrease, adversarialLeaf] 
+
+commonMaps = [NetworkMalialisSmall, NetworkSingleTeamMalialisMedium, NetworkSixFour, NetworkMalialisTeamFull]
+for common_map in commonMaps:
+    print(common_map)
+    generateAttacks(common_map, attackClasses)
 
 

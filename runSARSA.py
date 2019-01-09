@@ -38,7 +38,7 @@ class LinearSarsaSingular(object):
 
 class LinearSarsaLong(LinearSarsaSingular):
     name = "LinearSarsaLong"
-    num_episodes = 100001
+    num_episodes = 200001
 
 class LinearSarsaNoOverloadLong(LinearSarsaSingular):
     name = "LinearNoOverloadLong"
@@ -102,7 +102,7 @@ class LinearSarsaLAI(object):
     name = "LinearSarsaLAI"
     max_epLength = 500
     y = 0
-    tau = 0.00625
+    tau = 0.001
     update_freq = None
     batch_size = None
     num_episodes = 100001#82501
@@ -258,18 +258,16 @@ Settings to change
 
 """
 assignedNetwork = NetworkMalialisSmall
-assignedAgent = LinearSarsaSingular
+assignedAgent = LinearSarsaLong
 load_attack_path = "attackSimulations/{0}/".format(assignedNetwork.name)
 network_emulator = network.network_new.network_full # network_quick # network_full
 
 
 assignedAgent.save_model_mode = defender_mode_enum.save
-
 # DdRandomMasterSettings = None
 DdRandomMasterSettings.save_model_mode = defender_mode_enum.save
 
 loadAttacks = False
-
 trainHost = adversarialLeaf #coordAttack # conAttack #driftAttack #adversarialLeaf
 
 ###

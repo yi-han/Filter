@@ -1,10 +1,10 @@
-sed 's/runDDQN/runSARSA/g' exp_gpgpu_single.slurm > temp1.slurm
-sed 's/sampleDDQNText/DOrigOverload/g' temp1.slurm > temp2.slurm
-sed 's/sampleDDQNText/DOrigOverload/g' temp1.slurm > output.slurm
-sbatch output.slurm
-# sleep 5
-# sed 's/0 2/2 2/g' temp2.slurm > output.slurm
+sed 's/runDDQN/runDDQNHundred/g' exp_gpgpu_single.slurm > temp1.slurm
+sed 's/sampleDDQNText/DDsixFour/g' temp1.slurm > temp2.slurm
+sed 's/sampleDDQNText/DDsixFour/g' temp1.slurm > output.slurm
 # sbatch output.slurm
+# sleep 5
+sed 's/0 2/0 1/g' temp2.slurm > output.slurm
+sbatch output.slurm
 # sed 's/0 2/4 2/g' temp2.slurm > output.slurm
 # sbatch output.slurm
 # sed 's/0 2/6 2/g' temp2.slurm > output.slurm

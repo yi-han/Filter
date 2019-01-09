@@ -153,7 +153,7 @@ class LargePulse(Pulse):
         return "PulseLarge"
 
 class GradualIncrease(Host):
-
+    
     def sendTraffic(self, time_step):
         if not self.is_attacker:
             super().sendTraffic(time_step, self.traffic_rate)
@@ -174,8 +174,18 @@ class GradualIncrease(Host):
             self.init_traffic = self.rate_legal_high + np.random.rand()*(self.rate_attack_low - self.rate_legal_high)
         else:
             traffic_rate = self.rate_legal_low + np.random.rand()*(self.rate_legal_high - self.rate_legal_low)
-
+            self.init_traffic = 0
         super().reset(is_attacker, traffic_rate)
+
+    def get_details(self):
+        details = (self.is_attacker, self.traffic_rate, self.init_traffic)
+        # print(details)
+        return details
+    def load_details(self, details):
+        (is_attacker, traffic_rate, init_traffic) = details
+        self.is_attacker = is_attacker
+        self.traffic_rate = traffic_rate
+        self.init_traffic = init_traffic
 
 class CoordinatedRandomNotGradual(Host):
     """
@@ -246,8 +256,7 @@ class adversarialRandom(object):
 class adversarialLeaf(object):
     def __init__(self, destination_switch, rate_attack_low, rate_attack_high, rate_legal_low, rate_legal_high,
         max_epLength, adversarialMaster = None, appendToSwitch = True):
-
-        assert(adversarialMaster != None)
+        
         self.destination_switch = destination_switch
 
         if appendToSwitch:
@@ -260,8 +269,10 @@ class adversarialLeaf(object):
         self.rate_legal_low = rate_legal_low
         self.rate_legal_high = rate_legal_high
 
-        self.adversarialMaster = adversarialMaster
-        self.adversarialMaster.assignLeaf(self)
+        if max_epLength != -1: 
+            assert(adversarialMaster != None)
+            self.adversarialMaster = adversarialMaster
+            self.adversarialMaster.assignLeaf(self)
 
 
     def getName():
@@ -281,7 +292,13 @@ class adversarialLeaf(object):
     def classReset():
         return
 
+    def get_details(self):
+        return (self.is_attacker, self.traffic_rate)
 
+    def load_details(self, details):
+        (is_attacker, traffic_rate) = details
+        self.is_attacker = is_attacker
+        self.traffic_rate = traffic_rate
 
 
 

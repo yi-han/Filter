@@ -202,19 +202,16 @@ attackClasses = [conAttack, shortPulse, mediumPulse,
 ###
 # Settings
 assignedNetwork = NetworkMalialisSmall #NetworkSingleTeamMalialisMedium
-assignedAgent = ddqnSingleSarsaCopy #ddqn100MediumHierarchical
+assignedAgent = ddqnSingleNoCommunicate #ddqn100MediumHierarchical
 load_attack_path = "attackSimulations/{0}/".format(assignedNetwork.name)
-loadAttacks = False
+loadAttacks = True
 assignedAgent.encoders = None
 
-assignedAgent.save_model_mode = defender_mode_enum.save
-
+assignedAgent.save_model_mode = defender_mode_enum.load
 trainHost = conAttack #coordAttack # conAttack #driftAttack #adversarialLeaf
 
-assignedAgent.save_model_mode = defender_mode_enum.save
-
-DdRandomMasterSettings = None
-#DdRandomMasterSettings.save_model_mode = defender_mode_enum.save
+# DdRandomMasterSettings = None
+DdRandomMasterSettings.save_model_mode = defender_mode_enum.save
 
 network_emulator = network.network_new.network_full #network_quick # network_full
 
@@ -227,18 +224,16 @@ twist="{0}".format(network_emulator.name)
 commStrategy = calc_comm_strategy(assignedAgent.stateRepresentation)
 file_path = getPathName(assignedNetwork, assignedAgent, commStrategy, twist, trainHost)
 
+if assignedAgent.save_model_mode is defender_mode_enum.load and DdRandomMasterSettings \
+    and DdRandomMasterSettings.save_model_mode is defender_mode_enum.save:
+    # we've set the filepath, now we need to ensure that we have the right adversary
+    assert(trainHost==conAttack)
+    trainHost = adversarialLeaf
+
 if loadAttacks:
-    runAttacks.run_attacks(assignedNetwork, assignedAgent, file_path)
+    runAttacks.run_attacks(assignedNetwork, assignedAgent, file_path, DdRandomMasterSettings)
 
-    # for attackClass in attackClasses:
-    #     genericAgent = create_generic_dec(assignedAgent, GeneralSettings, assignedNetwork)
-    #     #genericAgent = None
-    #     attack_location = load_attack_path+attackClass.getName()+".apkl"
 
-    #     exp = experiment.Experiment(attackClass, GeneralSettings, assignedNetwork, 
-    #         assignedAgent, load_attack_path=attack_location)
-    #     exp.run(0, genericAgent, file_path)
-    # getSummary(attackClasses, file_path, assignedAgent)
 
 else:
     #experiment = experiment.Experiment(conAttack, GeneralSettings, assignedNetwork, assignedAgent, twist="{2}{0}Alias{1}".format(numTiles, partition, network_emulator.name))
@@ -256,7 +251,7 @@ else:
 
     if start_num==0:
         genericAgent = create_generic_dec(assignedAgent, assignedNetwork)
-        runAttacks.run_attacks(assignedNetwork, assignedAgent, file_path)
+        runAttacks.run_attacks(assignedNetwork, assignedAgent, file_path, DdRandomMasterSettings)
 
 
 

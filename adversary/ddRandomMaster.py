@@ -13,7 +13,7 @@ import adversary.ddAdvAgent as ddAdvAgent
 import numpy as np
 class RandomAdvMaster():
 
-    def __init__(self, adv_settings, network_setting, defender_object):
+    def __init__(self, adv_settings, network_setting, defender_path):
 
 
 
@@ -33,7 +33,7 @@ class RandomAdvMaster():
 
 
         self.agents = []
-        self.defender = defender_object
+        self.defender_path = defender_path
 
         N_adv_state = self.num_agents*7
         for _ in range(self.num_agents):
@@ -99,6 +99,7 @@ class RandomAdvMaster():
         # print(state)
         # print(self.prior_actions)
         for prior_action in self.prior_actions:
+            
             state.extend(prior_action)
 
         # pThrottles = []
@@ -138,7 +139,6 @@ class RandomAdvMaster():
     def update(self, last_state, last_actions, current_state, is_done, network_reward):
         # provide the update function to each individual state
         reward = self.calc_reward(network_reward)
-
         for i in range(len(self.agents)):
             agent = self.agents[i]
             last_action = last_actions[i]
@@ -172,7 +172,7 @@ class RandomAdvMaster():
 
 
     def getPath(self):
-        return "{0}/smartAdversary".format(self.defender.getPath())
+        return "{0}/smartAdversary".format(self.defender_path)
 
 
 
