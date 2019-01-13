@@ -66,7 +66,7 @@ class Experiment:
 
         self.agentLoadModes = [mapsAndSettings.defender_mode_enum.test_short, mapsAndSettings.defender_mode_enum.load]
 
-
+        AgentSettings.trained_drift != -1 # ensure we have it set, dont ever use in experiment
 
     def run(self, prefix, preloaded_agent, file_path):
         N_action = self.network_settings.N_action
@@ -212,10 +212,10 @@ class Experiment:
 
                     if self.adversarialMaster != None:
                         adv_state = self.adversarialMaster.get_state(net)
-                        advAction = self.adversarialMaster.predict(adv_state, total_steps, adv_e)
+                        advAction = self.adversarialMaster.predict(adv_state, adv_e)
                     else:
                         advAction = None
-                    a = agent.predict(net.get_state(), total_steps, e) # generate an action
+                    a = agent.predict(net.get_state(), e) # generate an action
                     #net.step(a, step) # take the action, update the network
 
 
@@ -238,9 +238,9 @@ class Experiment:
                         # print("current_state: {0}".format(net.get_state()))
                         # print("last state: {0}".format(net.last_state))
                         # if step==20:
-                            # print("def | step {0} | action {1} | reward {2} | e {3}".format(step, last_action, r, e))
+                        #     print("def | step {0} | action {1} | reward {2} | e {3}".format(step, last_action, r, e))
                         #     print("adversary | ep {3} | action {0} | reward {1} | e {2}".format(advAction, r, adv_e, ep_num))
-                            # print("state = {1}, e = {0}".format(e, net.last_state))
+                        #     print("state = {1}, e = {0}".format(e, net.last_state))
 
                         # print("server state: {0}\n".format(net.switches[0].getWindow()))
                         
@@ -322,7 +322,7 @@ class Experiment:
                 
                 for f_step in range(2):
                     # do two steps without learning (so nothing implicit) and see if we can see how well it performs
-                    a = agent.predict(net.get_state(), total_steps, 0)
+                    a = agent.predict(net.get_state(), 0)
                     net.step(a, step+f_step, adv_last_action)
 
                 # how well the system performs assuming no exploration (only useful for training)

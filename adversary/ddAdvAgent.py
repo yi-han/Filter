@@ -39,7 +39,7 @@ import sys
 from numpy import random as random
 
 class ddAdvAgent():
-    def __init__(self, N_state, adv_settings, is_test=False):
+    def __init__(self, N_state, adv_settings):
 
         self.leaves = []
 
@@ -61,10 +61,6 @@ class ddAdvAgent():
         self.N_action = N_action
         self.y = discount_factor
         self.sess = tf.Session()
-
-
-        self.is_test = is_test
-        self.pre_train_steps = adv_settings.pre_train_steps
     
     def __enter__(self):
         print("sess init ddqnAdvAgent")
@@ -80,9 +76,9 @@ class ddAdvAgent():
 
 
         
-    def predict(self, state, total_steps, e):
+    def predict(self, state, e):
         assert(len(self.leaves)!=0)
-        randomChoice = self.isRandomGuess(total_steps, e)
+        randomChoice = self.isRandomGuess(e)
         #print("I believe i can make {0} actions".format(self.N_action))
         if randomChoice:
             action = np.random.randint(0,self.N_action)
@@ -145,9 +141,9 @@ class ddAdvAgent():
     #     return self.getName()
 
 
-    def isRandomGuess(self, total_steps, e):
+    def isRandomGuess(self, e):
         # calculate if meant to do choose a random
-        return (random.rand(1) < e or total_steps < self.pre_train_steps) and not self.is_test
+        return (random.rand(1) < e)
 
 
     def addLeaf(self, leaf):

@@ -248,7 +248,7 @@ shortPulse = hostClass.ShortPulse
 mediumPulse = hostClass.MediumPulse
 largePulse = hostClass.LargePulse
 gradualIncrease = hostClass.GradualIncrease
-driftAttack = hostClass.DriftAttack
+# driftAttack = hostClass.DriftAttack
 coordAttack = hostClass.CoordinatedRandomNotGradual
 adversarialLeaf = hostClass.adversarialLeaf
 
@@ -258,7 +258,7 @@ Settings to change
 
 """
 assignedNetwork = NetworkMalialisSmall
-assignedAgent = LinearSarsaLong
+assignedAgent = LinearSarsaSingular
 load_attack_path = "attackSimulations/{0}/".format(assignedNetwork.name)
 network_emulator = network.network_new.network_full # network_quick # network_full
 
@@ -269,6 +269,7 @@ DdRandomMasterSettings.save_model_mode = defender_mode_enum.save
 
 loadAttacks = False
 trainHost = adversarialLeaf #coordAttack # conAttack #driftAttack #adversarialLeaf
+assignedNetwork.drift = 10
 
 ###
 
@@ -287,6 +288,7 @@ else:
 
 
 
+assignedAgent.trained_drift = assignedNetwork.drift # we use this a copy of what the trained drift value is. We dont use this for the experiment
 
 
 """

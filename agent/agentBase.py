@@ -20,7 +20,7 @@ class Agent():
 
     # Given state, generate an action
     @abstractmethod
-    def predict(self, state, total_steps, e):
+    def predict(self, state, e):
         pass
 
     # provided the last state and the current state and prior actoin, update the learning agent
@@ -55,7 +55,7 @@ class Agent():
     # def __exit__(self, exception_type, exception_value, traceback):
     #     pass
 
-    def isRandomGuess(self, total_steps, e):
+    def isRandomGuess(self, e):
         # calculate if meant to do choose a random
         return (random.rand(1) < e)
 

@@ -1,9 +1,7 @@
 """
-Generic interface for many agents for adversary.
-We assign the potentials for each agent randomally each episode
-as opposed to using another agent to coordinate the agents.
+Here we have a single master agent in charge of all leaves.
 
-Comprised of many DDQN networks with one per adversarial agent
+Assume everything moves same level
 
 
 """
@@ -28,7 +26,6 @@ class RandomAdvMaster():
 
 
 
-        self.states_per_agent = self.num_agents*7
         self.network_setting = network_setting 
 
 
@@ -41,8 +38,6 @@ class RandomAdvMaster():
 
         self.unassignedAgents = self.agents.copy() # hopefully we copy the references
         self.throttlerLeafDic = {}
-
-        self.name = adv_settings.name
 
     def __enter__(self):
         print("__enter__ RandomAdvMaster decentralised")
@@ -174,7 +169,9 @@ class RandomAdvMaster():
 
 
     def getPath(self):
-        return "{0}/{1}".format(self.defender_path,self.name)
+        return "{0}/smartAdversary".format(self.defender_path)
+
+
 
     def reset(self):
         for agent in self.agents:

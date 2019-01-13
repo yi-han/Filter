@@ -1,4 +1,4 @@
-sed 's/runDDQN/runDDQNNetQuick/g' exp_physical_ddqn.slurm > temp1.slurm
+sed 's/runDDQN/runSARSA/g' exp_physical_ddqn.slurm > temp1.slurm
 sed 's/sampleDDQNText/64Dqn100lSin/g' temp1.slurm > temp2.slurm
 sed 's/sampleDDQNText/64Dqn100Sin/g' temp1.slurm > output.slurm
 # sbatch temp2.slurm

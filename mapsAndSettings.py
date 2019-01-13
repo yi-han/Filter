@@ -208,10 +208,11 @@ class NetworkTwelveThrottleHeavy(object):
 
 
 class DdRandomMasterSettings(object):
+    name = "ddrandomMasterDecentralised"
     pre_train_steps = 1000
     num_episodes = 120001
     tau = 0.001
-    discount_factor = 0.5
+    discount_factor = 0.95
     annealing_episodes = 78000
     startE = 0.3
     endE = 0.0
@@ -258,13 +259,18 @@ def create_generic_dec(ds, ns):
 
 
 
-def getSummary(adversary_classes, load_path, agent):
+def getSummary(adversary_classes, load_path, agent, smart_adversary):
     summary = open("{0}/attackSummary.csv".format(load_path), "w")
-    summary.write("Attack Type, Agent, Legal Packets Received, Legal Packets Served, Percentage, Server Failures, tau, pretraining, annealing, total_episodes, start_e, overload\n")
+    summary.write("Attack Type, Agent, Drift, Legal Packets Received, Legal Packets Served, Percentage, Server Failures, tau, pretraining, annealing, total_episodes, start_e, overload, \
+        adv_tau, adv_discount, adv_pretrain, adv_annealing_episodes, adv_start_e\n")
     agentName = agent.name
     for adversary_class in adversary_classes:
-        attack_type = adversary_class.getName()
-        file_path = "{0}/packet_served-{1}-{2}-{3}.csv".format(load_path,agent.save_model_mode.name, attack_type, 0)
+        attack_name = adversary_class.getName()
+        if adversary_class != hosts.adversarialLeaf:
+            attack_type = attack_name
+        else:
+            attack_type = smart_adversary.name
+        file_path = "{0}/packet_served-{1}-{2}-{3}.csv".format(load_path,agent.save_model_mode.name, attack_name, 0)
         packet_file = pandas.read_csv(file_path)
         #print(packet_file)
         sum_packets_received = sum(packet_file.PacketsReceived)
@@ -283,9 +289,14 @@ def getSummary(adversary_classes, load_path, agent):
         else:
             overload = 'misc'
 
-        summary.write("{0}, {1}, {2}, {3}, {4}, {5}, {6}, {7}, {8}, {9}, {10}, {11}\n".format(attack_type, agent.name,
+        summary.write("{0},{1},{12},{2},{3},{4},{5},{6},{7},{8},{9},{10},{11},".format(attack_type, agent.name,
             sum_packets_received, sum_packets_sent, percentage_received, sum_server_failures,
-            tau, pretraining, annealing, total_episodes, start_e, overload))
+            tau, pretraining, annealing, total_episodes, start_e, overload, agent.trained_drift))
+        if adversary_class != hosts.adversarialLeaf:
+            summary.write(",,,,\n")
+        else:
+            summary.write("{0},{1},{2},{3},{4}\n".format(smart_adversary.tau, smart_adversary.discount_factor,
+                smart_adversary.pre_train_steps, smart_adversary.annealing_episodes, smart_adversary.startE))
     summary.close()
 
 
@@ -293,7 +304,12 @@ def getSummary(adversary_classes, load_path, agent):
 def getPathName(network_settings, agent_settings, commStrategy, twist, host_train):
     # host train is the type of host the agent was trained on. 
 
-    return host_train.getName() + network_settings.name + agent_settings.name + commStrategy  + twist
+    drift = network_settings.drift
+    if drift > 0:
+        drift_text = "Drift_{0}".format(drift)
+    else:
+        drift_text = ""
+    return drift_text + host_train.getName() + network_settings.name + agent_settings.name + commStrategy  + twist
 
 
 

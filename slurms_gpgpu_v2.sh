@@ -1,6 +1,6 @@
 sed 's/runDDQN/runDDQNHundred/g' exp_gpgpu_single.slurm > temp1.slurm
-sed 's/sampleDDQNText/DDsixFour/g' temp1.slurm > temp2.slurm
-sed 's/sampleDDQNText/DDsixFour/g' temp1.slurm > output.slurm
+sed 's/sampleDDQNText/Adv50/g' temp1.slurm > temp2.slurm
+sed 's/sampleDDQNText/Adv50/g' temp1.slurm > output.slurm
 # sbatch output.slurm
 # sleep 5
 sed 's/0 2/0 1/g' temp2.slurm > output.slurm

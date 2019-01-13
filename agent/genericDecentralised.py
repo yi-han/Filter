@@ -42,7 +42,7 @@ class AgentOfAgents(aBase.Agent):
         for agent in self.agents:
             agent.__exit__(type, value, tb)
 
-    def predict(self, state, total_steps, e):
+    def predict(self, state, e):
         # only provide each agent with its corresponding state
         # combine the actions as if it was a unified response
         # this is as network only takes a single number for action
@@ -59,7 +59,7 @@ class AgentOfAgents(aBase.Agent):
             #(statelet, state) = self.getStatelet(state, N_state)
             statelet = state[i]
             #print(statelet)
-            agentAction = agent.predict(statelet, total_steps, e)
+            agentAction = agent.predict(statelet, e)
             # print("{0} for {1}".format(agentAction, statelet))
             #print("agent has {0} actions".format(agent.N_action))
             action = action*agent.N_action+agentAction

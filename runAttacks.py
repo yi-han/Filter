@@ -33,7 +33,7 @@ def run_attacks(assignedNetwork, assignedAgent, file_path, adversaryAttacker):
     load_attack_path = "attackSimulations/{0}/".format(assignedNetwork.name)
     network_emulator = network_new.network_full # network_quick # network_full
     assignedNetwork.emulator = network_emulator
-
+    assignedNetwork.drift = 0 # we don't use drift in testing
     assignedAgent.save_model_mode = mapsAndSettings.defender_mode_enum.test_short
 
     for attackClass in attackClasses:
@@ -60,7 +60,7 @@ def run_attacks(assignedNetwork, assignedAgent, file_path, adversaryAttacker):
 
         exp.run(0, genericAgent, file_path)
 
-    mapsAndSettings.getSummary(attackClasses, file_path, assignedAgent)
+    mapsAndSettings.getSummary(attackClasses, file_path, assignedAgent, adversaryAttacker)
 
 
 

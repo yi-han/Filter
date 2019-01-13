@@ -247,7 +247,9 @@ class network_full(object):
 
         self.adversaryMaster = adversaryMaster
  
-
+        self.drift = network_settings.drift / 100
+        # drift is the measure of inaccurecy of discretising legitimate from illegite traffic
+        # represents the % of illegal traffic set as legal.
 
         # self.SaveAttackEnum = SaveAttackEnum
         self.save_attack = save_attack
@@ -442,6 +444,29 @@ class network_full(object):
         return r
     """
 
+    def adjust_drift(self):
+        # assume there is some drift, we want to return the stats with the associated drift
+
+        # Drift rules:
+        # Drift implies % illegal traffic categorised as legal traffic
+        # also have 25% of that rate of legal traffic set as illegal traffic
+
+        legitimate_rate = self.switches[0].legal_window
+        legitimate_rate_all = legitimate_rate + self.switches[0].dropped_legal_window
+        attacker_rate = self.switches[0].illegal_window
+        attacker_rate_all = attacker_rate + self.switches[0].dropped_illegal_window
+
+        illegal_to_legal = self.drift # illegal traffic misclassified as legal
+        legal_to_illegal = 0.25*self.drift # legal traffic misclassified as illegal
+
+        new_legit_rate = (1 - legal_to_illegal)* legitimate_rate + (illegal_to_legal * attacker_rate)
+        new_attacker_rate = (1 - illegal_to_legal) * attacker_rate + (legal_to_illegal*legitimate_rate)
+        new_legitimate_rate_all = (1 - legal_to_illegal)* legitimate_rate_all + (illegal_to_legal * attacker_rate_all)
+
+        #print("{0} {1} {2} To {3} {4} {5}".format(legitimate_rate, legitimate_rate_all, attacker_rate,
+        #        new_legit_rate, new_legitimate_rate_all, new_attacker_rate))
+
+        return (new_legit_rate, new_legitimate_rate_all, new_attacker_rate)
     def calculate_reward(self):
         
         if self.cache_reward != None:
@@ -451,7 +476,7 @@ class network_full(object):
         reward = 0.0
 
         legitimate_rate = self.switches[0].legal_window
-        legitimate_rate_all = self.switches[0].legal_window + self.switches[0].dropped_legal_window
+        legitimate_rate_all = legitimate_rate + self.switches[0].dropped_legal_window
         attacker_rate = self.switches[0].illegal_window
         #assert((legitimate_rate+attacker_rate)==self.switches[0].getWindow())
 
@@ -481,6 +506,12 @@ class network_full(object):
                 self.legitimate_served += new_legit_rate
 
         else:
+            # we dont do the drift until now because before now it didn't matter
+            # print("\nprior")
+            # print("{0} {1} {2} = {3}".format(legitimate_rate, legitimate_rate_all, attacker_rate, legitimate_rate/legitimate_rate_all))
+            legitimate_rate, legitimate_rate_all, attacker_rate = self.adjust_drift()
+            # print("{0} {1} {2} = {3}".format(legitimate_rate, legitimate_rate_all, attacker_rate, legitimate_rate/legitimate_rate_all))
+
             if legitimate_rate_all != 0:
                 reward += legitimate_rate/legitimate_rate_all
         

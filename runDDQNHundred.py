@@ -190,7 +190,7 @@ shortPulse = hostClass.ShortPulse
 mediumPulse = hostClass.MediumPulse
 largePulse = hostClass.LargePulse
 gradualIncrease = hostClass.GradualIncrease
-driftAttack = hostClass.DriftAttack
+# driftAttack = hostClass.DriftAttack
 coordAttack = hostClass.CoordinatedRandomNotGradual
 adversarialLeaf = hostClass.adversarialLeaf
 
@@ -201,7 +201,7 @@ attackClasses = [conAttack, shortPulse, mediumPulse,
 
 ###
 # Settings
-assignedNetwork = NetworkSixFour #NetworkSingleTeamMalialisMedium
+assignedNetwork =  NetworkSixFour #NetworkSingleTeamMalialisMedium
 assignedAgent = ddqn50MediumHierachical #ddqn100MediumHierarchical
 load_attack_path = "attackSimulations/{0}/".format(assignedNetwork.name)
 loadAttacks = False
@@ -209,6 +209,8 @@ assignedAgent.encoders = None
 
 assignedAgent.save_model_mode = defender_mode_enum.load
 trainHost = conAttack #coordAttack # conAttack #driftAttack #adversarialLeaf
+assignedNetwork.drift = 0
+
 
 # DdRandomMasterSettings = None
 DdRandomMasterSettings.save_model_mode = defender_mode_enum.save
@@ -218,6 +220,7 @@ network_emulator = network.network_new.network_full #network_quick # network_ful
 ###
 
 
+assignedAgent.trained_drift = assignedNetwork.drift # we use this a copy of what the trained drift value is. We dont use this for the experiment
 assignedNetwork.emulator = network_emulator
 
 twist="{0}".format(network_emulator.name)

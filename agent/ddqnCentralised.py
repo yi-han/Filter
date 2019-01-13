@@ -35,8 +35,8 @@ class Agent(aBase.Agent):
         print("\n\n__exit__ called\n\n")
         self.sess.close()
         
-    def predict(self, state, total_steps, e):
-        randomChoice = super().isRandomGuess(total_steps, e)
+    def predict(self, state, e):
+        randomChoice = super().isRandomGuess(e)
         #print("I believe i can make {0} actions".format(self.N_action))
         if randomChoice:
             action = np.random.randint(0,self.N_action)

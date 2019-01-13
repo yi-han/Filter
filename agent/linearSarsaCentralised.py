@@ -13,12 +13,12 @@ import numpy as np
 import pickle
 from pathlib import Path
 import os
-from sklearn.externals import joblib
+# from sklearn.externals import joblib
 class Agent(aBase.Agent):
 
-    def __init__(self, N_action, pre_train_steps, action_per_agent, N_state, encoders, agent_settings, alph=0.1, gam=0, debug=False, test=False):
+    def __init__(self, N_action, action_per_agent, N_state, encoders, agent_settings, alph, gam):
 
-        super().__init__(pre_train_steps, debug, test)
+        super().__init__()
         self.ai = SarsaFunctionAI(
             actions=range(N_action), encoders = encoders, alpha=alph, gamma=gam, agent_settings=agent_settings)
 
@@ -26,7 +26,6 @@ class Agent(aBase.Agent):
         self.N_action = N_action
         self.N_state = N_state
         self.score = 0
-        self.test = test
         self.encoders = encoders
 
     def __enter__(self):
@@ -43,8 +42,8 @@ class Agent(aBase.Agent):
     def reset(self):
         self.ai.reset()
 
-    def predict(self, state, total_steps, e):
-        randomChoice = super().isRandomGuess(total_steps, e)
+    def predict(self, state, e):
+        randomChoice = super().isRandomGuess(e)
         
 
         if randomChoice:
@@ -90,8 +89,10 @@ class Agent(aBase.Agent):
                 print("used pickle \n")
                 dataDict = pickle.load(f)
         else:
-            print("using joblib \n")
-            dataDict = joblib.load(load_path+"/joblibBackup.sav") 
+            assert(5==1)
+        # else:
+        #     print("using joblib \n")
+        #     dataDict = joblib.load(load_path+"/joblibBackup.sav") 
         
         self.ai.loadData(dataDict)
 
@@ -127,9 +128,9 @@ class Agent(aBase.Agent):
             # this happens at the end
             os.remove(load_path+'/'+last_checkpoint)
 
-        with open(load_path+"/joblibBackup.sav", 'wb') as backupSave:
+        # with open(load_path+"/joblibBackup.sav", 'wb') as backupSave:
             # backupPickle.write("hello")
-            joblib.dump(dataDict, backupSave) 
+            # joblib.dump(dataDict, backupSave) 
 
         return
     def printStats(self):

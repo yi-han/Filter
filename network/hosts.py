@@ -58,28 +58,30 @@ class Host():
         (is_attacker, traffic_rate) = details
         self.is_attacker = is_attacker
         self.traffic_rate = traffic_rate
-class DriftAttack(Host):
-    # pretty much like a constant attack except a small amount of the traffic will be considred legitimate traffic
-    # as this is experimental we'll assume 5% of all traffic is set as legit
+# class DriftAttack(Host):
+#     # pretty much like a constant attack except a small amount of the traffic will be considred legitimate traffic
+#     # as this is experimental we'll assume 5% of all traffic is set as legit
 
 
-    def reset(self, is_attacker):
+#     def reset(self, is_attacker):
 
-        if is_attacker:
-            self.traffic_rate = self.rate_attack_low + np.random.rand()*(self.rate_attack_high - self.rate_attack_low)
-        else:
-            traffic_rate = self.rate_legal_low + np.random.rand()*(self.rate_legal_high - self.rate_legal_low)
-        super().reset(is_attacker, traffic_rate)
+#         if is_attacker:
+#             self.traffic_rate = self.rate_attack_low + np.random.rand()*(self.rate_attack_high - self.rate_attack_low)
+#         else:
+#             self.traffic_rate = self.rate_legal_low + np.random.rand()*(self.rate_legal_high - self.rate_legal_low)
+#         super().reset(is_attacker, self.traffic_rate)
 
-    def sendTraffic(self, time_step):
-        if self.is_attacker:
-            self.destination_switch.new_illegal += self.traffic_rate*0.95
-            self.destination_switch.new_legal += self.traffic_rate*0.05
-        else:
-            self.destination_switch.new_legal += self.traffic_rate
+#     def sendTraffic(self, time_step):
+#         # set the drift initially to 20% illegal -> legal, 5% legal to illegal
+#         if self.is_attacker:
+#             self.destination_switch.new_illegal += self.traffic_rate*0.8
+#             self.destination_switch.new_legal += self.traffic_rate*0.2
+#         else:
+#             self.destination_switch.new_legal += self.traffic_rate * 0.95
+#             self.destination_switch.new_illegal += self.traffic_rate * 0.05
     
-    def getName():
-        return "Drift-Attack"
+#     def getName():
+#         return "Drift-Attack"
 
 
 class ConstantAttack(Host):
