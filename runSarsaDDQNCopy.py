@@ -2,7 +2,6 @@ import sys
 import experiment
 import network.hosts as hostClass
 import network.network_new
-from network.network_new import stateRepresentationEnum # how to represent the state
 import agent.tileCoding as tileCoding
 import agent.sarsaCentralised as sarCen
 import agent.linearSarsaCentralised as linCen
@@ -21,7 +20,7 @@ class LinearSarsaSingular(object):
     name = "LinearSarsaSingular"
     max_epLength = 30 # or 60 if test
     y = 0
-    tau = 0.1
+    tau = 0.0125
     update_freq = None
     batch_size = None
     num_episodes = 62501#82501
@@ -39,7 +38,7 @@ class LinearSarsaSingular(object):
 
 class LinearSarsaLong(LinearSarsaSingular):
     name = "LinearSarsaLong"
-    num_episodes = 100001
+    num_episodes = 200001
 
 class LinearSarsaNoOverloadLong(LinearSarsaSingular):
     name = "LinearNoOverloadLong"
@@ -50,14 +49,6 @@ class LinearSarsaNoOverload(LinearSarsaSingular):
     name = "LinearSarsaSingularNoOverload"
     reward_overload = None
 
-class LinearSarsaReducedLearning(LinearSarsaSingular):
-    # this is malialis one i think
-    name = "LinearSarsaReducedLearning"
-    tau = 0.0125
-
-class LinearReducedNoOverload(LinearSarsaReducedLearning):
-    name = "LinearReducedNoOverload"
-    reward_overload = None
 
 """
 class LinearButPT(object):
@@ -111,7 +102,7 @@ class LinearSarsaLAI(object):
     name = "LinearSarsaLAI"
     max_epLength = 500
     y = 0
-    tau = 0.00625
+    tau = 0.001
     update_freq = None
     batch_size = None
     num_episodes = 100001#82501
@@ -242,13 +233,11 @@ class RandomAgent(object):
 
 
 
-class GeneralSettings(object):
-    # SaveAttackEnum = Enum('SaveAttack', 'neither save load')
-    SaveModelEnum = Enum('SaveModel', 'neither save load')
-    debug = False
-    # save_attack = SaveAttackEnum.neither
-    save_model = SaveModelEnum.save
-    tileFunction = None
+# class GeneralSettings(object):
+#     # SaveAttackEnum = Enum('SaveAttack', 'neither save load')
+#     debug = False
+#     # save_attack = SaveAttackEnum.neither
+#     tileFunction = None
 
 
 
@@ -259,30 +248,42 @@ shortPulse = hostClass.ShortPulse
 mediumPulse = hostClass.MediumPulse
 largePulse = hostClass.LargePulse
 gradualIncrease = hostClass.GradualIncrease
+# driftAttack = hostClass.DriftAttack
+coordAttack = hostClass.CoordinatedRandomNotGradual
+adversarialLeaf = hostClass.adversarialLeaf
 
 """
 Settings to change
 
 
 """
-assignedNetwork = NetworkMalialisSmall
-assignedAgent = LinearSarsaReducedLearning
+assignedNetwork = NetworkSixFour
+assignedAgent = LinearSarsaLAIDDQN200
 load_attack_path = "attackSimulations/{0}/".format(assignedNetwork.name)
 network_emulator = network.network_new.network_full # network_quick # network_full
+loadAttacks = False
 
 
+
+assignedAgent.save_model_mode = defender_mode_enum.save
+trainHost = conAttack #coordAttack # conAttack #driftAttack #adversarialLeaf
+assignedNetwork.drift = 0
+
+intelligentOpposition = DdCoordinatedMasterSettings #DdRandomMasterSettings
+intelligentOpposition.save_model_mode = defender_mode_enum.save
+intelligentOpposition = None
+
+###
 
 assignedNetwork.emulator = network_emulator
 
+if assignedAgent.save_model_mode is defender_mode_enum.load and intelligentOpposition \
+    and intelligentOpposition.save_model_mode is defender_mode_enum.save:
+    # we've set the filepath, now we need to ensure that we have the right adversary
+    assert(trainHost==conAttack)
+    trainHost = adversarialLeaf
 
-conAttack = hostClass.ConstantAttack
-shortPulse = hostClass.ShortPulse
-mediumPulse = hostClass.MediumPulse
-largePulse = hostClass.LargePulse
-gradualIncrease = hostClass.GradualIncrease
 
-driftAttack = hostClass.DriftAttack
-coordAttack = hostClass.CoordinatedRandomNotGradual
 
 attackClasses = [conAttack, shortPulse, mediumPulse,
     largePulse, gradualIncrease] 
@@ -293,9 +294,8 @@ else:
     partition = ""
 
 
-loadAttacks = False
 
-trainHost = conAttack #coordAttack # conAttack #driftAttack
+assignedAgent.trained_drift = assignedNetwork.drift # we use this a copy of what the trained drift value is. We dont use this for the experiment
 
 
 """
@@ -320,48 +320,49 @@ assignedAgent.encoders = encoders
 
 twist = "{2}{0}Alias{1}".format(numTiles, partition, network_emulator.name)
 commStrategy = calc_comm_strategy(assignedAgent.stateRepresentation)
-file_path = getPathName(assignedNetwork, assignedAgent, commStrategy, twist, trainHost)
+
+if (len(sys.argv)==4) and sys.argv[3] != "" :
+    file_path = sys.argv[3]
+    proper_path = getPathName(assignedNetwork, assignedAgent, commStrategy, twist, trainHost)
+
+    print("file should be: {0}".format(proper_path))
+else:
+    file_path = getPathName(assignedNetwork, assignedAgent, commStrategy, twist, trainHost)
+
+print('the filepath is {0}'.format(file_path))
+
 
 if loadAttacks:
-    # for attackClass in attackClasses:
-    #     genericAgent = create_generic_dec(assignedAgent, GeneralSettings, assignedNetwork)
-    #     #genericAgent = None
-    #     attack_location = load_attack_path+attackClass.getName()+".apkl"
-
-    #     exp = experiment.Experiment(attackClass, GeneralSettings, assignedNetwork, 
-    #         assignedAgent, load_attack_path=attack_location)
-    #     exp.run(0, genericAgent, file_path)
-    # getSummary(attackClasses, file_path, assignedAgent)
-    runAttacks.run_attacks(assignedNetwork, assignedAgent, file_path)
-
+    runAttacks.run_attacks(assignedNetwork, assignedAgent, file_path, intelligentOpposition)
 
 else:
     #experiment = experiment.Experiment(conAttack, GeneralSettings, assignedNetwork, assignedAgent, twist="{2}{0}Alias{1}".format(numTiles, partition, network_emulator.name))
 
-    experiment = experiment.Experiment(trainHost, GeneralSettings, assignedNetwork, assignedAgent)
+    experiment = experiment.Experiment(trainHost, assignedNetwork, assignedAgent, intelligentOpposition)
 
     start_num = int(sys.argv[1])
     length_core= int(sys.argv[2])
 
     for i in range(length_core):
-        genericAgent = create_generic_dec(assignedAgent, GeneralSettings, assignedNetwork)
+        genericAgent = create_generic_dec(assignedAgent, assignedNetwork)
         # genericAgent = None        
         print("Im doing it for {0}".format(start_num+i))
         experiment.run(start_num+i, genericAgent, file_path)
 
     if start_num==0:
-        
-        runAttacks.run_attacks(assignedNetwork, assignedAgent, file_path)
+        genericAgent = create_generic_dec(assignedAgent, assignedNetwork)
+        runAttacks.run_attacks(assignedNetwork, assignedAgent, file_path, intelligentOpposition)
+
 
 """
 
 for attackClass in attackClasses:
-    sarsaGeneric = create_generic_dec(assignedAgent, GeneralSettings, assignedNetwork)
+    sarsaGeneric = create_generic_dec(assignedAgent, assignedNetwork)
     # sarsaGeneric = None
     
     attack_location = load_attack_path+attackClass.getName()+".apkl"
 
-    exp = experiment.Experiment(attackClass, GeneralSettings, assignedNetwork, 
+    exp = experiment.Experiment(attackClass, assignedNetwork, 
         assignedAgent, twist= "NoPTTile1Save", load_attack_path=attack_location)
     exp.run(0, sarsaGeneric)
 """
@@ -369,7 +370,7 @@ for attackClass in attackClasses:
 """
 
 
-exp = experiment.Experiment(conAttack, GeneralSettings, assignedNetwork, 
+exp = experiment.Experiment(conAttack, assignedNetwork, 
     assignedAgent, load_attack_path=None)
 
 
@@ -377,7 +378,7 @@ start_num = int(sys.argv[1])
 length_core= int(sys.argv[2])
 
 for i in range(length_core):
-    sarsaGeneric = create_generic_dec(assignedAgent, GeneralSettings, assignedNetwork)
+    sarsaGeneric = create_generic_dec(assignedAgent, assignedNetwork)
     print("Im doing it for {0}".format(start_num+i))
     exp.run(start_num+i, sarsaGeneric)
     # exp.run(start_num+i)

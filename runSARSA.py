@@ -50,33 +50,6 @@ class LinearSarsaNoOverload(LinearSarsaSingular):
     reward_overload = None
 
 
-"""
-class LinearButPT(object):
-    name = "LinButPT"
-    max_epLength = 30 # or 60 if test
-    y = 0
-    tau = 0.0125
-    update_freq = None
-    batch_size = None
-    num_episodes = 64501#82501
-    pre_train_steps = 2000 * max_epLength
-    annealing_steps = 50000 * max_epLength #1000*max_epLength #60000 * max_epLength 
-    startE = 0.4 #0.4
-    endE = 0.0
-    stepDrop = (startE - endE)/annealing_steps
-    agent = None
-    sub_agent = linCen.Agent
-    group_size = 1 # number of filters each agent controls
-    #stateletFunction = getStateletNoCommunication
-    reward_overload = -1
-    stateRepresentation = stateRepresentationEnum.throttler  
-
-class LinearPtNoOverload(LinearButPT):
-    name = "LinearPtNoOverload"
-    reward_overload = None
-
-"""
-
 
 class LinearSarsaSingularDDQNCopy(object):
     # copy from ddqnSingleNoCommunicate
@@ -257,24 +230,31 @@ Settings to change
 
 
 """
-assignedNetwork = NetworkMalialisSmall
+assignedNetwork = NetworkSingleTeamMalialisMedium
 assignedAgent = LinearSarsaSingular
 load_attack_path = "attackSimulations/{0}/".format(assignedNetwork.name)
 network_emulator = network.network_new.network_full # network_quick # network_full
+loadAttacks = False
+
 
 
 assignedAgent.save_model_mode = defender_mode_enum.save
-# DdRandomMasterSettings = None
-DdRandomMasterSettings.save_model_mode = defender_mode_enum.save
+trainHost = conAttack #coordAttack # conAttack #driftAttack #adversarialLeaf
+assignedNetwork.drift = 20
 
-loadAttacks = False
-trainHost = adversarialLeaf #coordAttack # conAttack #driftAttack #adversarialLeaf
-assignedNetwork.drift = 10
+intelligentOpposition = DdCoordinatedMasterSettings #DdRandomMasterSettings
+intelligentOpposition.save_model_mode = defender_mode_enum.save
+intelligentOpposition = None
 
 ###
 
 assignedNetwork.emulator = network_emulator
 
+if assignedAgent.save_model_mode is defender_mode_enum.load and intelligentOpposition \
+    and intelligentOpposition.save_model_mode is defender_mode_enum.save:
+    # we've set the filepath, now we need to ensure that we have the right adversary
+    assert(trainHost==conAttack)
+    trainHost = adversarialLeaf
 
 
 
@@ -313,25 +293,25 @@ assignedAgent.encoders = encoders
 
 twist = "{2}{0}Alias{1}".format(numTiles, partition, network_emulator.name)
 commStrategy = calc_comm_strategy(assignedAgent.stateRepresentation)
-file_path = getPathName(assignedNetwork, assignedAgent, commStrategy, twist, trainHost)
+
+if (len(sys.argv)==4) and sys.argv[3] != "" :
+    file_path = sys.argv[3]
+    proper_path = getPathName(assignedNetwork, assignedAgent, commStrategy, twist, trainHost)
+
+    print("file should be: {0}".format(proper_path))
+else:
+    file_path = getPathName(assignedNetwork, assignedAgent, commStrategy, twist, trainHost)
+
+print('the filepath is {0}'.format(file_path))
+
 
 if loadAttacks:
-    # for attackClass in attackClasses:
-    #     genericAgent = create_generic_dec(assignedAgent, assignedNetwork)
-    #     #genericAgent = None
-    #     attack_location = load_attack_path+attackClass.getName()+".apkl"
-
-    #     exp = experiment.Experiment(attackClass, assignedNetwork, 
-    #         assignedAgent, load_attack_path=attack_location)
-    #     exp.run(0, genericAgent, file_path)
-    # getSummary(attackClasses, file_path, assignedAgent)
-    runAttacks.run_attacks(assignedNetwork, assignedAgent, file_path)
-
+    runAttacks.run_attacks(assignedNetwork, assignedAgent, file_path, intelligentOpposition)
 
 else:
-    #experiment = experiment.Experiment(conAttack, assignedNetwork, assignedAgent, twist="{2}{0}Alias{1}".format(numTiles, partition, network_emulator.name))
+    #experiment = experiment.Experiment(conAttack, GeneralSettings, assignedNetwork, assignedAgent, twist="{2}{0}Alias{1}".format(numTiles, partition, network_emulator.name))
 
-    experiment = experiment.Experiment(trainHost, assignedNetwork, assignedAgent, DdRandomMasterSettings)
+    experiment = experiment.Experiment(trainHost, assignedNetwork, assignedAgent, intelligentOpposition)
 
     start_num = int(sys.argv[1])
     length_core= int(sys.argv[2])
@@ -343,8 +323,9 @@ else:
         experiment.run(start_num+i, genericAgent, file_path)
 
     if start_num==0:
-        
-        runAttacks.run_attacks(assignedNetwork, assignedAgent, file_path)
+        genericAgent = create_generic_dec(assignedAgent, assignedNetwork)
+        runAttacks.run_attacks(assignedNetwork, assignedAgent, file_path, intelligentOpposition)
+
 
 """
 

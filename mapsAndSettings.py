@@ -10,6 +10,7 @@ import math
 import agent.genericDecentralised as genericDecentralised
 import agent.sarsaCentralised as sarCen
 import adversary.ddRandomMaster as ddRandomMaster
+import adversary.ddAdvMaster as ddAdvMaster
 import pandas
 import network.hosts as hosts
 # defender_mode_enum = Enum('SaveModel', 'neither save load test_short')
@@ -212,7 +213,7 @@ class DdRandomMasterSettings(object):
     pre_train_steps = 1000
     num_episodes = 120001
     tau = 0.001
-    discount_factor = 0.95
+    discount_factor = 0.3
     annealing_episodes = 78000
     startE = 0.3
     endE = 0.0
@@ -222,8 +223,29 @@ class DdRandomMasterSettings(object):
 
     action_per_agent = 11
 
+class DdCoordinatedMasterSettings(object):
+    name = "ddCoordinatedMasterCentralised"
+    pre_train_steps = 1000
+    num_episodes = 120001
+    tau = 0.001
+    discount_factor = 0.3
+    annealing_episodes = 78000
+    startE = 0.3
+    endE = 0.0
+    update_freq = 4
+    batch_size = 32
+    adversary_class = ddAdvMaster.CoordinatedAdvMaster
 
+    action_per_agent = 11
 
+class DdCoordinatedLongSettings(DdCoordinatedMasterSettings):
+    name = "ddCoordLongCentralised"
+    pre_train_steps = 10000
+    num_episodes = 150001
+    tau = 0.0005
+    discount_factor = 0.5
+    annealing_episodes = 78000
+    startE = 0.6    
 
 def create_generic_dec(ds, ns):
     """

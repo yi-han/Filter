@@ -30,7 +30,7 @@ module load Tensorflow/1.9.0-intel-2017.u2-GCC-6.2.0-CUDA9-Python-3.6.4-GPU
 
 
 echo "Starting four throttle"
-time mpiexec -n 1 python3 runDDQN.py 0 2 "sampleDDQNText"
+time mpiexec -n 1 python3 runDDQN.py 0 2 "samplePath"
 
 echo "done"
 

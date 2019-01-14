@@ -18,14 +18,14 @@
 
 # Load required modules
 
-module load Python/3.6.4-intel-2017.u2-GCC-6.2.0-CUDA9
-# module load Tensorflow/1.3.0-intel-2017.u2-Python-3.5.2
+# module load Python/3.6.4-intel-2017.u2-GCC-6.2.0-CUDA9
+module load Tensorflow/1.3.0-intel-2017.u2-Python-3.5.2
 # module load Tensorflow/1.1.0-intel-2016.u3-Python-3.5.2
 
 # Launch multiple process python code
 
 echo "Starting physical throttle"
-time mpiexec -n 1 python3 runSARSA.py 0 5 "sample_sarsa_name"
+time mpiexec -n 1 python3 runSARSA.py 0 5 "samplePath"
 
 echo "done"
 
