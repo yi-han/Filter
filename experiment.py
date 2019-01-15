@@ -232,14 +232,15 @@ class Experiment:
                             agent.update(net.last_state, last_action, net.get_state(), d, r, next_action = a)
 
                         if self.adversarialMaster != None and not self.adversary_agent_settings.save_model_mode in self.agentLoadModes:
-                            
+                            # print("ls {0} la {1}\n\n\n".format(adv_last_state, adv_last_action))
                             self.adversarialMaster.update(adv_last_state, adv_last_action, adv_state, d, r)  
                         #if debug:                
                         # print("current_state: {0}".format(net.get_state()))
-                        # print("last state: {0}".format(net.last_state))
-                        # if step==20:
-                        #     print("def | step {0} | action {1} | reward {2} | e {3}".format(step, last_action, r, e))
-                        #     print("adversary | ep {3} | action {0} | reward {1} | e {2}".format(advAction, r, adv_e, ep_num))
+                        # # print("last state: {0}".format(net.last_state))
+                        # # if step==20:
+                        # print("def | step {0} | action {1} | reward {2} | e {3}".format(step, last_action, r, e))
+                        # print("adversary | ep {3} | action {0} | reward {1} | e {2}".format(advAction, r, adv_e, ep_num))
+                        # print("adv_state {0}".format(adv_state))
                         #     print("state = {1}, e = {0}".format(e, net.last_state))
 
                         # print("server state: {0}\n".format(net.switches[0].getWindow()))

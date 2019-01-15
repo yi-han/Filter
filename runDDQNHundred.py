@@ -201,19 +201,20 @@ attackClasses = [conAttack, shortPulse, mediumPulse,
 
 ###
 # Settings
-assignedNetwork =  NetworkSixFour #NetworkSingleTeamMalialisMedium
-assignedAgent = ddqn50MediumHierachical #ddqn100MediumHierarchical
+assignedNetwork =  NetworkSingleTeamMalialisMedium #NetworkSingleTeamMalialisMedium
+assignedAgent = ddqn100MediumHierarchical #ddqn100MediumHierarchical
 load_attack_path = "attackSimulations/{0}/".format(assignedNetwork.name)
 loadAttacks = False
 assignedAgent.encoders = None
 
-assignedAgent.save_model_mode = defender_mode_enum.load
+assignedAgent.save_model_mode = defender_mode_enum.save
 trainHost = conAttack #coordAttack # conAttack #driftAttack #adversarialLeaf
-assignedNetwork.drift = 0
+assignedNetwork.drift = 25
 
+intelligentOpposition = DdCoordinatedLongSettings #DdCoordinatedMasterSettings #DdRandomMasterSettings
+intelligentOpposition.save_model_mode = defender_mode_enum.save
+intelligentOpposition = None
 
-# DdRandomMasterSettings = None
-DdRandomMasterSettings.save_model_mode = defender_mode_enum.save
 
 network_emulator = network.network_new.network_full #network_quick # network_full
 
@@ -225,23 +226,31 @@ assignedNetwork.emulator = network_emulator
 
 twist="{0}".format(network_emulator.name)
 commStrategy = calc_comm_strategy(assignedAgent.stateRepresentation)
-file_path = getPathName(assignedNetwork, assignedAgent, commStrategy, twist, trainHost)
 
-if assignedAgent.save_model_mode is defender_mode_enum.load and DdRandomMasterSettings \
-    and DdRandomMasterSettings.save_model_mode is defender_mode_enum.save:
+if (len(sys.argv)==4) and sys.argv[3] != "" :
+    file_path = sys.argv[3]
+    proper_path = getPathName(assignedNetwork, assignedAgent, commStrategy, twist, trainHost)
+
+    print("file should be: {0}".format(proper_path))
+else:
+    file_path = getPathName(assignedNetwork, assignedAgent, commStrategy, twist, trainHost)
+
+print('the filepath is {0}'.format(file_path))
+if assignedAgent.save_model_mode is defender_mode_enum.load and intelligentOpposition \
+    and intelligentOpposition.save_model_mode is defender_mode_enum.save:
     # we've set the filepath, now we need to ensure that we have the right adversary
     assert(trainHost==conAttack)
     trainHost = adversarialLeaf
 
 if loadAttacks:
-    runAttacks.run_attacks(assignedNetwork, assignedAgent, file_path, DdRandomMasterSettings)
+    runAttacks.run_attacks(assignedNetwork, assignedAgent, file_path, intelligentOpposition)
 
 
 
 else:
     #experiment = experiment.Experiment(conAttack, GeneralSettings, assignedNetwork, assignedAgent, twist="{2}{0}Alias{1}".format(numTiles, partition, network_emulator.name))
 
-    experiment = experiment.Experiment(trainHost, assignedNetwork, assignedAgent, DdRandomMasterSettings)
+    experiment = experiment.Experiment(trainHost, assignedNetwork, assignedAgent, intelligentOpposition)
 
     start_num = int(sys.argv[1])
     length_core= int(sys.argv[2])
@@ -254,7 +263,7 @@ else:
 
     if start_num==0:
         genericAgent = create_generic_dec(assignedAgent, assignedNetwork)
-        runAttacks.run_attacks(assignedNetwork, assignedAgent, file_path, DdRandomMasterSettings)
+        runAttacks.run_attacks(assignedNetwork, assignedAgent, file_path, intelligentOpposition)
 
 
 

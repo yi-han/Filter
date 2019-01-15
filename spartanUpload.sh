@@ -1,6 +1,6 @@
 #!/bin/bash
-for dest in punim0621 punim0636; do 
-# for dest in punim0636; do 
+#for dest in punim0621 punim0636; do 
+for dest in jpattison; do 
 	rsync -avz -e 'ssh' \
 	--include=*/ \
 	--include='**/*.py' \
@@ -43,8 +43,11 @@ for dest in punim0621 punim0636; do
 	runSarsaOriginal.py \
 	runSarsaDDQNCopy.py \
 	runAttacks.py \
+	runDDQNAdditional.py \
+	runSarsaAdditional.py \
 	--exclude='*' \
-	jpattison@spartan.hpc.unimelb.edu.au:/data/projects/$dest #punim0621
+	jpattison@spartan.hpc.unimelb.edu.au:/home/$dest
+	#jpattison@spartan.hpc.unimelb.edu.au:/data/projects/$dest #punim0621
 	#jpattison@spartan.hpc.unimelb.edu.au:/data/projects/punim0636  punim0621
 done
 

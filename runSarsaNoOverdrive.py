@@ -50,33 +50,6 @@ class LinearSarsaNoOverload(LinearSarsaSingular):
     reward_overload = None
 
 
-"""
-class LinearButPT(object):
-    name = "LinButPT"
-    max_epLength = 30 # or 60 if test
-    y = 0
-    tau = 0.0125
-    update_freq = None
-    batch_size = None
-    num_episodes = 64501#82501
-    pre_train_steps = 2000 * max_epLength
-    annealing_steps = 50000 * max_epLength #1000*max_epLength #60000 * max_epLength 
-    startE = 0.4 #0.4
-    endE = 0.0
-    stepDrop = (startE - endE)/annealing_steps
-    agent = None
-    sub_agent = linCen.Agent
-    group_size = 1 # number of filters each agent controls
-    #stateletFunction = getStateletNoCommunication
-    reward_overload = -1
-    stateRepresentation = stateRepresentationEnum.throttler  
-
-class LinearPtNoOverload(LinearButPT):
-    name = "LinearPtNoOverload"
-    reward_overload = None
-
-"""
-
 
 class LinearSarsaSingularDDQNCopy(object):
     # copy from ddqnSingleNoCommunicate
@@ -257,7 +230,7 @@ Settings to change
 
 
 """
-assignedNetwork = NetworkMalialisSmall
+assignedNetwork = NetworkSixFour
 assignedAgent = LinearSarsaSingular
 load_attack_path = "attackSimulations/{0}/".format(assignedNetwork.name)
 network_emulator = network.network_new.network_full # network_quick # network_full
@@ -267,7 +240,7 @@ loadAttacks = False
 
 assignedAgent.save_model_mode = defender_mode_enum.save
 trainHost = conAttack #coordAttack # conAttack #driftAttack #adversarialLeaf
-assignedNetwork.drift = 20
+assignedNetwork.drift = 25
 
 intelligentOpposition = DdCoordinatedMasterSettings #DdRandomMasterSettings
 intelligentOpposition.save_model_mode = defender_mode_enum.save
