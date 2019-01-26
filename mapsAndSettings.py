@@ -247,6 +247,34 @@ class DdCoordinatedLongSettings(DdCoordinatedMasterSettings):
     annealing_episodes = 78000
     startE = 0.6    
 
+class DdCoordinatedAltShortSettings(DdCoordinatedMasterSettings):
+    name = "ddCoordShortAlt"
+    pre_train_steps = 1000
+    annealing_episodes = 40000
+    num_episodes = 50000
+    tau = 0.0001
+    discount_factor = 0.5
+    startE = 0.3    
+
+class DdCoordinatedAltMedSettings(DdCoordinatedMasterSettings):
+    name = "ddCoordMedAlt"
+    pre_train_steps = 30000
+    annealing_episodes = 140000
+    num_episodes = 200000
+    tau = 0.0001
+    discount_factor = 0.3
+    startE = 0.6
+
+class DdCoordinatedAltLongSettings(DdCoordinatedMasterSettings):
+    name = "ddCoordLongAlt"
+    pre_train_steps = 60000
+    annealing_episodes = 200000
+    num_episodes = 300000
+    tau = 0.001
+    discount_factor = 0.5
+    startE = 1
+
+
 def create_generic_dec(ds, ns):
     """
     ds = defender_settings, ns = network_settings
@@ -284,7 +312,7 @@ def create_generic_dec(ds, ns):
 def getSummary(adversary_classes, load_path, agent, smart_adversary):
     summary = open("{0}/attackSummary.csv".format(load_path), "w")
     summary.write("Attack Type, Agent, Drift, Legal Packets Received, Legal Packets Served, Percentage, Server Failures, tau, pretraining, annealing, total_episodes, start_e, overload, \
-        adv_tau, adv_discount, adv_pretrain, adv_annealing_episodes, adv_start_e\n")
+        adv_tau, adv_discount, adv_pretrain, adv_annealing_episodes, adv_episodes, adv_start_e\n")
     agentName = agent.name
     for adversary_class in adversary_classes:
         attack_name = adversary_class.getName()
@@ -317,8 +345,8 @@ def getSummary(adversary_classes, load_path, agent, smart_adversary):
         if adversary_class != hosts.adversarialLeaf:
             summary.write(",,,,\n")
         else:
-            summary.write("{0},{1},{2},{3},{4}\n".format(smart_adversary.tau, smart_adversary.discount_factor,
-                smart_adversary.pre_train_steps, smart_adversary.annealing_episodes, smart_adversary.startE))
+            summary.write("{0},{1},{2},{3},{4},{5}\n".format(smart_adversary.tau, smart_adversary.discount_factor,
+                smart_adversary.pre_train_steps, smart_adversary.annealing_episodes, smart_adversary.num_episodes, smart_adversary.startE))
     summary.close()
 
 

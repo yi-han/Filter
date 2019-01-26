@@ -108,25 +108,27 @@ class Agent(aBase.Agent):
         if cpp.is_file():
             checkpoint_file = open(checkpoint_path,'r')
             last_checkpoint = checkpoint_file.readline()
+            last_checkpoint = load_path+'/'+last_checkpoint
         else:
             last_checkpoint = None
 
         dataDict = self.ai.getData()
-        name = Agent.getName()+'-'+str(i)+'.pkl'
+        name = str(i)+'.pkl'
 
-        with open(load_path+'/'+name, 'wb') as f:
-            # dump datafile
-            pickle.dump(dataDict, f, pickle.HIGHEST_PROTOCOL)
+        current_checkpoint_path = load_path+'/'+name
+        f = open(current_checkpoint_path, 'wb')
+        pickle.dump(dataDict, f, pickle.HIGHEST_PROTOCOL)
+        f.close()
 
         with open(checkpoint_path, 'w') as checkpoint_file:
             # update checkpoint to point to new datafile
             #checkpoint_file = open(checkpoint_path, 'w')
             checkpoint_file.write(name)
         
-        if last_checkpoint and Path(load_path+'/'+last_checkpoint).is_file():
+        if last_checkpoint and last_checkpoint != current_checkpoint_path and Path(last_checkpoint).is_file() and Path(current_checkpoint_path).is_file():
             # delete redundant datafile that was prior checkpoint
             # this happens at the end
-            os.remove(load_path+'/'+last_checkpoint)
+            os.remove(last_checkpoint)
 
         # with open(load_path+"/joblibBackup.sav", 'wb') as backupSave:
             # backupPickle.write("hello")
