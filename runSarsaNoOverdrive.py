@@ -205,71 +205,42 @@ class RandomAgent(object):
     stateRepresentation = stateRepresentationEnum.leaderAndIntermediate      
 
 
-
-# class GeneralSettings(object):
-#     # SaveAttackEnum = Enum('SaveAttack', 'neither save load')
-#     debug = False
-#     # save_attack = SaveAttackEnum.neither
-#     tileFunction = None
-
-
-
-
 # The class of the adversary to implement
 conAttack = hostClass.ConstantAttack
 shortPulse = hostClass.ShortPulse
 mediumPulse = hostClass.MediumPulse
 largePulse = hostClass.LargePulse
 gradualIncrease = hostClass.GradualIncrease
-# driftAttack = hostClass.DriftAttack
 coordAttack = hostClass.CoordinatedRandomNotGradual
 adversarialLeaf = hostClass.adversarialLeaf
 
+attackClasses = [conAttack, shortPulse, mediumPulse,
+    largePulse, gradualIncrease] 
+
 """
 Settings to change
-
-
 """
+
 assignedNetwork = NetworkSixFour
-assignedAgent = LinearSarsaSingular
+assignedAgent = LinearSarsaLAIDDQN200
 load_attack_path = "attackSimulations/{0}/".format(assignedNetwork.name)
 network_emulator = network.network_new.network_full # network_quick # network_full
 loadAttacks = False
 
 
 
-assignedAgent.save_model_mode = defender_mode_enum.save
+assignedAgent.save_model_mode = defender_mode_enum.load
 trainHost = conAttack #coordAttack # conAttack #driftAttack #adversarialLeaf
-assignedNetwork.drift = 25
+assignedNetwork.drift = 0
 
-intelligentOpposition = DdCoordinatedMasterSettings #DdRandomMasterSettings
+intelligentOpposition = DdCoordinatedLowlongDHighSettings #DdCoordinatedMasterSettings #DdRandomMasterSettings
 intelligentOpposition.save_model_mode = defender_mode_enum.save
-intelligentOpposition = None
+# intelligentOpposition = None
 
 ###
-
-assignedNetwork.emulator = network_emulator
-
-if assignedAgent.save_model_mode is defender_mode_enum.load and intelligentOpposition \
-    and intelligentOpposition.save_model_mode is defender_mode_enum.save:
-    # we've set the filepath, now we need to ensure that we have the right adversary
-    assert(trainHost==conAttack)
-    trainHost = adversarialLeaf
-
-
-
-attackClasses = [conAttack, shortPulse, mediumPulse,
-    largePulse, gradualIncrease] 
-
-if len(sys.argv)==4:
-    partition = sys.argv[3]
-else:
-    partition = ""
-
-
-
 assignedAgent.trained_drift = assignedNetwork.drift # we use this a copy of what the trained drift value is. We dont use this for the experiment
-
+assignedNetwork.emulator = network_emulator
+commStrategy = calc_comm_strategy(assignedAgent.stateRepresentation)
 
 """
 This is the encoder for the sarsa, this might be better positioned somewhere else
@@ -290,17 +261,24 @@ for max_hosts in assignedNetwork.max_hosts_per_level:
     level += 1
 assignedAgent.encoders = encoders
 
+twist = "{0}{1}".format(numTiles, network_emulator.name) #{2}{0}Alias{1}".format(numTiles, "", network_emulator.name)
 
-twist = "{2}{0}Alias{1}".format(numTiles, partition, network_emulator.name)
-commStrategy = calc_comm_strategy(assignedAgent.stateRepresentation)
 
 if (len(sys.argv)==4) and sys.argv[3] != "" :
     file_path = sys.argv[3]
     proper_path = getPathName(assignedNetwork, assignedAgent, commStrategy, twist, trainHost)
-
     print("file should be: {0}".format(proper_path))
 else:
     file_path = getPathName(assignedNetwork, assignedAgent, commStrategy, twist, trainHost)
+
+print('the filepath is {0}'.format(file_path))
+
+if assignedAgent.save_model_mode is defender_mode_enum.load and intelligentOpposition \
+    and intelligentOpposition.save_model_mode is defender_mode_enum.save:
+    # we've set the filepath, now we need to ensure that we have the right adversary
+    assert(trainHost==conAttack)
+    trainHost = adversarialLeaf
+
 
 print('the filepath is {0}'.format(file_path))
 

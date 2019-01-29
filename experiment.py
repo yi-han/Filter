@@ -152,6 +152,7 @@ class Experiment:
         #create lists to contain total rewards and steps per episode
         stepList = []
         rList = []
+        advRList = []
         loss = []
         total_steps = 0
         rewards_tampered = 0
@@ -178,7 +179,7 @@ class Experiment:
         loss_file = open("{0}/loss-{1}-{2}-{3}.csv".format(file_path,run_mode, self.adversary_class.getName(), prefix) ,"w")
         packet_served_file = open("{0}/packet_served-{1}-{2}-{3}.csv".format(file_path,run_mode, self.adversary_class.getName(), prefix),"w")
         print("Using the {0} agent:".format(name))
-        reward_file.write("Episode,StepsSoFar,TotalReward,LastReward,LengthEpisode,e,PerPacketIdeal\n")
+        reward_file.write("Episode,StepsSoFar,TotalReward,LastReward,LengthEpisode,e,PerPacketIdeal, AdvTotalReward, AdvLastReward\n")
         packet_served_file.write("Episode,PacketsReceived,PacketsServed,PercentageReceived,ServerFailures\n")
         #self.episode_rewards = []
 
@@ -206,6 +207,7 @@ class Experiment:
                 d = False # indicates that network is finished
                 rAll = 0 # accumulative reward for system in the episode. #TODO shouldn't contribute in pretraining
                 
+                advRAll = 0 # total reward for episode
                 for step in range(max_epLength):
                     #TODO make sure to do do pre_training_stuff
                     # print("my prediction is for {0}".format(net.get_state()))
@@ -226,14 +228,21 @@ class Experiment:
                         d = (step+1)==max_epLength
                         r = net.calculate_reward()
                         rAll += r
+
+
                         ### why are we putting in the current state??? Shouldn't it be last state
                         ### or better, shouldn't it involve both the last state and current state?
                         if not self.agent_settings.save_model_mode in self.agentLoadModes:
                             agent.update(net.last_state, last_action, net.get_state(), d, r, next_action = a)
 
-                        if self.adversarialMaster != None and not self.adversary_agent_settings.save_model_mode in self.agentLoadModes:
-                            # print("ls {0} la {1}\n\n\n".format(adv_last_state, adv_last_action))
-                            self.adversarialMaster.update(adv_last_state, adv_last_action, adv_state, d, r)  
+                        if self.adversarialMaster != None:
+                            adv_r = self.adversarialMaster.calc_reward(r)
+                            if not self.adversary_agent_settings.save_model_mode in self.agentLoadModes:
+                                self.adversarialMaster.update(adv_last_state, adv_last_action, adv_state, d, adv_r)
+                        else:
+                            adv_r = 0
+
+                        advRAll += adv_r
                         #if debug:                
                         # print("current_state: {0}".format(net.get_state()))
                         # # print("last state: {0}".format(net.last_state))
@@ -245,6 +254,9 @@ class Experiment:
 
                         # print("server state: {0}\n".format(net.switches[0].getWindow()))
                         
+
+
+
                         if r < 0:
                             fail += 1
                             fail_seg += 1
@@ -304,7 +316,7 @@ class Experiment:
                     print("E={0} Fails = {1} FailPer = {2}".format(e,fail_seg, (fail_seg*100/(1000*max_epLength))))
                     print("def | step {0} | action {1} | reward {2} | e {3}".format(step, last_action, r, e))
                     if self.adversarialMaster:
-                        print("adversary | ep {3} | action {0} | reward {1} | adv_e {2}".format(advAction, r, adv_e, ep_num))
+                        print("adversary | ep {3} | action {0} | reward {1} | adv_e {2}".format(advAction, adv_r, adv_e, ep_num))
                         print("adversary_state: {0}\n".format(adv_last_state))
                     fail_seg = 0
                 if prefix == 0 and ep_num % 10000 == 0:
@@ -317,7 +329,7 @@ class Experiment:
                 # save data generated
                 stepList.append(step)
                 rList.append(rAll)
-
+                advRList.append(advRAll)
                 # grab stats before doing two more
                 legit_served, legit_all, legit_per, server_failures = net.getLegitStats()
                 
@@ -331,7 +343,7 @@ class Experiment:
 
                 packet_served_file.write("{0}, {1}, {2}, {3}, {4}\n".format(ep_num, legit_served, legit_all, legit_per, server_failures))
 
-                reward_file.write("{0},{1},{2},{3},{4},{5},{6}\n".format(ep_num, total_steps, rList[-1], r, stepList[-1], e, agent_performance))
+                reward_file.write("{0},{1},{2},{3},{4},{5},{6},{7},{8}\n".format(ep_num, total_steps, rList[-1], r, stepList[-1], e, agent_performance, advRList[-1], adv_r))
                 if len(loss) > 0:
                     loss_file.write(str(ep_num) + "," + str(total_steps) + "," + str(loss[-1]) + "," + str(e) + "\n")
 

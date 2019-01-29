@@ -18,7 +18,7 @@ class CoordinatedAdvMaster():
 
     def __init__(self, adv_settings, network_setting, defender_path):
 
-
+        self.prior_agent_actions = 1
 
         self.pre_train_steps = adv_settings.pre_train_steps
         self.N_action = adv_settings.action_per_agent
@@ -37,7 +37,7 @@ class CoordinatedAdvMaster():
         self.agents = []
         self.defender_path = defender_path
 
-        N_adv_state = self.num_agents*4+3
+        N_adv_state = self.num_agents*(self.prior_agent_actions+1)+3 # plus one due to bandwiths
         for _ in range(self.num_agents):
             self.agents.append(ddAdvAgent.ddAdvAgent(N_adv_state, adv_settings))
 
@@ -131,10 +131,10 @@ class CoordinatedAdvMaster():
 
         # pThrottles = []
         for throttler in net.throttlers:
-            state.extend(throttler.past_throttles)
+            state.extend(throttler.past_throttles[-self.prior_agent_actions:])
         #     pThrottles.append(throttler.past_throttles)
         # print(pThrottles)
-
+        
         return np.array(state)
 
     def initiate_episode(self):
@@ -165,13 +165,13 @@ class CoordinatedAdvMaster():
         self.prior_actions.pop(0)
         self.prior_actions.append(action)
 
-    def update(self, last_state, last_actions, current_state, is_done, network_reward):
+    def update(self, last_state, last_actions, current_state, is_done, adv_reward):
         # provide the update function to each individual state
-        reward = self.calc_reward(network_reward)
+        # reward = self.calc_reward(network_reward)
 
         last_action = self.actions_to_action(last_actions)
 
-        self.myBuffer.store(np.array([deep_copy_state(last_state),last_action,reward,deep_copy_state(current_state),is_done,False])) 
+        self.myBuffer.store(np.array([deep_copy_state(last_state),last_action,adv_reward,deep_copy_state(current_state),is_done,False])) 
 
         
         # print("Update {0} {1}".format(last_state, last_actions))

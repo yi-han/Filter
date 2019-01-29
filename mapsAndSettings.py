@@ -274,6 +274,23 @@ class DdCoordinatedAltLongSettings(DdCoordinatedMasterSettings):
     discount_factor = 0.5
     startE = 1
 
+class DdCoordinatedLowlongDlowSettings(DdCoordinatedMasterSettings):
+    name = "ddCoordLowLongDLow"
+    pre_train_steps = 100000
+    annealing_episodes = 200000
+    num_episodes = 500000
+    tau = 0.0001
+    discount_factor = 0.3
+    startE = 0.5
+
+class DdCoordinatedLowlongDHighSettings(DdCoordinatedMasterSettings):
+    name = "ddCoordLowLongDHigh"
+    pre_train_steps = 100000
+    annealing_episodes = 200000
+    num_episodes = 500000
+    tau = 0.0001
+    discount_factor = 0.8
+    startE = 0.5
 
 def create_generic_dec(ds, ns):
     """
