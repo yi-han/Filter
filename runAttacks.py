@@ -3,6 +3,8 @@ import mapsAndSettings
 from enum import Enum
 import network.network_new as network_new
 import network.hosts as hostClass
+
+import copy
 """
 Rather than using runSARSA or runDDQN, have a master file that runs attacks for us
 
@@ -29,6 +31,10 @@ attackClasses = [conAttack, gradualIncrease, shortPulse, mediumPulse,
 #     save_model = SaveModelEnum.load
 
 def run_attacks(assignedNetwork, assignedAgent, file_path, adversaryAttacker, prefix):
+
+    assignedNetwork = copy.deepcopy(assignedNetwork)
+    assignedAgent = copy.deepcopy(assignedAgent)
+
 
     load_attack_path = "attackSimulations/{0}/".format(assignedNetwork.name)
     network_emulator = network_new.network_full # network_quick # network_full

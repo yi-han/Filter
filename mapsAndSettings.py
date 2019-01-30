@@ -327,7 +327,7 @@ def create_generic_dec(ds, ns):
 
 
 def getSummary(adversary_classes, load_path, agent, smart_adversary, prefix):
-    summary = open("{0}/attackSummary.csv".format(load_path), "w")
+    summary = open("{0}/attackSummary-{1}.csv".format(load_path,prefix), "w")
     summary.write("Attack Type, Agent, Drift, Legal Packets Received, Legal Packets Served, Percentage, Server Failures, tau, pretraining, annealing, total_episodes, start_e, overload, \
         adv_tau, adv_discount, adv_pretrain, adv_annealing_episodes, adv_episodes, adv_start_e\n")
     agentName = agent.name
