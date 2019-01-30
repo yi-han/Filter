@@ -37,7 +37,7 @@ class ddqnSingleNoCommunicate(object):
 
 class ddqnSingleSarsaCopy(object):
     # apart from 2000 pretrain and overload this is as close as it gets
-    name = "DDQNDecGenMalialisAttempt" #used to be DDQNDecGenMalialisNoOpt
+    name = "DONT USE" #used to be DDQNDecGenMalialisNoOpt
     max_epLength = 30 # or 60 if test
     y = 0
     tau = 0.1
@@ -201,19 +201,19 @@ attackClasses = [conAttack, shortPulse, mediumPulse,
 
 ###
 # Settings
-assignedNetwork =  NetworkSixFour #NetworkSingleTeamMalialisMedium
-assignedAgent = ddqn50MediumHierachical #ddqn100MediumHierarchical
+assignedNetwork =  NetworkMalialisSmall #NetworkSingleTeamMalialisMedium
+assignedAgent = ddqnMalialisTrue #ddqn100MediumHierarchical
 load_attack_path = "attackSimulations/{0}/".format(assignedNetwork.name)
 loadAttacks = False
 assignedAgent.encoders = None
 
-assignedAgent.save_model_mode = defender_mode_enum.load
+assignedAgent.save_model_mode = defender_mode_enum.save
 trainHost = conAttack #coordAttack # conAttack #driftAttack #adversarialLeaf
 assignedNetwork.drift = 0
 
 intelligentOpposition = DdCoordinatedLowlongDlowSettings #DdCoordinatedMasterSettings #DdRandomMasterSettings
 intelligentOpposition.save_model_mode = defender_mode_enum.save
-# intelligentOpposition = None
+intelligentOpposition = None
 
 
 network_emulator = network.network_new.network_full #network_quick # network_full
@@ -242,55 +242,26 @@ if assignedAgent.save_model_mode is defender_mode_enum.load and intelligentOppos
     assert(trainHost==conAttack)
     trainHost = adversarialLeaf
 
+
+start_num = int(sys.argv[1])
+length_core= int(sys.argv[2])
+
 if loadAttacks:
-    runAttacks.run_attacks(assignedNetwork, assignedAgent, file_path, intelligentOpposition)
+    for i in range(start_num, start_num+length_core):
 
-
+        runAttacks.run_attacks(assignedNetwork, assignedAgent, file_path, intelligentOpposition, i)
 
 else:
     #experiment = experiment.Experiment(conAttack, GeneralSettings, assignedNetwork, assignedAgent, twist="{2}{0}Alias{1}".format(numTiles, partition, network_emulator.name))
 
     experiment = experiment.Experiment(trainHost, assignedNetwork, assignedAgent, intelligentOpposition)
 
-    start_num = int(sys.argv[1])
-    length_core= int(sys.argv[2])
-
-    for i in range(length_core):
+    for i in range(start_num, length_core+start_num):
         genericAgent = create_generic_dec(assignedAgent, assignedNetwork)
         # genericAgent = None        
-        print("Im doing it for {0}".format(start_num+i))
-        experiment.run(start_num+i, genericAgent, file_path)
+        print("Im doing it for {0}".format(i))
+        experiment.run(i, genericAgent, file_path)
 
-    if start_num==0:
         genericAgent = create_generic_dec(assignedAgent, assignedNetwork)
-        runAttacks.run_attacks(assignedNetwork, assignedAgent, file_path, intelligentOpposition)
-
-
-
-"""
-if loadAttacks:
-    for attackClass in attackClasses:
-        genericAgent = create_generic_dec(assignedAgent, GeneralSettings, assignedNetwork)
-        # genericAgent = None
-        attack_location = load_attack_path+attackClass.getName()+".apkl"
-
-        exp = experiment.Experiment(attackClass, GeneralSettings, assignedNetwork, 
-            assignedAgent, twist="{0}".format(network_emulator.name), load_attack_path=attack_location)
-        exp.run(0, genericAgent)
-
-    getSummary(attackClasses, exp.load_path, assignedAgent)
-else:
-    experiment = experiment.Experiment(conAttack, GeneralSettings, assignedNetwork, assignedAgent, twist="{0}".format(network_emulator.name))
-    # experiment = experiment.Experiment(conAttack, GeneralSettings, assignedNetwork, assignedAgent, "double")
-
-
-    start_num = int(sys.argv[1])
-    length_core= int(sys.argv[2])
-
-    for i in range(length_core):
-        genericAgent = create_generic_dec(assignedAgent, GeneralSettings, assignedNetwork)
-        # genericAgent = None        
-        print("Im doing it for {0}".format(start_num+i))
-        experiment.run(start_num+i, genericAgent)
-"""
+        runAttacks.run_attacks(assignedNetwork, assignedAgent, file_path, intelligentOpposition, i)
 

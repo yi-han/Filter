@@ -46,16 +46,16 @@ def deep_copy_state(state):
 
 class Switch():
     def __init__(self, switch_id, is_filter, representation):
-        self.id = switch_id
-        self.source_links = []
-        self.destination_links = []
-        self.attatched_hosts = []
-        self.throttle_rate = 0
+        self.id = switch_id # id
+        self.source_links = [] # places sending traffic to switch
+        self.destination_links = [] # where traffic is getting sent
+        self.attatched_hosts = [] # used for network_quick, quick access for hosts attatched to this 
+        self.throttle_rate = 0 # the throttling rate for the specific switch
         
-        self.legal_window = 0
-        self.illegal_window = 0
-        self.dropped_legal_window = 0
-        self.dropped_illegal_window = 0
+        self.legal_window = 0 # over the last window, how much legal traffic has passed
+        self.illegal_window = 0 # over the last window, how much illegal traffic has passed
+        self.dropped_legal_window = 0 # how much legal traffic have we dropped over the last window
+        self.dropped_illegal_window = 0 # over last window, how much illegal traffic has passed
 
         self.legal_traffic = 0
         self.dropped_legal = 0
@@ -78,7 +78,7 @@ class Switch():
     def sendTraffic(self):
         # an initial part of passing traffic along
         num_dests = len(self.destination_links)
-
+        assert(num_dests == 1 or self.id == 0)
         legal_pass = self.legal_traffic * (1 - self.throttle_rate)
         legal_dropped = self.legal_traffic * self.throttle_rate        
         # legal_pass = int(self.legal_traffic * (1-self.throttle_rate))
@@ -373,6 +373,7 @@ class network_full(object):
             switch.sendTraffic()
 
         for switch in self.switches:
+            # simulates adding new traffic to the hosts
             switch.updateSwitch()
 
     def set_drop_probability(self, action):
@@ -414,6 +415,9 @@ class network_full(object):
                     self.switches[i].source_links.append(l)
                     self.switches[j].destination_links.append(l)                                    
 
+        # print("\n\n\nfinished initialising")
+        # for switch in self.switches:
+        #     print("switch {1} len = {0}".format(len(switch.destination_links), switch.id))
 
         for i in self.host_sources:
 

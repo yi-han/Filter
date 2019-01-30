@@ -28,7 +28,7 @@ attackClasses = [conAttack, gradualIncrease, shortPulse, mediumPulse,
 #     # save_attack = SaveAttackEnum.neither
 #     save_model = SaveModelEnum.load
 
-def run_attacks(assignedNetwork, assignedAgent, file_path, adversaryAttacker):
+def run_attacks(assignedNetwork, assignedAgent, file_path, adversaryAttacker, prefix):
 
     load_attack_path = "attackSimulations/{0}/".format(assignedNetwork.name)
     network_emulator = network_new.network_full # network_quick # network_full
@@ -45,11 +45,11 @@ def run_attacks(assignedNetwork, assignedAgent, file_path, adversaryAttacker):
         exp = experiment.Experiment(attackClass, assignedNetwork, 
             assignedAgent, None, load_attack_path=attack_location)
 
-        exp.run(0, genericAgent, file_path)
+        exp.run(prefix, genericAgent, file_path)
     if adversaryAttacker:
         adversaryAttacker.save_model_mode = mapsAndSettings.defender_mode_enum.test_short
 
-        attackClasses.append(adversarialLeaf)
+        # attackClasses.insert(adversarialLeaf, 0)
         print("doing adversaryAttacker")
         attackClass = adversarialLeaf
 
@@ -58,9 +58,9 @@ def run_attacks(assignedNetwork, assignedAgent, file_path, adversaryAttacker):
         exp = experiment.Experiment(attackClass, assignedNetwork, 
             assignedAgent, adversaryAttacker, load_attack_path=attack_location)
 
-        exp.run(0, genericAgent, file_path)
+        exp.run(prefix, genericAgent, file_path)
 
-    mapsAndSettings.getSummary(attackClasses, file_path, assignedAgent, adversaryAttacker)
+    mapsAndSettings.getSummary(attackClasses, file_path, assignedAgent, adversaryAttacker, prefix)
 
 
 

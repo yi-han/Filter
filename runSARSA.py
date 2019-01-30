@@ -229,13 +229,13 @@ loadAttacks = False
 
 
 
-assignedAgent.save_model_mode = defender_mode_enum.load
+assignedAgent.save_model_mode = defender_mode_enum.save
 trainHost = conAttack #coordAttack # conAttack #driftAttack #adversarialLeaf
 assignedNetwork.drift = 0
 
 intelligentOpposition = DdCoordinatedLowlongDHighSettings #DdCoordinatedMasterSettings #DdRandomMasterSettings
 intelligentOpposition.save_model_mode = defender_mode_enum.save
-# intelligentOpposition = None
+intelligentOpposition = None
 
 ###
 assignedAgent.trained_drift = assignedNetwork.drift # we use this a copy of what the trained drift value is. We dont use this for the experiment
@@ -282,59 +282,30 @@ if assignedAgent.save_model_mode is defender_mode_enum.load and intelligentOppos
 
 print('the filepath is {0}'.format(file_path))
 
+start_num = int(sys.argv[1])
+length_core= int(sys.argv[2])
 
 if loadAttacks:
-    runAttacks.run_attacks(assignedNetwork, assignedAgent, file_path, intelligentOpposition)
+    for i in range(start_num, start_num+length_core):
+
+        runAttacks.run_attacks(assignedNetwork, assignedAgent, file_path, intelligentOpposition, i)
 
 else:
     #experiment = experiment.Experiment(conAttack, GeneralSettings, assignedNetwork, assignedAgent, twist="{2}{0}Alias{1}".format(numTiles, partition, network_emulator.name))
 
     experiment = experiment.Experiment(trainHost, assignedNetwork, assignedAgent, intelligentOpposition)
 
-    start_num = int(sys.argv[1])
-    length_core= int(sys.argv[2])
 
-    for i in range(length_core):
+
+    for i in range(start_num, length_core+start_num):
         genericAgent = create_generic_dec(assignedAgent, assignedNetwork)
         # genericAgent = None        
-        print("Im doing it for {0}".format(start_num+i))
-        experiment.run(start_num+i, genericAgent, file_path)
+        print("Im doing it for {0}".format(i))
+        experiment.run(i, genericAgent, file_path)
 
-    if start_num==0:
         genericAgent = create_generic_dec(assignedAgent, assignedNetwork)
-        runAttacks.run_attacks(assignedNetwork, assignedAgent, file_path, intelligentOpposition)
+        runAttacks.run_attacks(assignedNetwork, assignedAgent, file_path, intelligentOpposition, i)
 
-
-"""
-
-for attackClass in attackClasses:
-    sarsaGeneric = create_generic_dec(assignedAgent, assignedNetwork)
-    # sarsaGeneric = None
-    
-    attack_location = load_attack_path+attackClass.getName()+".apkl"
-
-    exp = experiment.Experiment(attackClass, assignedNetwork, 
-        assignedAgent, twist= "NoPTTile1Save", load_attack_path=attack_location)
-    exp.run(0, sarsaGeneric)
-"""
-
-"""
-
-
-exp = experiment.Experiment(conAttack, assignedNetwork, 
-    assignedAgent, load_attack_path=None)
-
-
-start_num = int(sys.argv[1])
-length_core= int(sys.argv[2])
-
-for i in range(length_core):
-    sarsaGeneric = create_generic_dec(assignedAgent, assignedNetwork)
-    print("Im doing it for {0}".format(start_num+i))
-    exp.run(start_num+i, sarsaGeneric)
-    # exp.run(start_num+i)
-
-"""
 
 
 

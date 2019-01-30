@@ -188,10 +188,10 @@ class Experiment:
             if self.adversarialMaster:
                 self.adversarialMaster.__enter__()
             if self.agent_settings.save_model_mode in self.agentLoadModes: #mapsAndSettings.defender_mode_enum.test
-                agent.loadModel(self.file_path)
+                agent.loadModel(self.file_path, prefix)
 
             if self.adversarialMaster and self.adversary_agent_settings.save_model_mode in self.agentLoadModes:
-                self.adversarialMaster.loadModel(self.file_path)
+                self.adversarialMaster.loadModel(self.file_path, prefix)
 
             fail_seg = 0
             adv_last_action = None
@@ -239,6 +239,7 @@ class Experiment:
                             adv_r = self.adversarialMaster.calc_reward(r)
                             if not self.adversary_agent_settings.save_model_mode in self.agentLoadModes:
                                 self.adversarialMaster.update(adv_last_state, adv_last_action, adv_state, d, adv_r)
+                            self.adversarialMaster.update_past_state(adv_last_action)
                         else:
                             adv_r = 0
 
@@ -246,28 +247,33 @@ class Experiment:
                         #if debug:                
                         # print("current_state: {0}".format(net.get_state()))
                         # # print("last state: {0}".format(net.last_state))
-                        # # if step==20:
-                        # print("def | step {0} | action {1} | reward {2} | e {3}".format(step, last_action, r, e))
-                        # print("adversary | ep {3} | action {0} | reward {1} | e {2}".format(advAction, r, adv_e, ep_num))
-                        # print("adv_state {0}".format(adv_state))
-                        #     print("state = {1}, e = {0}".format(e, net.last_state))
+                        # if step in range(18,22):
+                        #     # print("def | step {0} | action {1} | reward {2} | e {3}".format(step, last_action, r, e))
+                        #     # print("adversary | ep {3} | action {0} | reward {1} | e {2}".format(advAction, r, adv_e, ep_num))
+                        #     # print("adv_state {0}".format(adv_state))
+                        #     #     print("state = {1}, e = {0}".format(e, net.last_state))
 
-                        # print("server state: {0}\n".format(net.switches[0].getWindow()))
-                        
-
-
+                        #     # print("server state: {0}\n".format(net.switches[0].getWindow()))
+                                
+                        #     print("In Episode - {0}".format(ep_num))
+                        #     print("def | step {0} | action {1} | reward {2} | e {3}".format(step, last_action, r, e))
+                        #     if self.adversarialMaster:
+                        #         print("adversary | ep {3} | action {0} | reward {1} | adv_e {2}".format(adv_last_action, adv_r, adv_e, ep_num))
+                        #         print("adversary_state: {0}\n".format(adv_last_state))
+                        # if step == 22:
+                        #     print("\n\n")
 
                         if r < 0:
                             fail += 1
                             fail_seg += 1
                     
-                    if self.adversarialMaster != None:
-                        adv_last_action = advAction
-                        adv_last_state = adv_state
+
                     net.step(a, step, advAction) # take the action, update the network
                     # ideally get rid of double up
 
-                          
+                    if self.adversarialMaster != None:
+                        adv_last_action = advAction
+                        adv_last_state = adv_state                          
                     
                     last_action = a   
                     total_steps += 1
@@ -316,14 +322,14 @@ class Experiment:
                     print("E={0} Fails = {1} FailPer = {2}".format(e,fail_seg, (fail_seg*100/(1000*max_epLength))))
                     print("def | step {0} | action {1} | reward {2} | e {3}".format(step, last_action, r, e))
                     if self.adversarialMaster:
-                        print("adversary | ep {3} | action {0} | reward {1} | adv_e {2}".format(advAction, adv_r, adv_e, ep_num))
+                        print("adversary | ep {3} | action {0} | reward {1} | adv_e {2}".format(adv_last_action, adv_r, adv_e, ep_num))
                         print("adversary_state: {0}\n".format(adv_last_state))
                     fail_seg = 0
-                if prefix == 0 and ep_num % 10000 == 0:
+                if ep_num % 10000 == 0:
                     if self.agent_settings.save_model_mode is mapsAndSettings.defender_mode_enum.save:  # only save the first iteration 
-                        agent.saveModel(self.file_path, ep_num)
+                        agent.saveModel(self.file_path, ep_num, prefix)
                     if self.adversarialMaster and self.adversary_agent_settings.save_model_mode is mapsAndSettings.defender_mode_enum.save:
-                        self.adversarialMaster.saveModel(self.file_path, ep_num)
+                        self.adversarialMaster.saveModel(self.file_path, ep_num, prefix)
 
 
                 # save data generated
@@ -348,13 +354,12 @@ class Experiment:
                     loss_file.write(str(ep_num) + "," + str(total_steps) + "," + str(loss[-1]) + "," + str(e) + "\n")
 
 
-            if prefix == 0:
-                if self.agent_settings.save_model_mode is mapsAndSettings.defender_mode_enum.save: # only save the first iteration 
-                    # save the model only every 10,000 steps
-                    agent.saveModel(self.file_path, ep_num)
+            if self.agent_settings.save_model_mode is mapsAndSettings.defender_mode_enum.save: # only save the first iteration 
+                # save the model only every 10,000 steps
+                agent.saveModel(self.file_path, ep_num, prefix)
 
-                if self.adversarialMaster and self.adversary_agent_settings.save_model_mode is mapsAndSettings.defender_mode_enum.save:
-                    self.adversarialMaster.saveModel(self.file_path, ep_num)
+            if self.adversarialMaster and self.adversary_agent_settings.save_model_mode is mapsAndSettings.defender_mode_enum.save:
+                self.adversarialMaster.saveModel(self.file_path, ep_num, prefix)
 
         reward_file.close()
         loss_file.close()

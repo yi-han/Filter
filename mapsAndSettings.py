@@ -118,7 +118,7 @@ class NetworkSingleTeamMalialisMedium(object):
     rate_attack_high = 6
     legal_probability = 0.6 # probability that is a good guys
     upper_boundary = 12.5
-    iterations_between_action = 5 
+    iterations_between_action = 10
 
     max_hosts_per_level = [2, 6, 12]
 
@@ -326,7 +326,7 @@ def create_generic_dec(ds, ns):
 
 
 
-def getSummary(adversary_classes, load_path, agent, smart_adversary):
+def getSummary(adversary_classes, load_path, agent, smart_adversary, prefix):
     summary = open("{0}/attackSummary.csv".format(load_path), "w")
     summary.write("Attack Type, Agent, Drift, Legal Packets Received, Legal Packets Served, Percentage, Server Failures, tau, pretraining, annealing, total_episodes, start_e, overload, \
         adv_tau, adv_discount, adv_pretrain, adv_annealing_episodes, adv_episodes, adv_start_e\n")
@@ -337,7 +337,7 @@ def getSummary(adversary_classes, load_path, agent, smart_adversary):
             attack_type = attack_name
         else:
             attack_type = smart_adversary.name
-        file_path = "{0}/packet_served-{1}-{2}-{3}.csv".format(load_path,agent.save_model_mode.name, attack_name, 0)
+        file_path = "{0}/packet_served-{1}-{2}-{3}.csv".format(load_path,agent.save_model_mode.name, attack_name, prefix)
         packet_file = pandas.read_csv(file_path)
         #print(packet_file)
         sum_packets_received = sum(packet_file.PacketsReceived)
@@ -366,6 +366,26 @@ def getSummary(adversary_classes, load_path, agent, smart_adversary):
                 smart_adversary.pre_train_steps, smart_adversary.annealing_episodes, smart_adversary.num_episodes, smart_adversary.startE))
     summary.close()
 
+# def create_summary_log(file_path, prefix):
+#     # if prefix == 0 then delete and recreate
+#     # otherwise just check it exists and if not create
+
+# def add_to_summary_log(file_path, prefix):
+#     # record that we completed this prefix
+#     # assert that this prefix wasn't already in it
+
+#     summary_log = open("{0}/sum_log.txt".format(file_path))
+
+#     for line in summary_log.read_lines():
+#         if int(line) == prefix:
+#             print("\n\nwarning likely error, prefix already in here\n")
+#             error_file = open("{0}/error_warning.txt".format(file_path))
+#             error_file.write("likely error with prefix")
+#             error_file.close()
+#     summary_log.close()
+#     summary_log = open("{0}/sum_log.txt".format(file_path), "a")
+#     summary_log.write("{0}\n".format(prefix))
+#     summary_log.close()
 
 
 def getPathName(network_settings, agent_settings, commStrategy, twist, host_train):

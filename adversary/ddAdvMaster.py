@@ -7,7 +7,7 @@ Assume everything moves same level
 """
 
 import math
-import adversary.ddAdvAgent as ddAdvAgent
+import adversary.ddDumbAgent as ddDumbAgent
 import numpy as np
 from numpy import random as random
 import sys
@@ -39,7 +39,7 @@ class CoordinatedAdvMaster():
 
         N_adv_state = self.num_agents*(self.prior_agent_actions+1)+3 # plus one due to bandwiths
         for _ in range(self.num_agents):
-            self.agents.append(ddAdvAgent.ddAdvAgent(N_adv_state, adv_settings))
+            self.agents.append(ddDumbAgent.ddDumbAgent())
 
         self.unassignedAgents = self.agents.copy() # hopefully we copy the references
         self.throttlerLeafDic = {}
@@ -64,21 +64,20 @@ class CoordinatedAdvMaster():
         self.sess = tf.Session()        
 
     def __enter__(self):
-        print("__enter__ RandomAdvMaster decentralised")
+        print("__enter__ CoordinatedAdvMaster decentralised")
         for agent in self.agents:
             #agent.__enter__()
-            #agent.sess = tf.Session()
+            agent.sess = tf.Session()
             #agent.sess.run(agent.init)
-            self.sess.run(self.init)
+        self.sess.run(self.init)
 
-            agent.__enter__()
 
     def __exit__(self, type, value, tb):
         print("\n\nmaster__exit__ called\n\n")
         self.sess.close()
 
-        for agent in self.agents:
-            agent.__exit__(type, value, tb)
+        # for agent in self.agents:
+        #     agent.__exit__(type, value, tb)
 
     def predict(self, state, e):
         """
@@ -164,6 +163,7 @@ class CoordinatedAdvMaster():
         action = self.actions_to_action(actions)
         self.prior_actions.pop(0)
         self.prior_actions.append(action)
+        # print("appending {0}".format(action))
 
     def update(self, last_state, last_actions, current_state, is_done, adv_reward):
         # provide the update function to each individual state
@@ -175,7 +175,7 @@ class CoordinatedAdvMaster():
 
         
         # print("Update {0} {1}".format(last_state, last_actions))
-        self.update_past_state(last_actions)
+        # self.update_past_state(last_actions)
 
     def actionReplay(self, current_state, batch_size):
         tree_idx, trainBatch, ISWeights = self.myBuffer.sample(batch_size) #Get a batch of experiences.
@@ -206,16 +206,16 @@ class CoordinatedAdvMaster():
 
         return l
 
-    def loadModel(self, load_path):
+    def loadModel(self, load_path, prefix):
         # note we are going to use the index of the array as an id
-        print("loading all models")
-        load_path += "/ddAdvMaster"
+        print("loading centralised adversary")
+        load_path += "/ddAdvMaster-{0}".format(prefix)
         ckpt = tf.train.get_checkpoint_state(load_path)
         self.saver.restore(self.sess,ckpt.model_checkpoint_path)        
 
 
-    def saveModel(self,load_path, iteration):
-        load_path += "/ddAdvMaster"
+    def saveModel(self,load_path, iteration, prefix):
+        load_path += "/ddAdvMaster-{0}".format(prefix)
         if not os.path.exists(load_path):
             os.makedirs(load_path)        
         self.saver.save(self.sess, load_path+'/model-'+str(iteration)+'.ckpt')

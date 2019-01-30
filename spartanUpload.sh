@@ -45,6 +45,8 @@ for dest in jpattison; do
 	runAttacks.py \
 	runDDQNAdditional.py \
 	runSarsaAdditional.py \
+	slurms_attacks.sh \
+	exp_attacks.slurm \
 	--exclude='*' \
 	jpattison@spartan.hpc.unimelb.edu.au:/home/$dest
 	#jpattison@spartan.hpc.unimelb.edu.au:/data/projects/$dest #punim0621

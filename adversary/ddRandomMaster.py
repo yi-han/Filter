@@ -151,7 +151,7 @@ class RandomAdvMaster():
             agent.update(last_state, last_action, current_state, is_done, reward)
         
 
-        self.update_past_state(last_actions)
+        # self.update_past_state(last_actions)
 
     def actionReplay(self, current_state, batch_size):
         # print(batch_size)
@@ -163,16 +163,16 @@ class RandomAdvMaster():
             l+= agent.actionReplay(current_state, batch_size)
         return l
 
-    def loadModel(self, load_path):
+    def loadModel(self, load_path, prefix):
         # note we are going to use the index of the array as an id
         print("loading all models")
         for i in range(len(self.agents)):
-            individual_path = load_path+'/{0}Adv'.format(i)
+            individual_path = load_path+'/{0}Adv-{1}'.format(i, prefix)
             self.agents[i].loadModel(individual_path)
 
-    def saveModel(self,load_path, interation):
+    def saveModel(self,load_path, interation, prefix):
         for i in range(len(self.agents)):
-            individual_path = load_path+'/{0}Adv'.format(i)
+            individual_path = load_path+'/{0}Adv-{1}'.format(i, prefix)
             self.agents[i].saveModel(individual_path, interation)
 
 

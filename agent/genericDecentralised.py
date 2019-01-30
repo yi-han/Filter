@@ -107,16 +107,16 @@ class AgentOfAgents(aBase.Agent):
             l+= agent.actionReplay(current_statelet, batch_size)
         return l
 
-    def loadModel(self, load_path):
+    def loadModel(self, load_path, prefix):
         # note we are going to use the index of the array as an id
         print("loading all models")
         for i in range(len(self.agents)):
-            individual_path = load_path+'/{0}'.format(i)
+            individual_path = load_path+'/{0}-{1}'.format(i, prefix)
             self.agents[i].loadModel(individual_path)
 
-    def saveModel(self,load_path, interation):
+    def saveModel(self,load_path, interation, prefix):
         for i in range(len(self.agents)):
-            individual_path = load_path+'/{0}'.format(i)
+            individual_path = load_path+'/{0}-{1}'.format(i, prefix)
             self.agents[i].saveModel(individual_path, interation)
 
     def getName(self):
