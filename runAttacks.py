@@ -32,24 +32,28 @@ attackClasses = [conAttack, gradualIncrease, shortPulse, mediumPulse,
 
 def run_attacks(assignedNetwork, assignedAgent, file_path, adversaryAttacker, prefix):
 
-    assignedNetwork = copy.deepcopy(assignedNetwork)
-    assignedAgent = copy.deepcopy(assignedAgent)
+    network = copy.deepcopy(assignedNetwork)
+    agent = copy.deepcopy(assignedAgent)
 
 
-    load_attack_path = "attackSimulations/{0}/".format(assignedNetwork.name)
+    load_attack_path = "attackSimulations/{0}/".format(network.name)
     network_emulator = network_new.network_full # network_quick # network_full
-    assignedNetwork.emulator = network_emulator
-    assignedNetwork.drift = 0 # we don't use drift in testing
-    assignedAgent.save_model_mode = mapsAndSettings.defender_mode_enum.test_short
+    network.emulator = network_emulator
+
+    initial_save_mode = agent.save_model_mode
+    initial_drift = network.drift
+
+    network.drift = 0 # we don't use drift in testing
+    agent.save_model_mode = mapsAndSettings.defender_mode_enum.test_short
 
     for attackClass in attackClasses:
         print(attackClass.getName())
-        genericAgent = mapsAndSettings.create_generic_dec(assignedAgent, assignedNetwork)
+        genericAgent = mapsAndSettings.create_generic_dec(agent, network)
         
         attack_location = load_attack_path+attackClass.getName()+".apkl"
 
-        exp = experiment.Experiment(attackClass, assignedNetwork, 
-            assignedAgent, None, load_attack_path=attack_location)
+        exp = experiment.Experiment(attackClass, network, 
+            agent, None, load_attack_path=attack_location)
 
         exp.run(prefix, genericAgent, file_path)
     if adversaryAttacker:
@@ -59,14 +63,20 @@ def run_attacks(assignedNetwork, assignedAgent, file_path, adversaryAttacker, pr
         print("doing adversaryAttacker")
         attackClass = adversarialLeaf
 
-        genericAgent = mapsAndSettings.create_generic_dec(assignedAgent, assignedNetwork)
+        genericAgent = mapsAndSettings.create_generic_dec(agent, network)
         attack_location = load_attack_path+attackClass.getName()+".apkl"
-        exp = experiment.Experiment(attackClass, assignedNetwork, 
-            assignedAgent, adversaryAttacker, load_attack_path=attack_location)
+        exp = experiment.Experiment(attackClass, network, 
+            agent, adversaryAttacker, load_attack_path=attack_location)
 
         exp.run(prefix, genericAgent, file_path)
 
-    mapsAndSettings.getSummary(attackClasses, file_path, assignedAgent, adversaryAttacker, prefix)
+    mapsAndSettings.getSummary(attackClasses, file_path, agent, adversaryAttacker, prefix)
+
+    #undo changes
+
+    network.drift = initial_drift
+    agent.save_model_mode = initial_save_mode
+
 
 
 
