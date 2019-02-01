@@ -57,8 +57,10 @@ def run_attacks(assignedNetwork, assignedAgent, file_path, adversaryAttacker, pr
 
         exp.run(prefix, genericAgent, file_path)
     if adversaryAttacker:
+        init_adv_save_model = adversaryAttacker.save_model_mode
         adversaryAttacker.save_model_mode = mapsAndSettings.defender_mode_enum.test_short
 
+        
         # attackClasses.insert(adversarialLeaf, 0)
         print("doing adversaryAttacker")
         attackClass = adversarialLeaf
@@ -69,9 +71,10 @@ def run_attacks(assignedNetwork, assignedAgent, file_path, adversaryAttacker, pr
             agent, adversaryAttacker, load_attack_path=attack_location)
 
         exp.run(prefix, genericAgent, file_path)
-
+        adversaryAttacker.save_model_mode = init_adv_save_model
+    attackClasses.append(adversarialLeaf)
     mapsAndSettings.getSummary(attackClasses, file_path, agent, adversaryAttacker, prefix)
-
+    attackClasses.remove(adversarialLeaf)
     #undo changes
 
     network.drift = initial_drift

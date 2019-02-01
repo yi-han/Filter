@@ -328,8 +328,7 @@ def create_generic_dec(ds, ns):
 
 def getSummary(adversary_classes, load_path, agent, smart_adversary, prefix):
     summary = open("{0}/attackSummary-{1}.csv".format(load_path,prefix), "w")
-    summary.write("Attack Type, Agent, Drift, Legal Packets Received, Legal Packets Served, Percentage, Server Failures, tau, pretraining, annealing, total_episodes, start_e, overload, \
-        adv_tau, adv_discount, adv_pretrain, adv_annealing_episodes, adv_episodes, adv_start_e\n")
+    summary.write("AttackType,Agent,Drift,LegalPacketsReceived,LegalPacketsServed,Percentage,ServerFailures,Tau,Pretraining,Annealing,TotalEpisodes,start_e,overload,adv_tau,adv_discount,adv_pretrain,adv_annealing_episodes,adv_episodes,adv_start_e\n")
     agentName = agent.name
     for adversary_class in adversary_classes:
         attack_name = adversary_class.getName()
@@ -366,26 +365,6 @@ def getSummary(adversary_classes, load_path, agent, smart_adversary, prefix):
                 smart_adversary.pre_train_steps, smart_adversary.annealing_episodes, smart_adversary.num_episodes, smart_adversary.startE))
     summary.close()
 
-# def create_summary_log(file_path, prefix):
-#     # if prefix == 0 then delete and recreate
-#     # otherwise just check it exists and if not create
-
-# def add_to_summary_log(file_path, prefix):
-#     # record that we completed this prefix
-#     # assert that this prefix wasn't already in it
-
-#     summary_log = open("{0}/sum_log.txt".format(file_path))
-
-#     for line in summary_log.read_lines():
-#         if int(line) == prefix:
-#             print("\n\nwarning likely error, prefix already in here\n")
-#             error_file = open("{0}/error_warning.txt".format(file_path))
-#             error_file.write("likely error with prefix")
-#             error_file.close()
-#     summary_log.close()
-#     summary_log = open("{0}/sum_log.txt".format(file_path), "a")
-#     summary_log.write("{0}\n".format(prefix))
-#     summary_log.close()
 
 
 def getPathName(network_settings, agent_settings, commStrategy, twist, host_train):

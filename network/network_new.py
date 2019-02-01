@@ -420,7 +420,6 @@ class network_full(object):
         #     print("switch {1} len = {0}".format(len(switch.destination_links), switch.id))
 
         for i in self.host_sources:
-
             host = self.hostClass(self.switches[i], self.rate_attack_low, self.rate_attack_high,
                 self.rate_legal_low, self.rate_legal_high, self.max_epLength, adversarialMaster = self.adversaryMaster)
             self.hosts.append(host)

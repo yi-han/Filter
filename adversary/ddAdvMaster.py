@@ -210,6 +210,7 @@ class CoordinatedAdvMaster():
         # note we are going to use the index of the array as an id
         print("loading centralised adversary")
         load_path += "/ddAdvMaster-{0}".format(prefix)
+        print(load_path)
         ckpt = tf.train.get_checkpoint_state(load_path)
         self.saver.restore(self.sess,ckpt.model_checkpoint_path)        
 
