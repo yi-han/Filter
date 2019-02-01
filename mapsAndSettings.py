@@ -211,11 +211,11 @@ class NetworkTwelveThrottleHeavy(object):
 class DdRandomMasterSettings(object):
     name = "ddrandomMasterDecentralised"
     pre_train_steps = 1000
-    num_episodes = 120001
+    num_episodes = 700000
     tau = 0.001
-    discount_factor = 0.3
-    annealing_episodes = 78000
-    startE = 0.3
+    discount_factor = 0.5
+    annealing_episodes = 500000
+    startE = 1
     endE = 0.0
     update_freq = 4
     batch_size = 32

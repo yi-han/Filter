@@ -15,7 +15,8 @@ class RandomAdvMaster():
 
     def __init__(self, adv_settings, network_setting, defender_path):
 
-
+        self.prior_agent_actions = 1 # number of actions by the defender we use in state
+        self.prior_adversary_actions = 3 # number of actions by advesary we use in state
 
         self.pre_train_steps = adv_settings.pre_train_steps
         self.action_per_agent = adv_settings.action_per_agent
@@ -35,7 +36,9 @@ class RandomAdvMaster():
         self.agents = []
         self.defender_path = defender_path
 
-        N_adv_state = self.num_agents*7
+        #N_adv_state = self.num_agents*7
+        N_adv_state = self.num_agents*(self.prior_agent_actions+1 + self.prior_adversary_actions)# plus one due to bandwiths
+        print("adv_stat size is {0}".format(N_adv_state))
         for _ in range(self.num_agents):
             self.agents.append(ddAdvAgent.ddAdvAgent(N_adv_state, adv_settings))
 
@@ -102,14 +105,16 @@ class RandomAdvMaster():
         # print("\n\n")
         state = self.bandwidths.copy() # start off with bandwidths
         # print(state)
-        # print(self.prior_actions)
+        #print(self.prior_actions)
+        #print("actions done")
+        # state.extend(self.prior_actions)
         for prior_action in self.prior_actions:
             
             state.extend(prior_action)
 
         # pThrottles = []
         for throttler in net.throttlers:
-            state.extend(throttler.past_throttles)
+            state.extend(throttler.past_throttles[-self.prior_agent_actions:])
         #     pThrottles.append(throttler.past_throttles)
         # print(pThrottles)
         # print(state)

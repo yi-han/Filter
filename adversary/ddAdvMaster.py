@@ -18,8 +18,8 @@ class CoordinatedAdvMaster():
 
     def __init__(self, adv_settings, network_setting, defender_path):
 
-        self.prior_agent_actions = 1
-
+        self.prior_agent_actions = 1 # number of actions by the defender we use in state
+        self.prior_adversary_actions = 3 # number of actions by advesary we use in state
         self.pre_train_steps = adv_settings.pre_train_steps
         self.N_action = adv_settings.action_per_agent
         self.tau = adv_settings.tau
@@ -37,7 +37,8 @@ class CoordinatedAdvMaster():
         self.agents = []
         self.defender_path = defender_path
 
-        N_adv_state = self.num_agents*(self.prior_agent_actions+1)+3 # plus one due to bandwiths
+        N_adv_state = self.num_agents*(self.prior_agent_actions+1)+self.prior_adversary_actions # plus one due to bandwiths
+        
         for _ in range(self.num_agents):
             self.agents.append(ddDumbAgent.ddDumbAgent())
 
@@ -48,11 +49,10 @@ class CoordinatedAdvMaster():
 
 
         N_action =  self.N_action
-        N_state = N_adv_state
 
-        self.N_state = N_adv_state
-        self.mainQN = Qnetwork(N_state, N_action)
-        self.targetQN = Qnetwork(N_state, N_action)
+        self.N_adv_state = N_adv_state
+        self.mainQN = Qnetwork(N_adv_state, N_action)
+        self.targetQN = Qnetwork(N_adv_state, N_action)
         self.init = tf.global_variables_initializer()
         self.saver = tf.train.Saver()
         self.trainables = tf.trainable_variables()
@@ -119,7 +119,7 @@ class CoordinatedAdvMaster():
         and bandwidth emmitted by each agent over last 3 steps
         last 3 
         """
-        assert(len(self.prior_actions) == 3)
+        assert(len(self.prior_actions) == self.prior_adversary_actions)
         
         # print("\n\n")
         state = self.bandwidths.copy() # start off with bandwidths
