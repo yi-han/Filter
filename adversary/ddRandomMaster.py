@@ -90,7 +90,7 @@ class RandomAdvMaster():
         if network_reward<0:
             return 1
         else:
-            return 1-(1.1*network_reward)
+            return 1-network_reward
 
 
 
@@ -146,9 +146,9 @@ class RandomAdvMaster():
         self.prior_actions.pop(0)
         self.prior_actions.append(actions)
 
-    def update(self, last_state, last_actions, current_state, is_done, network_reward):
+    def update(self, last_state, last_actions, current_state, is_done, reward):
         # provide the update function to each individual state
-        reward = self.calc_reward(network_reward)
+        # reward = self.calc_reward(network_reward)
         for i in range(len(self.agents)):
             agent = self.agents[i]
             last_action = last_actions[i]

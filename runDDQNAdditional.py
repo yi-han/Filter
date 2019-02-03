@@ -24,7 +24,7 @@ class ddqnSingleNoCommunicate(object):
     tau = 0.01 #Rate to update target network toward primary network. 
     update_freq = 4 #How often to perform a training step.
     batch_size = 32 #How many experiences to use for each training step.
-    num_episodes = 100001 #200001#    
+    num_episodes = 100001 #100001#    
     pre_train_steps = 20000 * max_epLength #40000 * max_epLength #
     annealing_steps = 60000 * max_epLength  #120000 * max_epLength  #
     startE = 1
@@ -201,19 +201,19 @@ attackClasses = [conAttack, shortPulse, mediumPulse,
 
 ###
 # Settings
-assignedNetwork =  NetworkMalialisSmall #NetworkSingleTeamMalialisMedium
-assignedAgent = ddqnMalialisTrue #ddqn100MediumHierarchical
+assignedNetwork =  NetworkSingleTeamMalialisMedium #NetworkSingleTeamMalialisMedium
+assignedAgent = ddqnSingleNoCommunicate #ddqn100MediumHierarchical
 load_attack_path = "attackSimulations/{0}/".format(assignedNetwork.name)
 loadAttacks = False
 assignedAgent.encoders = None
 
-assignedAgent.save_model_mode = defender_mode_enum.save
+assignedAgent.save_model_mode = defender_mode_enum.load
 trainHost = conAttack #coordAttack # conAttack #driftAttack #adversarialLeaf
 assignedNetwork.drift = 0
 
-intelligentOpposition = DdCoordinatedLowlongDlowSettings #DdCoordinatedMasterSettings #DdRandomMasterSettings
+intelligentOpposition = DdRandomMasterSettings #DdCoordinatedLowlongDlowSettings #DdCoordinatedMasterSettings #DdRandomMasterSettings
 intelligentOpposition.save_model_mode = defender_mode_enum.save
-intelligentOpposition = None
+# intelligentOpposition = None
 
 
 network_emulator = network.network_new.network_full #network_quick # network_full
@@ -248,7 +248,6 @@ length_core= int(sys.argv[2])
 
 if loadAttacks:
     for i in range(start_num, start_num+length_core):
-
         runAttacks.run_attacks(assignedNetwork, assignedAgent, file_path, intelligentOpposition, i)
 
 else:

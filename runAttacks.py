@@ -72,9 +72,10 @@ def run_attacks(assignedNetwork, assignedAgent, file_path, adversaryAttacker, pr
 
         exp.run(prefix, genericAgent, file_path)
         adversaryAttacker.save_model_mode = init_adv_save_model
-    attackClasses.append(adversarialLeaf)
+        attackClasses.append(adversarialLeaf)
     mapsAndSettings.getSummary(attackClasses, file_path, agent, adversaryAttacker, prefix)
-    attackClasses.remove(adversarialLeaf)
+    if adversaryAttacker:
+        attackClasses.remove(adversarialLeaf)
     #undo changes
 
     network.drift = initial_drift

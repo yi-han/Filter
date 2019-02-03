@@ -5,7 +5,7 @@ sed 's/sampleDDQNText/advDecSmall/g' temp1.slurm > output.slurm
 # sleep 5
 sed 's/0 2/0 1/g' output.slurm -i 
 sbatch output.slurm
-sed 's/runDDQN/runSarsaNoOverdrive/g' output.slurm -i
+sed 's/runDDQN/runDDQNAdditional/g' output.slurm -i
 sbatch output.slurm
 # sed 's/0 2/6 2/g' output.slurm -i
 # sbatch output.slurm
