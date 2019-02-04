@@ -13,6 +13,7 @@ import adversary.ddRandomMaster as ddRandomMaster
 import adversary.ddAdvMaster as ddAdvMaster
 import pandas
 import network.hosts as hosts
+import agent.AIMD
 # defender_mode_enum = Enum('SaveModel', 'neither save load test_short')
 
 class defender_mode_enum(Enum):
@@ -25,10 +26,34 @@ class stateRepresentationEnum(Enum):
     leaderAndIntermediate = 1 
     server = 2  # all the way to the server
     allThrottlers = 3
-
+    only_server = 4
 class advesaryTypeEnum(Enum):
     standard = 0
     ddRandomMaster = 1 
+
+
+class AIMDsettings(object):
+    name = "AIMD"
+    group_size = 1
+    delta = 0.2 # additive increase
+    beta = 2 # multiplicative decrease
+    epsilon = 0.1
+    stateRepresentation = stateRepresentationEnum.only_server # WRONG
+    sub_agent = agent.AIMD.AIMDagent
+
+    num_episodes = 100001
+    max_epLength = 30
+    y = None
+    tau = None
+    update_freq = None
+    batch_size = None
+    pre_train_steps = 0
+    annealing_steps = 0
+    startE = 0
+    endE = 0
+    stepDrop = 0
+    reward_overload = None
+
 
 
 class NetworkSimpleBasic(object):
@@ -95,6 +120,7 @@ class NetworkMalialisSmall(object):
     rate_attack_high = 6
     legal_probability = 0.6 # probability that is a good guys
     upper_boundary = 8
+    lower_boundary = 6 # for AIMD
     iterations_between_action = 10
 
     max_hosts_per_level = [3] # no communication therefore just one
@@ -117,7 +143,9 @@ class NetworkSingleTeamMalialisMedium(object):
     rate_attack_low = 2.5 
     rate_attack_high = 6
     legal_probability = 0.6 # probability that is a good guys
-    upper_boundary = 12.5
+    upper_boundary = 12.5 # Mal would have used 14
+    lower_boundary = 10 # for AIMD
+
     iterations_between_action = 10
 
     max_hosts_per_level = [2, 6, 12]
@@ -127,7 +155,8 @@ class NetworkSixFour(NetworkSingleTeamMalialisMedium):
     name = "six_four"
     host_sources = [3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5,
     7, 7, 7, 7, 8, 8, 8, 8, 9, 9, 9, 9]
-    upper_boundary = 25
+    upper_boundary = 25 # malialis would have used 26
+    lower_boundary = 23
     max_hosts_per_level = [4, 12, 24]
 
 class NetworkMalialisTeamFull(object):
@@ -299,7 +328,12 @@ def create_generic_dec(ds, ns):
     We can make agents into groups.
 
     """
+
+    if ds.name == "AIMD":
+        return ds.sub_agent(ns, ds)
+
     throttlers_not_allocated = ns.N_state
+
     group_size = ds.group_size
     sub_agent = ds.sub_agent
     #num_teams = math.ceil(ns.N_state/group_size)
@@ -402,6 +436,8 @@ def calc_comm_strategy(stateRepresentation):
         return "IncludeServer"
     elif stateRepresentation == stateRepresentationEnum.allThrottlers:
         return "CommAll"
+    else:
+        return stateRepresentation.name
 
 
 

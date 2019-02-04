@@ -75,18 +75,22 @@ class Switch():
         self.is_filter = is_filter
         self.reset()
 
-    def sendTraffic(self):
+    def sendTraffic(self, defender_agent):
         # an initial part of passing traffic along
+
+
+        throttle_rate = defender_agent.calculateThrottleRate(self.getImmediateState(), self.throttle_rate)
+
         num_dests = len(self.destination_links)
         assert(num_dests == 1 or self.id == 0)
-        legal_pass = self.legal_traffic * (1 - self.throttle_rate)
-        legal_dropped = self.legal_traffic * self.throttle_rate        
-        # legal_pass = int(self.legal_traffic * (1-self.throttle_rate))
+        legal_pass = self.legal_traffic * (1 - throttle_rate)
+        legal_dropped = self.legal_traffic * throttle_rate        
+        # legal_pass = int(self.legal_traffic * (1-throttle_rate))
         # legal_dropped = self.legal_traffic - legal_pass
 
-        illegal_pass = self.illegal_traffic * (1 - self.throttle_rate)
-        illegal_dropped = self.illegal_traffic * self.throttle_rate
-        # illegal_pass = int(self.illegal_traffic * (1 - self.throttle_rate)) 
+        illegal_pass = self.illegal_traffic * (1 - throttle_rate)
+        illegal_dropped = self.illegal_traffic * throttle_rate
+        # illegal_pass = int(self.illegal_traffic * (1 - throttle_rate)) 
         # illegal_dropped = self.illegal_traffic - illegal_pass
 
         # update all other switches with new traffic values
@@ -172,6 +176,11 @@ class Switch():
                 assert currentNode.id!=0 #we shouldn't be getting server
                 #print(currentNode.id)
                 self.stateSwitches.append(currentNode)            
+        elif self.representation == stateRepresentationEnum.only_server:
+            currentNode = currentNode.destination_links[0].destination_switch
+            while currentNode.id != 0:
+                currentNode = currentNode.destination_links[0].destination_switch
+            self.stateSwitches = [currentNode]
         else:
             print(self.representation)
             assert(1==2)
@@ -358,7 +367,7 @@ class network_full(object):
         return response
 
         
-    def move_traffic(self, time_step, adv_action):
+    def move_traffic(self, time_step, defender_agent, adv_action):
         # update the network
         if adv_action:
             assert( self.adversaryMaster!=None)
@@ -370,7 +379,8 @@ class network_full(object):
 
         for switch in self.switches:
             # ensure all traffic sent before we update
-            switch.sendTraffic()
+            #print(defender_agent)
+            switch.sendTraffic(defender_agent)
 
         for switch in self.switches:
             # simulates adding new traffic to the hosts
@@ -545,7 +555,7 @@ class network_full(object):
             return legitimate_rate/legitimate_sent
 
 
-    def step(self, action, step_count, adv_action = None):
+    def step(self, action, step_count, defender_agent, adv_action = None):
         # input the actions. Just sets drop probabilities at the moment
         # ideally i would move calculations here
         # adv action is action by adversary
@@ -560,7 +570,7 @@ class network_full(object):
 
 
         for i in range(self.iterations_between_action): # each time delay is 10 ms, 10*200 = 2000 ms = 2 seconds
-           self.move_traffic(step_count, adv_action)
+           self.move_traffic(step_count, defender_agent, adv_action)
            #self.rewards_per_step.append(self.calculate_reward())
 
 

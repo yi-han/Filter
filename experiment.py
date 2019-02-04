@@ -66,7 +66,7 @@ class Experiment:
 
         self.agentLoadModes = [mapsAndSettings.defender_mode_enum.test_short, mapsAndSettings.defender_mode_enum.load]
 
-        AgentSettings.trained_drift != -1 # ensure we have it set, dont ever use in experiment
+        assert AgentSettings.trained_drift != -1 # ensure we have it set, dont ever use in experiment
 
     def run(self, prefix, preloaded_agent, file_path):
         N_action = self.network_settings.N_action
@@ -267,8 +267,7 @@ class Experiment:
                             fail += 1
                             fail_seg += 1
                     
-
-                    net.step(a, step, advAction) # take the action, update the network
+                    net.step(a, step, agent, advAction) # take the action, update the network
                     # ideally get rid of double up
 
                     if self.adversarialMaster != None:
@@ -342,7 +341,7 @@ class Experiment:
                 for f_step in range(2):
                     # do two steps without learning (so nothing implicit) and see if we can see how well it performs
                     a = agent.predict(net.get_state(), 0)
-                    net.step(a, step+f_step, adv_last_action)
+                    net.step(a, step+f_step, agent, adv_last_action)
 
                 # how well the system performs assuming no exploration (only useful for training)
                 agent_performance = net.getPacketServedAtMoment()

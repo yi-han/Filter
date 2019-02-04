@@ -153,4 +153,7 @@ class AgentOfAgents(aBase.Agent):
 
 #             action = action*agent.N_action+agentAction
 
+    def calculateThrottleRate(self, _, current_rate):
+        # irrelevent for throttle agents as we already calculated the throttle
 
+        return current_rate
