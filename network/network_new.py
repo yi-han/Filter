@@ -78,9 +78,10 @@ class Switch():
     def sendTraffic(self, defender_agent):
         # an initial part of passing traffic along
 
-
-        throttle_rate = defender_agent.calculateThrottleRate(self.getImmediateState(), self.throttle_rate)
-
+        if self.is_filter:
+            throttle_rate = defender_agent.calculateThrottleRate(self.getImmediateState(), self.throttle_rate)
+        else:
+            throttle_rate = 0
         num_dests = len(self.destination_links)
         assert(num_dests == 1 or self.id == 0)
         legal_pass = self.legal_traffic * (1 - throttle_rate)
@@ -94,6 +95,10 @@ class Switch():
         # illegal_dropped = self.illegal_traffic - illegal_pass
 
         # update all other switches with new traffic values
+
+        self.recorded_pass += (legal_pass + illegal_pass)
+        self.recorded_drop += (legal_dropped + illegal_dropped)
+
         for dest in self.destination_links:
             dest.destination_switch.new_legal += (legal_pass/num_dests)
             dest.destination_switch.new_dropped_legal += ((legal_dropped + self.dropped_legal)/num_dests)
@@ -125,7 +130,9 @@ class Switch():
         self.illegal_window = 0
         self.dropped_legal_window = 0
         self.dropped_illegal_window = 0
-        
+
+        self.recorded_pass = 0 # we use this to calculate the average throttle in each step
+        self.recorded_drop = 0
 
     def getWindow(self):
         return self.legal_window + self.illegal_window
@@ -136,8 +143,7 @@ class Switch():
     def setThrottle(self, throttle_rate):
         assert(self.is_filter)
         self.throttle_rate = throttle_rate
-        self.past_throttles.append(throttle_rate*10)
-        self.past_throttles.pop(0)
+
 
     def reset(self):
         self.legal_traffic = 0
@@ -568,12 +574,13 @@ class network_full(object):
         self.set_drop_probability(action)
         
 
-
+        # reset_throttle_count and record_average_throttle seek to determine what the true throttle percentage actually was
+         
         for i in range(self.iterations_between_action): # each time delay is 10 ms, 10*200 = 2000 ms = 2 seconds
            self.move_traffic(step_count, defender_agent, adv_action)
            #self.rewards_per_step.append(self.calculate_reward())
 
-
+        self.record_average_throttle()
 
         #self.adversary.takeStep()
         # should pass the data along nodes
@@ -610,8 +617,14 @@ class network_full(object):
                 dest = None
             print("id {0} | load {1} | window {2} | destination {3}".format(switch.id, switch.getImmediateState(), switch.getWindow(), dest))
 
-
-
+    def record_average_throttle(self):
+        for switch in self.switches:
+            if (switch.recorded_drop + switch.recorded_pass) == 0:
+                new_throttle = 0
+            else:
+                new_throttle = switch.recorded_drop / (switch.recorded_drop + switch.recorded_pass)
+            switch.past_throttles.append(new_throttle*10) # convert to a whole number
+            switch.past_throttles.pop(0)
 
 class network_quick(object):
     """

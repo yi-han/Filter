@@ -13,7 +13,7 @@ import runAttacks
 import agent.ddqnCentralised as ddCen
 # import agent.ddqnDecentralised as ddDec
 
-from mapsAndSettings import *
+#from mapsAndSettings import *
 assert(len(sys.argv)>= 3)
 
 class ddqnSingleNoCommunicate(object):
@@ -201,7 +201,7 @@ attackClasses = [conAttack, shortPulse, mediumPulse,
 
 ###
 # Settings
-assignedNetwork =  NetworkMalialisSmall #NetworkSingleTeamMalialisMedium
+assignedNetwork =  NetworkSingleTeamMalialisMedium #NetworkSingleTeamMalialisMedium
 assignedAgent =  AIMDsettings #ddqnSingleNoCommunicate #ddqn100MediumHierarchical
 load_attack_path = "attackSimulations/{0}/".format(assignedNetwork.name)
 loadAttacks = True

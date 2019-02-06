@@ -79,15 +79,5 @@ class AIMDagent():
         else:
             return 1 - (r_per_iteration / current_load)
 
-"""
-rate allowed is 5
-load is 7
-
-I need to work out (1 - x) * load = allowed
-
-1 - (allowed / load)
-
-7 * (1 - (1 - (5 / 7) ) )
-"""
 
 

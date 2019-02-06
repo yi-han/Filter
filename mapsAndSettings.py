@@ -31,20 +31,41 @@ class advesaryTypeEnum(Enum):
     standard = 0
     ddRandomMaster = 1 
 
-
-class AIMDsettings(object):
+class AIMDmallSmall(object):
     name = "AIMD"
     group_size = 1
-    delta = 0.2 # additive increase
+    delta = 0.3 # additive increase
     beta = 2 # multiplicative decrease
     epsilon = 0.1
     stateRepresentation = stateRepresentationEnum.only_server # WRONG
     sub_agent = agent.AIMD.AIMDagent
 
-    num_episodes = 100001
+    num_episodes = 1
     max_epLength = 30
-    y = None
-    tau = None
+    y = delta
+    tau = beta
+    update_freq = None
+    batch_size = None
+    pre_train_steps = 0
+    annealing_steps = 0
+    startE = 0
+    endE = 0
+    stepDrop = 0
+    reward_overload = None
+
+class AIMDsettings(object):
+    name = "AIMD"
+    group_size = 1
+    delta = 0.1 # additive increase
+    beta = 1.5 # multiplicative decrease
+    epsilon = 0.1
+    stateRepresentation = stateRepresentationEnum.only_server # WRONG
+    sub_agent = agent.AIMD.AIMDagent
+
+    num_episodes = 1
+    max_epLength = 30
+    y = delta
+    tau = beta
     update_freq = None
     batch_size = None
     pre_train_steps = 0
@@ -156,7 +177,7 @@ class NetworkSixFour(NetworkSingleTeamMalialisMedium):
     host_sources = [3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5,
     7, 7, 7, 7, 8, 8, 8, 8, 9, 9, 9, 9]
     upper_boundary = 25 # malialis would have used 26
-    lower_boundary = 23
+    lower_boundary = 23 # malialis would have used 20
     max_hosts_per_level = [4, 12, 24]
 
 class NetworkMalialisTeamFull(object):
@@ -184,10 +205,41 @@ class NetworkMalialisTeamFull(object):
     rate_attack_low = 2.5 
     rate_attack_high = 6
     legal_probability = 0.6 # probability that is a good guys
-    upper_boundary = 12.5
-    iterations_between_action = 5 
+    upper_boundary = 62
+    lower_boundary = 56
+    iterations_between_action = 10
     max_hosts_per_level = [2, 6, 12, 60]    
 
+### This is an experimental one where i have not set an even set of hosts
+# class NetworkMalialisTeamFull(object):
+#     name = "full_team_malialias"
+#     N_state = 30
+#     N_action = 1000000000000000000000000000000
+#     action_per_throttler = 10
+#     N_switch = 47
+#     host_sources = [4, 4, 4, 5, 6, 6, 44, 44, 44, 45, 46, 46, 
+#     9, 10, 10, 10, 11, 11, 13, 14, 14, 14, 15, 15, 
+#     18, 18, 19, 20, 20, 20, 22, 22, 23, 24, 24, 24,
+#     27, 28, 28, 28, 29, 29, 31, 32, 32, 32, 33, 33,
+#     36, 36, 36, 37, 38, 38, 40, 40, 40, 41, 42, 42]
+
+#     servers = [0]
+#     filters = [4, 5, 6, 44, 45, 46,
+#     9, 10, 11, 13, 14, 15,
+#     18, 19, 20, 22, 23, 24,
+#     27, 28, 29, 31, 32, 33,
+#     36, 37, 38, 40, 41, 42]
+
+#     topologyFile = 'topologies/full_team.txt'
+#     rate_legal_low = 0.05 
+#     rate_legal_high = 1 
+#     rate_attack_low = 2.5 
+#     rate_attack_high = 6
+#     legal_probability = 0.6 # probability that is a good guys
+#     upper_boundary = 62
+#     lower_boundary = 56
+#     iterations_between_action = 10
+#     max_hosts_per_level = [2, 6, 12, 60]   
 
 class NetworkTwelveThrottleLight(object):
     name = "network_twelve_throttle_light"
@@ -440,4 +492,19 @@ def calc_comm_strategy(stateRepresentation):
         return stateRepresentation.name
 
 
+def merge_summaries(file_path, number_summaries):
+    summary = open("{0}/merged_summary.csv".format(file_path), "w")
+    # we assume it goes from 0 to max
+    first_summary = open("{0}/attackSummary-0.csv".format(file_path))
+    header = first_summary.readline()
+    summary.write(header)
+    first_summary.close()
+
+    for i in range(0, number_summaries):
+        i_summary = open("{0}/attackSummary-{1}.csv".format(file_path, i))
+        i_summary.readline()
+        for line in i_summary.readlines():
+            summary.write(line)
+        i_summary.close()
+    summary.close()
 

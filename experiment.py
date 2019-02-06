@@ -133,10 +133,6 @@ class Experiment:
             stepDrop = 0
 
         run_mode = self.agent_settings.save_model_mode.name
-        # if self.adversary_agent_settings:
-        #     run_mode = run_mode + "_" + self.adversary_agent_settings.save_model_mode.name
-        # else:
-        #     run_mode+="_normal"
      
 
         print("Experiment has {0} episodes".format(num_episodes))
@@ -209,8 +205,6 @@ class Experiment:
                 
                 advRAll = 0 # total reward for episode
                 for step in range(max_epLength):
-                    #TODO make sure to do do pre_training_stuff
-                    # print("my prediction is for {0}".format(net.get_state()))
 
                     if self.adversarialMaster != None:
                         adv_state = self.adversarialMaster.get_state(net)
@@ -219,8 +213,6 @@ class Experiment:
                         advAction = None
                     a = agent.predict(net.get_state(), e) # generate an action
                     #net.step(a, step) # take the action, update the network
-
-
                     
                     if step > 0: # when step==0, the actions are chosen randomly, and the state is NULL
 
@@ -245,13 +237,20 @@ class Experiment:
 
                         advRAll += adv_r
                         #if debug:                
-                        # print("current_state: {0}".format(net.get_state()))
+                        # if(net.get_state() != net.last_state):
+                        #     print("E = {1} | step = {2} | current_state: {0}".format(net.get_state(), ep_num, step))
+                        #     print(r)
+                        # elif finished == False:
+                        #     print("\n\n\n")
+                        #     finished = True
                         # # print("last state: {0}".format(net.last_state))
                         # if step in range(18,22):
-                        #     # print("def | step {0} | action {1} | reward {2} | e {3}".format(step, last_action, r, e))
-                        #     # print("adversary | ep {3} | action {0} | reward {1} | e {2}".format(advAction, r, adv_e, ep_num))
-                        #     # print("adv_state {0}".format(adv_state))
-                        #     #     print("state = {1}, e = {0}".format(e, net.last_state))
+                        #     print("def | step {0} | action {1} | reward {2} | e {3}".format(step, last_action, r, e))
+                        #     print("adversary | ep {3} | action {0} | reward {1} | e {2}".format(advAction, r, adv_e, ep_num))
+                        #     print("adv_state {0}".format(adv_state))
+                                
+
+                                # print("state = {1}, e = {0}".format(e, net.last_state))
 
                         #     # print("server state: {0}\n".format(net.switches[0].getWindow()))
                                 
@@ -308,10 +307,6 @@ class Experiment:
 
 
                 #self.episode_rewards.append(net.rewards_per_step) DO LATER
-
-
-
-
 
                 reward_per_print += rAll
                 if ep_num % 1000 == 0:
