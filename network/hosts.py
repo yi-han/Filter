@@ -274,7 +274,7 @@ class adversarialLeaf(object):
         if max_epLength != -1: 
             assert(adversarialMaster != None)
             self.adversarialMaster = adversarialMaster
-            self.adversarialMaster.assignLeaf(self)
+            self.adversarialMaster.addLeaf(self)
 
 
     def getName():

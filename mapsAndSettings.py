@@ -11,6 +11,7 @@ import agent.genericDecentralised as genericDecentralised
 import agent.sarsaCentralised as sarCen
 import adversary.ddRandomMaster as ddRandomMaster
 import adversary.ddAdvMaster as ddAdvMaster
+import adversary.ddAdvGenericMaster as ddGeneric
 import pandas
 import network.hosts as hosts
 import agent.AIMD
@@ -289,8 +290,93 @@ class NetworkTwelveThrottleHeavy(object):
     iterations_between_action = 5 
 
 
-class DdRandomMasterSettings(object):
-    name = "ddrandomMasterDecentralised"
+# class DdRandomMasterSettings(object):
+#     name = "ddrandomMasterDecentralised"
+#     pre_train_steps = 1000
+#     num_episodes = 700000
+#     tau = 0.001
+#     discount_factor = 0.5
+#     annealing_episodes = 500000
+#     startE = 1
+#     endE = 0.0
+#     update_freq = 4
+#     batch_size = 32
+#     adversary_class = ddRandomMaster.RandomAdvMaster
+
+#     action_per_agent = 11
+
+# class DdCoordinatedMasterSettings(object):
+#     name = "ddCoordinatedMasterCentralised"
+#     pre_train_steps = 1000
+#     num_episodes = 120001
+#     tau = 0.001
+#     discount_factor = 0.3
+#     annealing_episodes = 78000
+#     startE = 0.3
+#     endE = 0.0
+#     update_freq = 4
+#     batch_size = 32
+#     adversary_class = ddAdvMaster.CoordinatedAdvMaster
+
+#     action_per_agent = 11
+
+# class DdCoordinatedLongSettings(DdCoordinatedMasterSettings):
+#     name = "ddCoordLongCentralised"
+#     pre_train_steps = 10000
+#     num_episodes = 150001
+#     tau = 0.0005
+#     discount_factor = 0.5
+#     annealing_episodes = 78000
+#     startE = 0.6    
+
+# class DdCoordinatedAltShortSettings(DdCoordinatedMasterSettings):
+#     name = "ddCoordShortAlt"
+#     pre_train_steps = 1000
+#     annealing_episodes = 40000
+#     num_episodes = 50000
+#     tau = 0.0001
+#     discount_factor = 0.5
+#     startE = 0.3    
+
+# class DdCoordinatedAltMedSettings(DdCoordinatedMasterSettings):
+#     name = "ddCoordMedAlt"
+#     pre_train_steps = 30000
+#     annealing_episodes = 140000
+#     num_episodes = 200000
+#     tau = 0.0001
+#     discount_factor = 0.3
+#     startE = 0.6
+
+# class DdCoordinatedAltLongSettings(DdCoordinatedMasterSettings):
+#     name = "ddCoordLongAlt"
+#     pre_train_steps = 60000
+#     annealing_episodes = 200000
+#     num_episodes = 300000
+#     tau = 0.001
+#     discount_factor = 0.5
+#     startE = 1
+
+# class DdCoordinatedLowlongDlowSettings(DdCoordinatedMasterSettings):
+#     name = "ddCoordLowLongDLow"
+#     pre_train_steps = 100000
+#     annealing_episodes = 200000
+#     num_episodes = 500000
+#     tau = 0.0001
+#     discount_factor = 0.3
+#     startE = 0.5
+
+# class DdCoordinatedLowlongDHighSettings(DdCoordinatedMasterSettings):
+#     name = "ddCoordLowLongDHigh"
+#     pre_train_steps = 100000
+#     annealing_episodes = 200000
+#     num_episodes = 500000
+#     tau = 0.0001
+#     discount_factor = 0.8
+#     startE = 0.5
+
+class DdGenericDec(object):
+    name = "ddGenericDecentralised"
+    num_adv_agents = -1
     pre_train_steps = 1000
     num_episodes = 700000
     tau = 0.001
@@ -298,80 +384,21 @@ class DdRandomMasterSettings(object):
     annealing_episodes = 500000
     startE = 1
     endE = 0.0
+    
+    prior_agent_actions = 1
+    prior_adversary_actions = 3
     update_freq = 4
     batch_size = 32
-    adversary_class = ddRandomMaster.RandomAdvMaster
-
+    adversary_class = ddGeneric.GenericAdvMaster
     action_per_agent = 11
 
-class DdCoordinatedMasterSettings(object):
-    name = "ddCoordinatedMasterCentralised"
-    pre_train_steps = 1000
-    num_episodes = 120001
-    tau = 0.001
-    discount_factor = 0.3
-    annealing_episodes = 78000
-    startE = 0.3
-    endE = 0.0
-    update_freq = 4
-    batch_size = 32
-    adversary_class = ddAdvMaster.CoordinatedAdvMaster
+class DdGenericCentral(DdGenericDec):
+    name = "ddGenCentral"
+    num_adv_agents = 1
 
-    action_per_agent = 11
-
-class DdCoordinatedLongSettings(DdCoordinatedMasterSettings):
-    name = "ddCoordLongCentralised"
-    pre_train_steps = 10000
-    num_episodes = 150001
-    tau = 0.0005
-    discount_factor = 0.5
-    annealing_episodes = 78000
-    startE = 0.6    
-
-class DdCoordinatedAltShortSettings(DdCoordinatedMasterSettings):
-    name = "ddCoordShortAlt"
-    pre_train_steps = 1000
-    annealing_episodes = 40000
-    num_episodes = 50000
-    tau = 0.0001
-    discount_factor = 0.5
-    startE = 0.3    
-
-class DdCoordinatedAltMedSettings(DdCoordinatedMasterSettings):
-    name = "ddCoordMedAlt"
-    pre_train_steps = 30000
-    annealing_episodes = 140000
-    num_episodes = 200000
-    tau = 0.0001
-    discount_factor = 0.3
-    startE = 0.6
-
-class DdCoordinatedAltLongSettings(DdCoordinatedMasterSettings):
-    name = "ddCoordLongAlt"
-    pre_train_steps = 60000
-    annealing_episodes = 200000
-    num_episodes = 300000
-    tau = 0.001
-    discount_factor = 0.5
-    startE = 1
-
-class DdCoordinatedLowlongDlowSettings(DdCoordinatedMasterSettings):
-    name = "ddCoordLowLongDLow"
-    pre_train_steps = 100000
-    annealing_episodes = 200000
-    num_episodes = 500000
-    tau = 0.0001
-    discount_factor = 0.3
-    startE = 0.5
-
-class DdCoordinatedLowlongDHighSettings(DdCoordinatedMasterSettings):
-    name = "ddCoordLowLongDHigh"
-    pre_train_steps = 100000
-    annealing_episodes = 200000
-    num_episodes = 500000
-    tau = 0.0001
-    discount_factor = 0.8
-    startE = 0.5
+class DdGenericSplit(DdGenericDec):
+    name = "ddGenSplit"
+    num_adv_agents = 2
 
 def create_generic_dec(ds, ns):
     """
