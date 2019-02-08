@@ -189,7 +189,7 @@ class GradualIncrease(Host):
         self.traffic_rate = traffic_rate
         self.init_traffic = init_traffic
 
-class CoordinatedRandomNotGradual(Host):
+class CoordinatedRandom(Host):
     """
     everything but gradual attacks. Note all hosts work together (not a multivector attack)
 
@@ -197,11 +197,11 @@ class CoordinatedRandomNotGradual(Host):
     1) In the init of Host we attach our object to the switch. Quite likely that the switch might call us via switch
     so we can't be creating mulitple objects connected to switch. Best practice is to create a dummy switch for the fakes
     """
-    possibleClasses = [ShortPulse, MediumPulse, LargePulse, ConstantAttack]
+    possibleClasses = [ShortPulse, MediumPulse, LargePulse, ConstantAttack, GradualIncrease]
     assignedClass = None # this is iteratively updated based on the type of attack we're doing
     @staticmethod
     def classReset():
-        CoordinatedRandomNotGradual.assignedClass = random.choice(CoordinatedRandomNotGradual.possibleClasses)
+        CoordinatedRandom.assignedClass = random.choice(CoordinatedRandom.possibleClasses)
 
 
     def __init__(self, destination_switch, rate_attack_low, rate_attack_high, rate_legal_low, rate_legal_high,
@@ -210,23 +210,22 @@ class CoordinatedRandomNotGradual(Host):
         # create a bunch of alterantive hosts that we can switch between
         self.active_host = None # the host that we are
         self.all_hosts = {}
-        for hostClass in CoordinatedRandomNotGradual.possibleClasses:
+        for hostClass in CoordinatedRandom.possibleClasses:
             # the appendToSwitch=False is SUPER important
             self.all_hosts[hostClass] = (hostClass(destination_switch, rate_attack_low, rate_attack_high, rate_legal_low, rate_legal_high,
                 max_epLength, adversarialMaster, appendToSwitch))
 
         super().__init__(destination_switch, rate_attack_low, rate_attack_high, rate_legal_low, rate_legal_high,
-        max_epLength)
-
+        max_epLength, adversarialMaster, appendToSwitch)
 
 
     def getName():
-        return "RandomNotGradual"
+        return "RandomAttack"
 
 
     def reset(self, is_attacker):
         # create a temporary host of the assigned class
-        self.active_host = CoordinatedRandomNotGradual.assignedClass
+        self.active_host = CoordinatedRandom.assignedClass
         #print("setting host as {0}".format(self.active_host))
         self.all_hosts[self.active_host].reset(is_attacker)
 

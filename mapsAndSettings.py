@@ -377,11 +377,11 @@ class NetworkTwelveThrottleHeavy(object):
 class DdGenericDec(object):
     name = "ddGenericDecentralised"
     num_adv_agents = -1
-    pre_train_steps = 1000
-    num_episodes = 700000
+    pre_train_steps = 60000
+    num_episodes = 500000
     tau = 0.001
-    discount_factor = 0.5
-    annealing_episodes = 500000
+    discount_factor = 0.7
+    annealing_episodes = 600000
     startE = 1
     endE = 0.0
     
