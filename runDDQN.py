@@ -202,9 +202,9 @@ attackClasses = [conAttack, shortPulse, mediumPulse,
 ###
 # Settings
 assignedNetwork =  NetworkSingleTeamMalialisMedium #NetworkSingleTeamMalialisMedium
-assignedAgent =  AIMDsettings #ddqnSingleNoCommunicate #ddqn100MediumHierarchical
+assignedAgent =  ddqn50MediumHierachical #ddqnSingleNoCommunicate #ddqn100MediumHierarchical
 load_attack_path = "attackSimulations/{0}/".format(assignedNetwork.name)
-loadAttacks = True
+loadAttacks = False
 assignedAgent.encoders = None
 
 assignedAgent.save_model_mode = defender_mode_enum.save

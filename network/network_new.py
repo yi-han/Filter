@@ -425,7 +425,7 @@ class network_full(object):
                 drop_prob /= self.action_per_throttler # to turn into a percentage
                 self.switches[switch_id].setThrottle(drop_prob)
 
-                assert(action==0) 
+            assert(action==0) 
 
     def initialise(self, f_link, representationType):
         for i in range(self.N_switch):

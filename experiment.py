@@ -254,9 +254,9 @@ class Experiment:
 
                         #     # print("server state: {0}\n".format(net.switches[0].getWindow()))
                                 
-                        #     print("In Episode - {0}".format(ep_num))
-                        #     print("def | step {0} | action {1} | reward {2} | e {3}".format(step, last_action, r, e))
-                        #     if self.adversarialMaster:
+                        # print("In Episode - {0}".format(ep_num))
+                        # print("def | step {0} | action {1} | reward {2} | e {3}".format(step, last_action, r, e))
+                        # #     if self.adversarialMaster:
                         #         print("adversary | ep {3} | action {0} | reward {1} | adv_e {2}".format(adv_last_action, adv_r, adv_e, ep_num))
                         #         print("adversary_state: {0}\n".format(adv_last_state))
                         # if step == 22:
