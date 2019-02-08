@@ -6,6 +6,9 @@ sed 's/0 5//g' output.slurm -i
 sbatch output.slurm
 sed 's/grid_test/runSarsaOriginal/g' output.slurm -i
 sbatch output.slurm
+sed 's/runSarsaOriginal/runSarsaNoOverdrive/g' output.slurm -i
+sbatch output.slurm
+
 
 # sleep 5
 # sed 's/0 2/2 2/g' output.slurm -i

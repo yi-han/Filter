@@ -75,10 +75,16 @@ class Switch():
         self.is_filter = is_filter
         self.reset()
 
+
+        self.delay = 0 # the delay for implementing a throttle based on maximum communication
     def sendTraffic(self, defender_agent):
         # an initial part of passing traffic along
 
+
         if self.is_filter:
+            if self.iterations_since_throttle == self.delay:
+                self.throttle_rate = self.next_throttle
+            # print("delay {0} throttle {1}".format(self.delay - self.iterations_since_throttle, self.throttle_rate))
             throttle_rate = defender_agent.calculateThrottleRate(self.getImmediateState(), self.throttle_rate)
         else:
             throttle_rate = 0
@@ -105,7 +111,7 @@ class Switch():
 
             dest.destination_switch.new_illegal += (illegal_pass/num_dests)
             dest.destination_switch.new_dropped_illegal += ((illegal_dropped+ self.dropped_illegal)/num_dests)
-
+        self.iterations_since_throttle += 1
     def updateSwitch(self):
         # update the traffic values
         self.legal_traffic = self.new_legal
@@ -141,8 +147,10 @@ class Switch():
         return self.legal_traffic + self.illegal_traffic
 
     def setThrottle(self, throttle_rate):
+
         assert(self.is_filter)
-        self.throttle_rate = throttle_rate
+        self.next_throttle = throttle_rate
+        self.iterations_since_throttle = 0 # we keep track of number iterations. This is for the delay of throttle
 
 
     def reset(self):
@@ -156,6 +164,8 @@ class Switch():
         self.new_dropped_illegal = 0
         self.past_throttles = [0, 0, 0]
         self.resetWindow()
+        self.throttle_rate = 0
+        self.iterations_since_throttle = 0
 
 
 
@@ -164,28 +174,33 @@ class Switch():
 
     def setRepresentation(self, allThrottlers):
         self.stateSwitches.append(self) #always include self
+         
         currentNode = self
         if self.representation == stateRepresentationEnum.throttler:
             pass
 
         elif self.representation == stateRepresentationEnum.allThrottlers:
             self.stateSwitches = allThrottlers
+            assert(1==2) # haven't done delay for this yet!
         elif self.representation == stateRepresentationEnum.leaderAndIntermediate:
             for i in range(2):
                 currentNode = currentNode.destination_links[0].destination_switch
                 assert currentNode.id!=0 #we shouldn't be getting server
                 #print(currentNode.id)
                 self.stateSwitches.append(currentNode)
+                self.delay += 1
+
         elif self.representation == stateRepresentationEnum.server:
             for i in range(3):
                 currentNode = currentNode.destination_links[0].destination_switch
                 assert currentNode.id!=0 #we shouldn't be getting server
                 #print(currentNode.id)
-                self.stateSwitches.append(currentNode)            
+                self.stateSwitches.append(currentNode)
+                self.delay += 1            
         elif self.representation == stateRepresentationEnum.only_server:
-            currentNode = currentNode.destination_links[0].destination_switch
             while currentNode.id != 0:
                 currentNode = currentNode.destination_links[0].destination_switch
+                self.delay += 1
             self.stateSwitches = [currentNode]
         else:
             print(self.representation)
@@ -246,7 +261,7 @@ class network_full(object):
         self.rate_legal_high = (network_settings.rate_legal_high / self.iterations_between_action)
         self.rate_attack_low = (network_settings.rate_attack_low / self.iterations_between_action)
         self.rate_attack_high = (network_settings.rate_attack_high / self.iterations_between_action)
-        
+        self.representationType = representationType
         self.legal_probability = network_settings.legal_probability # odds of host being an attacker
         self.upper_boundary = network_settings.upper_boundary
         self.hostClass = host_class
@@ -394,17 +409,23 @@ class network_full(object):
 
     def set_drop_probability(self, action):
 
-        for i in range(self.N_state):
-            j = self.N_state - (i + 1) # start at one below host, end at 0
-            divider = self.action_per_throttler**j
+        if self.representationType == stateRepresentationEnum.only_server:
+            # if its only server then the action is actually meant to be a throttle rate
 
-            switch_id = self.filter_list[i]
-            drop_prob = int(action / divider)
-            action = action - (drop_prob*divider)
-            drop_prob /= self.action_per_throttler # to turn into a percentage
-            self.switches[switch_id].setThrottle(drop_prob)
+            for switch_id in self.filter_list:
+                self.switches[switch_id].setThrottle(action)
+        else:
+            for i in range(self.N_state):
+                j = self.N_state - (i + 1) # start at one below host, end at 0
+                divider = self.action_per_throttler**j
 
-        assert(action==0) 
+                switch_id = self.filter_list[i]
+                drop_prob = int(action / divider)
+                action = action - (drop_prob*divider)
+                drop_prob /= self.action_per_throttler # to turn into a percentage
+                self.switches[switch_id].setThrottle(drop_prob)
+
+                assert(action==0) 
 
     def initialise(self, f_link, representationType):
         for i in range(self.N_switch):
@@ -575,7 +596,6 @@ class network_full(object):
         
 
         # reset_throttle_count and record_average_throttle seek to determine what the true throttle percentage actually was
-         
         for i in range(self.iterations_between_action): # each time delay is 10 ms, 10*200 = 2000 ms = 2 seconds
            self.move_traffic(step_count, defender_agent, adv_action)
            #self.rewards_per_step.append(self.calculate_reward())

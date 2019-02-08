@@ -25,10 +25,12 @@ class AIMDtest(object):
     group_size = 1
     delta = 0.3 # additive increase
     beta = 2 # multiplicative decrease
+    epsilon = 0.1 # our error
+
     stateRepresentation = stateRepresentationEnum.only_server # WRONG
     sub_agent = agent.AIMD.AIMDagent
     
-    epsilon = 0.1
+
     num_episodes = 1
     max_epLength = 30
     y = 0
@@ -94,15 +96,16 @@ if assignedAgent.save_model_mode is defender_mode_enum.load and intelligentOppos
     trainHost = adversarialLeaf
 
 
-delta_values = np.arange(0.05, 8, 0.05)
+delta_values = np.arange(0.05, 0.6, 0.05)
 beta_values = np.arange(1.25, 3, 0.25)
 l_values = np.arange(0.6, 0.95, 0.05)
-
-# delta_values = np.arange(0.05, 8, 3.5)
-# beta_values = np.arange(1.25, 1.5, 0.25)
-# l_values = np.arange(0.6, 0.615, 0.05)
-
-print(delta_values)
+epsilon_values = np.arange(0.001, 1.002, 0.1)
+repeats = len(delta_values) * len(beta_values) * len(l_values) * len(epsilon_values)
+print("repeats = {0}".format(repeats))
+print(len(delta_values))
+print(len(beta_values))
+print(len(l_values))
+print(len(epsilon_values))
 
 if parameter_tune:
     i = 0
@@ -110,16 +113,17 @@ if parameter_tune:
     for delta in delta_values:
         for beta in beta_values:
             for l_value in l_values:
-                print("testing for {0} {1} {2}".format(delta, beta, l_value))
-                assignedNetwork.lower_boundary = assignedNetwork.upper_boundary*l_value
-                print("lower_boundary = {0}".format(assignedNetwork.lower_boundary))
-                assignedAgent.startE = l_value
-                assignedAgent.pre_train_steps = delta
-                assignedAgent.y = delta
-                assignedAgent.beta = beta
-                assignedAgent.tau = beta
-                runAttacks.run_attacks(assignedNetwork, assignedAgent, file_path, intelligentOpposition, i)
-                i+=1
+                for epsilon in epsilon_values:
+                    print("testing for {0} {1} {2} {3}".format(delta, beta, l_value, epsilon))
+                    assignedNetwork.lower_boundary = assignedNetwork.upper_boundary*l_value
+                    print("lower_boundary = {0}".format(assignedNetwork.lower_boundary))
+                    assignedAgent.delta = delta
+                    assignedAgent.beta = beta
+                    assignedAgent.l_value = l_value
+                    
+                    assignedAgent.epsilon = epsilon
+                    runAttacks.run_attacks(assignedNetwork, assignedAgent, file_path, intelligentOpposition, i)
+                    i+=1
 
     merge_summaries(file_path, i)
 else:

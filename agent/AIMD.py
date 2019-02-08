@@ -31,8 +31,8 @@ class AIMDagent():
         print("exit the AIMD")
 
     def reset(self):
-        self.rs = -1
-        self.pLast = -1        
+        self.rs = None
+        self.pLast = None        
 
     def predict(self, p, _):
         # treat this as set the rate
@@ -40,21 +40,22 @@ class AIMDagent():
         # we calculate the maximum amount of traffic we allow pass through in a 
         p = p[0][0]
         if p > self.upper:
-            if self.rs < 0:
+            if self.rs == None:
                 self.rs  = (self.upper + self.lower)/self.num_throttles
             else:
                 self.rs /= self.beta
             self.pLast = p
         elif p < self.lower:
-            if abs(p - self.pLast) < self.epsilon:
-                self.rs = -1
-                self.pLast = -1
+            if self.pLast == None or self.rs == None or abs(p - self.pLast) < self.epsilon:
+                self.rs = None
+                self.pLast = None
             else:
                 self.pLast = p
                 self.rs += self.delta
-        return 0
+        # print("i'm seeing {0} and suggesting {1}".format(p, self.rs))
+        return self.rs
 
-    def update(self, _, _a, _b, _c, _d, _e = 0):
+    def update(self, _, _a, _b, _c, _d, next_action = 0):
         return
 
     def actionReplay(self, _a, _b):
@@ -63,16 +64,19 @@ class AIMDagent():
     def loadModel(self, _a, _b):
         return
 
-    def saveModel(self, _a, _b):
+    def saveModel(self, _a, _b, _c):
         return
     
     def getPath(self=None):
         return "AIMD"
 
-    def calculateThrottleRate(self, current_load, _):
+    def calculateThrottleRate(self, current_load, current_rs):
         # given the through rate, load and iterations per window, what's the % of traffic we let pass
 
-        r_per_iteration = self.rs / self.iterations_per_window * self.seconds_per_window # traffic we allow through each second
+        if current_rs == None:
+            # no throttle set
+            return 0
+        r_per_iteration = current_rs / self.iterations_per_window * self.seconds_per_window # traffic we allow through each second
 
         if current_load <= r_per_iteration or r_per_iteration < 0:
             return 0

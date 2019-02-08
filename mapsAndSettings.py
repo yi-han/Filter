@@ -56,9 +56,9 @@ class AIMDmallSmall(object):
 class AIMDsettings(object):
     name = "AIMD"
     group_size = 1
-    delta = 0.1 # additive increase
-    beta = 1.5 # multiplicative decrease
-    epsilon = 0.1
+    delta = 0.3 # additive increase
+    beta = 2 # multiplicative decrease
+    epsilon = 0.5
     stateRepresentation = stateRepresentationEnum.only_server # WRONG
     sub_agent = agent.AIMD.AIMDagent
 
@@ -164,7 +164,7 @@ class NetworkSingleTeamMalialisMedium(object):
     rate_attack_low = 2.5 
     rate_attack_high = 6
     legal_probability = 0.6 # probability that is a good guys
-    upper_boundary = 12.5 # Mal would have used 14
+    upper_boundary = 14 #12.5 # Mal would have used 14
     lower_boundary = 10 # for AIMD
 
     iterations_between_action = 10
@@ -414,7 +414,7 @@ def create_generic_dec(ds, ns):
 
 def getSummary(adversary_classes, load_path, agent, smart_adversary, prefix):
     summary = open("{0}/attackSummary-{1}.csv".format(load_path,prefix), "w")
-    summary.write("AttackType,Agent,Drift,LegalPacketsReceived,LegalPacketsServed,Percentage,ServerFailures,Tau,Pretraining,Annealing,TotalEpisodes,start_e,overload,adv_tau,adv_discount,adv_pretrain,adv_annealing_episodes,adv_episodes,adv_start_e\n")
+    summary.write("AttackType,Agent,Drift,LegalPacketsReceived,LegalPacketsServed,Percentage,ServerFailures,Tau,Pretraining,Annealing,TotalEpisodes,start_e,overload,adv_tau,adv_discount,adv_pretrain,adv_annealing_episodes,adv_episodes,adv_start_e,delta,beta,epsilon,l_value\n")
     agentName = agent.name
     for adversary_class in adversary_classes:
         attack_name = adversary_class.getName()
@@ -445,10 +445,18 @@ def getSummary(adversary_classes, load_path, agent, smart_adversary, prefix):
             sum_packets_received, sum_packets_sent, percentage_received, sum_server_failures,
             tau, pretraining, annealing, total_episodes, start_e, overload, agent.trained_drift))
         if adversary_class != hosts.adversarialLeaf:
-            summary.write(",,,,\n")
+            summary.write(",,,,,,")
         else:
-            summary.write("{0},{1},{2},{3},{4},{5}\n".format(smart_adversary.tau, smart_adversary.discount_factor,
+            summary.write("{0},{1},{2},{3},{4},{5},".format(smart_adversary.tau, smart_adversary.discount_factor,
                 smart_adversary.pre_train_steps, smart_adversary.annealing_episodes, smart_adversary.num_episodes, smart_adversary.startE))
+        if agent.stateRepresentation == stateRepresentationEnum.only_server:
+            summary.write("{0},{1},{2},".format(agent.delta, agent.beta, agent.epsilon))
+            try:
+                summary.write("{0}\n".format(agent.l_value))
+            except AttributeError:
+                summary.write("\n")
+        else:
+            summary.write(",,,\n")
     summary.close()
 
 
