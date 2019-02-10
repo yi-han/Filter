@@ -143,7 +143,7 @@ class NetworkMalialisSmall(object):
     legal_probability = 0.6 # probability that is a good guys
     upper_boundary = 8
     lower_boundary = 6 # for AIMD
-    iterations_between_action = 10
+    iterations_between_action = 20
 
     max_hosts_per_level = [3] # no communication therefore just one
 
@@ -168,7 +168,7 @@ class NetworkSingleTeamMalialisMedium(object):
     upper_boundary = 14 #12.5 # Mal would have used 14
     lower_boundary = 10 # for AIMD
 
-    iterations_between_action = 10
+    iterations_between_action = 20
 
     max_hosts_per_level = [2, 6, 12]
 
@@ -208,7 +208,7 @@ class NetworkMalialisTeamFull(object):
     legal_probability = 0.6 # probability that is a good guys
     upper_boundary = 62
     lower_boundary = 56
-    iterations_between_action = 10
+    iterations_between_action = 20
     max_hosts_per_level = [2, 6, 12, 60]    
 
 ### This is an experimental one where i have not set an even set of hosts

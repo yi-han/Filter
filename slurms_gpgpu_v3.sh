@@ -11,12 +11,15 @@ sbatch output.slurm
 
 sed 's/runDDQNAdditional/runDDQNHundred/g' output.slurm -i
 sed 's/smallMal/midSin/g' output.slurm -i
+sed 's/0 10/0 5/g' output.slurm -i 
+sbatch output.slurm
+sed 's/0 5/5 5/g' output.slurm -i 
 sbatch output.slurm
 
 
 sed 's/runDDQNHundred/runDDQNMalialis/g' output.slurm -i
 sed 's/midSin/midMal/g' output.slurm -i
-sed 's/0 10/0 5/g' output.slurm -i 
+sed 's/5 5/0 5/g' output.slurm -i 
 sbatch output.slurm
 sed 's/0 5/5 5/g' output.slurm -i 
 sbatch output.slurm
@@ -55,7 +58,7 @@ sed 's/6 2/8 2/g' output.slurm -i
 sbatch output.slurm
 
 sed 's/runSarsaDDQNCopy/runSarsaNoOverdrive/g' output.slurm -i
-sed 's/64Sin/64_50/g' output.slurm -i
+sed 's/64Hier/64_50/g' output.slurm -i
 sed 's/8 2/0 2/g' output.slurm -i 
 sbatch output.slurm
 sed 's/0 2/2 2/g' output.slurm -i 

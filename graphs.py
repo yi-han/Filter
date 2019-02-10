@@ -11,7 +11,7 @@ mediumPulse = hostClass.MediumPulse
 largePulse = hostClass.LargePulse
 gradualIncrease = hostClass.GradualIncrease
 
-randomNotGradual = hostClass.CoordinatedRandomNotGradual
+randomNotGradual = hostClass.CoordinatedRandom
 
 directory = sys.argv[1]
 repetitions = int(sys.argv[2])

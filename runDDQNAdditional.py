@@ -13,7 +13,7 @@ import runAttacks
 import agent.ddqnCentralised as ddCen
 # import agent.ddqnDecentralised as ddDec
 
-from mapsAndSettings import *
+#from mapsAndSettings import *
 assert(len(sys.argv)>= 3)
 
 class ddqnSingleNoCommunicate(object):
@@ -191,7 +191,7 @@ mediumPulse = hostClass.MediumPulse
 largePulse = hostClass.LargePulse
 gradualIncrease = hostClass.GradualIncrease
 # driftAttack = hostClass.DriftAttack
-coordAttack = hostClass.CoordinatedRandomNotGradual
+coordAttack = hostClass.CoordinatedRandom
 adversarialLeaf = hostClass.adversarialLeaf
 
 
@@ -201,19 +201,19 @@ attackClasses = [conAttack, shortPulse, mediumPulse,
 
 ###
 # Settings
-assignedNetwork =  NetworkSingleTeamMalialisMedium #NetworkSingleTeamMalialisMedium
-assignedAgent = ddqnSingleNoCommunicate #ddqn100MediumHierarchical
+assignedNetwork =  NetworkMalialisSmall #NetworkSingleTeamMalialisMedium
+assignedAgent =  ddqnMalialisTrue #ddqnSingleNoCommunicate #ddqn100MediumHierarchical
 load_attack_path = "attackSimulations/{0}/".format(assignedNetwork.name)
 loadAttacks = False
 assignedAgent.encoders = None
 
-assignedAgent.save_model_mode = defender_mode_enum.load
+assignedAgent.save_model_mode = defender_mode_enum.save
 trainHost = conAttack #coordAttack # conAttack #driftAttack #adversarialLeaf
 assignedNetwork.drift = 0
 
-intelligentOpposition = DdRandomMasterSettings #DdCoordinatedLowlongDlowSettings #DdCoordinatedMasterSettings #DdRandomMasterSettings
+intelligentOpposition = DdGenericSplit #DdCoordinatedLowlongDlowSettings #DdCoordinatedMasterSettings #DdRandomMasterSettings
 intelligentOpposition.save_model_mode = defender_mode_enum.save
-# intelligentOpposition = None
+intelligentOpposition = None
 
 
 network_emulator = network.network_new.network_full #network_quick # network_full
@@ -223,6 +223,7 @@ network_emulator = network.network_new.network_full #network_quick # network_ful
 
 assignedAgent.trained_drift = assignedNetwork.drift # we use this a copy of what the trained drift value is. We dont use this for the experiment
 assignedNetwork.emulator = network_emulator
+
 
 twist="{0}".format(network_emulator.name)
 commStrategy = calc_comm_strategy(assignedAgent.stateRepresentation)

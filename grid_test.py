@@ -115,10 +115,10 @@ print(len(epsilon_values))
 if parameter_tune:
     i = 0
 
-    for delta in delta_values:
+    for epsilon in epsilon_values:
         for beta in beta_values:
             for l_value in l_values:
-                for epsilon in epsilon_values:
+                for delta in delta_values:
                     print("testing for {0} {1} {2} {3}".format(delta, beta, l_value, epsilon))
                     assignedNetwork.lower_boundary = assignedNetwork.upper_boundary*l_value
                     print("lower_boundary = {0}".format(assignedNetwork.lower_boundary))

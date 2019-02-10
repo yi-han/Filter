@@ -70,6 +70,7 @@ def reward_multiple(directory, max_num, reward_prefix, PerLegitTraffic=False):
     
 
     path = "{0}/{1}-{2}.csv".format(directory, reward_prefix, 0)
+    print(path)
     f = pd.read_csv(path)
     if PerLegitTraffic:
         ep_reward = f.PerPacketIdeal#PerPacketIdeal #LastReward
