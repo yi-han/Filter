@@ -169,14 +169,15 @@ class Experiment:
             os.makedirs(file_path)
 
         # determine reward for a prediction at start of episode, we choose the second step as first step is random
-        reward_file = open("{0}/reward-{1}-{2}-{3}.csv".format(file_path,run_mode, self.adversary_class.getName(), prefix),"w")
+
+        reward_lines = []
+        loss_lines = []
+        packet_served_lines = []
         # Similar to init. Different from reward_file as this is if exploration is 0. Measures how accurate it is at the moment.
         
-        loss_file = open("{0}/loss-{1}-{2}-{3}.csv".format(file_path,run_mode, self.adversary_class.getName(), prefix) ,"w")
-        packet_served_file = open("{0}/packet_served-{1}-{2}-{3}.csv".format(file_path,run_mode, self.adversary_class.getName(), prefix),"w")
         print("Using the {0} agent:".format(name))
-        reward_file.write("Episode,StepsSoFar,TotalReward,LastReward,LengthEpisode,e,PerPacketIdeal, AdvTotalReward, AdvLastReward\n")
-        packet_served_file.write("Episode,PacketsReceived,PacketsServed,PercentageReceived,ServerFailures\n")
+        reward_lines.append("Episode,StepsSoFar,TotalReward,LastReward,LengthEpisode,e,PerPacketIdeal, AdvTotalReward, AdvLastReward\n")
+        packet_served_lines.append("Episode,PacketsReceived,PacketsServed,PercentageReceived,ServerFailures\n")
         #self.episode_rewards = []
 
 
@@ -341,11 +342,11 @@ class Experiment:
                 # how well the system performs assuming no exploration (only useful for training)
                 agent_performance = net.getPacketServedAtMoment()
 
-                packet_served_file.write("{0}, {1}, {2}, {3}, {4}\n".format(ep_num, legit_served, legit_all, legit_per, server_failures))
+                packet_served_lines.append("{0}, {1}, {2}, {3}, {4}\n".format(ep_num, legit_served, legit_all, legit_per, server_failures))
 
-                reward_file.write("{0},{1},{2},{3},{4},{5},{6},{7},{8}\n".format(ep_num, total_steps, rList[-1], r, stepList[-1], e, agent_performance, advRList[-1], adv_r))
+                reward_lines.append("{0},{1},{2},{3},{4},{5},{6},{7},{8}\n".format(ep_num, total_steps, rList[-1], r, stepList[-1], e, agent_performance, advRList[-1], adv_r))
                 if len(loss) > 0:
-                    loss_file.write(str(ep_num) + "," + str(total_steps) + "," + str(loss[-1]) + "," + str(e) + "\n")
+                    loss_lines.append(str(ep_num) + "," + str(total_steps) + "," + str(loss[-1]) + "," + str(e) + "\n")
 
 
             if self.agent_settings.save_model_mode is mapsAndSettings.defender_mode_enum.save: # only save the first iteration 
@@ -355,9 +356,20 @@ class Experiment:
             if self.adversarialMaster and self.adversary_agent_settings.save_model_mode is mapsAndSettings.defender_mode_enum.save:
                 self.adversarialMaster.saveModel(self.file_path, ep_num, prefix)
 
+        reward_file = open("{0}/reward-{1}-{2}-{3}.csv".format(file_path,run_mode, self.adversary_class.getName(), prefix),"w")
+        for line in reward_lines:
+            reward_file.write(line)
         reward_file.close()
-        loss_file.close()
 
+        loss_file = open("{0}/loss-{1}-{2}-{3}.csv".format(file_path,run_mode, self.adversary_class.getName(), prefix) ,"w")
+        for line in loss_lines:
+            loss_file.write(line)
+        loss_file.close()
+        
+        packet_served_file = open("{0}/packet_served-{1}-{2}-{3}.csv".format(file_path,run_mode, self.adversary_class.getName(), prefix),"w")
+        for line in packet_served_lines:
+            packet_served_file.write(line)
+        packet_served_file.close()
         print("{0} is:".format(name))
         print("Percent of succesful episodes: " + str(100 - fail*100/total_steps) + "%")
 
