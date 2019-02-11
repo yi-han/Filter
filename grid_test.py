@@ -51,7 +51,7 @@ mediumPulse = hostClass.MediumPulse
 largePulse = hostClass.LargePulse
 gradualIncrease = hostClass.GradualIncrease
 # driftAttack = hostClass.DriftAttack
-coordAttack = hostClass.CoordinatedRandomNotGradual
+coordAttack = hostClass.CoordinatedRandom
 adversarialLeaf = hostClass.adversarialLeaf
 
 
@@ -64,15 +64,15 @@ attackClasses = [conAttack, shortPulse, mediumPulse,
 assignedNetwork =  NetworkSingleTeamMalialisMedium #NetworkSingleTeamMalialisMedium
 assignedAgent =  AIMDtest #ddqnSingleNoCommunicate #ddqn100MediumHierarchical
 load_attack_path = "attackSimulations/{0}/".format(assignedNetwork.name)
-parameter_tune = True
+parameter_tune = False
 assignedAgent.encoders = None
 
 assignedAgent.save_model_mode = defender_mode_enum.save
 trainHost = conAttack #coordAttack # conAttack #driftAttack #adversarialLeaf
 assignedNetwork.drift = 0
 
-intelligentOpposition = DdRandomMasterSettings #DdCoordinatedLowlongDlowSettings #DdCoordinatedMasterSettings #DdRandomMasterSettings
-intelligentOpposition.save_model_mode = defender_mode_enum.save
+# intelligentOpposition = DdRandomMasterSettings #DdCoordinatedLowlongDlowSettings #DdCoordinatedMasterSettings #DdRandomMasterSettings
+# intelligentOpposition.save_model_mode = defender_mode_enum.save
 intelligentOpposition = None
 
 
@@ -96,10 +96,10 @@ if assignedAgent.save_model_mode is defender_mode_enum.load and intelligentOppos
     trainHost = adversarialLeaf
 
 
-delta_values = np.arange(0.05, 0.6, 0.05)
+delta_values = np.arange(0.05, 0.6, 0.1)
 beta_values = np.arange(1.25, 3, 0.25)
 l_values = np.arange(0.6, 0.95, 0.05)
-epsilon_values = np.arange(0.001, 1.002, 0.1)
+epsilon_values = np.arange(0.001, 1.002, 0.15)
 repeats = len(delta_values) * len(beta_values) * len(l_values) * len(epsilon_values)
 print("repeats = {0}".format(repeats))
 print(len(delta_values))

@@ -134,10 +134,11 @@ class ddGenAgent():
         legal_per_leaf = self.legal_traffic/len(self.leaves)
 
         percent_emit = action/10
-        illegal_per_leaf = self.illegal_traffic * percent_emit / len(self.leaves)
+        # illegal_per_leaf = self.illegal_traffic * percent_emit / len(self.leaves)
         for leaf in self.leaves:
-            leaf.destination_switch.new_legal += legal_per_leaf
-            leaf.destination_switch.new_illegal += illegal_per_leaf
+            leaf.sendTraffic(percent_emit)
+            # leaf.destination_switch.new_legal += legal_per_leaf
+            # leaf.destination_switch.new_illegal += illegal_per_leaf
 
 
     def initiate_episode(self):

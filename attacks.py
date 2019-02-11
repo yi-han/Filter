@@ -28,6 +28,7 @@ def generateAttacks(networkSettings, attackClasses, max_epLength = -1, num_episo
     if not os.path.exists(path):
         os.makedirs(path)
     for attackClass in attackClasses:
+        print(attackClass)
         attack_path = path+attackClass.getName()+".apkl"
         
         with open(attack_path, "wb") as f:
@@ -57,6 +58,7 @@ attackClasses = [conAttack, shortPulse, mediumPulse,
 
 commonMaps = [NetworkMalialisSmall, NetworkSingleTeamMalialisMedium, NetworkSixFour, NetworkMalialisTeamFull]
 for common_map in commonMaps:
+    common_map.drift = 0
     print(common_map)
     generateAttacks(common_map, attackClasses)
 

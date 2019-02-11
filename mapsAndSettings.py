@@ -76,7 +76,7 @@ class AIMDsettings(object):
     stepDrop = 0
     reward_overload = None
 
-
+"""
 
 class NetworkSimpleBasic(object):
     name = "simple_basic"
@@ -122,7 +122,7 @@ class NetworkFourThrottle(object):
     upper_boundary = 10
     iterations_between_action = 10
 
-
+"""
 class NetworkMalialisSmall(object):
     name = "malialis_small"
     N_state = 3 #The number of state, i.e., the number of filters
@@ -143,7 +143,7 @@ class NetworkMalialisSmall(object):
     legal_probability = 0.6 # probability that is a good guys
     upper_boundary = 8
     lower_boundary = 6 # for AIMD
-    iterations_between_action = 20
+    iterations_between_action = 200 #200
 
     max_hosts_per_level = [3] # no communication therefore just one
 
@@ -168,7 +168,7 @@ class NetworkSingleTeamMalialisMedium(object):
     upper_boundary = 14 #12.5 # Mal would have used 14
     lower_boundary = 10 # for AIMD
 
-    iterations_between_action = 5
+    iterations_between_action = 10 # 200
 
     max_hosts_per_level = [2, 6, 12]
 

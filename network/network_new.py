@@ -257,10 +257,11 @@ class network_full(object):
         self.N_filter = len(self.filter_list)
         self.action_per_throttler = network_settings.action_per_throttler # actions each host can take
         self.reward_overload = reward_overload
-        self.rate_legal_low = (network_settings.rate_legal_low / self.iterations_between_action)
-        self.rate_legal_high = (network_settings.rate_legal_high / self.iterations_between_action)
-        self.rate_attack_low = (network_settings.rate_attack_low / self.iterations_between_action)
-        self.rate_attack_high = (network_settings.rate_attack_high / self.iterations_between_action)
+        self.rate_legal_low = network_settings.rate_legal_low  #/ self.iterations_between_action)
+        self.rate_legal_high = network_settings.rate_legal_high  #/ self.iterations_between_action)
+        self.rate_attack_low = network_settings.rate_attack_low  #/ self.iterations_between_action)
+        self.rate_attack_high = network_settings.rate_attack_high  #/ self.iterations_between_action)
+
         self.representationType = representationType
         self.legal_probability = network_settings.legal_probability # odds of host being an attacker
         self.upper_boundary = network_settings.upper_boundary
@@ -458,7 +459,7 @@ class network_full(object):
 
         for i in self.host_sources:
             host = self.hostClass(self.switches[i], self.rate_attack_low, self.rate_attack_high,
-                self.rate_legal_low, self.rate_legal_high, self.max_epLength, adversarialMaster = self.adversaryMaster)
+                self.rate_legal_low, self.rate_legal_high, self.max_epLength, self.adversaryMaster, self.iterations_between_action)
             self.hosts.append(host)
         # set the state of all switches
         for i in self.filter_list:
