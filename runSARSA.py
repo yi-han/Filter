@@ -211,7 +211,7 @@ shortPulse = hostClass.ShortPulse
 mediumPulse = hostClass.MediumPulse
 largePulse = hostClass.LargePulse
 gradualIncrease = hostClass.GradualIncrease
-coordAttack = hostClass.CoordinatedRandomNotGradual
+coordAttack = hostClass.CoordinatedRandom
 adversarialLeaf = hostClass.adversarialLeaf
 
 attackClasses = [conAttack, shortPulse, mediumPulse,
@@ -233,8 +233,8 @@ assignedAgent.save_model_mode = defender_mode_enum.save
 trainHost = conAttack #coordAttack # conAttack #driftAttack #adversarialLeaf
 assignedNetwork.drift = 0
 
-intelligentOpposition = DdCoordinatedLowlongDHighSettings #DdCoordinatedMasterSettings #DdRandomMasterSettings
-intelligentOpposition.save_model_mode = defender_mode_enum.save
+# intelligentOpposition = DdCoordinatedLowlongDHighSettings #DdCoordinatedMasterSettings #DdRandomMasterSettings
+# intelligentOpposition.save_model_mode = defender_mode_enum.save
 intelligentOpposition = None
 
 ###
