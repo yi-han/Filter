@@ -58,6 +58,11 @@ class ddqnSingleSarsaCopy(object):
     stateRepresentation = stateRepresentationEnum.throttler
 
 class ddqnMalialisTrue(ddqnSingleSarsaCopy):
+    """
+    Looked through results and this has clearly not converged. We are getting 
+    variations of up to 10% on constant traffic
+
+    """
     # is the singleSarsaCopy but with reward overload
     name = "DDQNDecGenMalialisTrue"
     reward_overload = -1

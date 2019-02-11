@@ -278,7 +278,7 @@ class adversarialLeaf(Host):
         # if max_epLength != -1: 
         #     assert(adversarialMaster != None)
         super().__init__(destination_switch, rate_attack_low, rate_attack_high, rate_legal_low, rate_legal_high,
-        max_epLength, adversarialMaster, iterations_per_action, appendToSwitch)
+        max_epLength, None, iterations_per_action, appendToSwitch)
         
         if max_epLength != -1:
             self.adversarialMaster = adversarialMaster
@@ -304,11 +304,11 @@ class adversarialLeaf(Host):
 
 
     def sendTraffic(self, percent_emit):
-        packet_size = (self.iterations_per_action)/percent_emit
+        packet_size = (self.traffic_per_iteration)*percent_emit
         if self.is_attacker:
             self.destination_switch.new_illegal += packet_size
         else:
-            self.destination_switch.new_legal += packet_size        
+            self.destination_switch.new_legal += self.traffic_per_iteration        
 
 """
 

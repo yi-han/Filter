@@ -122,6 +122,7 @@ class Experiment:
 
                     # if we're loading the defender but saving the adversary
                     num_episodes = self.adversary_agent_settings.num_episodes
+                    adv_annealing_episodes = self.adversary_agent_settings.annealing_episodes
                 else:
                     # both agent and attacker are learning
                     if(num_episodes<(adv_pretraining+self.adversary_agent_settings.annealing_episodes)):
@@ -253,12 +254,12 @@ class Experiment:
                         #     print("\n\n\n")
                         #     finished = True
                         # # print("last state: {0}".format(net.last_state))
-                        # if step in range(21,22):
+                        # if step in range(20,22):
                         #     print("def | step {0} | action {1} | reward {2} | e {3}".format(step, last_action, r, e))
                         #     print("state was {0}".format(net.get_state()))
                         #     print("state was {0}".format(net.get_state()))
-                            # print("adversary | ep {3} | action {0} | reward {1} | e {2}".format(advAction, r, adv_e, ep_num))
-                            # print("adv_state {0}".format(adv_state))
+                        #     print("adversary | ep {3} | action {0} | reward {1} | e {2}".format(advAction, r, adv_e, ep_num))
+                        #     print("adv_state {0}".format(adv_state))
                                 
 
                                 # print("state = {1}, e = {0}".format(e, net.last_state))

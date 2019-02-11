@@ -42,6 +42,7 @@ for dest in jpattison; do
 	runSarsaNoOverdrive.py \
 	runSarsaOriginal.py \
 	runSarsaDDQNCopy.py \
+	runSarsaX.py \
 	runAttacks.py \
 	runDDQNAdditional.py \
 	runSarsaAdditional.py \

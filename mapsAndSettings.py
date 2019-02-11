@@ -168,7 +168,7 @@ class NetworkSingleTeamMalialisMedium(object):
     upper_boundary = 14 #12.5 # Mal would have used 14
     lower_boundary = 10 # for AIMD
 
-    iterations_between_action = 10 # 200
+    iterations_between_action = 200 # 200
 
     max_hosts_per_level = [2, 6, 12]
 

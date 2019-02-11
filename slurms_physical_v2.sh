@@ -1,14 +1,26 @@
-sed 's/runSARSA/runSARSA/g' exp_physical.slurm > temp1.slurm
-sed 's/sample_sarsa_name/sarsa_small/g' temp1.slurm -i
-sed "s/samplePath/$1/g" temp1.slurm > output.slurm
+sed 's/runSARSA/runSARSA/g' exp_physical.slurm > output.slurm
+sed 's/sample_sarsa_name/LSSsmall/g' output.slurm -i
+sed "s/samplePath/$1/g" output.slurm -i 
 
-sed 's/0 5/0 2/g' output.slurm -i
+sed 's/0 5/0 10/g' output.slurm -i
 sbatch output.slurm
-sed 's/sample_sarsa_name/sarsa_medium/g' temp1.slurm -i
-sed 's/runSARSA/runSarsaAdditional/g' output.slurm -i
+sed 's/runSARSA/runSarsaOriginal/g' output.slurm -i
+sed 's/LSSsmall/L200Med/g' output.slurm -i
+sed 's/0 10/0 2/g' output.slurm -i
 sbatch output.slurm
-# sed 's/runSarsaOriginal/runSarsaNoOverdrive/g' output.slurm -i
-# sbatch output.slurm
+sed 's/0 2/2 4/g' output.slurm -i
+sbatch output.slurm
+sed 's/2 4/6 4/g' output.slurm -i
+sbatch output.slurm
+
+sed 's/runSarsaOriginal/runSarsaX/g' output.slurm -i
+sed 's/L200Med/L200_64/g' output.slurm -i
+sed 's/6 4/0 2/g' output.slurm -i
+sbatch output.slurm
+sed 's/0 2/2 4/g' output.slurm -i
+sbatch output.slurm
+sed 's/2 4/6 4/g' output.slurm -i
+sbatch output.slurm
 
 
 # sleep 5
