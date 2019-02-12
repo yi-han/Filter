@@ -1,16 +1,16 @@
-sed 's/runDDQN/runDDQN/g' exp_gpgpu_single.slurm > temp1.slurm
-sed "s/samplePath/$1/g" temp1.slurm -i
-sed 's/sampleDDQNText/malSmall/g' temp1.slurm > output.slurm
+sed 's/runDDQN/runDDQN/g' exp_gpgpu_single.slurm > output.slurm
+sed "s/samplePath/$1/g" output.slurm -i
+sed 's/sampleDDQNText/AdvAIM/g' output.slurm -i
 # sbatch output.slurm
 # sleep 5
 sed 's/0 2/0 1/g' output.slurm -i 
 sbatch output.slurm
-sed 's/runDDQN/runDDQNAdditional/g' output.slurm -i
-sed 's/malSmall/malMedium/g' output.slurm -i
-sbatch output.slurm
-sed 's/runDDQNAdditional/runDDQNHundred/g' output.slurm -i
-sed 's/malMedium/hier/g' output.slurm -i
-sbatch output.slurm
+# sed 's/runDDQN/runDDQNAdditional/g' output.slurm -i
+# sed 's/malSmall/malMedium/g' output.slurm -i
+# sbatch output.slurm
+# sed 's/runDDQNAdditional/runDDQNHundred/g' output.slurm -i
+# sed 's/malMedium/hier/g' output.slurm -i
+# sbatch output.slurm
 
 # sed 's/0 2/6 2/g' output.slurm -i
 # sbatch output.slurm
