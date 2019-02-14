@@ -38,7 +38,7 @@ if not testAttacks:
         distributions.reward_graph(directory, attackName, repetitions, name)
         distributions.reward_graph(directory, attackName, repetitions, PerLegitTraffic = True, title = "\% Legit Traffic")
         distributions.distributions(directory, repetitions, averageFrom, attackName, PerLegitTraffic = True) #190000
-
+        distributions.reward_graph(directory, "loss-save-ConstantAttack", repetitions, Loss = True, title = "Loss")
 else:
     for attackType in attackClasses:
         attackName = "reward-test-{0}".format(attackType.getName())

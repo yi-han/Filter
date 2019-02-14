@@ -65,7 +65,7 @@ def reward_single(directory,reward_prefix="reward"):
     #(ep, ep_reward) = condense_values(ep, ep_reward)
     return (ep, ep_reward)
 
-def reward_multiple(directory, max_num, reward_prefix, PerLegitTraffic=False):
+def reward_multiple(directory, max_num, reward_prefix, PerLegitTraffic=False, Loss = False):
     # we do first one manually then loop for rest
     
 
@@ -74,6 +74,8 @@ def reward_multiple(directory, max_num, reward_prefix, PerLegitTraffic=False):
     f = pd.read_csv(path)
     if PerLegitTraffic:
         ep_reward = f.PerPacketIdeal#PerPacketIdeal #LastReward
+    elif Loss:
+        ep_reward = f.Loss
     else:
         ep_reward = f.LastReward
 
@@ -88,6 +90,8 @@ def reward_multiple(directory, max_num, reward_prefix, PerLegitTraffic=False):
         f = pd.read_csv(path)
         if PerLegitTraffic:
             ep_reward = np.array(f.PerPacketIdeal, dtype=float)  #PerPacketIdeal, dtype=float)
+        elif Loss:
+            ep_reward = np.array(f.Loss, dtype=float)
         else:
             ep_reward = np.array(f.LastReward, dtype=float)
         ep_reward.shape=(len(ep),1)
@@ -103,7 +107,7 @@ def reward_multiple(directory, max_num, reward_prefix, PerLegitTraffic=False):
 
 
 
-def reward_graph(directory, reward_type, max_num = None, title=None, PerLegitTraffic = False):
+def reward_graph(directory, reward_type, max_num = None, title=None, PerLegitTraffic = False, Loss = False):
     # used for the reward of the training file
     
     #print(path)
@@ -111,10 +115,12 @@ def reward_graph(directory, reward_type, max_num = None, title=None, PerLegitTra
     if not max_num:
         (ep, ep_reward) = reward_single(directory, reward_type)
     else:
-        (ep, ep_reward) = reward_multiple(directory, max_num, reward_type, PerLegitTraffic)
+        (ep, ep_reward) = reward_multiple(directory, max_num, reward_type, PerLegitTraffic, Loss)
 
     if PerLegitTraffic:
         plt.ylim(0, 1)#((-0.8, 1.2))
+    elif Loss:
+        plt.ylim(0, 0.2)
     else:
         plt.ylim(-0.8, 1.2)
     plt.plot(ep,ep_reward, 'o-')

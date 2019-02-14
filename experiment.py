@@ -187,6 +187,7 @@ class Experiment:
         print("Using the {0} agent:".format(name))
         reward_lines.append("Episode,StepsSoFar,TotalReward,LastReward,LengthEpisode,e,PerPacketIdeal, AdvTotalReward, AdvLastReward\n")
         packet_served_lines.append("Episode,PacketsReceived,PacketsServed,PercentageReceived,ServerFailures\n")
+        loss_lines.append("Episode,StepsSoFar,Loss,Exploration\n")
         #self.episode_rewards = []
 
 
