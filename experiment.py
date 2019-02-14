@@ -63,7 +63,7 @@ class Experiment:
 
         self.adversary_agent_settings = AdversaryAgentSettings
 
-
+        
         self.agentLoadModes = [mapsAndSettings.defender_mode_enum.test_short, mapsAndSettings.defender_mode_enum.load]
 
         assert AgentSettings.trained_drift != -1 # ensure we have it set, dont ever use in experiment

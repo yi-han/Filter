@@ -8,7 +8,6 @@ Common settings for networks
 from enum import Enum
 import math
 import agent.genericDecentralised as genericDecentralised
-import agent.sarsaCentralised as sarCen
 import adversary.ddRandomMaster as ddRandomMaster
 import adversary.ddAdvMaster as ddAdvMaster
 import adversary.ddAdvGenericMaster as ddGeneric

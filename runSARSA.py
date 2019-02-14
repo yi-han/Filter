@@ -3,7 +3,6 @@ import experiment
 import network.hosts as hostClass
 import network.network_new
 import agent.tileCoding as tileCoding
-import agent.sarsaCentralised as sarCen
 import agent.linearSarsaCentralised as linCen
 import agent.randomAgent as ranAg
 #import agent.sarsaDecentralised as sarDec# import agent.ddqnDecentralised as ddDec
