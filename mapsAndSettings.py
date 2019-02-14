@@ -15,6 +15,10 @@ import adversary.ddAdvGenericMaster as ddGeneric
 import pandas
 import network.hosts as hosts
 import agent.AIMD
+import os
+import numpy as np
+import pandas
+
 # defender_mode_enum = Enum('SaveModel', 'neither save load test_short')
 
 class defender_mode_enum(Enum):
@@ -32,12 +36,12 @@ class advesaryTypeEnum(Enum):
     standard = 0
     ddRandomMaster = 1 
 
-class AIMDmallSmall(object):
+class AIMDstandard(object):
     name = "AIMD"
     group_size = 1
-    delta = 0.3 # additive increase
+    delta = 0.15 # additive increase
     beta = 2 # multiplicative decrease
-    epsilon = 0.1
+    epsilon = 0.01
     stateRepresentation = stateRepresentationEnum.only_server # WRONG
     sub_agent = agent.AIMD.AIMDagent
 
@@ -76,53 +80,6 @@ class AIMDsettings(object):
     stepDrop = 0
     reward_overload = None
 
-"""
-
-class NetworkSimpleBasic(object):
-    name = "simple_basic"
-    N_state = 2 #The number of state, i.e., the number of filters
-    N_action = 100 #In the current implementation, each filter has 10 possible actions, so altogether there are 10^N_state actions, 
-                    #e.g., action 123 means the drop rates at the three filters are set to 0.1, 0.2 and 0.3, respectively
-    action_per_throttler = 10 # each filter can do 10 actions
-    N_switch = 3 # number of routers in the system
-    host_sources = [1, 1, 2] #ID of the switch that the host is connected to  
-
-    servers = [0] #ID of the switch that the server is connected to 
-    filters = [1, 2] #ID of the switch that the filter locates at
-
-    topologyFile = 'topologies/simple_basic.txt'
-    rate_legal_low = 0.05 
-    rate_legal_high = 1 
-    rate_attack_low = 2.5 
-    rate_attack_high = 6
-    legal_probability = 0.6 # probability that is a good guys
-    upper_boundary = 8
-    iterations_between_action = 5
-
-class NetworkFourThrottle(object):
-    # depreciated
-    name = "four_throttlers"
-
-    N_state = 4 #The number of state, i.e., the number of filters
-    N_action = 10000 #In the current implementation, each filter has 10 possible actions, so altogether there are 10^N_state actions, 
-                    #e.g., action 123 means the drop rates at the three filters are set to 0.1, 0.2 and 0.3, respectively
-    action_per_throttler = 10 # each filter can do 10 actions
-    N_switch = 8 # number of routers in the system
-    host_sources = [3, 3, 4, 4, 6, 6, 7, 7] #ID of the switch that the host is connected to  
-
-    servers = [0] #ID of the switch that the server is connected to 
-    filters = [3, 4, 6, 7] #ID of the switch that the filter locates at
-
-    topologyFile = 'topologies/four_throttlers.txt'
-    rate_legal_low = 0.05 
-    rate_legal_high = 1 
-    rate_attack_low = 2.5 
-    rate_attack_high = 6
-    legal_probability = 0.6 # probability that is a good guys
-    upper_boundary = 10
-    iterations_between_action = 10
-
-"""
 class NetworkMalialisSmall(object):
     name = "malialis_small"
     N_state = 3 #The number of state, i.e., the number of filters
@@ -143,7 +100,7 @@ class NetworkMalialisSmall(object):
     legal_probability = 0.6 # probability that is a good guys
     upper_boundary = 8
     lower_boundary = 6 # for AIMD
-    iterations_between_action = 200 #200
+    iterations_between_action = 30 #200
 
     max_hosts_per_level = [3] # no communication therefore just one
 
@@ -168,7 +125,7 @@ class NetworkSingleTeamMalialisMedium(object):
     upper_boundary = 14 #12.5 # Mal would have used 14
     lower_boundary = 10 # for AIMD
 
-    iterations_between_action = 200 # 200
+    iterations_between_action = 30 # 200
 
     max_hosts_per_level = [2, 6, 12]
 
@@ -177,8 +134,8 @@ class NetworkSixFour(NetworkSingleTeamMalialisMedium):
     name = "six_four"
     host_sources = [3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5,
     7, 7, 7, 7, 8, 8, 8, 8, 9, 9, 9, 9]
-    upper_boundary = 25 # malialis would have used 26
-    lower_boundary = 23 # malialis would have used 20
+    upper_boundary = 26 # malialis would have used 26
+    lower_boundary = 18 # malialis would have used 20
     max_hosts_per_level = [4, 12, 24]
 
 class NetworkMalialisTeamFull(object):
@@ -242,52 +199,7 @@ class NetworkMalialisTeamFull(object):
 #     iterations_between_action = 10
 #     max_hosts_per_level = [2, 6, 12, 60]   
 
-class NetworkTwelveThrottleLight(object):
-    name = "network_twelve_throttle_light"
-    N_state = 12
-    N_action = int(1e12)
 
-    action_per_throttler = 10
-    N_switch = 19
-    host_sources = [3, 3, 3, 4, 4, 4, 5, 5, 5, 7, 7, 7, 8, 8, 8, 9, 9, 9, 12, 12, 12, 13, 13, 13,
-    14, 14, 14, 16, 16, 16, 17, 17, 17, 18, 18, 18]
-    servers = [0]
-    filters = [3, 4, 5, 7, 8, 9, 12, 13, 14, 16, 17, 18]
-    
-    topologyFile = 'topologies/four_team_three_agent.txt'
-    rate_legal_low = 0.05 
-    rate_legal_high = 1 
-    rate_attack_low = 2.5 
-    rate_attack_high = 6
-    legal_probability = 0.6 # probability that is a good guys
-    upper_boundary = 45#52
-    iterations_between_action = 5     
-
-
-
-class NetworkTwelveThrottleHeavy(object):
-    name = "network_twelve_throttle_heavy"
-    N_state = 12
-    N_action = int(1e12)
-
-    action_per_throttler = 10
-    N_switch = 19
-    host_sources = [3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 5, 5, 5, 5, 5, 
-    7, 7, 7, 7, 7, 8, 8, 8, 8, 8, 9, 9, 9, 9, 9, 
-    12, 12, 12, 12, 12, 13, 13, 13, 13, 13,
-    14, 14, 14, 14, 14, 16, 16, 16, 16, 16, 
-    17, 17, 17, 17, 17, 18, 18, 18, 18, 18]
-    servers = [0]
-    filters = [3, 4, 5, 7, 8, 9, 12, 13, 14, 16, 17, 18]
-    
-    topologyFile = 'topologies/four_team_three_agent.txt'
-    rate_legal_low = 0.05 
-    rate_legal_high = 1 
-    rate_attack_low = 2.5 
-    rate_attack_high = 6
-    legal_probability = 0.6 # probability that is a good guys
-    upper_boundary = 45#52
-    iterations_between_action = 5 
 
 
 # class DdRandomMasterSettings(object):
@@ -391,14 +303,22 @@ class DdGenericDec(object):
     batch_size = 32
     adversary_class = ddGeneric.GenericAdvMaster
     action_per_agent = 11
+    include_other_attackers = False
 
 class DdGenericCentral(DdGenericDec):
     name = "ddGenCentral"
     num_adv_agents = 1
+    include_other_attackers = False
 
 class DdGenericSplit(DdGenericDec):
     name = "ddGenSplit"
     num_adv_agents = 2
+    include_other_attackers = False
+
+class ddSplitShare(DdGenericSplit):
+    name = "ddSplitShare"
+    include_other_attackers = True
+    prior_agent_actions = 0
 
 def create_generic_dec(ds, ns):
     """
@@ -543,3 +463,80 @@ def merge_summaries(file_path, number_summaries):
         i_summary.close()
     summary.close()
 
+def massSummary(load_path):
+    """
+    Go through the packet data and make some stats showing actual distributions.
+
+    We assume that prior summaries are deleted except the relevent one. 
+    We use this to provide contextual information about the agent / advesary.
+    """
+    ms = open("{0}/attack_summary_mass.csv".format(load_path), "w")
+    ms.write("AttackType,Repeats,Agent,Drift,MeanPercentage,Range,SD,Tau,Pretraining,Annealing,TotalEpisodes,start_e,overload,adv_tau,adv_discount,adv_pretrain,adv_annealing_episodes,adv_episodes,adv_start_e\n")
+    # Open up the first summary
+
+    init_summary_path = "{0}/attackSummary-0.csv".format(load_path)
+    init_summary = pandas.read_csv(init_summary_path)
+    num_attacks = len(init_summary['AttackType'])
+    agent_used = init_summary.iloc[-1]["Agent"]
+    drift = init_summary.iloc[-1]["Drift"]
+    tau = init_summary.iloc[-1]["Tau"]
+    pretraining = init_summary.iloc[-1]["Pretraining"]
+    annealing = init_summary.iloc[-1]["Annealing"]
+    totalEpisodes = init_summary.iloc[-1]["TotalEpisodes"]
+    start_e = init_summary.iloc[-1]["start_e"]
+    overload = init_summary.iloc[-1]["overload"]
+    adv_tau = init_summary.iloc[-1]["adv_tau"]
+    adv_discount = init_summary.iloc[-1]["adv_discount"]
+    adv_pretrain = init_summary.iloc[-1]["adv_pretrain"]
+    adv_annealing_episodes = init_summary.iloc[-1]["adv_annealing_episodes"]
+    adv_episodes = init_summary.iloc[-1]["adv_episodes"]
+    adv_start_e = init_summary.iloc[-1]["adv_start_e"]
+
+    # check number of rows to determine if advesary
+    # grab agent / advesary details
+    data_scores = {}
+    attack_names = []
+    first_file = True
+
+    for prefix in range(20):
+        print(prefix)
+        packet_file_path = "{0}/attackSummary-{1}.csv".format(load_path, prefix)
+        if os.path.exists(packet_file_path):
+            packet_file = open(packet_file_path)
+            packet_file.readline()       
+            for line in packet_file.readlines():
+                line = line.split(",")
+                attacker = line[0]
+                percentage = line[5]
+                if first_file:
+                    # we're grabbing the attack names in order
+                    attack_names.append(attacker)
+                    data_scores[attacker] = []
+                print("adding {0} to {1}".format(percentage, attacker))
+                data_scores[attacker].append(float(percentage))
+
+            first_file = False
+
+    print(data_scores)
+    for attack_name in attack_names:
+        percentages = data_scores[attack_name]
+        ms.write("{0},{1},".format(attack_name,len(percentages)))
+        if len(percentages)>0:
+            ms.write("{0},{1},".format(agent_used, drift))
+
+            # calc and add mean, range,
+            num_per = np.array(percentages) 
+            print(num_per)
+            print(num_per.mean())
+            ms.write("{0},{1},{2},".format(num_per.mean(), num_per.ptp(), num_per.std()))
+
+            ms.write("{0},{1},{2},{3},{4},{5},".format(tau, pretraining, annealing, totalEpisodes, start_e, overload))
+            if attack_names.index(attack_name)>=5:
+                ms.write("{0},{1},{2},{3},{4},{5}\n".format(adv_tau, adv_discount, adv_pretrain, adv_annealing_episodes, adv_episodes, adv_start_e))
+            else:
+                ms.write("{0},{1},{2},{3},{4},{5}\n".format("","","","","",""))
+        else:
+            for _ in range(17):
+                ms.write(",")
+            ms.write("\n")
+    ms.close()

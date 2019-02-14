@@ -1,23 +1,46 @@
-sed 's/runDDQN/runSARSA/g' exp_physical_ddqn.slurm > temp1.slurm
-sed 's/sampleDDQNText/64Dqn100lSin/g' temp1.slurm > temp2.slurm
-sed 's/sampleDDQNText/64Dqn100Sin/g' temp1.slurm > output.slurm
-# sbatch temp2.slurm
-# sleep 30
-sed 's/0 2/0 1/g' temp2.slurm > output.slurm
+# doing all the tests
+sed 's/runSARSA/runDDQN/g' exp_physical.slurm > output.slurm
+sed "s/samplePath/$1/g" output.slurm -i 
+sed 's/sample_sarsa_name/smallSin/g' output.slurm -i 
+sed 's/0 5/0 10/g' output.slurm -i 
+sed 's/loadAttacks = False/loadAttacks = True/g' runDDQN.py -i
 sbatch output.slurm
-# sed 's/0 2/4 2/g' temp2.slurm > output.slurm
-# sbatch output.slurm
-# sed 's/0 2/6 2/g' temp2.slurm > output.slurm
-# sbatch output.slurm
-# sed 's/0 2/8 2/g' temp2.slurm > output.slurm
-# sbatch output.slurm
-# sed 's/0 2/10 2/g' temp2.slurm > output.slurm
-# sbatch output.slurm
-# sed 's/0 2/12 2/g' temp2.slurm > output.slurm
-# sbatch output.slurm
-# sed 's/0 2/14 2/g' temp2.slurm > output.slurm
-# sbatch output.slurm
-# sed 's/0 2/16 2/g' temp2.slurm > output.slurm
-# sbatch output.slurm
-# sed 's/0 2/18 2/g' temp2.slurm > output.slurm
-# sbatch output.slurm
+
+sed 's/runDDQN/runDDQNAdditional/g' output.slurm -i
+sed 's/smallSin/smallMal/g' output.slurm -i
+sed 's/loadAttacks = False/loadAttacks = True/g' runDDQNAdditional.py -i
+sbatch output.slurm
+
+sed 's/runDDQNAdditional/runDDQNHundred/g' output.slurm -i
+sed 's/smallMal/midSin/g' output.slurm -i
+sed 's/loadAttacks = False/loadAttacks = True/g' runDDQNHundred.py -i
+sbatch output.slurm
+
+
+
+sed 's/runDDQNHundred/runDDQNMalialis/g' output.slurm -i
+sed 's/midSin/midMal/g' output.slurm -i
+sed 's/loadAttacks = False/loadAttacks = True/g' runDDQNMalialis.py -i
+sbatch output.slurm
+
+
+sed 's/runDDQNMalialis/runDDQNNetQuick/g' output.slurm -i
+sed 's/midMal/midHier/g' output.slurm -i
+sed 's/loadAttacks = False/loadAttacks = True/g' runDDQNNetQuick.py -i
+sbatch output.slurm
+
+sed 's/runDDQNNetQuick/runSarsaAdditional/g' output.slurm -i
+sed 's/midHier/64Sin/g' output.slurm -i
+sed 's/loadAttacks = False/loadAttacks = True/g' runSarsaAdditional.py -i
+sbatch output.slurm
+
+sed 's/runSarsaAdditional/runSarsaDDQNCopy/g' output.slurm -i
+sed 's/64Sin/64Hier/g' output.slurm -i
+sed 's/loadAttacks = False/loadAttacks = True/g' runSarsaDDQNCopy.py -i
+sbatch output.slurm
+
+sed 's/runSarsaDDQNCopy/runSarsaNoOverdrive/g' output.slurm -i
+sed 's/64Hier/64_50/g' output.slurm -i
+sed 's/loadAttacks = False/loadAttacks = True/g' runSarsaNoOverdrive.py -i
+sbatch output.slurm
+

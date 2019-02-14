@@ -218,7 +218,7 @@ assignedNetwork.drift = 0
 
 intelligentOpposition = DdGenericSplit #DdCoordinatedLowlongDlowSettings #DdCoordinatedMasterSettings #DdRandomMasterSettings
 intelligentOpposition.save_model_mode = defender_mode_enum.save
-# intelligentOpposition = None
+intelligentOpposition = None
 
 
 network_emulator = network.network_new.network_full #network_quick # network_full

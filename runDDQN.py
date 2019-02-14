@@ -206,8 +206,8 @@ attackClasses = [conAttack, shortPulse, mediumPulse,
 
 ###
 # Settings
-assignedNetwork =  NetworkSingleTeamMalialisMedium #NetworkSingleTeamMalialisMedium
-assignedAgent =  AIMDmallSmall #ddqnSingleNoCommunicate #ddqn100MediumHierarchical
+assignedNetwork =  NetworkMalialisSmall #NetworkSingleTeamMalialisMedium
+assignedAgent =  AIMDstandard #ddqnSingleNoCommunicate #ddqn100MediumHierarchical
 load_attack_path = "attackSimulations/{0}/".format(assignedNetwork.name)
 loadAttacks = False
 assignedAgent.encoders = None
@@ -233,7 +233,7 @@ assignedNetwork.emulator = network_emulator
 twist="{0}".format(network_emulator.name)
 commStrategy = calc_comm_strategy(assignedAgent.stateRepresentation)
 
-if (len(sys.argv)==4) and sys.argv[3] != "" :
+if (len(sys.argv)>=4) and sys.argv[3] != "" :
     file_path = sys.argv[3]
     proper_path = getPathName(assignedNetwork, assignedAgent, commStrategy, twist, trainHost)
 

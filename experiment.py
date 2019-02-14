@@ -217,7 +217,7 @@ class Experiment:
                 for step in range(max_epLength):
 
                     if self.adversarialMaster != None:
-                        adv_state = self.adversarialMaster.get_state(net)
+                        adv_state = self.adversarialMaster.get_state(net, adv_e)
                         advAction = self.adversarialMaster.predict(adv_state, adv_e)
                     else:
                         advAction = None

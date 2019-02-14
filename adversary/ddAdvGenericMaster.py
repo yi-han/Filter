@@ -11,10 +11,13 @@ Comprised of many DDQN networks with one per adversarial agent
 import math
 import adversary.ddAdvGenericAgent as ddGenAgent
 import numpy as np
+import copy 
+
 class GenericAdvMaster():
 
     def __init__(self, adv_settings, network_setting, defender_path):
 
+        self.adv_settings = adv_settings
         self.num_adv_agents = adv_settings.num_adv_agents # number of adversarial agents
         self.num_agents = network_setting.N_state # number of defender agents
 
@@ -41,6 +44,9 @@ class GenericAdvMaster():
         print("adv_stat size is {0}".format(N_adv_state))
         for _ in range(self.num_adv_agents):
             self.adv_agents.append(ddGenAgent.ddGenAgent(N_adv_state, adv_settings))
+            if adv_settings.include_other_attackers:
+                # If we want to include the moves of the attackers before it
+                N_adv_state += 1
 
         self.all_leaves = [] # list of lists of leaves. Eventually grouped so each inner list corresponds to an adversarial agent
         #self.unassignedAgents = self.adv_agents.copy() # hopefully we copy the references
@@ -73,6 +79,10 @@ class GenericAdvMaster():
             Here we just calculate the % of traffic from capacity each agent produces
 
         """
+        if self.adv_settings.include_other_attackers:
+            # we've already calculated the moves in this case
+            return state[-1]
+
 
         actions = []
         # print("\n\npredictions")
@@ -98,7 +108,7 @@ class GenericAdvMaster():
 
 
 
-    def get_state(self, net):
+    def get_state(self, net, e):
         """ 
         Provide the bandwidth capacity for each agent,
         and bandwidth emmitted by each agent over last 3 steps
@@ -117,12 +127,34 @@ class GenericAdvMaster():
             state.extend(prior_action)
 
         # pThrottles = []
-        for throttler in net.throttlers:
-            state.extend(throttler.past_throttles[-self.prior_agent_actions:])
-        #     pThrottles.append(throttler.past_throttles)
-        # print(pThrottles)
-        # print(state)
+
+        if self.prior_agent_actions>0:
+            for throttler in net.throttlers:
+                state.extend(throttler.past_throttles[-self.prior_agent_actions:])
+
+
+        if self.adv_settings.include_other_attackers:
+            combined_state = []
+            associated_actions = []
+            for i in range(len(self.adv_agents)):
+                combined_state.append(copy.deepcopy(state))
+                associated_action = self.adv_agents[i].predict(state,e)
+                state.append(associated_action)
+                associated_actions.append(associated_action)
+            # record the actions in the state variable
+            combined_state.append(associated_actions)
+            return combined_state
+
+
         return np.array(state)
+
+    def extract_state(self, combined_state, i):
+        if self.adv_settings.include_other_attackers:
+            return combined_state[i]
+        else:
+            # normal
+            return combined_state
+
 
     def initiate_episode(self):
         # here I assume that we know the number of designated attackers
@@ -159,20 +191,21 @@ class GenericAdvMaster():
         for i in range(len(self.adv_agents)):
             agent = self.adv_agents[i]
             last_action = last_actions[i]
+            t_last_state = self.extract_state(last_state, i)
+            t_current_state = self.extract_state(current_state, i)
 
-            agent.update(last_state, last_action, current_state, is_done, reward)
+            agent.update(t_last_state, last_action, t_current_state, is_done, reward)
         
 
         # self.update_past_state(last_actions)
 
     def actionReplay(self, current_state, batch_size):
-        # print(batch_size)
-        # print(current_state)
+
         l = 0
         for i in range(len(self.adv_agents)):
             agent = self.adv_agents[i]
-
-            l+= agent.actionReplay(current_state, batch_size)
+            t_state = self.extract_state(current_state, i)
+            l+= agent.actionReplay(t_state, batch_size)
         return l
 
     def loadModel(self, load_path, prefix):
