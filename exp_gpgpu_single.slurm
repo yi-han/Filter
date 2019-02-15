@@ -7,8 +7,7 @@
 #SBATCH --account=punim0621
 
 #SBATCH --gres=gpu:1
-# idea: use four gpus (amount we get per node)
-#SBATCH --mem=25360
+#SBATCH --mem=10750
 
 
 # Send yourself an email when the job:

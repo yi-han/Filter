@@ -18,6 +18,7 @@ for dest in jpattison; do
 	runSARSA.py \
 	mapsAndSettings.py \
 	topologies \
+	exp_gpgpu_light.slurm \
 	exp_gpgpu_single.slurm \
 	exp_gpgpu_heavy.slurm \
 	exp_cloud.slurm \
@@ -30,7 +31,7 @@ for dest in jpattison; do
 	slurms_physical_standard.sh \
 	slurms_physical_heavy.sh \
 	slurms_gpgpu_standard.sh \
-	slurms_gpgpu_half.sh \
+	slurms_AIMD.sh \
 	slurms_gpgpu_latter.sh \
 	slurms_gpgpu_v2.sh \
 	slurms_gpgpu_v3.sh \

@@ -155,19 +155,19 @@ attackClasses = [conAttack, shortPulse, mediumPulse,
 
 ###
 # Settings
-assignedNetwork =  NetworkMalialisSmall #NetworkSingleTeamMalialisMedium
-assignedAgent =  ddqnMalialisTrue #ddqnSingleNoCommunicate #ddqn100MediumHierarchical
+assignedNetwork =  NetworkSingleTeamMalialisMedium #NetworkSingleTeamMalialisMedium
+assignedAgent =  AIMDstandard #ddqnSingleNoCommunicate #ddqn100MediumHierarchical
 load_attack_path = "attackSimulations/{0}/".format(assignedNetwork.name)
 loadAttacks = False
 assignedAgent.encoders = None
 
-assignedAgent.save_model_mode = defender_mode_enum.save
+assignedAgent.save_model_mode = defender_mode_enum.load
 trainHost = conAttack #coordAttack # conAttack #driftAttack #adversarialLeaf
 assignedNetwork.drift = 0
 
 intelligentOpposition = DdGenericCentral #DdCoordinatedLowlongDlowSettings #DdCoordinatedMasterSettings #DdRandomMasterSettings
 intelligentOpposition.save_model_mode = defender_mode_enum.save
-intelligentOpposition = None
+# intelligentOpposition = None
 
 
 network_emulator = network.network_new.network_full #network_quick # network_full

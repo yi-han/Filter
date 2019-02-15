@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --nodes 1
-#SBATCH --partition shortgpgpu
-#SBATCH --time=0-01:00:00
+#SBATCH --partition gpgpu
+#SBATCH --time=7-00:00:00
 #SBATCH --cpus-per-task=1
 #SBATCH --job-name=sampleDDQNText
 #SBATCH --account=punim0621
@@ -19,9 +19,10 @@
 # Use this email address:
 #SBATCH --mail-user=jpattison@student.unimelb.edu.au
 
-module load Tensorflow/1.9.0-intel-2017.u2-GCC-6.2.0-CUDA9-Python-3.6.4-GPU
+# module load Tensorflow/1.8.0-intel-2017.u2-GCC-6.2.0-CUDA9-Python-3.5.2-GPU
 # module load Theano/1.0.2-intel-2017.u2-Python-3.5.2-Tensorflow-1.10.0
 # module load Python/3.5.2-goolf-2015a
+module load Tensorflow/1.9.0-intel-2017.u2-GCC-6.2.0-CUDA9-Python-3.6.4-GPU
 
 # Launch multiple process python code
 # pip3 install --user scikit-learn
@@ -29,7 +30,7 @@ module load Tensorflow/1.9.0-intel-2017.u2-GCC-6.2.0-CUDA9-Python-3.6.4-GPU
 
 
 echo "Starting four throttle"
-time mpiexec -n 1 python3 runDDQN.py 0 1 "sampleDDQNText"
+time mpiexec -n 1 python3 runDDQN.py 0 2 "samplePath"
 
 echo "done"
 
