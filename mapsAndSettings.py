@@ -288,11 +288,11 @@ class NetworkMalialisTeamFull(object):
 class DdGenericDec(object):
     name = "ddGenericDecentralised"
     num_adv_agents = -1
-    pre_train_steps = 60000
+    pre_train_steps = 50000
+    annealing_episodes = 200000
     num_episodes = 500000
     tau = 0.001
-    discount_factor = 0.7
-    annealing_episodes = 600000
+    discount_factor = 0.6
     startE = 1
     endE = 0.0
     

@@ -63,7 +63,7 @@ class Experiment:
 
         self.adversary_agent_settings = AdversaryAgentSettings
 
-        
+
         self.agentLoadModes = [mapsAndSettings.defender_mode_enum.test_short, mapsAndSettings.defender_mode_enum.load]
 
         assert AgentSettings.trained_drift != -1 # ensure we have it set, dont ever use in experiment
@@ -132,7 +132,6 @@ class Experiment:
                         adv_annealing_episodes = self.adversary_agent_settings.annealing_episodes
                 adv_step_drop = (adv_e - self.adversary_agent_settings.endE) / (adv_annealing_episodes  * max_epLength)
 
-
         else:
             self.adversarialMaster = None 
 
@@ -187,7 +186,7 @@ class Experiment:
         print("Using the {0} agent:".format(name))
         reward_lines.append("Episode,StepsSoFar,TotalReward,LastReward,LengthEpisode,e,PerPacketIdeal, AdvTotalReward, AdvLastReward\n")
         packet_served_lines.append("Episode,PacketsReceived,PacketsServed,PercentageReceived,ServerFailures\n")
-        loss_lines.append("Episode,StepsSoFar,Loss,Exploration\n")
+        loss_lines.append("Episode,StepsSoFar,Loss,Exploration, EpDefLoss, EpAdvLoss\n")
         #self.episode_rewards = []
 
 
@@ -202,10 +201,10 @@ class Experiment:
 
             fail_seg = 0
             adv_last_action = None
-
             reward_per_print = 0
             for ep_num in range(num_episodes):
-
+                ep_adv_loss = 0
+                ep_def_loss = 0
                 #print("loading ep {0} out of {1}".format(ep_num, num_episodes))
                 net.reset() # reset the network
                 if self.adversarialMaster != None:
@@ -302,6 +301,7 @@ class Experiment:
                         l = agent.actionReplay(net.get_state(), batch_size)
                         if l:
                             loss.append(l)
+                            ep_def_loss += abs(l)
 
                     if self.adversarialMaster and (not self.adversary_agent_settings.save_model_mode in self.agentLoadModes):
 
@@ -315,6 +315,7 @@ class Experiment:
                             print("manual set adv_e to adv_e_Ende")
                         if total_steps % self.adversary_agent_settings.update_freq == 0:
                             adv_loss = self.adversarialMaster.actionReplay(adv_state, self.adversary_agent_settings.batch_size)
+                            ep_adv_loss += abs(adv_loss)
                     else:
                         adv_e = 0
 
@@ -358,8 +359,10 @@ class Experiment:
 
                 reward_lines.append("{0},{1},{2},{3},{4},{5},{6},{7},{8}\n".format(ep_num, total_steps, rList[-1], r, stepList[-1], e, agent_performance, advRList[-1], adv_r))
                 if len(loss) > 0:
-                    loss_lines.append(str(ep_num) + "," + str(total_steps) + "," + str(loss[-1]) + "," + str(e) + "\n")
-
+                    last_loss = loss[-1]
+                else:
+                    last_loss = 0
+                loss_lines.append("{0},{1},{2},{3},{4}\n".format(ep_num,total_steps,last_loss, ep_def_loss, ep_adv_loss))
 
             if self.agent_settings.save_model_mode is mapsAndSettings.defender_mode_enum.save: # only save the first iteration 
                 # save the model only every 10,000 steps

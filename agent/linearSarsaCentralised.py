@@ -27,6 +27,7 @@ class Agent(aBase.Agent):
         self.N_state = N_state
         self.score = 0
         self.encoders = encoders
+        self.ai.reset()
 
     def __enter__(self):
         # probably have memory management here
@@ -73,7 +74,9 @@ class Agent(aBase.Agent):
 
 
     def actionReplay(self, current_state, batch_size):
-        return None
+        loss = self.ai.cumLoss
+        self.ai.cumLoss = 0
+        return loss
 
     def loadModel(self, load_path):
         # let above work out the load_path especially with the decentralised part

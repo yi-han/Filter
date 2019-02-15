@@ -24,6 +24,7 @@ class TileWrapper(object):
     def __init__(self, encoders, bias_term = False):
         self.encoders = encoders
         self.bias_term = bias_term
+        
 
     def featureSize(self):
         count = 0
@@ -110,8 +111,7 @@ class SarsaFunctionAI:
         for action in self.actions:
             w = np.zeros(self.n_features)
             self.w_matrix.append(w)
-
-
+        self.cumLoss = 0
 
     def chooseAction(self, state):
         # as epsilon dealt with by main we going to ignore epsilon logic for now
@@ -140,7 +140,7 @@ class SarsaFunctionAI:
         coefficient = (self.alpha*(reward - self.getQ(state, action)))
         state_vector = self.tile_wrapper.feature_converter(state)
         self.w_matrix[action_num] = current_weights + coefficient*state_vector
-        
+        self.cumLoss += abs(coefficient)
         if False :#current_weights[-38] != 0:
             print("\naction")
             print(action)
