@@ -1,3 +1,0 @@
-import adversary.ddAdvGenericMaster as ddGenMaster
-
-class decAdvMaster(ddGenMaster.GenericAdvMaster)
