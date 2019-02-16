@@ -92,41 +92,18 @@ class LinearSarsaLAI(object):
     reward_overload = -1
     stateRepresentation = stateRepresentationEnum.leaderAndIntermediate  
 
-class LinearSarsaLAIreduced(LinearSarsaLAI):
-    # same concept as the DDQN, lower learning rate ~ better results?
-    name = "LinearSarsaLAIreduced"
-    tau = 0.001
-
-class LinearSarsaLAIshort(LinearSarsaLAI):
-    name = "LinearLAIshort"
-    max_epLength = 30
-    annealing_steps = 80000 * max_epLength #1000*max_epLength #60000 * max_epLength 
-
-class LinearLAIshortReduced(LinearSarsaLAIshort):
-    name = "LAIshortAndReduced"
-    tau = 0.003
-
-
 class LinearSarsaLAIDDQN200(LinearSarsaLAI):
     # Idea (without using a ridiculous number of epLength, set the learning rate even lower and give proper exploration)
     name = "LinearDDQN200"
     max_epLength = 30
     tau = 0.001
-    num_episodes = 200001 #200001#    
+    num_episodes = 300001 #200001#    
     pre_train_steps = 40000 * max_epLength #40000 * max_epLength #
     annealing_steps = 120000 * max_epLength  #120000 * max_epLength  #
     startE = 1
     endE = 0.0
     stepDrop = (startE - endE)/annealing_steps
     reward_overload = None  
-
-class LinSarDDQN200HighTau(LinearSarsaLAIDDQN200):
-    name = "LinearDDQN200HighTau"
-    tau = 0.005
-
-class LinLaiOverload(LinearSarsaLAIDDQN200):
-    name = "LinLaiOverload"
-    reward_overload = -1
 
 
 class LinearSarsaLAIDDQN100Short(LinearSarsaLAI):

@@ -25,6 +25,8 @@ class defender_mode_enum(Enum):
     save = 1
     load = 2
     test_short = 3
+    load_save = 4
+    
 class stateRepresentationEnum(Enum):
     throttler = 0 #always
     leaderAndIntermediate = 1 

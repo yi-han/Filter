@@ -3,7 +3,6 @@ import experiment
 import network.hosts as hostClass
 import network.network_new
 import agent.tileCoding as tileCoding
-import agent.sarsaCentralised as sarCen
 import agent.linearSarsaCentralised as linCen
 import agent.randomAgent as ranAg
 #import agent.sarsaDecentralised as sarDec# import agent.ddqnDecentralised as ddDec
@@ -21,9 +20,9 @@ class LinearSarsaSingular(object):
     max_epLength = 30 # or 60 if test
     y = 0
     tau = 0.0125
-    update_freq = None
+    update_freq = 4
     batch_size = None
-    num_episodes = 62501#82501
+    num_episodes = 200000#82501
     pre_train_steps = 0#2000 * max_epLength
     annealing_steps = 50000 * max_epLength #1000*max_epLength #60000 * max_epLength 
     startE = 0.4 #0.4
@@ -48,6 +47,8 @@ class LinearSarsaNoOverloadLong(LinearSarsaSingular):
 class LinearSarsaNoOverload(LinearSarsaSingular):
     name = "LinearSarsaSingularNoOverload"
     reward_overload = None
+    num_episodes = 62501#82501
+
 
 
 
@@ -57,9 +58,9 @@ class LinearSarsaSingularDDQNCopy(object):
     max_epLength = 30 # or 60 if test
     y = 0    
     tau = 0.01 #Rate to update target network toward primary network. 
-    update_freq = None #How often to perform a training step.
+    update_freq = 4 #How often to perform a training step.
     batch_size = None #How many experiences to use for each training step.
-    num_episodes = 100001 #200001#    
+    num_episodes = 200001 #200001#    
     pre_train_steps = 20000 * max_epLength #40000 * max_epLength #
     annealing_steps = 60000 * max_epLength  #120000 * max_epLength  #
     startE = 1
@@ -76,7 +77,7 @@ class LinearSarsaLAI(object):
     max_epLength = 500
     y = 0
     tau = 0.001
-    update_freq = None
+    update_freq = 4
     batch_size = None
     num_episodes = 100001#82501
     pre_train_steps = 0#2000 * max_epLength
@@ -146,7 +147,7 @@ class LinearLaiManyEpisodes(object):
     max_epLength = 60
     y = 0
     tau = 0.001
-    update_freq = None
+    update_freq = 4
     batch_size = None
     num_episodes = 1000001#82501
     pre_train_steps = 0#2000 * max_epLength
@@ -168,7 +169,7 @@ class LinearTeamCommunicate(object):
     max_epLength = 30 # or 60 if test
     y = 0    
     tau = 0.001 #Rate to update target network toward primary network. 
-    update_freq = None #How often to perform a training step.
+    update_freq = 4 #How often to perform a training step.
     batch_size = None #How many experiences to use for each training step.
     num_episodes = 100001 #200001#    
     pre_train_steps = 40000 * max_epLength #40000 * max_epLength #
@@ -189,7 +190,7 @@ class RandomAgent(object):
     max_epLength = 500 # or 60 if test
     y = 0
     tau = 0.05
-    update_freq = None
+    update_freq = 4
     batch_size = None
     num_episodes = 100001#82501
     pre_train_steps = 0#2000 * max_epLength
@@ -221,8 +222,8 @@ attackClasses = [conAttack, shortPulse, mediumPulse,
 Settings to change
 """
 
-assignedNetwork = NetworkSingleTeamMalialisMedium
-assignedAgent = LinearSarsaLAIDDQN200
+assignedNetwork = NetworkSixFour
+assignedAgent = LinearSarsaSingularDDQNCopy
 load_attack_path = "attackSimulations/{0}/".format(assignedNetwork.name)
 network_emulator = network.network_new.network_full # network_quick # network_full
 loadAttacks = False

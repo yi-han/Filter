@@ -64,7 +64,9 @@ class Experiment:
         self.adversary_agent_settings = AdversaryAgentSettings
 
 
-        self.agentLoadModes = [mapsAndSettings.defender_mode_enum.test_short, mapsAndSettings.defender_mode_enum.load]
+        self.agentLoadModes = [mapsAndSettings.defender_mode_enum.test_short, mapsAndSettings.defender_mode_enum.load, mapsAndSettings.defender_mode_enum.load_save]
+        self.agentSaveModes = [mapsAndSettings.defender_mode_enum.save, mapsAndSettings.defender_mode_enum.load_save]
+
 
         assert AgentSettings.trained_drift != -1 # ensure we have it set, dont ever use in experiment
 
@@ -97,7 +99,7 @@ class Experiment:
         """
 
         if self.agent_settings.save_model_mode in self.agentLoadModes:
-            e = 0
+            e = endE
             stepDrop = 0
             pre_train_steps = 0
 
@@ -112,7 +114,7 @@ class Experiment:
             if self.adversary_agent_settings.save_model_mode in self.agentLoadModes:
                 # large assumption of learning or loading
                 adv_pretraining = 0
-                adv_e = 0
+                adv_e = self.adversary_agent_settings.endE
                 adv_step_drop = 0
             else:
                 adv_e = self.adversary_agent_settings.startE
@@ -234,12 +236,12 @@ class Experiment:
 
                         ### why are we putting in the current state??? Shouldn't it be last state
                         ### or better, shouldn't it involve both the last state and current state?
-                        if not self.agent_settings.save_model_mode in self.agentLoadModes:
+                        if self.agent_settings.save_model_mode in self.agentSaveModes:
                             agent.update(net.last_state, last_action, net.get_state(), d, r, next_action = a)
 
                         if self.adversarialMaster != None:
                             adv_r = self.adversarialMaster.calc_reward(r)
-                            if not self.adversary_agent_settings.save_model_mode in self.agentLoadModes:
+                            if self.adversary_agent_settings.save_model_mode in self.agentSaveModes:
                                 self.adversarialMaster.update(adv_last_state, adv_last_action, adv_state, d, adv_r)
                             self.adversarialMaster.update_past_state(adv_last_action)
                         else:
@@ -288,7 +290,7 @@ class Experiment:
                     last_action = a   
                     total_steps += 1
                     
-                    if total_steps > pre_train_steps and not self.agent_settings.save_model_mode in self.agentLoadModes:
+                    if total_steps > pre_train_steps:
                         if e > startE:
                             e = startE
                         elif e > endE:
@@ -297,13 +299,13 @@ class Experiment:
                             e = endE
                             print("manual set e to end_e \n\n")
 
-                    if update_freq and not self.agent_settings.save_model_mode in self.agentLoadModes and total_steps % (update_freq) == 0:
+                    if update_freq and self.agent_settings.save_model_mode in self.agentSaveModes and total_steps % (update_freq) == 0:
                         l = agent.actionReplay(net.get_state(), batch_size)
                         if l:
                             loss.append(l)
                             ep_def_loss += abs(l)
 
-                    if self.adversarialMaster and (not self.adversary_agent_settings.save_model_mode in self.agentLoadModes):
+                    if self.adversarialMaster and self.adversary_agent_settings.save_model_mode in self.agentSaveModes:
 
                         if adv_e > self.adversary_agent_settings.startE:
                             adv_e = self.adversary_agent_settings.startE
