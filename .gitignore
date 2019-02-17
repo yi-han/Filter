@@ -1,0 +1,11 @@
+.DS_Store
+agent/__pycache__/
+filter new 3 layers 256 bias/
+*.pyc
+*.csv
+*.ckpt.*
+*checkpoint
+*.pkl
+*.sav
+*.xlsx
+*.slurm
