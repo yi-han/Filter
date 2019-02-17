@@ -9,9 +9,10 @@ Comprised of many DDQN networks with one per adversarial agent
 """
 
 import math
-import adversary.ddAdvGenericAgent as ddGenAgent
+#import adversary.ddAdvGenericAgent as ddGenAgent
 import numpy as np
 import copy 
+import agent.tileCoding as tileCoding
 
 class GenericAdvMaster():
 
@@ -40,13 +41,35 @@ class GenericAdvMaster():
         self.adv_agents = []
         self.defender_path = defender_path
 
-        #N_adv_state = self.num_agents*7
+        if adv_settings.include_encoder:
+            bandwidth_tiles = len(network_setting.host_sources)*network_setting.rate_attack_high
+            maxThrottlerBandwidth = bandwidth_tiles
+            bandwidth_tilings = 8
+            bandwidth_encoding = tileCoding.myTileInterface(maxThrottlerBandwidth, bandwidth_tiles, bandwidth_tilings)
+
+            agent_tilings = 1
+            agent_move_encoding = tileCoding.myTileInterface(network_setting.action_per_throttler, network_setting.action_per_throttler, agent_tilings)
+            advesary_move_encoding = tileCoding.myTileInterface(adv_settings.action_per_agent, adv_settings.action_per_agent, agent_tilings)
+
+            encoders = [bandwidth_encoding]*self.num_adv_agents
+            encoders.extend([advesary_move_encoding]*(self.prior_adversary_actions*self.num_adv_agents))
+            encoders.extend([agent_move_encoding]*(self.prior_agent_actions*self.num_agents))
+            assert(len(encoders)==N_adv_state)
+        else:
+            encoders = None
+
+
+
         print("adv_stat size is {0}".format(N_adv_state))
         for _ in range(self.num_adv_agents):
-            self.adv_agents.append(ddGenAgent.ddGenAgent(N_adv_state, adv_settings))
+            self.adv_agents.append(self.adv_settings.adv_agent_class(N_adv_state, adv_settings, encoders))
             if adv_settings.include_other_attackers:
                 # If we want to include the moves of the attackers before it
                 N_adv_state += 1
+                if adv_settings.include_encoder:
+                    encoders = copy.deepcopy(encoders) # copy it
+
+                    encoders.append(advesary_move_encoding)
 
         self.all_leaves = [] # list of lists of leaves. Eventually grouped so each inner list corresponds to an adversarial agent
         #self.unassignedAgents = self.adv_agents.copy() # hopefully we copy the references

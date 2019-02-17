@@ -13,7 +13,7 @@ import sys
 from numpy import random as random
 
 class ddGenAgent():
-    def __init__(self, N_state, adv_settings):
+    def __init__(self, N_state, adv_settings, encoders):
 
         self.leaves = []
 

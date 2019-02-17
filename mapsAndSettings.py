@@ -8,9 +8,9 @@ Common settings for networks
 from enum import Enum
 import math
 import agent.genericDecentralised as genericDecentralised
-import adversary.ddRandomMaster as ddRandomMaster
-import adversary.ddAdvMaster as ddAdvMaster
 import adversary.ddAdvGenericMaster as ddGeneric
+import adversary.ddAdvGenericAgent as ddGenAgent
+import adversary.sarsaAdvAgent as sarsaAdvAgent
 import pandas
 import network.hosts as hosts
 import agent.AIMD
@@ -219,8 +219,10 @@ class DdGenericDec(object):
     update_freq = 4
     batch_size = 32
     adversary_class = ddGeneric.GenericAdvMaster
+    adv_agent_class = ddGenAgent.ddGenAgent
     action_per_agent = 11
     include_other_attackers = False
+    include_encoder = False
 
 class DdGenericCentral(DdGenericDec):
     name = "ddGenCentral"
@@ -236,6 +238,38 @@ class ddSplitShare(DdGenericSplit):
     name = "ddSplitShare"
     include_other_attackers = True
     prior_agent_actions = 0
+
+class sarGenericDec(object):
+    name = "sarsaGenericDec"
+    num_adv_agents = -1
+    pre_train_steps = 50000
+    annealing_episodes = 200000
+    num_episodes = 500000
+    tau = 0.001
+    discount_factor = 0.6
+    startE = 1
+    endE = 0.0
+    
+    max_epLength = None
+    reward_overload = None
+    prior_agent_actions = 1
+    prior_adversary_actions = 3
+    update_freq = 4
+    batch_size = 32
+    adversary_class = ddGeneric.GenericAdvMaster
+    adv_agent_class = sarsaAdvAgent.sarGenAgent
+    action_per_agent = 11
+    include_other_attackers = False    
+    include_encoder = True
+
+class sarAdvSplit(sarGenericDec):
+    name = "sarsaAdvSplit"
+    num_adv_agents = 2 
+
+class sarAdvShare(sarAdvSplit):
+    name = "sarsaAdvShare"
+    prior_agent_actions = 0
+    include_other_attackers = True
 
 def create_generic_dec(ds, ns):
     """
@@ -262,8 +296,7 @@ def create_generic_dec(ds, ns):
         agent_to_allocate = min(throttlers_not_allocated, group_size)
         state_size = calcStateSize(ns.N_state, ds.stateRepresentation)
         print(agent_to_allocate)
-        sub_agent_list.append(sub_agent(ns.action_per_throttler**agent_to_allocate,
-            ns.action_per_throttler, state_size, ds.encoders, ds, ds.tau, ds.y
+        sub_agent_list.append(sub_agent(ns.action_per_throttler**agent_to_allocate, state_size, ds.encoders, ds, ds.tau, ds.y
             ))
         throttlers_not_allocated -= agent_to_allocate
 

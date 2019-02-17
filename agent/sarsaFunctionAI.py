@@ -176,11 +176,11 @@ class SarsaFunctionAI:
        
         data['name'] = self.agent_settings.name
         data['max_epLength'] = self.agent_settings.max_epLength
-        data['y'] = self.agent_settings.y
-        data['tau'] = self.agent_settings.tau
+        #data['y'] = self.agent_settings.y
+        #data['tau'] = self.agent_settings.tau
         data['num_episodes'] = self.agent_settings.num_episodes
-        data['pre_train_steps'] = self.agent_settings.pre_train_steps
-        data['annealing_steps'] = self.agent_settings.annealing_steps
+        # data['pre_train_steps'] = self.agent_settings.pre_train_steps
+        # data['annealing_steps'] = self.agent_settings.annealing_steps
         data['startE'] = self.agent_settings.startE
         data['reward_overload'] = self.agent_settings.reward_overload
         return data
@@ -192,10 +192,8 @@ class SarsaFunctionAI:
         if dataDict['alpha'] != self.alpha or dataDict['gamma'] != self.gamma or \
             dataDict['actions'] != self.actions or dataDict['n_features'] != self.n_features:
             print(dataDict)
-            
             raise ValueError('Experiments parameters do not match saved file')
         if dataDict['name'] != self.agent_settings.name or dataDict['max_epLength'] != self.agent_settings.max_epLength \
-        or dataDict['y'] != self.agent_settings.y or dataDict['tau'] != self.agent_settings.tau \
         or dataDict['num_episodes'] != self.agent_settings.num_episodes or dataDict['pre_train_steps'] != self.agent_settings.pre_train_steps \
         or dataDict['annealing_steps'] != self.agent_settings.annealing_steps or dataDict['startE'] != self.agent_settings.startE \
         or dataDict['reward_overload'] != self.agent_settings.reward_overload:
@@ -203,4 +201,4 @@ class SarsaFunctionAI:
             raise ValueError("Class settings do not match")
         else:
             self.w_matrix = dataDict['w_matrix']
-            
+        # or dataDict['y'] != self.agent_settings.y or dataDict['tau'] != self.agent_settings.tau \

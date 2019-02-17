@@ -5,7 +5,7 @@ import os
 import sys
 
 class Agent(aBase.Agent):
-    def __init__(self, N_action, action_per_agent, N_state, tileFunction, agent_settings, tau, discountFactor):
+    def __init__(self, N_action, N_state, tileFunction, agent_settings, tau, discountFactor):
 
 
         tf.reset_default_graph() # note remove for the decentralised one
