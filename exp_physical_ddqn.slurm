@@ -1,36 +1,31 @@
 #!/bin/bash
-#SBATCH --nodes 1
-#SBATCH --partition gpgpu
-#SBATCH --time=7-00:00:00
-#SBATCH --cpus-per-task=2
-#SBATCH --job-name=sample_sarsa_name
-#SBATCH --account=punim0621
-
-#SBATCH --gres=gpu:1
-# idea: use four gpus (amount we get per node)
-#SBATCH --mem=25360
-
+#SBATCH --nodes=1
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task=1
+#SBATCH --time=5-00:00:00
+#SBATCH --account=punim0636
+#SBATCH --partition=physical
+#SBATCH --job-name=sampleDDQNText
 
 # Send yourself an email when the job:
 # aborts abnormally (fails)
 #SBATCH --mail-type=FAIL
 # ends successfully
 #SBATCH --mail-type=END
+
 # Use this email address:
 #SBATCH --mail-user=jpattison@student.unimelb.edu.au
 
-# module load Tensorflow/1.8.0-intel-2017.u2-GCC-6.2.0-CUDA9-Python-3.5.2-GPU
-# module load Theano/1.0.2-intel-2017.u2-Python-3.5.2-Tensorflow-1.10.0
-# module load Python/3.5.2-goolf-2015a
-module load Tensorflow/1.9.0-intel-2017.u2-GCC-6.2.0-CUDA9-Python-3.6.4-GPU
+# Load required modules
+
+# module load Python/3.6.4-intel-2017.u2-GCC-6.2.0-CUDA9
+module load Tensorflow/1.3.0-intel-2017.u2-Python-3.5.2
+# module load Tensorflow/1.1.0-intel-2016.u3-Python-3.5.2
 
 # Launch multiple process python code
-# pip3 install --user scikit-learn
 
-
-
-echo "Starting four throttle"
-time mpiexec -n 1 python3 runSARSA.py 0 5 "samplePath"
+echo "Starting physical throttle"
+time mpiexec -n 1 python3 runDDQN.py 0 2 "samplePath"
 
 echo "done"
 

@@ -35,9 +35,15 @@ class ddqnSingleNoCommunicate(object):
     stateRepresentation = stateRepresentationEnum.throttler
     reward_overload = None
 
-class ddqnSingleSarsaCopy(object):
-    # apart from 2000 pretrain and overload this is as close as it gets
-    name = "DONT USE" #used to be DDQNDecGenMalialisNoOpt
+
+
+class ddqnMalialisTrue(object):
+    """
+    Looked through results and this has clearly not converged. We are getting 
+    variations of up to 10% on constant traffic
+
+    """
+    name = "DDQNDecGenMalialisTrue"
     max_epLength = 30 # or 60 if test
     y = 0
     tau = 0.1
@@ -54,48 +60,28 @@ class ddqnSingleSarsaCopy(object):
     group_size = 1 # number of filters each agent controls
     # stateletFunction = getStateletNoCommunication
     isCommunication = False
-    reward_overload = None
+    reward_overload = -1
     stateRepresentation = stateRepresentationEnum.throttler
 
-class ddqnMalialisTrue(ddqnSingleSarsaCopy):
-    """
-    Looked through results and this has clearly not converged. We are getting 
-    variations of up to 10% on constant traffic
 
-    """
-    # is the singleSarsaCopy but with reward overload
-    name = "DDQNDecGenMalialisTrue"
-    reward_overload = -1
-
-
-class ddqnDoubleHierarchical(object):
-    group_size = 1
-    name = "DDQN200Hierarchical"
-    max_epLength = 30 # or 60 if test
-    y = 0    
-    tau = 0.001 #Rate to update target network toward primary network. 
-    update_freq = 4 #How often to perform a training step.
-    batch_size = 32 #How many experiences to use for each training step.
-    num_episodes = 200001 #200001#    
-    pre_train_steps = 40000 * max_epLength #40000 * max_epLength #
-    annealing_steps = 120000 * max_epLength  #120000 * max_epLength  #
-    startE = 1
-    endE = 0.0
-    stepDrop = (startE - endE)/annealing_steps
-    agent = None
-    sub_agent = ddCen.Agent
-    stateRepresentation = stateRepresentationEnum.leaderAndIntermediate
-    reward_overload = None    
-
-class ddqnLAIlow(ddqnDoubleHierarchical):
-    name = "ddqnLAIlowLearn"
-
-    tau = 0.0005
-
-class ddqnLAIhigh(ddqnDoubleHierarchical):
-    name = "ddqnLAIhighLearn"
-
-    tau = 0.005
+# class ddqnDoubleHierarchical(object):
+#     group_size = 1
+#     name = "DDQN200Hierarchical"
+#     max_epLength = 30 # or 60 if test
+#     y = 0    
+#     tau = 0.001 #Rate to update target network toward primary network. 
+#     update_freq = 4 #How often to perform a training step.
+#     batch_size = 32 #How many experiences to use for each training step.
+#     num_episodes = 200001 #200001#    
+#     pre_train_steps = 40000 * max_epLength #40000 * max_epLength #
+#     annealing_steps = 120000 * max_epLength  #120000 * max_epLength  #
+#     startE = 1
+#     endE = 0.0
+#     stepDrop = (startE - endE)/annealing_steps
+#     agent = None
+#     sub_agent = ddCen.Agent
+#     stateRepresentation = stateRepresentationEnum.leaderAndIntermediate
+#     reward_overload = None    
 
 
 class ddqn50MediumHierachical(object):
@@ -137,6 +123,24 @@ class ddqn100MediumHierarchical(object):
     reward_overload = None   
 
 
+class ddqnHierExploration(object):
+    group_size = 1
+    name = "ddqnHierExp"
+    max_epLength = 30 # or 60 if test
+    y = 0    
+    tau = 0.001 #Rate to update target network toward primary network. 
+    update_freq = 4 #How often to perform a training step.
+    batch_size = 32 #How many experiences to use for each training step.
+    num_episodes = 200001 #200001#    
+    pre_train_steps = 20000 * max_epLength #40000 * max_epLength #
+    annealing_steps = 60000 * max_epLength  #120000 * max_epLength  #
+    startE = 0.3
+    endE = 0.1
+    stepDrop = (startE - endE)/annealing_steps
+    agent = None
+    sub_agent = ddCen.Agent
+    stateRepresentation = stateRepresentationEnum.leaderAndIntermediate
+    reward_overload = None   
 
 # The class of the adversary to implement
 conAttack = hostClass.ConstantAttack
@@ -155,8 +159,8 @@ attackClasses = [conAttack, shortPulse, mediumPulse,
 
 ###
 # Settings
-assignedNetwork =  NetworkSixFour #NetworkSingleTeamMalialisMedium
-assignedAgent =  AIMDstandard #ddqnSingleNoCommunicate #ddqn100MediumHierarchical
+assignedNetwork =  NetworkSingleTeamMalialisMedium #NetworkSingleTeamMalialisMedium
+assignedAgent =  ddqn100MediumHierarchical #ddqnSingleNoCommunicate #ddqn100MediumHierarchical
 load_attack_path = "attackSimulations/{0}/".format(assignedNetwork.name)
 loadAttacks = False
 assignedAgent.encoders = None
@@ -165,7 +169,7 @@ assignedAgent.save_model_mode = defender_mode_enum.load
 trainHost = conAttack #coordAttack # conAttack #driftAttack #adversarialLeaf
 assignedNetwork.drift = 0
 
-intelligentOpposition = DdGenericCentral #DdCoordinatedLowlongDlowSettings #DdCoordinatedMasterSettings #DdRandomMasterSettings
+intelligentOpposition = sarAdvShare #DdCoordinatedLowlongDlowSettings #DdCoordinatedMasterSettings #DdRandomMasterSettings
 intelligentOpposition.save_model_mode = defender_mode_enum.save
 # intelligentOpposition = None
 
@@ -191,7 +195,7 @@ else:
     file_path = getPathName(assignedNetwork, assignedAgent, commStrategy, twist, trainHost)
 
 print('the filepath is {0}'.format(file_path))
-if assignedAgent.save_model_mode is defender_mode_enum.load and intelligentOpposition \
+if assignedAgent.save_model_mode in [defender_mode_enum.load, defender_mode_enum.load_save] and intelligentOpposition \
     and intelligentOpposition.save_model_mode is defender_mode_enum.save:
     # we've set the filepath, now we need to ensure that we have the right adversary
     assert(trainHost==conAttack)

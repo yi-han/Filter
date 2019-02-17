@@ -64,26 +64,24 @@ class ddqnMalialisTrue(object):
     stateRepresentation = stateRepresentationEnum.throttler
 
 
-class ddqnDoubleHierarchical(object):
-    group_size = 1
-    name = "DDQN200Hierarchical"
-    max_epLength = 30 # or 60 if test
-    y = 0    
-    tau = 0.001 #Rate to update target network toward primary network. 
-    update_freq = 4 #How often to perform a training step.
-    batch_size = 32 #How many experiences to use for each training step.
-    num_episodes = 200001 #200001#    
-    pre_train_steps = 40000 * max_epLength #40000 * max_epLength #
-    annealing_steps = 120000 * max_epLength  #120000 * max_epLength  #
-    startE = 1
-    endE = 0.0
-    stepDrop = (startE - endE)/annealing_steps
-    agent = None
-    sub_agent = ddCen.Agent
-    stateRepresentation = stateRepresentationEnum.leaderAndIntermediate
-    reward_overload = None    
-
-
+# class ddqnDoubleHierarchical(object):
+#     group_size = 1
+#     name = "DDQN200Hierarchical"
+#     max_epLength = 30 # or 60 if test
+#     y = 0    
+#     tau = 0.001 #Rate to update target network toward primary network. 
+#     update_freq = 4 #How often to perform a training step.
+#     batch_size = 32 #How many experiences to use for each training step.
+#     num_episodes = 200001 #200001#    
+#     pre_train_steps = 40000 * max_epLength #40000 * max_epLength #
+#     annealing_steps = 120000 * max_epLength  #120000 * max_epLength  #
+#     startE = 1
+#     endE = 0.0
+#     stepDrop = (startE - endE)/annealing_steps
+#     agent = None
+#     sub_agent = ddCen.Agent
+#     stateRepresentation = stateRepresentationEnum.leaderAndIntermediate
+#     reward_overload = None    
 
 
 class ddqn50MediumHierachical(object):
@@ -162,16 +160,16 @@ attackClasses = [conAttack, shortPulse, mediumPulse,
 ###
 # Settings
 assignedNetwork =  NetworkSingleTeamMalialisMedium #NetworkSingleTeamMalialisMedium
-assignedAgent =  ddqnHierExploration #ddqnSingleNoCommunicate #ddqn100MediumHierarchical
+assignedAgent =  ddqn100MediumHierarchical #ddqnSingleNoCommunicate #ddqn100MediumHierarchical
 load_attack_path = "attackSimulations/{0}/".format(assignedNetwork.name)
 loadAttacks = False
 assignedAgent.encoders = None
 
-assignedAgent.save_model_mode = defender_mode_enum.load_save
+assignedAgent.save_model_mode = defender_mode_enum.load
 trainHost = conAttack #coordAttack # conAttack #driftAttack #adversarialLeaf
 assignedNetwork.drift = 0
 
-intelligentOpposition = ddSplitShare #DdCoordinatedLowlongDlowSettings #DdCoordinatedMasterSettings #DdRandomMasterSettings
+intelligentOpposition = sarAdvSplit #DdCoordinatedLowlongDlowSettings #DdCoordinatedMasterSettings #DdRandomMasterSettings
 intelligentOpposition.save_model_mode = defender_mode_enum.save
 # intelligentOpposition = None
 
@@ -197,7 +195,7 @@ else:
     file_path = getPathName(assignedNetwork, assignedAgent, commStrategy, twist, trainHost)
 
 print('the filepath is {0}'.format(file_path))
-if assignedAgent.save_model_mode in [defender_mode_enum.save, defender_mode_enum.load_save] and intelligentOpposition \
+if assignedAgent.save_model_mode in [defender_mode_enum.load, defender_mode_enum.load_save] and intelligentOpposition \
     and intelligentOpposition.save_model_mode is defender_mode_enum.save:
     # we've set the filepath, now we need to ensure that we have the right adversary
     assert(trainHost==conAttack)
