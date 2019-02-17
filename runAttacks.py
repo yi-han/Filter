@@ -45,8 +45,13 @@ def run_attacks(assignedNetwork, assignedAgent, file_path, adversaryAttacker, pr
 
     network.drift = 0 # we don't use drift in testing
     agent.save_model_mode = mapsAndSettings.defender_mode_enum.test_short
+    
+    original_iterations = assignedNetwork.iterations_between_action
+
+
 
     for attackClass in attackClasses:
+        assignedNetwork.iterations_between_action = 200
         print(attackClass.getName())
         genericAgent = mapsAndSettings.create_generic_dec(agent, network)
         
@@ -56,6 +61,7 @@ def run_attacks(assignedNetwork, assignedAgent, file_path, adversaryAttacker, pr
             agent, None, load_attack_path=attack_location)
 
         exp.run(prefix, genericAgent, file_path)
+        assignedNetwork.iterations_between_action = original_iterations
     if adversaryAttacker:
         init_adv_save_model = adversaryAttacker.save_model_mode
         adversaryAttacker.save_model_mode = mapsAndSettings.defender_mode_enum.test_short
