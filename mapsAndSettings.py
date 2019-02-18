@@ -244,6 +244,11 @@ class ddSplitShare(DdGenericSplit):
     include_other_attackers = True
     prior_agent_actions = 0
 
+class ddSplitSuper(DdGenericSplit):
+    name = "ddSplitSuper"
+    include_other_attackers = True
+    prior_agent_actions = 1
+
 class ddAdvAntiAimd(DdGenericDec):
     num_adv_agents = 1
     name = "ddAdvAntiAimd"
@@ -251,7 +256,7 @@ class ddAdvAntiAimd(DdGenericDec):
     prior_agent_actions = 4
 
 class sarGenericCen(object):
-    name = "sarsaGenericDec"
+    name = "sarsaGenericCen"
     num_adv_agents = 1
     pre_train_steps = 75000
     annealing_episodes = 300000
@@ -280,6 +285,11 @@ class sarAdvSplit(sarGenericCen):
 class sarAdvShare(sarAdvSplit):
     name = "sarsaAdvShare"
     prior_agent_actions = 0
+    include_other_attackers = True
+
+class sarAdvSuper(sarAdvSplit):
+    name = "sarsaAdvSuper"
+    prior_agent_actions = 1
     include_other_attackers = True
 
 def create_generic_dec(ds, ns):
