@@ -101,7 +101,7 @@ class NetworkMalialisSmall(object):
     legal_probability = 0.6 # probability that is a good guys
     upper_boundary = 8
     lower_boundary = 6 # for AIMD
-    iterations_between_action = 30 #200
+    iterations_between_action = 60 #200
 
     max_hosts_per_level = [3] # no communication therefore just one
 

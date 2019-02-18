@@ -51,7 +51,7 @@ def run_attacks(assignedNetwork, assignedAgent, file_path, adversaryAttacker, pr
 
 
     for attackClass in attackClasses:
-        assignedNetwork.iterations_between_action = 200
+        assignedNetwork.iterations_between_action = 30
         print(attackClass.getName())
         genericAgent = mapsAndSettings.create_generic_dec(agent, network)
         

@@ -256,13 +256,14 @@ class Experiment:
                         #     print("\n\n\n")
                         #     finished = True
                         # # print("last state: {0}".format(net.last_state))
-                        # if step in range(20,22):
+                        # if step in range(15,24) and ep_num == 4:
                         #     print("def | step {0} | action {1} | reward {2} | e {3}".format(step, last_action, r, e))
                         #     print("state was {0}".format(net.get_state()))
-                        #     print("state was {0}".format(net.get_state()))
-                        #     print("adversary | ep {3} | action {0} | reward {1} | e {2}".format(advAction, r, adv_e, ep_num))
-                        #     print("adv_state {0}".format(adv_state))
-                                
+                        #     #print("adversary | ep {3} | action {0} | reward {1} | e {2}".format(advAction, r, adv_e, ep_num))
+                        #     print(net.switches[3].past_throttles)
+                        #     if step==23:
+                        #         print("adv_state {0}".format(adv_state))
+                               
 
                                 # print("state = {1}, e = {0}".format(e, net.last_state))
 
@@ -331,6 +332,8 @@ class Experiment:
                     reward_per_print = 0
                     print("E={0} Fails = {1} FailPer = {2}".format(e,fail_seg, (fail_seg*100/(1000*max_epLength))))
                     print("def | step {0} | action {1} | reward {2} | e {3}".format(step, last_action, r, e))
+                    print("state was {0}".format(net.get_state()))
+
                     if self.adversarialMaster:
                         print("adversary | ep {3} | action {0} | reward {1} | adv_e {2}".format(adv_last_action, adv_r, adv_e, ep_num))
                         print("adversary_state: {0}\n".format(adv_last_state))

@@ -36,6 +36,7 @@ class Host():
         self.traffic_rate = traffic_rate
         self.traffic_per_iteration = self.traffic_rate/self.iterations_per_action
 
+
     def sendTraffic(self, time_step, packet_size):
         if self.is_attacker:
             self.destination_switch.new_illegal += packet_size
@@ -117,7 +118,8 @@ class Pulse(Host):
 
     def sendTraffic(self, time_step):
         time_reduced = time_step % (2*self.time_flip) #split episode into two periods
-        if time_reduced<=self.time_flip or not self.is_attacker:
+
+        if time_reduced<self.time_flip or not self.is_attacker:
             super().sendTraffic(time_step, self.traffic_per_iteration)
 
     def reset(self, is_attacker):
@@ -135,7 +137,7 @@ class Pulse(Host):
 class ShortPulse(Pulse):
     def __init__(self, destination_switch, rate_attack_low, rate_attack_high, rate_legal_low, rate_legal_high,
         max_epLength, adversarialMaster, iterations_per_action, appendToSwitch = True):
-        super().__init__(2, destination_switch, rate_attack_low, rate_attack_high, rate_legal_low, rate_legal_high,
+        super().__init__(1, destination_switch, rate_attack_low, rate_attack_high, rate_legal_low, rate_legal_high,
         max_epLength, adversarialMaster, iterations_per_action, appendToSwitch)
 
     def getName():
@@ -144,7 +146,7 @@ class ShortPulse(Pulse):
 class MediumPulse(Pulse):
     def __init__(self, destination_switch, rate_attack_low, rate_attack_high, rate_legal_low, rate_legal_high,
         max_epLength, adversarialMaster, iterations_per_action, appendToSwitch = True):
-        super().__init__(4, destination_switch, rate_attack_low, rate_attack_high, rate_legal_low, rate_legal_high,
+        super().__init__(2, destination_switch, rate_attack_low, rate_attack_high, rate_legal_low, rate_legal_high,
         max_epLength, adversarialMaster, iterations_per_action, appendToSwitch)
 
     def getName():
@@ -154,7 +156,7 @@ class MediumPulse(Pulse):
 class LargePulse(Pulse):
     def __init__(self, destination_switch, rate_attack_low, rate_attack_high, rate_legal_low, rate_legal_high,
         max_epLength, adversarialMaster, iterations_per_action, appendToSwitch = True):
-        super().__init__(10, destination_switch, rate_attack_low, rate_attack_high, rate_legal_low, rate_legal_high,
+        super().__init__(5, destination_switch, rate_attack_low, rate_attack_high, rate_legal_low, rate_legal_high,
         max_epLength, adversarialMaster, iterations_per_action, appendToSwitch)
     def getName():
         return "PulseLarge"
