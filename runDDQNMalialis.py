@@ -169,7 +169,7 @@ assignedAgent.save_model_mode = defender_mode_enum.save
 trainHost = conAttack #coordAttack # conAttack #driftAttack #adversarialLeaf
 assignedNetwork.drift = 0
 
-intelligentOpposition = sarGenericDec #DdCoordinatedLowlongDlowSettings #DdCoordinatedMasterSettings #DdRandomMasterSettings
+intelligentOpposition = sarAdvSuper #DdCoordinatedLowlongDlowSettings #DdCoordinatedMasterSettings #DdRandomMasterSettings
 intelligentOpposition.save_model_mode = defender_mode_enum.save
 intelligentOpposition = None
 

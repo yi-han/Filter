@@ -12,7 +12,7 @@ for file in runDDQN.py runDDQNAdditional.py runDDQNHundred.py runDDQNMalialis.py
 	rm $file.bak
 	sed -i.bak "s/0 2/0 10/g" output.slurm
 	sed -i.bak "s/samplePath/$1/g" output.slurm
-	sed -i.bak 's/sampleDDQNText/longTest/g' output.slurm
+	sed -i.bak "s/sampleDDQNText/$file/g" output.slurm
 	sbatch output.slurm
 	rm output.slurm.bak
 done
