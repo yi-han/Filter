@@ -203,8 +203,9 @@ class NetworkMalialisTeamFull(object):
 
 
 
+
 class DdGenericDec(object):
-    name = "ddGenericDecentralised"
+    name = "dd DO NOT USE"
     num_adv_agents = -1
     pre_train_steps = 50000
     annealing_episodes = 200000
@@ -239,9 +240,15 @@ class ddSplitShare(DdGenericSplit):
     include_other_attackers = True
     prior_agent_actions = 0
 
-class sarGenericDec(object):
+class ddAdvAntiAimd(DdGenericDec):
+    num_adv_agents = 1
+    name = "ddAdvAntiAimd"
+    include_other_attackers = False
+    prior_agent_actions = 4
+
+class sarGenericCen(object):
     name = "sarsaGenericDec"
-    num_adv_agents = -1
+    num_adv_agents = 1
     pre_train_steps = 50000
     annealing_episodes = 200000
     num_episodes = 500000
@@ -262,7 +269,7 @@ class sarGenericDec(object):
     include_other_attackers = False    
     include_encoder = True
 
-class sarAdvSplit(sarGenericDec):
+class sarAdvSplit(sarGenericCen):
     name = "sarsaAdvSplit"
     num_adv_agents = 2 
 

@@ -18,7 +18,7 @@ sbatch output.slurm
 
 
 sed 's/runDDQNHundred/runDDQNMalialis/g' output.slurm -i
-sed 's/midSin/midMal/g' output.slurm -i
+sed 's/midSin/mid50/g' output.slurm -i
 sed 's/5 5/0 5/g' output.slurm -i 
 sbatch output.slurm
 sed 's/0 5/5 5/g' output.slurm -i 

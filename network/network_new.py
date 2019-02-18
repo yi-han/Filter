@@ -162,7 +162,7 @@ class Switch():
         self.new_dropped_legal = 0
         self.new_illegal = 0
         self.new_dropped_illegal = 0
-        self.past_throttles = [0, 0, 0]
+        self.past_throttles = [0]*10
         self.resetWindow()
         self.throttle_rate = 0
         self.iterations_since_throttle = 0
