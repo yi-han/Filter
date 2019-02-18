@@ -59,6 +59,10 @@ class AIMDstandard(object):
     stepDrop = 0
     reward_overload = None
 
+class AIMDmalialis(AIMDstandard):
+    name = "AimdMalialis"
+    delta = 0.05
+
 class AIMDsettings(object):
     name = "AIMD"
     group_size = 1
@@ -249,10 +253,10 @@ class ddAdvAntiAimd(DdGenericDec):
 class sarGenericCen(object):
     name = "sarsaGenericDec"
     num_adv_agents = 1
-    pre_train_steps = 50000
-    annealing_episodes = 200000
-    num_episodes = 500000
-    tau = 0.001
+    pre_train_steps = 75000
+    annealing_episodes = 300000
+    num_episodes = 750000
+    tau = 0.0001
     discount_factor = 0.6
     startE = 1
     endE = 0.0
