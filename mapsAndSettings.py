@@ -60,8 +60,15 @@ class AIMDstandard(object):
     reward_overload = None
 
 class AIMDmalialis(AIMDstandard):
-    name = "AimdMalialis"
+    # sourced page 60 thesis
+    name = "AIMDMalialis"
     delta = 0.05
+
+class AIMDmucking(AIMDstandard):
+    name = "AIMDmucking"
+    delta = 1
+    beta = 2
+
 
 class AIMDsettings(object):
     name = "AIMD"
@@ -300,7 +307,7 @@ def create_generic_dec(ds, ns):
 
     """
 
-    if ds.name == "AIMD":
+    if "AIMD" in ds.name:
         return ds.sub_agent(ns, ds)
 
     throttlers_not_allocated = ns.N_state
