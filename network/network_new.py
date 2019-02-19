@@ -30,7 +30,8 @@ eated flexible adversary
 
 
 
-
+delta = 0.001
+inf = 9999
 def clip(min_value, max_value, value):
     if value < min_value:
         return min_value
@@ -44,13 +45,128 @@ def deep_copy_state(state):
     state_copy[:] = state
     return state_copy
 
+class Bucket():
+    # for buckets associated to a switch
+
+    def __init__(self, network_settings):
+        self.iterations_between_action = network_settings.iterations_between_action
+        self.bucket_capacity = network_settings.bucket_capacity
+        self.reset()
+    def reset(self):
+        self.bucket_list = [] # to ensure FIFO
+        self.bucket_load = 0
+
+    def bucket_flow(self, legal_traffic_in, illegal_traffic_in, rs_per_action):
+        """
+        Bucket logic
+        Current idea:
+        All data must add to the bucket first. Only then can we take it out
+        Rationale: We're breaking it down to 10ms steps anyway. The memory would include the ram
+        
+        Initial idea:
+        Case 1: Bucket load is less than rs
+
+        Case 2:
+        Bucket + traffic in exceeds bucket_load
+
+        Case 3 (easy):
+        rs < Bucket < Bucket + rs < bucket_load
+
+
+        First calculate out from the bucket.
+        Then calculate what to do with new traffic
+        """
+
+        if rs_per_action == None:
+            # No throttle set
+            rs_per_iteration = inf
+        else:
+            rs_per_iteration = rs_per_action/self.iterations_between_action
+        # adding data to bucket
+        
+        print("legal {0} illegal {1} rs {2}".format(legal_traffic_in, illegal_traffic_in, rs_per_iteration))
+        remaining_capacity = self.bucket_capacity - self.bucket_load
+        if remaining_capacity < delta:
+            (legal_dropped, illegal_dropped) = (legal_traffic_in, illegal_traffic_in)
+        else:
+            (legal_added, legal_dropped, illegal_added, illegal_dropped) = self.add_to_capacity(legal_traffic_in, illegal_traffic_in, remaining_capacity)
+            if((legal_added+illegal_added>0)):
+                # only add if above 0
+                print("add from normal")
+                self.add_bucket(legal_added, illegal_added)
+             
+
+        # empty bucket
+        legal_out, illegal_out = self.empty_bucket(rs_per_iteration)
+        
+
+        return (legal_out, legal_dropped, illegal_out, illegal_dropped)
+
+
+    def add_bucket(self, legal_in, illegal_in, at_front=False):
+        # add to bucket
+        if at_front:
+            self.bucket_list.insert(0, (legal_in, illegal_in))
+        else:
+            self.bucket_list.append((legal_in, illegal_in))
+        self.bucket_load += (legal_in + illegal_in)
+        assert(self.bucket_load<=self.bucket_capacity)
+
+    def empty_bucket(self, current_rs):
+        # empty bucket to amount of rs or until empty
+        
+        assert(self.bucket_load <= self.bucket_capacity)
+        emptied = 0
+        legal_out = 0
+        illegal_out = 0
+        remaining_rs = current_rs
+        (legal_added, legal_stopped, illegal_added, illegal_stopped) = (0, 0, 0, 0) # this is for santify checking assetts
+        while(self.bucket_list and remaining_rs>delta):
+            assert(legal_stopped<delta and illegal_stopped < delta)
+
+            (f_legal, f_illegal) = self.bucket_list.pop(0)
+            (legal_added, legal_stopped, illegal_added, illegal_stopped) = self.add_to_capacity(f_legal, f_illegal, remaining_rs)
+            remaining_rs -= (f_legal + f_illegal) # note this will go negative once we hit our limit
+            legal_out += legal_added
+            illegal_out += illegal_added
+            self.bucket_load -= current_rs
+        if((legal_stopped + illegal_stopped) > 0):
+            # put back to bucket any that didn't get through
+            print("put back in ")
+            print("out {0} {1} | stopped {2} {3} | remaining_capacity {4} | f {5} {6}".format(legal_added, illegal_added, legal_stopped, illegal_stopped, (self.bucket_capacity - self.bucket_load), f_legal, f_illegal))
+            self.add_bucket(legal_stopped, illegal_stopped, at_front=True)
+        return (legal_out, illegal_out)
+
+    def add_to_capacity(self, legal_in, illegal_in, capacity):
+        print("in {0} {1} capacity {2}".format(legal_in, illegal_in, capacity))
+
+        traffic_in = legal_in + illegal_in
+
+        assert(capacity>0 and traffic_in >= 0)
+
+        if(traffic_in<delta):
+            return (0, 0, 0, 0)
+
+        percentage_through = min((capacity/traffic_in),1)
+
+
+
+        legal_added = percentage_through*legal_in
+        illegal_added = percentage_through*illegal_in
+
+        legal_stopped = legal_in - legal_added 
+        illegal_stopped = illegal_in - illegal_added
+        print((legal_added, legal_stopped, illegal_added, illegal_stopped))
+        return (legal_added, legal_stopped, illegal_added, illegal_stopped)
+
+
 class Switch():
-    def __init__(self, switch_id, is_filter, representation):
+    def __init__(self, switch_id, is_filter, representation, defender_settings, network_settings):
         self.id = switch_id # id
         self.source_links = [] # places sending traffic to switch
         self.destination_links = [] # where traffic is getting sent
         self.attatched_hosts = [] # used for network_quick, quick access for hosts attatched to this 
-        self.throttle_rate = 0 # the throttling rate for the specific switch
+        self.throttle_rate = None # the throttling rate for the specific switch
         
         self.legal_window = 0 # over the last window, how much legal traffic has passed
         self.illegal_window = 0 # over the last window, how much illegal traffic has passed
@@ -73,11 +189,16 @@ class Switch():
         self.representation = representation
 
         self.is_filter = is_filter
+
+        if defender_settings.has_bucket and is_filter:
+            # initiate a bucket
+            self.bucket = Bucket(network_settings)
+        else:
+            self.bucket = None
         self.reset()
 
-
         self.delay = 0 # the delay for implementing a throttle based on maximum communication
-    def sendTraffic(self, defender_agent):
+    def sendTraffic(self):
         # an initial part of passing traffic along
 
 
@@ -85,20 +206,27 @@ class Switch():
             if self.iterations_since_throttle == self.delay:
                 self.throttle_rate = self.next_throttle
             # print("delay {0} throttle {1}".format(self.delay - self.iterations_since_throttle, self.throttle_rate))
-            throttle_rate = defender_agent.calculateThrottleRate(self.getImmediateState(), self.throttle_rate)
         else:
-            throttle_rate = 0
+            assert(self.throttle_rate == None)
+
+
         num_dests = len(self.destination_links)
         assert(num_dests == 1 or self.id == 0)
-        legal_pass = self.legal_traffic * (1 - throttle_rate)
-        legal_dropped = self.legal_traffic * throttle_rate        
-        # legal_pass = int(self.legal_traffic * (1-throttle_rate))
-        # legal_dropped = self.legal_traffic - legal_pass
 
-        illegal_pass = self.illegal_traffic * (1 - throttle_rate)
-        illegal_dropped = self.illegal_traffic * throttle_rate
-        # illegal_pass = int(self.illegal_traffic * (1 - throttle_rate)) 
-        # illegal_dropped = self.illegal_traffic - illegal_pass
+        if self.is_filter and self.bucket:
+            (legal_pass, legal_dropped, illegal_pass, illegal_dropped) = self.bucket.bucket_flow(self.legal_traffic, self.illegal_traffic, self.throttle_rate)
+        else:
+            if self.throttle_rate == None:
+                # if not set assume it's 0
+                throttle_rate = 0
+            else:
+                throttle_rate = self.throttle_rate
+            legal_pass = self.legal_traffic * (1 - throttle_rate)
+            legal_dropped = self.legal_traffic * throttle_rate        
+
+            illegal_pass = self.illegal_traffic * (1 - throttle_rate)
+            illegal_dropped = self.illegal_traffic * throttle_rate
+
 
         # update all other switches with new traffic values
 
@@ -164,8 +292,11 @@ class Switch():
         self.new_dropped_illegal = 0
         self.past_throttles = [0]*10
         self.resetWindow()
-        self.throttle_rate = 0
+        self.throttle_rate = None # represents not set
         self.iterations_since_throttle = 0
+        if self.bucket:
+            self.bucket.reset()
+
 
 
 
@@ -241,7 +372,7 @@ class network_full(object):
     #self.ITERATIONSBETEENACTION = 200 # with 10 ms delay, and throttle agent every 2 seconds, we see 200 messages passed in between
     name = "Network_Full"
 
-    def __init__(self, network_settings, reward_overload, host_class, max_epLength, representationType, adversaryMaster, load_attack_path = None, save_attack=False):
+    def __init__(self, network_settings, reward_overload, host_class, max_epLength, representationType, defender_settings, adversaryMaster, load_attack_path = None, save_attack=False):
         
         self.iterations_between_action = network_settings.iterations_between_action# ideally set at 200
         self.host_sources = np.empty_like(network_settings.host_sources)
@@ -283,10 +414,12 @@ class network_full(object):
         # represents the % of illegal traffic set as legal.
 
         # self.SaveAttackEnum = SaveAttackEnum
+        self.network_settings = network_settings
+
         self.save_attack = save_attack
         self.load_attack_path = load_attack_path
         self.hostClass.classReset()
-        self.initialise(network_settings.topologyFile, representationType)
+        self.initialise(network_settings.topologyFile, representationType, defender_settings)
         self.last_state = np.empty_like(self.get_state())
 
     def reset(self):
@@ -389,7 +522,7 @@ class network_full(object):
         return response
 
         
-    def move_traffic(self, time_step, defender_agent, adv_action):
+    def move_traffic(self, time_step, adv_action):
         # update the network
         if adv_action:
             assert( self.adversaryMaster!=None)
@@ -402,7 +535,7 @@ class network_full(object):
         for switch in self.switches:
             # ensure all traffic sent before we update
             #print(defender_agent)
-            switch.sendTraffic(defender_agent)
+            switch.sendTraffic()
 
         for switch in self.switches:
             # simulates adding new traffic to the hosts
@@ -428,7 +561,7 @@ class network_full(object):
 
             assert(action==0) 
 
-    def initialise(self, f_link, representationType):
+    def initialise(self, f_link, representationType, defender_settings):
         for i in range(self.N_switch):
             l = []
             for j in range(self.N_switch):
@@ -439,7 +572,7 @@ class network_full(object):
         
         for i in range(self.N_switch):
             is_filter = i in self.filter_list
-            self.switches.append(Switch(i, is_filter, representationType))
+            self.switches.append(Switch(i, is_filter, representationType, defender_settings, self.network_settings))
 
         
         for i in range(0, self.N_switch-1):
@@ -583,7 +716,7 @@ class network_full(object):
             return legitimate_rate/legitimate_sent
 
 
-    def step(self, action, step_count, defender_agent, adv_action = None):
+    def step(self, action, step_count, adv_action = None):
         # input the actions. Just sets drop probabilities at the moment
         # ideally i would move calculations here
         # adv action is action by adversary
@@ -598,7 +731,7 @@ class network_full(object):
 
         # reset_throttle_count and record_average_throttle seek to determine what the true throttle percentage actually was
         for i in range(self.iterations_between_action): # each time delay is 10 ms, 10*200 = 2000 ms = 2 seconds
-           self.move_traffic(step_count, defender_agent, adv_action)
+           self.move_traffic(step_count, adv_action)
            #self.rewards_per_step.append(self.calculate_reward())
 
         self.record_average_throttle()

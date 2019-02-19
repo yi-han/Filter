@@ -152,7 +152,7 @@ class Experiment:
             print("using reward overload")
         print("\n Prefix {0}".format(prefix))
         print("using proper network")
-        net = self.network_settings.emulator(self.network_settings, reward_overload, self.adversary_class, max_epLength, self.representationType, self.adversarialMaster, load_attack_path=self.load_attack_path)
+        net = self.network_settings.emulator(self.network_settings, reward_overload, self.adversary_class, max_epLength, self.representationType, self.agent_settings, self.adversarialMaster, load_attack_path=self.load_attack_path)
         # print("using quick network")
         # net = network_quick(self.network_settings, reward_overload, self.adversary_class, max_epLength, self.representationType, load_attack_path = self.load_attack_path)
         #create lists to contain total rewards and steps per episode
@@ -281,7 +281,7 @@ class Experiment:
                             fail += 1
                             fail_seg += 1
                     
-                    net.step(a, step, agent, advAction) # take the action, update the network
+                    net.step(a, step, advAction) # take the action, update the network
                     # ideally get rid of double up
 
                     if self.adversarialMaster != None:
@@ -355,7 +355,7 @@ class Experiment:
                 for f_step in range(2):
                     # do two steps without learning (so nothing implicit) and see if we can see how well it performs
                     a = agent.predict(net.get_state(), 0)
-                    net.step(a, step+f_step, agent, adv_last_action)
+                    net.step(a, step+f_step, adv_last_action)
 
                 # how well the system performs assuming no exploration (only useful for training)
                 agent_performance = net.getPacketServedAtMoment()

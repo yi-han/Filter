@@ -68,6 +68,7 @@ class AIMDmucking(AIMDstandard):
     name = "AIMDmucking"
     delta = 1
     beta = 2
+    has_bucket = True
 
 
 class AIMDsettings(object):
@@ -115,7 +116,7 @@ class NetworkMalialisSmall(object):
     iterations_between_action = 60 #200
 
     max_hosts_per_level = [3] # no communication therefore just one
-
+    bucket_capacity = 18
 
 class NetworkSingleTeamMalialisMedium(object):
     name = "single_team_malialis_medium"

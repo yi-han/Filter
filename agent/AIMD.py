@@ -70,18 +70,20 @@ class AIMDagent():
     def getPath(self=None):
         return "AIMD"
 
-    def calculateThrottleRate(self, current_load, current_rs):
-        # given the through rate, load and iterations per window, what's the % of traffic we let pass
 
-        if current_rs == None:
-            # no throttle set
-            return 0
-        r_per_iteration = current_rs / self.iterations_per_window * self.seconds_per_window # traffic we allow through each second
 
-        if current_load <= r_per_iteration or r_per_iteration < 0:
-            return 0
-        else:
-            return 1 - (r_per_iteration / current_load)
+    # def calculateThrottleRate(self, current_load, current_rs):
+    #     # given the through rate, load and iterations per window, what's the % of traffic we let pass
+
+    #     if current_rs == None:
+    #         # no throttle set
+    #         return 0
+    #     r_per_iteration = current_rs / self.iterations_per_window * self.seconds_per_window # traffic we allow through each second
+
+    #     if current_load <= r_per_iteration or r_per_iteration < 0:
+    #         return 0
+    #     else:
+    #         return 1 - (r_per_iteration / current_load)
 
 
 
