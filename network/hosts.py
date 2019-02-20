@@ -14,7 +14,6 @@ class Host():
 
         if appendToSwitch:
             destination_switch.attatched_hosts.append(self)
-        
         self.destination_switch = destination_switch
         self.rate_attack_low = rate_attack_low
         self.rate_attack_high = rate_attack_high

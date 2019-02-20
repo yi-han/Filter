@@ -1,7 +1,7 @@
 #import requests
 #import json
 import numpy as np
-#import math
+import math
 #import copy
 import pickle
 from mapsAndSettings import stateRepresentationEnum, advesaryTypeEnum
@@ -30,8 +30,29 @@ eated flexible adversary
 
 
 
-delta = 0.001
-inf = 9999
+DELTA = 0.001
+INF = 9999999
+MbTKb = 1000 # ratio for converting Mb to Kb
+KbTMb = 0.001 # ratio for converting Kb to Mb
+
+ROUND_SPOT = 6
+def KbToMb(kb):
+    return kb*KbTMb
+
+def MbToKb(mb):
+    return mb*MbTKb
+
+def roundNumber(number):
+    # we had a lot of floating point stuff going on so hopefully we can fix that.
+    return number
+    return round(number, 6)
+
+def round_half_down(n, decimals=5):
+    return n
+    multiplier = 10 ** decimals
+    return math.ceil(n*multiplier - 0.5) / multiplier
+
+
 def clip(min_value, max_value, value):
     if value < min_value:
         return min_value
@@ -48,14 +69,22 @@ def deep_copy_state(state):
 class Bucket():
     # for buckets associated to a switch
 
-    def __init__(self, network_settings):
-        self.iterations_between_action = network_settings.iterations_between_action
-        self.bucket_capacity = network_settings.bucket_capacity
+    def __init__(self, iterations_between_action, bucket_capacity ):
+        self.iterations_between_action = iterations_between_action
+        self.bucket_capacity = bucket_capacity
         self.reset()
     def reset(self):
         self.bucket_list = [] # to ensure FIFO
         self.bucket_load = 0
 
+    def updateBucketLoad(self, traffic_changed, is_incoming):
+        if is_incoming:
+            assert(traffic_changed>0)
+            self.bucket_load += traffic_changed
+        else:
+            assert(traffic_changed > 0)
+            self.bucket_load -= traffic_changed
+            self.bucket_load = max(0, self.bucket_load)
     def bucket_flow(self, legal_traffic_in, illegal_traffic_in, rs_per_action):
         """
         Bucket logic
@@ -79,89 +108,112 @@ class Bucket():
 
         if rs_per_action == None:
             # No throttle set
-            rs_per_iteration = inf
+            rs_per_iteration = INF
         else:
-            rs_per_iteration = rs_per_action/self.iterations_between_action
+            rs_per_iteration = roundNumber(MbToKb(rs_per_action/self.iterations_between_action))
         # adding data to bucket
         
-        print("legal {0} illegal {1} rs {2}".format(legal_traffic_in, illegal_traffic_in, rs_per_iteration))
+        #print("legal {0} illegal {1} rs {2}".format(legal_traffic_in, illegal_traffic_in, rs_per_iteration))
+        legal_traffic_in = roundNumber(legal_traffic_in)
+        illegal_traffic_in = roundNumber(illegal_traffic_in)
         remaining_capacity = self.bucket_capacity - self.bucket_load
-        if remaining_capacity < delta:
+        # print("load {0} total capacity {1} remaining {2}".format(self.bucket_load, self.bucket_capacity, remaining_capacity))
+        # print("capacity is {1} whilst incoming load is {0}".format((illegal_traffic_in+legal_traffic_in),remaining_capacity))
+        if remaining_capacity < DELTA:
+            # already full? shouldn't ever be case
+            assert(1==2)
             (legal_dropped, illegal_dropped) = (legal_traffic_in, illegal_traffic_in)
         else:
             (legal_added, legal_dropped, illegal_added, illegal_dropped) = self.add_to_capacity(legal_traffic_in, illegal_traffic_in, remaining_capacity)
+            # print((legal_added, legal_dropped, illegal_added, illegal_dropped))
+            assert(abs(legal_added+legal_dropped-legal_traffic_in)<DELTA)
+            assert(abs(illegal_added+illegal_dropped-illegal_traffic_in)<DELTA)
+
             if((legal_added+illegal_added>0)):
                 # only add if above 0
-                print("add from normal")
+                # print("add from normal")
+
                 self.add_bucket(legal_added, illegal_added)
              
 
         # empty bucket
         legal_out, illegal_out = self.empty_bucket(rs_per_iteration)
-        
+        # print("illegal into bucket {0} and illegal out {1} with rate {2}".format(illegal_added, illegal_out, rs_per_iteration))
 
         return (legal_out, legal_dropped, illegal_out, illegal_dropped)
 
 
     def add_bucket(self, legal_in, illegal_in, at_front=False):
         # add to bucket
+        legal_in = max(legal_in, 0)
+        illegal_in = max(illegal_in, 0)
+        if (legal_in + illegal_in) < DELTA:
+            return
         if at_front:
             self.bucket_list.insert(0, (legal_in, illegal_in))
         else:
             self.bucket_list.append((legal_in, illegal_in))
-        self.bucket_load += (legal_in + illegal_in)
-        assert(self.bucket_load<=self.bucket_capacity)
+        self.updateBucketLoad((legal_in + illegal_in), True)
+        if self.bucket_load-self.bucket_capacity>DELTA:
+            print("we're over by {0}".format(self.bucket_load-self.bucket_capacity))
+            assert(1==2)
+        assert(self.bucket_load-self.bucket_capacity < DELTA)
 
     def empty_bucket(self, current_rs):
         # empty bucket to amount of rs or until empty
         
-        assert(self.bucket_load <= self.bucket_capacity)
+        assert(self.bucket_load - self.bucket_capacity < DELTA)
         emptied = 0
         legal_out = 0
         illegal_out = 0
         remaining_rs = current_rs
         (legal_added, legal_stopped, illegal_added, illegal_stopped) = (0, 0, 0, 0) # this is for santify checking assetts
-        while(self.bucket_list and remaining_rs>delta):
-            assert(legal_stopped<delta and illegal_stopped < delta)
+        while(self.bucket_list and remaining_rs>DELTA):
+            assert(legal_stopped<DELTA and illegal_stopped < DELTA)
 
             (f_legal, f_illegal) = self.bucket_list.pop(0)
             (legal_added, legal_stopped, illegal_added, illegal_stopped) = self.add_to_capacity(f_legal, f_illegal, remaining_rs)
             remaining_rs -= (f_legal + f_illegal) # note this will go negative once we hit our limit
             legal_out += legal_added
             illegal_out += illegal_added
-            self.bucket_load -= current_rs
-        if((legal_stopped + illegal_stopped) > 0):
+            self.updateBucketLoad((f_legal + f_illegal), False)
+        #if((legal_stopped + illegal_stopped) > DELTA):
             # put back to bucket any that didn't get through
-            print("put back in ")
-            print("out {0} {1} | stopped {2} {3} | remaining_capacity {4} | f {5} {6}".format(legal_added, illegal_added, legal_stopped, illegal_stopped, (self.bucket_capacity - self.bucket_load), f_legal, f_illegal))
-            self.add_bucket(legal_stopped, illegal_stopped, at_front=True)
+            # print("put back in ")
+            # print("out {0} {1} | stopped {2} {3} | remaining_capacity {4} | f {5} {6}".format(legal_added, illegal_added, legal_stopped, illegal_stopped, (self.bucket_capacity - self.bucket_load), f_legal, f_illegal))
+            # print("remaining once added {0} | load {1}".format((self.bucket_capacity - self.bucket_load- (legal_stopped + illegal_stopped)), self.bucket_load))
+        # add bucket will ensure we aren't adding stupid stuff
+        self.add_bucket(legal_stopped, illegal_stopped, at_front=True)
         return (legal_out, illegal_out)
 
     def add_to_capacity(self, legal_in, illegal_in, capacity):
-        print("in {0} {1} capacity {2}".format(legal_in, illegal_in, capacity))
+        # print("in {0} {1} capacity {2}".format(legal_in, illegal_in, capacity))
 
         traffic_in = legal_in + illegal_in
 
         assert(capacity>0 and traffic_in >= 0)
 
-        if(traffic_in<delta):
+        if(traffic_in<DELTA):
             return (0, 0, 0, 0)
 
         percentage_through = min((capacity/traffic_in),1)
+        # print("percentage was {0}".format(percentage_through))
+        # print("leg {0} ill {1} cap {2}".format(legal_in, illegal_in, capacity))
 
+        legal_added = round_half_down(percentage_through*legal_in)
+        illegal_added = round_half_down(percentage_through*illegal_in)
 
+        legal_stopped = round_half_down(legal_in - legal_added)
+        illegal_stopped = round_half_down(illegal_in - illegal_added)
 
-        legal_added = percentage_through*legal_in
-        illegal_added = percentage_through*illegal_in
-
-        legal_stopped = legal_in - legal_added 
-        illegal_stopped = illegal_in - illegal_added
-        print((legal_added, legal_stopped, illegal_added, illegal_stopped))
+        if((legal_added + illegal_added-capacity)>DELTA):
+            print("legal_added {0} illegal_added {1} capacity {2} combined {3}".format(legal_added, illegal_added, capacity, legal_added+illegal_added))
+            assert(1==2)
         return (legal_added, legal_stopped, illegal_added, illegal_stopped)
 
 
 class Switch():
-    def __init__(self, switch_id, is_filter, representation, defender_settings, network_settings):
+    def __init__(self, switch_id, is_filter, representation, defender_settings, iterations_between_action, bucket_capacity):
         self.id = switch_id # id
         self.source_links = [] # places sending traffic to switch
         self.destination_links = [] # where traffic is getting sent
@@ -192,7 +244,7 @@ class Switch():
 
         if defender_settings.has_bucket and is_filter:
             # initiate a bucket
-            self.bucket = Bucket(network_settings)
+            self.bucket = Bucket(iterations_between_action, bucket_capacity)
         else:
             self.bucket = None
         self.reset()
@@ -214,6 +266,7 @@ class Switch():
         assert(num_dests == 1 or self.id == 0)
 
         if self.is_filter and self.bucket:
+            # print("\n\n about to bucket")
             (legal_pass, legal_dropped, illegal_pass, illegal_dropped) = self.bucket.bucket_flow(self.legal_traffic, self.illegal_traffic, self.throttle_rate)
         else:
             if self.throttle_rate == None:
@@ -221,12 +274,11 @@ class Switch():
                 throttle_rate = 0
             else:
                 throttle_rate = self.throttle_rate
-            legal_pass = self.legal_traffic * (1 - throttle_rate)
-            legal_dropped = self.legal_traffic * throttle_rate        
+            legal_dropped = roundNumber(self.legal_traffic * throttle_rate)      
+            legal_pass = self.legal_traffic - legal_dropped
 
-            illegal_pass = self.illegal_traffic * (1 - throttle_rate)
-            illegal_dropped = self.illegal_traffic * throttle_rate
-
+            illegal_dropped = roundNumber(self.illegal_traffic * throttle_rate)
+            illegal_pass = self.illegal_traffic - illegal_dropped
 
         # update all other switches with new traffic values
 
@@ -269,7 +321,7 @@ class Switch():
         self.recorded_drop = 0
 
     def getWindow(self):
-        return self.legal_window + self.illegal_window
+        return KbToMb(self.legal_window + self.illegal_window)
 
     def getImmediateState(self):
         return self.legal_traffic + self.illegal_traffic
@@ -388,14 +440,14 @@ class network_full(object):
         self.N_filter = len(self.filter_list)
         self.action_per_throttler = network_settings.action_per_throttler # actions each host can take
         self.reward_overload = reward_overload
-        self.rate_legal_low = network_settings.rate_legal_low  #/ self.iterations_between_action)
-        self.rate_legal_high = network_settings.rate_legal_high  #/ self.iterations_between_action)
-        self.rate_attack_low = network_settings.rate_attack_low  #/ self.iterations_between_action)
-        self.rate_attack_high = network_settings.rate_attack_high  #/ self.iterations_between_action)
+        self.rate_legal_low = MbToKb(network_settings.rate_legal_low)  #/ self.iterations_between_action)
+        self.rate_legal_high = MbToKb(network_settings.rate_legal_high)  #/ self.iterations_between_action)
+        self.rate_attack_low = MbToKb(network_settings.rate_attack_low)  #/ self.iterations_between_action)
+        self.rate_attack_high = MbToKb(network_settings.rate_attack_high)  #/ self.iterations_between_action)
 
         self.representationType = representationType
         self.legal_probability = network_settings.legal_probability # odds of host being an attacker
-        self.upper_boundary = network_settings.upper_boundary
+        self.upper_boundary = MbToKb(network_settings.upper_boundary)
         self.hostClass = host_class
         self.topology = []
         self.max_epLength = max_epLength
@@ -414,12 +466,12 @@ class network_full(object):
         # represents the % of illegal traffic set as legal.
 
         # self.SaveAttackEnum = SaveAttackEnum
-        self.network_settings = network_settings
 
         self.save_attack = save_attack
         self.load_attack_path = load_attack_path
         self.hostClass.classReset()
-        self.initialise(network_settings.topologyFile, representationType, defender_settings)
+        bucket_capacity = MbToKb(network_settings.bucket_capacity)
+        self.initialise(network_settings.topologyFile, representationType, defender_settings, network_settings.iterations_between_action, bucket_capacity)
         self.last_state = np.empty_like(self.get_state())
 
     def reset(self):
@@ -437,9 +489,6 @@ class network_full(object):
         for i in range(self.N_switch):
             self.switches[i].reset()
             is_filter = i in self.filter_list
-            if is_filter:
-                # print(i)
-                self.switches[i].setThrottle(np.random.randint(0,self.action_per_throttler)/self.action_per_throttler)
         self.server_failures = 0
 
         self.rewards_per_step = [] # keep track of the rewards at every step
@@ -561,7 +610,7 @@ class network_full(object):
 
             assert(action==0) 
 
-    def initialise(self, f_link, representationType, defender_settings):
+    def initialise(self, f_link, representationType, defender_settings, iterations_between_action, bucket_capacity):
         for i in range(self.N_switch):
             l = []
             for j in range(self.N_switch):
@@ -572,7 +621,7 @@ class network_full(object):
         
         for i in range(self.N_switch):
             is_filter = i in self.filter_list
-            self.switches.append(Switch(i, is_filter, representationType, defender_settings, self.network_settings))
+            self.switches.append(Switch(i, is_filter, representationType, defender_settings, iterations_between_action, bucket_capacity))
 
         
         for i in range(0, self.N_switch-1):
@@ -674,7 +723,7 @@ class network_full(object):
                 overload_amount = traffic_level - self.upper_boundary
                 overload_percent = overload_amount/traffic_level
                 server_throttle_level = 1-overload_percent
-                assert(abs(server_throttle_level * traffic_level - self.upper_boundary )< 0.001) 
+                assert(abs(server_throttle_level * traffic_level - self.upper_boundary )< DELTA) 
                 new_legit_rate = legitimate_rate * server_throttle_level
                 #print("{0} vs {1}".format(new_legit_rate, legitimate_rate_all))
                 self.legitimate_served += new_legit_rate
@@ -713,7 +762,7 @@ class network_full(object):
         if legitimate_rate + attacker_rate > self.upper_boundary:
             return 0.0
         else:
-            return legitimate_rate/legitimate_sent
+            return MbToKb(legitimate_rate/legitimate_sent)
 
 
     def step(self, action, step_count, adv_action = None):
