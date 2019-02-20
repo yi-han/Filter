@@ -460,7 +460,7 @@ class network_full(object):
         self.attack_record = [] # list of all attack stats, used if we're saving the attack
 
         self.adversaryMaster = adversaryMaster
- 
+        self.is_sig_attack = network_settings.is_sig_attack
         self.drift = network_settings.drift / 100
         # drift is the measure of inaccurecy of discretising legitimate from illegite traffic
         # represents the % of illegal traffic set as legal.
@@ -478,21 +478,20 @@ class network_full(object):
         if self.load_attack_path: # if we provide a file to oad from use it
             self.load_attacker()
         else:
-            self.set_attackers()
+            self.generate_attackers()
         if self.save_attack:# is self.SaveAttackEnum.save:
             self.record_attackers()
         #self.set_rate()
         self.current_state = None
         self.legitimate_all = 0
         self.legitimate_served = 0
-        # print("reset")
-        for i in range(self.N_switch):
-            self.switches[i].reset()
-            is_filter = i in self.filter_list
+        self.rewards_per_step = [] # keep track of the rewards at every step
         self.server_failures = 0
 
-        self.rewards_per_step = [] # keep track of the rewards at every step
-        #self.drop_probability.clear()
+        # reset the switches)
+        for i in range(self.N_switch):
+            self.switches[i].reset()
+
 
 
     def get_link(self, topology, f_link, v):
@@ -510,26 +509,35 @@ class network_full(object):
 
             return count
 
-    def set_attackers(self):
+    def generate_attackers(self):
         # sets a random amount of attackers inbetween (but not inclusive) 0 and max
         # I think just replace this if you want to replicate attacks
 
         attackers = []
         assert self.N_host!=0 or self.N_host!=1 # to stop infinite loops
-        while len(attackers) == 0 or len(attackers) == self.N_host:
         #do not allow "none/all attacker"
-            attackers.clear()
-            for i in range(self.N_host):
-                if np.random.rand() >= self.legal_probability:
-                    attackers.append(i)
-
+        attackers.clear()
+        for i in range(self.N_host):
+            if np.random.rand() >= self.legal_probability:
+                attackers.append(i)
         
+        if len(attackers) == 0 or len(attackers) == self.N_host:
+            # requirements not satisfied
+            return self.generate_attackers()
+
         self.hostClass.classReset()
         for i in range(len(self.hosts)):
             if i in attackers:
                 self.hosts[i].reset(is_attacker=True)
             else:
                self.hosts[i].reset(is_attacker=False) 
+
+        if self.is_sig_attack:
+            max_bandwidth = 0 # maximum bandwidth that can be generated per turn
+            for i in attackers:
+                max_bandwidth += self.hosts[i].traffic_rate
+            if max_bandwidth < self.upper_boundary*1.2:
+                return self.generate_attackers()
      
     def record_attackers(self):
         host_details = []

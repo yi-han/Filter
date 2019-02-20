@@ -24,24 +24,24 @@ def generateAttacks(networkSettings, attackClasses, max_epLength = -1, num_episo
     
     reward_overload = -1
 
-
+    networkSettings.is_sig_attack = True # ensure we only have significant attacks
     if not os.path.exists(path):
         os.makedirs(path)
-    for attackClass in attackClasses:
-        print(attackClass)
-        attack_path = path+attackClass.getName()+".apkl"
+    # for attackClass in attackClasses:
+        # print(attackClass)
+    attack_path = path+"genericAttack.apkl"
+    # just do it once 
+    with open(attack_path, "wb") as f:
         
-        with open(attack_path, "wb") as f:
-            
-            # run all the simulations
-            net = netModule.network_full(networkSettings, reward_overload, attackClass, max_epLength, netModule.stateRepresentationEnum.throttler, AIMDstandard, None, None, True)
-            for _ in range(num_episodes):
-                net.reset()
+        # run all the simulations
+        net = netModule.network_full(networkSettings, reward_overload, conAttack, max_epLength, netModule.stateRepresentationEnum.throttler, AIMDstandard, None, None, True)
+        for _ in range(num_episodes):
+            net.reset()
 
-            attack_record = net.attack_record # list of all attack initialisations
+        attack_record = net.attack_record # list of all attack initialisations
 
 
-            pickle.dump(attack_record, f, pickle.HIGHEST_PROTOCOL)
+        pickle.dump(attack_record, f, pickle.HIGHEST_PROTOCOL)
 
 
 # The class of the adversary to implement

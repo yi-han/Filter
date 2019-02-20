@@ -34,6 +34,7 @@ class LinearSarsaSingular(object):
     #stateletFunction = getStateletNoCommunication
     reward_overload = -1
     stateRepresentation = stateRepresentationEnum.throttler  
+    has_bucket = False
 
 class LinearSarsaLong(LinearSarsaSingular):
     name = "LinearSarsaLong"
@@ -71,6 +72,7 @@ class LinearSarsaSingularDDQNCopy(object):
     stateRepresentation = stateRepresentationEnum.throttler
     reward_overload = None
     group_size = 1 # number of filters each agent controls
+    has_bucket = False
 
 class LinearSarsaLAI(object):
     name = "LinearSarsaLAI"
@@ -91,6 +93,7 @@ class LinearSarsaLAI(object):
     #stateletFunction = getStateletNoCommunication
     reward_overload = -1
     stateRepresentation = stateRepresentationEnum.leaderAndIntermediate  
+    has_bucket = False
 
 class LinearSarsaLAIDDQN200(LinearSarsaLAI):
     # Idea (without using a ridiculous number of epLength, set the learning rate even lower and give proper exploration)
@@ -138,6 +141,7 @@ class LinearLaiManyEpisodes(object):
     #stateletFunction = getStateletNoCommunication
     reward_overload = None
     stateRepresentation = stateRepresentationEnum.leaderAndIntermediate  
+    has_bucket = False
 
 
 class LinearTeamCommunicate(object):
@@ -159,6 +163,7 @@ class LinearTeamCommunicate(object):
     stateRepresentation = stateRepresentationEnum.server
     reward_overload = -1
     group_size = 1 # number of filters each agent controls
+    has_bucket = False
 
 
 
@@ -181,6 +186,7 @@ class RandomAgent(object):
     #stateletFunction = getStateletNoCommunication
     reward_overload = -1
     stateRepresentation = stateRepresentationEnum.leaderAndIntermediate      
+    has_bucket = False
 
 
 # The class of the adversary to implement

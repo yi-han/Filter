@@ -58,18 +58,19 @@ class AIMDstandard(object):
     endE = 0
     stepDrop = 0
     reward_overload = None
+    has_bucket = True
 
 class AIMDmalialis(AIMDstandard):
     # sourced page 60 thesis
     name = "AIMDMalialis"
-    delta = 0.05
+    delta = 0.01
 
 class AIMDmucking(AIMDstandard):
     name = "AIMDmucking"
-    delta = 1
+    delta = 0.01
     beta = 2
     has_bucket = True
-
+    epsilon = 0.01
 
 class AIMDsettings(object):
     name = "AIMD"
@@ -116,7 +117,9 @@ class NetworkMalialisSmall(object):
     iterations_between_action = 60 #200
 
     max_hosts_per_level = [3] # no communication therefore just one
-    bucket_capacity = 18
+    bucket_capacity = 4#15#0.8
+
+    is_sig_attack = False
 
 class NetworkSingleTeamMalialisMedium(object):
     name = "single_team_malialis_medium"
@@ -141,6 +144,10 @@ class NetworkSingleTeamMalialisMedium(object):
     iterations_between_action = 30 # 200
 
     max_hosts_per_level = [2, 6, 12]
+    bucket_capacity = 12
+
+    is_sig_attack = False
+
 
 class NetworkSixFour(NetworkSingleTeamMalialisMedium):
     # 4 attackers per throttler.
@@ -150,6 +157,8 @@ class NetworkSixFour(NetworkSingleTeamMalialisMedium):
     upper_boundary = 26 # malialis would have used 26
     lower_boundary = 18 # malialis would have used 20
     max_hosts_per_level = [4, 12, 24]
+    bucket_capacity = 24
+
 
 class NetworkMalialisTeamFull(object):
     name = "full_team_malialias"
@@ -180,6 +189,8 @@ class NetworkMalialisTeamFull(object):
     lower_boundary = 56
     iterations_between_action = 20
     max_hosts_per_level = [2, 6, 12, 60]    
+    bucket_capacity = 12
+    is_sig_attack = False
 
 ### This is an experimental one where i have not set an even set of hosts
 # class NetworkMalialisTeamFull(object):

@@ -39,7 +39,7 @@ class AIMDagent():
         # p is server load
         # we calculate the maximum amount of traffic we allow pass through in a 
         p = p[0][0]
-        #init_rs = self.rs
+        # init_rs = self.rs
 
         if p > self.upper:
             if self.rs == None:
@@ -54,7 +54,7 @@ class AIMDagent():
             else:
                 self.pLast = p
                 self.rs += self.delta
-        #print("\n\n\nserver load is {0} we had {2} and suggesting {1}".format(p, self.rs, init_rs))
+        # print("\n\n\nserver load is {0} we had {2} and suggesting {1}".format(p, self.rs, init_rs))
         return self.rs
 
     def update(self, _, _a, _b, _c, _d, next_action = 0):
