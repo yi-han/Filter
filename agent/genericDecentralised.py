@@ -77,6 +77,10 @@ class AgentOfAgents(aBase.Agent):
         # print(N_action_list)
         # print("state {0}".format(last_state))
         # print("action was {0}".format(network_action))
+
+        if network_action == None:
+            network_action = 0
+
         for i in range(len(self.agents)):
             agent = self.agents[i]
             action = actions[i]

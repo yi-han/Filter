@@ -208,6 +208,7 @@ class Experiment:
                 ep_adv_loss = 0
                 ep_def_loss = 0
                 #print("loading ep {0} out of {1}".format(ep_num, num_episodes))
+                agent.reset()
                 net.reset() # reset the network
                 if self.adversarialMaster != None:
                     self.adversarialMaster.initiate_episode()
@@ -256,9 +257,13 @@ class Experiment:
                         #     print("\n\n\n")
                         #     finished = True
                         # # print("last state: {0}".format(net.last_state))
-                        # if step in range(15,24) and ep_num == 4:
-                        #     print("def | step {0} | action {1} | reward {2} | e {3}".format(step, last_action, r, e))
-                        #     print("state was {0}".format(net.get_state()))
+                        # if step in range(22,24):
+                        # print("def | step {0} | action {1} | reward {2} | e {3}".format(step, last_action, r, e))
+                        # print("state was {0}".format(net.get_state()))
+                        # print("experimental load is {0}".format(net.getPacketServedAtMoment()))
+                        # print("Bucket load {0}".format(list(map(lambda throttler: throttler.bucket.bucket_load, net.throttlers))))
+                        # print("reward was {0}".format(r))
+                        #     print("server at {0}".format(net.switches[0].legal_window + net.switches[0].illegal_window))
                         #     #print("adversary | ep {3} | action {0} | reward {1} | e {2}".format(advAction, r, adv_e, ep_num))
                         #     print(net.switches[3].past_throttles)
                         #     if step==23:
