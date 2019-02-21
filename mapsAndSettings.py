@@ -117,7 +117,7 @@ class NetworkMalialisSmall(object):
     iterations_between_action = 60 #200
 
     max_hosts_per_level = [3] # no communication therefore just one
-    bucket_capacity = 4#15#0.8
+    bucket_capacity = 8#15#0.8
 
     is_sig_attack = False
 

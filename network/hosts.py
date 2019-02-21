@@ -6,6 +6,11 @@ import random
 
 """
 
+
+def isAttackActive(attack_start, attack_end, time_step):
+    return (attack_start <= time_step and time_step <= attack_end)
+
+
 class Host():
     # ideally you want to merge host with switch somewhat
 
@@ -23,7 +28,9 @@ class Host():
         self.iterations_per_action = iterations_per_action
 
         self.reset(False) # initates all values
-
+        # unless we loading the attack, we constantly attack
+        self.first_attack = 0
+        self.last_attack = max_epLength
         assert(adversarialMaster == None)
     @staticmethod
     def classReset():
@@ -35,17 +42,14 @@ class Host():
         self.traffic_rate = traffic_rate
         self.traffic_per_iteration = self.traffic_rate/self.iterations_per_action
 
-
     def sendTraffic(self, time_step, packet_size):
         if self.is_attacker:
-            self.destination_switch.new_illegal += packet_size
-        else:
+            if isAttackActive(self.first_attack, self.last_attack, time_step):
+                self.destination_switch.new_illegal += packet_size
+        if not self.is_attacker:
             self.destination_switch.new_legal += packet_size
 
-    # def setRate(self, host_object):
-    #     # manual alternative to resetting a host
-    #     self.is_attacker = host_object.is_attacker
-    #     self.traffic_rate = host_object.traffic_rate        
+
 
     def print_host(self):
         print("destination {0}".format(self.destination_switch.id))
@@ -58,10 +62,13 @@ class Host():
         return (self.is_attacker, self.traffic_rate)
 
     def load_details(self, details):
+        # note this only happens if we're loading the attack. Therefore 
+        # we start the attack at step 5 and stops at t=55
         (is_attacker, traffic_rate) = details
         Host.reset(self, is_attacker, traffic_rate)
-        # self.is_attacker = is_attacker
-        # self.traffic_rate = traffic_rate
+        self.first_attack = 5 # manually set
+        self.last_attack = 55 # manually set
+
 
 # class DriftAttack(Host):
 #     # pretty much like a constant attack except a small amount of the traffic will be considred legitimate traffic
@@ -93,7 +100,6 @@ class ConstantAttack(Host):
 
 
     def reset(self, is_attacker):
-
         if is_attacker:
             traffic_rate = self.rate_attack_low + np.random.rand()*(self.rate_attack_high - self.rate_attack_low)
         else:
@@ -165,11 +171,12 @@ class GradualIncrease(Host):
     def sendTraffic(self, time_step):
         if not self.is_attacker:
             super().sendTraffic(time_step, self.traffic_per_iteration)
-        percentageAttack = time_step/self.max_epLength
-        assert(percentageAttack<=1)
-        #rate_traffic = self.init_traffic + (self.traffic_rate - self.init_traffic)*percentageAttack
-        rate_traffic = self.traffic_per_iteration * percentageAttack
-        super().sendTraffic(time_step, rate_traffic)
+        else:
+            percentageAttack = min(2*time_step/self.max_epLength,1)
+            assert(percentageAttack<=1)
+            #rate_traffic = self.init_traffic + (self.traffic_rate - self.init_traffic)*percentageAttack
+            rate_traffic = self.traffic_per_iteration * percentageAttack
+            super().sendTraffic(time_step, rate_traffic)
 
     def getName():
         return "GradualIncrease"
@@ -185,15 +192,6 @@ class GradualIncrease(Host):
             #self.init_traffic = 0
         super().reset(is_attacker, traffic_rate)
 
-    # def get_details(self):
-    #     details = (self.is_attacker, self.traffic_rate, self.init_traffic)
-    #     # print(details)
-    #     return details
-    # def load_details(self, details):
-    #     (is_attacker, traffic_rate, init_traffic) = details
-    #     self.is_attacker = is_attacker
-    #     self.traffic_rate = traffic_rate
-    #     self.init_traffic = init_traffic
 
 class CoordinatedRandom(Host):
     """

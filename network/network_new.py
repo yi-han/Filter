@@ -263,7 +263,7 @@ class Switch():
 
 
         num_dests = len(self.destination_links)
-        assert(num_dests == 1 or self.id == 0)
+        assert(num_dests == 1 or (self.id == 0 and num_dests ==0))
 
         if self.is_filter and self.bucket:
             # print("\n\n about to bucket")
@@ -276,9 +276,11 @@ class Switch():
                 throttle_rate = self.throttle_rate
             legal_dropped = roundNumber(self.legal_traffic * throttle_rate)      
             legal_pass = self.legal_traffic - legal_dropped
+            assert(abs(legal_pass + legal_dropped - self.legal_traffic) < DELTA)
 
             illegal_dropped = roundNumber(self.illegal_traffic * throttle_rate)
             illegal_pass = self.illegal_traffic - illegal_dropped
+            assert(abs(illegal_pass + illegal_dropped - self.illegal_traffic) < DELTA)
 
         # update all other switches with new traffic values
 
@@ -676,6 +678,8 @@ class network_full(object):
     """
 
     def adjust_drift(self):
+        #obsolete
+        assert(1==2)
         # assume there is some drift, we want to return the stats with the associated drift
 
         # Drift rules:
@@ -740,7 +744,7 @@ class network_full(object):
             # we dont do the drift until now because before now it didn't matter
             # print("\nprior")
             # print("{0} {1} {2} = {3}".format(legitimate_rate, legitimate_rate_all, attacker_rate, legitimate_rate/legitimate_rate_all))
-            legitimate_rate, legitimate_rate_all, attacker_rate = self.adjust_drift()
+            #legitimate_rate, legitimate_rate_all, attacker_rate = self.adjust_drift()
             # print("{0} {1} {2} = {3}".format(legitimate_rate, legitimate_rate_all, attacker_rate, legitimate_rate/legitimate_rate_all))
 
             if legitimate_rate_all != 0:

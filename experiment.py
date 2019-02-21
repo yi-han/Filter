@@ -257,7 +257,28 @@ class Experiment:
                         #     print("\n\n\n")
                         #     finished = True
                         # # print("last state: {0}".format(net.last_state))
-                        # if step in range(22,24):
+                        # if ep_num == 0:# or ep_num == 1:
+                        #     throttler = net.switches[6]
+                        #     throttle_combined = (throttler.legal_window+throttler.dropped_legal_window)
+                        #     assert(throttler.is_filter)
+                        #     router = net.switches[7]
+                        #     below_combined = (router.legal_window+router.dropped_legal_window)
+                        #     after = net.switches[4]
+                        #     after_combined = (after.legal_window+after.dropped_legal_window)
+                        #     further = net.switches[2]
+                        #     further_combined = (further.legal_window+further.dropped_legal_window)
+
+                        # if step>1 and abs(throttle_combined + below_combined - further_combined) >10:
+                            # print("Ep {0} Step {1}".format(ep_num, step))
+                            # print("throttler = {0}".format(throttle_combined))
+
+                            # print("below = {0}".format(below_combined))
+
+                            # print("after = {0}".format(after_combined))
+
+                            # print("further = {0}".format(further_combined))
+
+                        #     print("\n\n")
                         # print("def | step {0} | action {1} | reward {2} | e {3}".format(step, last_action, r, e))
                         # print("state was {0}".format(net.get_state()))
                         # print("experimental load is {0}".format(net.getPacketServedAtMoment()))

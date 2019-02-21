@@ -5,7 +5,8 @@
 # ./slurms_gpgpu_v3.sh
 
 
- 
+sed -i.bak "s/assignedNetwork.iterations_between_action = 30/assignedNetwork.iterations_between_action = 200/g" runAttacks.py
+rm runAttacks.py.bak
 for file in runDDQN.py runDDQNAdditional.py runDDQNHundred.py runDDQNMalialis.py runDDQNNetQuick.py runSarsaDDQNCopy.py runSarsaAdditional.py runSarsaNoOverdrive.py; do
 	sed -i.bak "s/loadAttacks = False/loadAttacks = True/g" $file
 	sed "s/runDDQN.py/$file/g" exp_physical_ddqn.slurm > output.slurm

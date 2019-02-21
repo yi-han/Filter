@@ -34,7 +34,7 @@ class ddqnSingleNoCommunicate(object):
     sub_agent = ddCen.Agent
     stateRepresentation = stateRepresentationEnum.throttler
     reward_overload = None
-
+    has_bucket = False
 
 
 class ddqnMalialisTrue(object):
@@ -62,6 +62,7 @@ class ddqnMalialisTrue(object):
     isCommunication = False
     reward_overload = -1
     stateRepresentation = stateRepresentationEnum.throttler
+    has_bucket = False
 
 
 # class ddqnDoubleHierarchical(object):
@@ -102,6 +103,7 @@ class ddqn50MediumHierachical(object):
     sub_agent = ddCen.Agent
     stateRepresentation = stateRepresentationEnum.leaderAndIntermediate
     reward_overload = None       
+    has_bucket = False
 
 class ddqn100MediumHierarchical(object):
     group_size = 1
@@ -121,6 +123,7 @@ class ddqn100MediumHierarchical(object):
     sub_agent = ddCen.Agent
     stateRepresentation = stateRepresentationEnum.leaderAndIntermediate
     reward_overload = None   
+    has_bucket = False
 
 
 class ddqnHierExploration(object):
@@ -141,6 +144,7 @@ class ddqnHierExploration(object):
     sub_agent = ddCen.Agent
     stateRepresentation = stateRepresentationEnum.leaderAndIntermediate
     reward_overload = None   
+    has_bucket = False
 
 # The class of the adversary to implement
 conAttack = hostClass.ConstantAttack
@@ -169,8 +173,8 @@ assignedAgent.save_model_mode = defender_mode_enum.save
 trainHost = conAttack #coordAttack # conAttack #driftAttack #adversarialLeaf
 assignedNetwork.drift = 0
 
-# intelligentOpposition = sarGenericDec #DdCoordinatedLowlongDlowSettings #DdCoordinatedMasterSettings #DdRandomMasterSettings
-# intelligentOpposition.save_model_mode = defender_mode_enum.save
+intelligentOpposition = DdGenericCentral #DdCoordinatedLowlongDlowSettings #DdCoordinatedMasterSettings #DdRandomMasterSettings
+intelligentOpposition.save_model_mode = defender_mode_enum.save
 intelligentOpposition = None
 
 
