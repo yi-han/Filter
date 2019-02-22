@@ -13,6 +13,7 @@ import math
 import numpy as np
 import copy 
 import agent.tileCoding as tileCoding
+from network.utility import *
 
 class GenericAdvMaster():
 
@@ -140,7 +141,7 @@ class GenericAdvMaster():
         assert(len(self.prior_actions) == 3)
         
         # print("\n\n")
-        state = self.bandwidths.copy() # start off with bandwidths
+        state = list(map(lambda x: KbToMb(x), self.bandwidths)) # start off with bandwidths
         # print(state)
         #print(self.prior_actions)
         #print("actions done")
@@ -208,7 +209,7 @@ class GenericAdvMaster():
         self.prior_actions.pop(0)
         self.prior_actions.append(actions)
 
-    def update(self, last_state, last_actions, current_state, is_done, reward):
+    def update(self, last_state, last_actions, current_state, is_done, reward, next_action):
         # provide the update function to each individual state
         # reward = self.calc_reward(network_reward)
         for i in range(len(self.adv_agents)):
@@ -217,7 +218,7 @@ class GenericAdvMaster():
             t_last_state = self.extract_state(last_state, i)
             t_current_state = self.extract_state(current_state, i)
 
-            agent.update(t_last_state, last_action, t_current_state, is_done, reward)
+            agent.update(t_last_state, last_action, t_current_state, is_done, reward, next_action)
         
 
         # self.update_past_state(last_actions)

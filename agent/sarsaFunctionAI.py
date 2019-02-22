@@ -191,13 +191,22 @@ class SarsaFunctionAI:
 
         if dataDict['alpha'] != self.alpha or dataDict['gamma'] != self.gamma or \
             dataDict['actions'] != self.actions or dataDict['n_features'] != self.n_features:
-            print(dataDict)
+            print("alpha {0} | {1}".format(dataDict['alpha'], self.alpha))
+            print("gamma {0} | {1}".format(dataDict['gamma'], self.gamma))
+            print("actions {0} | {1}".format(dataDict['actions'], self.actions))
+            print("n_features {0} | {1}".format(dataDict['n_features'], self.n_features))
             raise ValueError('Experiments parameters do not match saved file')
         if dataDict['name'] != self.agent_settings.name or dataDict['max_epLength'] != self.agent_settings.max_epLength \
-        or dataDict['num_episodes'] != self.agent_settings.num_episodes or dataDict['pre_train_steps'] != self.agent_settings.pre_train_steps \
-        or dataDict['annealing_steps'] != self.agent_settings.annealing_steps or dataDict['startE'] != self.agent_settings.startE \
+        or dataDict['num_episodes'] != self.agent_settings.num_episodes \
+        or dataDict['startE'] != self.agent_settings.startE \
         or dataDict['reward_overload'] != self.agent_settings.reward_overload:
-
+            # or dataDict['pre_train_steps'] != self.agent_settings.pre_train_steps \
+            # or dataDict['annealing_steps'] != self.agent_settings.annealing_steps
+            print("max_epLength {0} | {1}".format(dataDict['max_epLength'], self.agent_settings.max_epLength))
+            print("name {0} | {1}".format(dataDict['name'], self.agent_settings.name))
+            print("num_episodes {0} | {1}".format(dataDict['num_episodes'], self.agent_settings.num_episodes))
+            print("startE {0} | {1}".format(dataDict['startE'], self.agent_settings.startE))
+            print("reward_overload {0} | {1}".format(dataDict['reward_overload'], self.agent_settings.reward_overload))
             raise ValueError("Class settings do not match")
         else:
             self.w_matrix = dataDict['w_matrix']

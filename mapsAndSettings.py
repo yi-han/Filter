@@ -253,6 +253,10 @@ class DdGenericCentral(DdGenericDec):
     num_adv_agents = 1
     include_other_attackers = False
 
+class lowDdCentral(DdGenericCentral):
+    name = "lowDdCentral"
+    tau = 0.0005
+
 class DdGenericSplit(DdGenericDec):
     name = "ddGenSplit"
     num_adv_agents = 2
@@ -268,15 +272,20 @@ class ddSplitSuper(DdGenericSplit):
     include_other_attackers = True
     prior_agent_actions = 1
 
+class lowDdSuper(ddSplitSuper):
+    name = "lowDdSuper"
+    tau = 0.0005
+
+
 class ddAdvAntiAimd(DdGenericDec):
     num_adv_agents = 1
     name = "ddAdvAntiAimd"
     include_other_attackers = False
     prior_agent_actions = 4
 
-class sarGenericCen(object):
-    name = "sarsaGenericCen"
-    num_adv_agents = 1
+class sarGenericDec(object):
+    name = "sarsaGenericDec"
+    num_adv_agents = -1
     pre_train_steps = 75000
     annealing_episodes = 300000
     num_episodes = 750000
@@ -297,14 +306,21 @@ class sarGenericCen(object):
     include_other_attackers = False    
     include_encoder = True
 
+class sarGenericCen(sarGenericDec):
+    name = "sarsaGenericCen"
+    num_adv_agents = 1
+
+
 class sarAdvSplit(sarGenericCen):
     name = "sarsaAdvSplit"
     num_adv_agents = 2 
+
 
 class sarAdvShare(sarAdvSplit):
     name = "sarsaAdvShare"
     prior_agent_actions = 0
     include_other_attackers = True
+
 
 class sarAdvSuper(sarAdvSplit):
     name = "sarsaAdvSuper"

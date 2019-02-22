@@ -158,7 +158,7 @@ class myTileInterface:
 
     def encode(self, x):
         if x > self.maxBandwidth:
-            print(x)
+            print("encountred {0} but only had {1}".format(x, self.maxBandwidth))
             assert(1==2)
         return tiles(self.iht, self.numTilings, [self.scaleFactor * x])
 

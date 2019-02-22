@@ -243,7 +243,7 @@ class Experiment:
                         if self.adversarialMaster != None:
                             adv_r = self.adversarialMaster.calc_reward(r)
                             if self.adversary_agent_settings.save_model_mode in self.agentSaveModes:
-                                self.adversarialMaster.update(adv_last_state, adv_last_action, adv_state, d, adv_r)
+                                self.adversarialMaster.update(adv_last_state, adv_last_action, adv_state, d, adv_r, advAction)
                             self.adversarialMaster.update_past_state(adv_last_action)
                         else:
                             adv_r = 0

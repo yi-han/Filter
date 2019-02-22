@@ -34,6 +34,7 @@ class LinearSarsaSingular(object):
     #stateletFunction = getStateletNoCommunication
     reward_overload = -1
     stateRepresentation = stateRepresentationEnum.throttler  
+    has_bucket = False
 
 class LinearSarsaLong(LinearSarsaSingular):
     name = "LinearSarsaLong"
@@ -60,7 +61,7 @@ class LinearSarsaSingularDDQNCopy(object):
     tau = 0.01 #Rate to update target network toward primary network. 
     update_freq = 4 #How often to perform a training step.
     batch_size = None #How many experiences to use for each training step.
-    num_episodes = 200001 #200001#    
+    num_episodes = 100001 #200001#    
     pre_train_steps = 20000 * max_epLength #40000 * max_epLength #
     annealing_steps = 60000 * max_epLength  #120000 * max_epLength  #
     startE = 1
@@ -71,6 +72,7 @@ class LinearSarsaSingularDDQNCopy(object):
     stateRepresentation = stateRepresentationEnum.throttler
     reward_overload = None
     group_size = 1 # number of filters each agent controls
+    has_bucket = False
 
 class LinearSarsaLAI(object):
     name = "LinearSarsaLAI"
@@ -91,42 +93,20 @@ class LinearSarsaLAI(object):
     #stateletFunction = getStateletNoCommunication
     reward_overload = -1
     stateRepresentation = stateRepresentationEnum.leaderAndIntermediate  
-
-class LinearSarsaLAIreduced(LinearSarsaLAI):
-    # same concept as the DDQN, lower learning rate ~ better results?
-    name = "LinearSarsaLAIreduced"
-    tau = 0.001
-
-class LinearSarsaLAIshort(LinearSarsaLAI):
-    name = "LinearLAIshort"
-    max_epLength = 30
-    annealing_steps = 80000 * max_epLength #1000*max_epLength #60000 * max_epLength 
-
-class LinearLAIshortReduced(LinearSarsaLAIshort):
-    name = "LAIshortAndReduced"
-    tau = 0.003
-
+    has_bucket = False
 
 class LinearSarsaLAIDDQN200(LinearSarsaLAI):
     # Idea (without using a ridiculous number of epLength, set the learning rate even lower and give proper exploration)
     name = "LinearDDQN200"
     max_epLength = 30
     tau = 0.001
-    num_episodes = 200001 #200001#    
+    num_episodes = 300001 #200001#    
     pre_train_steps = 40000 * max_epLength #40000 * max_epLength #
     annealing_steps = 120000 * max_epLength  #120000 * max_epLength  #
     startE = 1
     endE = 0.0
     stepDrop = (startE - endE)/annealing_steps
     reward_overload = None  
-
-class LinSarDDQN200HighTau(LinearSarsaLAIDDQN200):
-    name = "LinearDDQN200HighTau"
-    tau = 0.005
-
-class LinLaiOverload(LinearSarsaLAIDDQN200):
-    name = "LinLaiOverload"
-    reward_overload = -1
 
 
 class LinearSarsaLAIDDQN100Short(LinearSarsaLAI):
@@ -161,6 +141,7 @@ class LinearLaiManyEpisodes(object):
     #stateletFunction = getStateletNoCommunication
     reward_overload = None
     stateRepresentation = stateRepresentationEnum.leaderAndIntermediate  
+    has_bucket = False
 
 
 class LinearTeamCommunicate(object):
@@ -182,6 +163,7 @@ class LinearTeamCommunicate(object):
     stateRepresentation = stateRepresentationEnum.server
     reward_overload = -1
     group_size = 1 # number of filters each agent controls
+    has_bucket = False
 
 
 
@@ -204,6 +186,7 @@ class RandomAgent(object):
     #stateletFunction = getStateletNoCommunication
     reward_overload = -1
     stateRepresentation = stateRepresentationEnum.leaderAndIntermediate      
+    has_bucket = False
 
 
 # The class of the adversary to implement
@@ -222,8 +205,8 @@ attackClasses = [conAttack, shortPulse, mediumPulse,
 Settings to change
 """
 
-assignedNetwork = NetworkSixFour
-assignedAgent = LinearSarsaSingularDDQNCopy
+assignedNetwork = NetworkSingleTeamMalialisMedium
+assignedAgent = LinearSarsaLAIDDQN200
 load_attack_path = "attackSimulations/{0}/".format(assignedNetwork.name)
 network_emulator = network.network_new.network_full # network_quick # network_full
 loadAttacks = False
@@ -234,8 +217,8 @@ assignedAgent.save_model_mode = defender_mode_enum.save
 trainHost = conAttack #coordAttack # conAttack #driftAttack #adversarialLeaf
 assignedNetwork.drift = 0
 
-# intelligentOpposition = DdCoordinatedLowlongDHighSettings #DdCoordinatedMasterSettings #DdRandomMasterSettings
-# intelligentOpposition.save_model_mode = defender_mode_enum.save
+intelligentOpposition = sarAdvShare #DdCoordinatedMasterSettings #DdRandomMasterSettings
+intelligentOpposition.save_model_mode = defender_mode_enum.save
 intelligentOpposition = None
 
 ###

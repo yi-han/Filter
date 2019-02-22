@@ -20,29 +20,29 @@ import numpy as np
 import runAttacks
 
 
-class AIMDtest(object):
-    name = "AIMD"
-    group_size = 1
-    delta = 0.3 # additive increase
-    beta = 2 # multiplicative decrease
-    epsilon = 0.1 # our error
+# class AIMDtest(object):
+#     name = "AIMD"
+#     group_size = 1
+#     delta = 0.3 # additive increase
+#     beta = 2 # multiplicative decrease
+#     epsilon = 0.1 # our error
 
-    stateRepresentation = stateRepresentationEnum.only_server # WRONG
-    sub_agent = agent.AIMD.AIMDagent
+#     stateRepresentation = stateRepresentationEnum.only_server # WRONG
+#     sub_agent = agent.AIMD.AIMDagent
     
 
-    num_episodes = 1
-    max_epLength = 30
-    y = 0
-    tau = beta
-    update_freq = None
-    batch_size = None
-    pre_train_steps = delta
-    annealing_steps = 0
-    startE = 0
-    endE = 0
-    stepDrop = 0
-    reward_overload = None
+#     num_episodes = 1
+#     max_epLength = 30
+#     y = 0
+#     tau = beta
+#     update_freq = None
+#     batch_size = None
+#     pre_train_steps = delta
+#     annealing_steps = 0
+#     startE = 0
+#     endE = 0
+#     stepDrop = 0
+#     reward_overload = None
 
 
 conAttack = hostClass.ConstantAttack
@@ -61,10 +61,10 @@ attackClasses = [conAttack, shortPulse, mediumPulse,
 
 ###
 # Settings
-assignedNetwork =  NetworkSingleTeamMalialisMedium #NetworkSingleTeamMalialisMedium
-assignedAgent =  AIMDtest #ddqnSingleNoCommunicate #ddqn100MediumHierarchical
+assignedNetwork =  NetworkMalialisSmall #NetworkSingleTeamMalialisMedium
+assignedAgent =  AIMDstandard #ddqnSingleNoCommunicate #ddqn100MediumHierarchical
 load_attack_path = "attackSimulations/{0}/".format(assignedNetwork.name)
-parameter_tune = False
+parameter_tune = True
 assignedAgent.encoders = None
 
 assignedAgent.save_model_mode = defender_mode_enum.save
@@ -94,38 +94,43 @@ if assignedAgent.save_model_mode is defender_mode_enum.load and intelligentOppos
     # we've set the filepath, now we need to ensure that we have the right adversary
     assert(trainHost==conAttack)
     trainHost = adversarialLeaf
+"""
+Variables:
+epsilon
+beta (second, do 2 first though)
+bucketValue (do as percentage of maximum of server)
+delta (bottom)
 
 
-delta_values = np.arange(0.05, 0.6, 0.1)
-beta_values = np.arange(1.25, 3, 0.25)
-l_values = np.arange(0.6, 0.95, 0.05)
-epsilon_values = np.arange(0.001, 1.002, 0.15)
-repeats = len(delta_values) * len(beta_values) * len(l_values) * len(epsilon_values)
+"""
+epsilon_values = np.arange(0.005, 1.0, 0.15).tolist()
+epsilon_values.insert(0,0.1)
+beta_values = np.arange(1.25, 4, 0.25).tolist()
+beta_values.remove(2)
+beta_values.insert(0,2)
+buck_values = np.arange(0.3, 1.3, 0.1).tolist()
+delta_values = np.arange(0.05, 1.5, 0.1).tolist()
+
+repeats = len(delta_values) * len(beta_values) * len(buck_values) * len(epsilon_values)
 print("repeats = {0}".format(repeats))
 print(len(delta_values))
 print(len(beta_values))
-print(len(l_values))
+print(len(buck_values))
 print(len(epsilon_values))
-# delta_values = np.arange(0.05, 8, 3.5)
-# beta_values = np.arange(1.25, 1.5, 0.25)
-# l_values = np.arange(0.6, 0.615, 0.05)
 
-# print(delta_values)
 
 if parameter_tune:
     i = 0
 
     for epsilon in epsilon_values:
         for beta in beta_values:
-            for l_value in l_values:
+            for buck_value in buck_values:
                 for delta in delta_values:
-                    print("testing for {0} {1} {2} {3}".format(delta, beta, l_value, epsilon))
-                    assignedNetwork.lower_boundary = assignedNetwork.upper_boundary*l_value
-                    print("lower_boundary = {0}".format(assignedNetwork.lower_boundary))
+                    print("testing for {0} {1} {2} {3}".format(delta, beta, buck_value, epsilon))
+                    assignedNetwork.bucket_capacity = assignedNetwork.upper_boundary*buck_value
+                    print("bucket is = {0}".format(assignedNetwork.bucket_capacity))
                     assignedAgent.delta = delta
                     assignedAgent.beta = beta
-                    assignedAgent.l_value = l_value
-
                     assignedAgent.epsilon = epsilon
                     runAttacks.run_attacks(assignedNetwork, assignedAgent, file_path, intelligentOpposition, i)
                     i+=1

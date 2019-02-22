@@ -61,7 +61,7 @@ class LinearSarsaSingularDDQNCopy(object):
     tau = 0.01 #Rate to update target network toward primary network. 
     update_freq = 4 #How often to perform a training step.
     batch_size = None #How many experiences to use for each training step.
-    num_episodes = 100001 #200001#    
+    num_episodes = 200001 #200001#    
     pre_train_steps = 20000 * max_epLength #40000 * max_epLength #
     annealing_steps = 60000 * max_epLength  #120000 * max_epLength  #
     startE = 1
@@ -205,7 +205,7 @@ attackClasses = [conAttack, shortPulse, mediumPulse,
 Settings to change
 """
 
-assignedNetwork = NetworkSingleTeamMalialisMedium
+assignedNetwork = NetworkMalialisSmall
 assignedAgent = LinearSarsaSingular
 load_attack_path = "attackSimulations/{0}/".format(assignedNetwork.name)
 network_emulator = network.network_new.network_full # network_quick # network_full

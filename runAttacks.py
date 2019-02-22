@@ -48,15 +48,16 @@ def run_attacks(assignedNetwork, assignedAgent, file_path, adversaryAttacker, pr
     
     original_iterations = assignedNetwork.iterations_between_action
 
-
+    attack_location = load_attack_path+"genericAttack.apkl"
 
     for attackClass in attackClasses:
+        
         assignedNetwork.iterations_between_action = 200
         print(attackClass.getName())
         print("\n\n\n")
         genericAgent = mapsAndSettings.create_generic_dec(agent, network)
         
-        attack_location = load_attack_path+"genericAttack.apkl"
+        
 
         exp = experiment.Experiment(attackClass, network, 
             agent, None, load_attack_path=attack_location)
@@ -73,7 +74,7 @@ def run_attacks(assignedNetwork, assignedAgent, file_path, adversaryAttacker, pr
         attackClass = adversarialLeaf
 
         genericAgent = mapsAndSettings.create_generic_dec(agent, network)
-        attack_location = load_attack_path+attackClass.getName()+".apkl"
+        #attack_location = load_attack_path+attackClass.getName()+".apkl"
         exp = experiment.Experiment(attackClass, network, 
             agent, adversaryAttacker, load_attack_path=attack_location)
 

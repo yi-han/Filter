@@ -164,18 +164,18 @@ attackClasses = [conAttack, shortPulse, mediumPulse,
 ###
 # Settings NetworkMalialisSmall
 assignedNetwork =   NetworkSingleTeamMalialisMedium
-assignedAgent =  ddqnSingleNoCommunicate #ddqnSingleNoCommunicate #ddqn100MediumHierarchical
+assignedAgent =  ddqnHierExploration #ddqnSingleNoCommunicate #ddqn100MediumHierarchical
 load_attack_path = "attackSimulations/{0}/".format(assignedNetwork.name)
 loadAttacks = True
 assignedAgent.encoders = None
 
-assignedAgent.save_model_mode = defender_mode_enum.save
+assignedAgent.save_model_mode = defender_mode_enum.load
 trainHost = conAttack #coordAttack # conAttack #driftAttack #adversarialLeaf
 assignedNetwork.drift = 0
 
-intelligentOpposition = DdGenericCentral #DdCoordinatedLowlongDlowSettings #DdCoordinatedMasterSettings #DdRandomMasterSettings
+intelligentOpposition = sarGenericCen #DdCoordinatedLowlongDlowSettings #DdCoordinatedMasterSettings #DdRandomMasterSettings
 intelligentOpposition.save_model_mode = defender_mode_enum.save
-intelligentOpposition = None
+# intelligentOpposition = None
 
 
 network_emulator = network.network_new.network_full #network_quick # network_full
@@ -219,6 +219,8 @@ else:
     experiment = experiment.Experiment(trainHost, assignedNetwork, assignedAgent, intelligentOpposition)
 
     for i in range(start_num, length_core+start_num):
+        if i==1:
+            continue
         genericAgent = create_generic_dec(assignedAgent, assignedNetwork)
         # genericAgent = None        
         print("Im doing it for {0}".format(i))
