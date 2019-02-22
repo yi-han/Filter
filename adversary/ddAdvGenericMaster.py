@@ -17,12 +17,11 @@ from network.utility import *
 
 class GenericAdvMaster():
 
-    def __init__(self, adv_settings, network_setting, defender_path):
+    def __init__(self, adv_settings, network_setting, defender_path, defender):
 
         self.adv_settings = adv_settings
         self.num_adv_agents = adv_settings.num_adv_agents # number of adversarial agents
         self.num_agents = network_setting.N_state # number of defender agents
-
         # above 0 inidicates the total number of agents
         # below 0 indicates the number of defenders each agent is responsible for
         if self.num_adv_agents < 0:
@@ -33,13 +32,11 @@ class GenericAdvMaster():
         self.prior_agent_actions = adv_settings.prior_agent_actions # number of actions by the defender we use in state
         self.prior_adversary_actions = adv_settings.prior_adversary_actions # number of actions by advesary we use in state
 
-
-
-
-        N_adv_state = self.num_agents*self.prior_agent_actions+ self.num_adv_agents * (1 + self.prior_adversary_actions)# plus one due to bandwiths
+        N_adv_state = defender.num_predictions*self.prior_agent_actions + (self.num_adv_agents * 1) + (self.num_adv_agents * self.prior_adversary_actions)# plus one due to bandwiths
 
 
         self.adv_agents = []
+        self.defender = defender
         self.defender_path = defender_path
 
         if adv_settings.include_encoder:
@@ -48,13 +45,17 @@ class GenericAdvMaster():
             bandwidth_tilings = 8
             bandwidth_encoding = tileCoding.myTileInterface(maxThrottlerBandwidth, bandwidth_tiles, bandwidth_tilings)
 
-            agent_tilings = 1
-            agent_move_encoding = tileCoding.myTileInterface(network_setting.action_per_throttler, network_setting.action_per_throttler, agent_tilings)
+            max_agent_value, agent_tilings = defender.get_max_agent_value()
+            agent_move_encoding = tileCoding.myTileInterface(max_agent_value, network_setting.action_per_throttler, agent_tilings)
             advesary_move_encoding = tileCoding.myTileInterface(adv_settings.action_per_agent, adv_settings.action_per_agent, agent_tilings)
 
             encoders = [bandwidth_encoding]*self.num_adv_agents
             encoders.extend([advesary_move_encoding]*(self.prior_adversary_actions*self.num_adv_agents))
-            encoders.extend([agent_move_encoding]*(self.prior_agent_actions*self.num_agents))
+            encoders.extend([agent_move_encoding]*(self.prior_agent_actions*defender.num_predictions))
+            
+            print(len(encoders))
+            print(N_adv_state)
+
             assert(len(encoders)==N_adv_state)
         else:
             encoders = None
@@ -153,8 +154,9 @@ class GenericAdvMaster():
         # pThrottles = []
 
         if self.prior_agent_actions>0:
-            for throttler in net.throttlers:
-                state.extend(throttler.past_throttles[-self.prior_agent_actions:])
+            for past_prediction in self.defender.past_predictions[-self.prior_agent_actions:]:
+                state.extend(past_prediction)
+
 
 
         if self.adv_settings.include_other_attackers:
@@ -209,12 +211,13 @@ class GenericAdvMaster():
         self.prior_actions.pop(0)
         self.prior_actions.append(actions)
 
-    def update(self, last_state, last_actions, current_state, is_done, reward, next_action):
+    def update(self, last_state, last_actions, current_state, is_done, reward, next_actions):
         # provide the update function to each individual state
         # reward = self.calc_reward(network_reward)
         for i in range(len(self.adv_agents)):
             agent = self.adv_agents[i]
             last_action = last_actions[i]
+            next_action = next_actions[i]
             t_last_state = self.extract_state(last_state, i)
             t_current_state = self.extract_state(current_state, i)
 

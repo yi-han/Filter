@@ -107,7 +107,7 @@ class Experiment:
         if self.adversary_agent_settings:
 
             print(self.adversary_class)
-            self.adversarialMaster = self.adversary_agent_settings.adversary_class(self.adversary_agent_settings, self.network_settings, agent.getPath())
+            self.adversarialMaster = self.adversary_agent_settings.adversary_class(self.adversary_agent_settings, self.network_settings, agent.getPath(), agent)
             assert(self.adversary_class == hosts.adversarialLeaf)
 
             

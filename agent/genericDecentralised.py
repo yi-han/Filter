@@ -28,6 +28,7 @@ class AgentOfAgents(aBase.Agent):
         #assert action_per_throttler**self.num_agents==N_action # confirm the numbers add up
         self.agents = sub_agent_list
         self.score = 0
+        self.num_predictions = self.num_agents
         #self.getStatelet = getStateletFunction
     def __enter__(self):
         print("__enter__ generic decentralised")
@@ -49,6 +50,7 @@ class AgentOfAgents(aBase.Agent):
         # combination
         action = 0
         # print("\n\npredictions")
+        prediction_as_list = []
         for i in range(len(self.agents)):
             # number of states is number of agents
             
@@ -60,11 +62,13 @@ class AgentOfAgents(aBase.Agent):
             statelet = state[i]
             #print(statelet)
             agentAction = agent.predict(statelet, e)
+            prediction_as_list.append(agentAction)
             # print("{0} for {1}".format(agentAction, statelet))
             #print("agent has {0} actions".format(agent.N_action))
             action = action*agent.N_action+agentAction
         # print("final action {0}".format(action))
-
+        self.past_predictions.pop()
+        self.past_predictions.append(prediction_as_list)
         return action
 
     def update(self, last_state, network_action, current_state, is_done, reward, next_action=None):
@@ -135,6 +139,7 @@ class AgentOfAgents(aBase.Agent):
     def reset(self):
         for agent in self.agents:
             agent.reset()
+        self.past_predictions = [[0]*self.num_predictions]*10
 
     def genericActionToactions(network_action, N_action_list):
         actions = []
@@ -155,9 +160,11 @@ class AgentOfAgents(aBase.Agent):
         # print("\n")
         return actions
 
-#             action = action*agent.N_action+agentAction
+    #             action = action*agent.N_action+agentAction
+    
 
-    def calculateThrottleRate(self, _, current_rate):
-        # irrelevent for throttle agents as we already calculated the throttle
 
-        return current_rate
+    def get_max_agent_value(self):
+        max_agent_value = 10
+        agent_tilings = 1
+        return max_agent_value, agent_tilings

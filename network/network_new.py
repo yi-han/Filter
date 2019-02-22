@@ -311,7 +311,6 @@ class Switch():
         self.new_dropped_legal = 0
         self.new_illegal = 0
         self.new_dropped_illegal = 0
-        self.past_throttles = [0]*10
         self.resetWindow()
         self.throttle_rate = None # represents not set
         self.iterations_since_throttle = 0
@@ -762,7 +761,7 @@ class network_full(object):
            self.move_traffic(step_count, adv_action)
            #self.rewards_per_step.append(self.calculate_reward())
 
-        self.record_average_throttle()
+        #self.record_average_throttle()
 
         #self.adversary.takeStep()
         # should pass the data along nodes
@@ -799,14 +798,14 @@ class network_full(object):
                 dest = None
             print("id {0} | load {1} | window {2} | destination {3}".format(switch.id, switch.getImmediateState(), switch.getWindow(), dest))
 
-    def record_average_throttle(self):
-        for switch in self.switches:
-            if (switch.recorded_drop + switch.recorded_pass) == 0:
-                new_throttle = 0
-            else:
-                new_throttle = switch.recorded_drop / (switch.recorded_drop + switch.recorded_pass)
-            switch.past_throttles.append(new_throttle*10) # convert to a whole number
-            switch.past_throttles.pop(0)
+    # def record_average_throttle(self):
+    #     for switch in self.switches:
+    #         if (switch.recorded_drop + switch.recorded_pass) == 0:
+    #             new_throttle = 0
+    #         else:
+    #             new_throttle = switch.recorded_drop / (switch.recorded_drop + switch.recorded_pass)
+    #         switch.past_throttles.append(new_throttle*10) # convert to a whole number
+    #         switch.past_throttles.pop(0)
 
 
 

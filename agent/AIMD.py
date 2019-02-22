@@ -23,6 +23,9 @@ class AIMDagent():
         self.lower = network_settings.lower_boundary
         self.seconds_per_window = 2 ### UPDATE: probably shouldn't assume
         self.iterations_per_window = network_settings.iterations_between_action
+        self.num_predictions = 1
+
+        self.max_rate =  network_settings.rate_attack_high * (len(network_settings.host_sources) - 1 ) + (2 * self.delta)
     def __enter__(self):
         print("enter the AIMD")
         self.reset()
@@ -33,6 +36,7 @@ class AIMDagent():
     def reset(self):
         self.rs = None
         self.pLast = None        
+        self.past_predictions = [[self.max_rate]*self.num_predictions]*10
 
     def predict(self, p, _):
         # treat this as set the rate
@@ -55,6 +59,18 @@ class AIMDagent():
                 self.pLast = p
                 self.rs += self.delta
         # print("\n\n\nserver load is {0} we had {2} and suggesting {1}".format(p, self.rs, init_rs))
+        if self.rs == None:
+            recorded_rs = self.max_rate
+        elif self.rs > self.max_rate:
+            print("how did it get that high?")
+            print(self.max_rate)
+            print(self.rs)
+            assert(1==2)
+        else:
+            recorded_rs = self.rs
+        self.past_predictions.pop()
+        self.past_predictions.append([recorded_rs])
+
         return self.rs
 
     def update(self, _, _a, _b, _c, _d, next_action = 0):
@@ -72,7 +88,11 @@ class AIMDagent():
     def getPath(self=None):
         return "AIMD"
 
-
+    def get_max_agent_value(self):
+        max_agent_value = self.max_rate
+        # effectively have the maximum throttle rate be two delta values greater than the max rate possible
+        agent_tilings = 8
+        return (max_agent_value, agent_tilings)
 
     # def calculateThrottleRate(self, current_load, current_rs):
     #     # given the through rate, load and iterations per window, what's the % of traffic we let pass
