@@ -93,14 +93,11 @@ class Bucket():
         else:
             (legal_added, legal_dropped, illegal_added, illegal_dropped) = self.add_to_capacity(legal_traffic_in, illegal_traffic_in, remaining_capacity)
             # print((legal_added, legal_dropped, illegal_added, illegal_dropped))
-            assert(abs(legal_added+legal_dropped-legal_traffic_in)<DELTA)
-            assert(abs(illegal_added+illegal_dropped-illegal_traffic_in)<DELTA)
+            #assert(abs(legal_added+legal_dropped-legal_traffic_in)<DELTA)
+            #assert(abs(illegal_added+illegal_dropped-illegal_traffic_in)<DELTA)
 
-            if((legal_added+illegal_added>0)):
-                # only add if above 0
-                # print("add from normal")
 
-                self.add_bucket(legal_added, illegal_added)
+            self.add_bucket(legal_added, illegal_added)
              
 
         # empty bucket
@@ -247,7 +244,7 @@ class Switch():
 
             illegal_dropped = roundNumber(self.illegal_traffic * throttle_rate)
             illegal_pass = self.illegal_traffic - illegal_dropped
-            assert(abs(illegal_pass + illegal_dropped - self.illegal_traffic) < DELTA)
+            #assert(abs(illegal_pass + illegal_dropped - self.illegal_traffic) < DELTA)
 
         # update all other switches with new traffic values
 
@@ -260,6 +257,7 @@ class Switch():
 
             dest.destination_switch.new_illegal += (illegal_pass/num_dests)
             dest.destination_switch.new_dropped_illegal += ((illegal_dropped+ self.dropped_illegal)/num_dests)
+            
         self.iterations_since_throttle += 1
     def updateSwitch(self):
         # update the traffic values

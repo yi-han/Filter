@@ -108,6 +108,7 @@ class SarsaFunctionAI:
 
 
     def reset(self):
+        self.w_matrix = []        
         for action in self.actions:
             w = np.zeros(self.n_features)
             self.w_matrix.append(w)

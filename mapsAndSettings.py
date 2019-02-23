@@ -114,7 +114,7 @@ class NetworkMalialisSmall(object):
     legal_probability = 0.6 # probability that is a good guys
     upper_boundary = 8
     lower_boundary = 6 # for AIMD
-    iterations_between_action = 60 #200
+    iterations_between_action = 30 #200
 
     max_hosts_per_level = [3] # no communication therefore just one
     bucket_capacity = 8#15#0.8
@@ -141,7 +141,7 @@ class NetworkSingleTeamMalialisMedium(object):
     upper_boundary = 14 #12.5 # Mal would have used 14
     lower_boundary = 10 # for AIMD
 
-    iterations_between_action = 30 # 200
+    iterations_between_action = 20 # 200
 
     max_hosts_per_level = [2, 6, 12]
     bucket_capacity = 12
@@ -367,7 +367,7 @@ def create_generic_dec(ds, ns):
 
 def getSummary(adversary_classes, load_path, agent, smart_adversary, prefix):
     summary = open("{0}/attackSummary-{1}.csv".format(load_path,prefix), "w")
-    summary.write("AttackType,Agent,Drift,LegalPacketsReceived,LegalPacketsServed,Percentage,ServerFailures,Tau,Pretraining,Annealing,TotalEpisodes,start_e,overload,adv_tau,adv_discount,adv_pretrain,adv_annealing_episodes,adv_episodes,adv_start_e,delta,beta,epsilon,l_value\n")
+    summary.write("AttackType,Agent,Drift,LegalPacketsReceived,LegalPacketsServed,Percentage,ServerFailures,Tau,Pretraining,Annealing,TotalEpisodes,start_e,overload,adv_tau,adv_discount,adv_pretrain,adv_annealing_episodes,adv_episodes,adv_start_e,delta,beta,epsilon,bucket_capacity, iteration\n")
     agentName = agent.name
     for adversary_class in adversary_classes:
         attack_name = adversary_class.getName()
@@ -405,11 +405,12 @@ def getSummary(adversary_classes, load_path, agent, smart_adversary, prefix):
         if agent.stateRepresentation == stateRepresentationEnum.only_server:
             summary.write("{0},{1},{2},".format(agent.delta, agent.beta, agent.epsilon))
             try:
-                summary.write("{0}\n".format(agent.l_value))
+                summary.write("{0},".format(agent.buck_value))
             except AttributeError:
-                summary.write("\n")
+                summary.write(",")
         else:
-            summary.write(",,,\n")
+            summary.write(",,,")
+        summary.write("{0}\n".format(prefix))
     summary.close()
 
 
@@ -453,20 +454,23 @@ def calc_comm_strategy(stateRepresentation):
         return stateRepresentation.name
 
 
-def merge_summaries(file_path, number_summaries):
-    summary = open("{0}/merged_summary.csv".format(file_path), "w")
+def merge_summaries(file_path):
+    summary = open("{0}/attack_merged_summary.csv".format(file_path), "w")
     # we assume it goes from 0 to max
     first_summary = open("{0}/attackSummary-0.csv".format(file_path))
     header = first_summary.readline()
     summary.write(header)
     first_summary.close()
 
-    for i in range(0, number_summaries):
+    #for i in range(0, number_summaries):
+    i = 0
+    while os.path.isfile("{0}/attackSummary-{1}.csv".format(file_path, i)):
         i_summary = open("{0}/attackSummary-{1}.csv".format(file_path, i))
         i_summary.readline()
         for line in i_summary.readlines():
             summary.write(line)
         i_summary.close()
+        i+=1
     summary.close()
 
 def massSummary(load_path):

@@ -378,13 +378,13 @@ class Experiment:
                 # grab stats before doing two more
                 legit_served, legit_all, legit_per, server_failures = net.getLegitStats()
                 
-                for f_step in range(2):
-                    # do two steps without learning (so nothing implicit) and see if we can see how well it performs
-                    a = agent.predict(net.get_state(), 0)
-                    net.step(a, step+f_step, adv_last_action)
+                # for f_step in range(2):
+                #     # do two steps without learning (so nothing implicit) and see if we can see how well it performs
+                #     a = agent.predict(net.get_state(), 0)
+                #     net.step(a, step+f_step, adv_last_action)
 
                 # how well the system performs assuming no exploration (only useful for training)
-                agent_performance = net.getPacketServedAtMoment()
+                agent_performance =  0# we ignore this to reduce timenet.getPacketServedAtMoment()
 
                 packet_served_lines.append("{0}, {1}, {2}, {3}, {4}\n".format(ep_num, legit_served, legit_all, legit_per, server_failures))
 

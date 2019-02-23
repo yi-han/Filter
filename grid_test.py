@@ -108,7 +108,7 @@ epsilon_values.insert(0,0.1)
 beta_values = np.arange(1.25, 4, 0.25).tolist()
 beta_values.remove(2)
 beta_values.insert(0,2)
-buck_values = np.arange(0.3, 1.3, 0.1).tolist()
+buck_values = np.arange(0.1, 1, 0.1).tolist()
 delta_values = np.arange(0.05, 1.5, 0.1).tolist()
 
 repeats = len(delta_values) * len(beta_values) * len(buck_values) * len(epsilon_values)
@@ -126,6 +126,7 @@ if parameter_tune:
         for beta in beta_values:
             for buck_value in buck_values:
                 for delta in delta_values:
+                    assignedAgent.buck_value = buck_value
                     print("testing for {0} {1} {2} {3}".format(delta, beta, buck_value, epsilon))
                     assignedNetwork.bucket_capacity = assignedNetwork.upper_boundary*buck_value
                     print("bucket is = {0}".format(assignedNetwork.bucket_capacity))
