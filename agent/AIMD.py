@@ -33,7 +33,7 @@ class AIMDagent():
     def __exit__(self, type, value, tb):
         print("exit the AIMD")
 
-    def reset(self):
+    def reset_episode(self):
         self.rs = None
         self.pLast = None        
         self.past_predictions = [[self.max_rate]*self.num_predictions]*10

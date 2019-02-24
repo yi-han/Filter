@@ -136,9 +136,9 @@ class AgentOfAgents(aBase.Agent):
 
 
 
-    def reset(self):
-        for agent in self.agents:
-            agent.reset()
+    def reset_episode(self):
+        # for agent in self.agents:
+        #     agent.reset()
         self.past_predictions = [[0]*self.num_predictions]*10
 
     def genericActionToactions(network_action, N_action_list):

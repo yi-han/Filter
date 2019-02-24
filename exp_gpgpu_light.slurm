@@ -1,14 +1,13 @@
 #!/bin/bash
 #SBATCH --nodes 1
-#SBATCH --partition gpgpu
-#SBATCH --time=0-19:00:00
+#SBATCH --partition shortgpgpu
+#SBATCH --time=0-00:59:59
 #SBATCH --cpus-per-task=1
 #SBATCH --job-name=sampleDDQNText
 #SBATCH --account=punim0621
 
 #SBATCH --gres=gpu:1
 # idea: use four gpus (amount we get per node)
-#SBATCH --mem=25360
 
 
 # Send yourself an email when the job:

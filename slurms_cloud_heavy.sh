@@ -1,19 +1,12 @@
-sed 's/0 5/0 2/g' exp_cloud.slurm > output.slurm
+sed 's/runDDQN/runDDQN/g' exp_gpgpu_single.slurm > output.slurm
+sed "s/samplePath/$1/g" output.slurm -i 
+sed 's/sampleDDQNText/ddMidSinTest/g' output.slurm -i 
+sed 's/0 2/0 1/g' output.slurm -i 
 sbatch output.slurm
-sleep 5
-sed 's/0 5/4 2/g' exp_cloud.slurm > output.slurm
-sbatch output.slurm
-sed 's/0 5/6 2/g' exp_cloud.slurm > output.slurm
-sbatch output.slurm
-sed 's/0 5/8 2/g' exp_cloud.slurm > output.slurm
-sbatch output.slurm
-sed 's/0 5/10 2/g' exp_cloud.slurm > output.slurm
-sbatch output.slurm
-sed 's/0 5/12 2/g' exp_cloud.slurm > output.slurm
-sbatch output.slurm
-sed 's/0 5/14 2/g' exp_cloud.slurm > output.slurm
-sbatch output.slurm
-sed 's/0 5/16 2/g' exp_cloud.slurm > output.slurm
-sbatch output.slurm
-sed 's/0 5/18 2/g' exp_cloud.slurm > output.slurm
+
+
+sed 's/runDDQN/runSARSA/g' exp_physical_ddqn.slurm > output.slurm
+sed "s/samplePath/$1/g" output.slurm -i 
+sed 's/sampleDDQNText/sarMidSinTest/g' output.slurm -i 
+sed 's/0 2/0 1/g' output.slurm -i 
 sbatch output.slurm

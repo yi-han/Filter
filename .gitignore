@@ -8,4 +8,4 @@ filter new 3 layers 256 bias/
 *.pkl
 *.sav
 *.xlsx
-*.slurm
+output.slurm

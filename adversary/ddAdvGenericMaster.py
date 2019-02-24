@@ -252,6 +252,7 @@ class GenericAdvMaster():
         return "{0}/{1}".format(self.defender_path,self.name)
 
     def reset(self):
+        assert(1==2) # dont think we use this
         for agent in self.adv_agents:
             agent.reset()
 

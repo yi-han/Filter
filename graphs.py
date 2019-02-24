@@ -28,7 +28,7 @@ attackClasses = [conAttack, shortPulse, mediumPulse,
 
 
 testAttacks = False
-averageFrom =  90000 #90000 #60000 #190000
+averageFrom =  80000 #90000 #60000 #190000
 
 
 if not testAttacks:

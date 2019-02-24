@@ -41,7 +41,9 @@ class Agent(aBase.Agent):
         return
 
     def reset(self):
-        self.ai.reset()
+        # do nothing. This is intentinoal as we were resetting everythign each episode.
+        assert(1==2)
+        return
 
     def predict(self, state, e):
         randomChoice = super().isRandomGuess(e)

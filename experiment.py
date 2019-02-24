@@ -205,10 +205,11 @@ class Experiment:
             adv_last_action = None
             reward_per_print = 0
             for ep_num in range(num_episodes):
+                agent.reset_episode()
                 ep_adv_loss = 0
                 ep_def_loss = 0
                 #print("loading ep {0} out of {1}".format(ep_num, num_episodes))
-                agent.reset()
+                
                 net.reset() # reset the network
                 if self.adversarialMaster != None:
                     self.adversarialMaster.initiate_episode()

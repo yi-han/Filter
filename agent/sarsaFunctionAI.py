@@ -50,6 +50,8 @@ class TileWrapper(object):
         # print(len(state_vector))
         return np.array(state_vector)
 
+    #def feature_learn()
+
 class SarsaFunctionAI:
     """
     Value Function approximator.
