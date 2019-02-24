@@ -21,7 +21,6 @@ for dest in jpattison; do
 	exp_gpgpu_light.slurm \
 	exp_gpgpu_single.slurm \
 	exp_gpgpu_heavy.slurm \
-	exp_cloud.slurm \
 	exp_physical.slurm \
 	exp_physical_ddqn.slurm \
 	phys_attempt.slurm \
@@ -48,7 +47,6 @@ for dest in jpattison; do
 	runDDQNAdditional.py \
 	runSarsaAdditional.py \
 	slurms_attacks.sh \
-	exp_attacks.slurm \
 	grid_test.py \
 	--exclude='*' \
 	jpattison@spartan.hpc.unimelb.edu.au:/home/$dest

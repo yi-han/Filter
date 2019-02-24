@@ -36,6 +36,10 @@ class LinearSarsaSingular(object):
     stateRepresentation = stateRepresentationEnum.throttler  
     has_bucket = False
 
+class LinSarsProper(LinearSarsaSingular):
+    name = "LinSarsProper"
+    tau = 0.1
+
 class LinearSarsaLong(LinearSarsaSingular):
     name = "LinearSarsaLong"
     num_episodes = 200001
@@ -205,8 +209,8 @@ attackClasses = [conAttack, shortPulse, mediumPulse,
 Settings to change
 """
 
-assignedNetwork = NetworkSingleTeamMalialisMedium
-assignedAgent = LinearSarsaSingular
+assignedNetwork = NetworkMalialisSmall
+assignedAgent = LinSarsProper
 load_attack_path = "attackSimulations/{0}/".format(assignedNetwork.name)
 network_emulator = network.network_new.network_full # network_quick # network_full
 loadAttacks = False

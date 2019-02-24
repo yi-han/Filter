@@ -27,7 +27,6 @@ class Agent(aBase.Agent):
         self.N_state = N_state
         self.score = 0
         self.encoders = encoders
-        self.ai.reset()
 
     def __enter__(self):
         # probably have memory management here
