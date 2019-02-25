@@ -120,7 +120,8 @@ class AgentOfAgents(aBase.Agent):
         print("loading all models")
         for i in range(len(self.agents)):
             individual_path = load_path+'/{0}-{1}'.format(i, prefix)
-            self.agents[i].loadModel(individual_path)
+            last_checkpoint = self.agents[i].loadModel(individual_path)
+        return last_checkpoint # note all should have returned same value
 
     def saveModel(self,load_path, interation, prefix):
         for i in range(len(self.agents)):

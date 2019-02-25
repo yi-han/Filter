@@ -101,7 +101,7 @@ class Agent(aBase.Agent):
         self.ai.loadData(dataDict)
 
 
-        return
+        return int(last_checkpoint[:-4])
 
     def saveModel(self, load_path, i):
         if not os.path.exists(load_path):

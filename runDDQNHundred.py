@@ -162,7 +162,7 @@ trainHost = conAttack #coordAttack # conAttack #driftAttack #adversarialLeaf
 assignedNetwork.drift = 0
 
 intelligentOpposition = ddSplitSuper #DdCoordinatedLowlongDlowSettings #DdCoordinatedMasterSettings #DdRandomMasterSettings
-intelligentOpposition.save_model_mode = defender_mode_enum.save
+intelligentOpposition.save_model_mode = defender_mode_enum.load_continue
 # intelligentOpposition = None
 
 
@@ -188,7 +188,7 @@ else:
 
 print('the filepath is {0}'.format(file_path))
 if assignedAgent.save_model_mode in [defender_mode_enum.load, defender_mode_enum.load_save] and intelligentOpposition \
-    and intelligentOpposition.save_model_mode is defender_mode_enum.save:
+    and intelligentOpposition.save_model_mode in [defender_mode_enum.save, defender_mode_enum.load_continue]:
     # we've set the filepath, now we need to ensure that we have the right adversary
     assert(trainHost==conAttack)
     trainHost = adversarialLeaf

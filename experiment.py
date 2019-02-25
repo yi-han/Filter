@@ -64,9 +64,10 @@ class Experiment:
         self.adversary_agent_settings = AdversaryAgentSettings
 
 
-        self.agentLoadModes = [mapsAndSettings.defender_mode_enum.test_short, mapsAndSettings.defender_mode_enum.load, mapsAndSettings.defender_mode_enum.load_save]
-        self.agentSaveModes = [mapsAndSettings.defender_mode_enum.save, mapsAndSettings.defender_mode_enum.load_save]
-
+        self.agentTestModes = [mapsAndSettings.defender_mode_enum.test_short, mapsAndSettings.defender_mode_enum.load, mapsAndSettings.defender_mode_enum.load_save]
+        self.agentSaveModes = [mapsAndSettings.defender_mode_enum.save, mapsAndSettings.defender_mode_enum.load_save, mapsAndSettings.defender_mode_enum.load_continue]
+        self.agentLoadModes = self.agentTestModes.copy()
+        self.agentLoadModes.append(mapsAndSettings.defender_mode_enum.load_continue)
 
         assert AgentSettings.trained_drift != -1 # ensure we have it set, dont ever use in experiment
 
@@ -98,7 +99,7 @@ class Experiment:
 
         """
 
-        if self.agent_settings.save_model_mode in self.agentLoadModes:
+        if self.agent_settings.save_model_mode in self.agentTestModes:
             e = endE
             stepDrop = 0
             pre_train_steps = 0
@@ -111,7 +112,7 @@ class Experiment:
             assert(self.adversary_class == hosts.adversarialLeaf)
 
             
-            if self.adversary_agent_settings.save_model_mode in self.agentLoadModes:
+            if self.adversary_agent_settings.save_model_mode in self.agentTestModes:
                 # large assumption of learning or loading
                 adv_pretraining = 0
                 adv_e = self.adversary_agent_settings.endE
@@ -191,20 +192,37 @@ class Experiment:
         loss_lines.append("Episode,StepsSoFar,Loss,Exploration, EpDefLoss, EpAdvLoss\n")
         #self.episode_rewards = []
 
+        ep_init = 0
+
 
         with agent:
             if self.adversarialMaster:
                 self.adversarialMaster.__enter__()
-            if self.agent_settings.save_model_mode in self.agentLoadModes: #mapsAndSettings.defender_mode_enum.test
-                agent.loadModel(self.file_path, prefix)
-
-            if self.adversarialMaster and self.adversary_agent_settings.save_model_mode in self.agentLoadModes:
-                self.adversarialMaster.loadModel(self.file_path, prefix)
-
+            if self.agent_settings.save_model_mode in self.agentLoadModes : #mapsAndSettings.defender_mode_enum.test
+                episode = agent.loadModel(self.file_path, prefix)
+                if self.agent_settings.save_model_mode == mapsAndSettings.defender_mode_enum.load_continue:
+                    ep_init = episode
+            if self.adversarialMaster and self.adversary_agent_settings.save_model_mode in self.agentLoadModes:              
+                episode = self.adversarialMaster.loadModel(self.file_path, prefix)
+                if self.adversary_agent_settings.save_model_mode == mapsAndSettings.defender_mode_enum.load_continue:
+                    ep_init = episode  
             fail_seg = 0
             adv_last_action = None
             reward_per_print = 0
-            for ep_num in range(num_episodes):
+
+            if ep_init > 0:
+                total_steps = ep_init*max_epLength
+                # lower the exploration rate
+                if e>0:
+                    if total_steps > pre_train_steps:
+                        e = max((e - (stepDrop*total_steps)),endE)
+
+
+                if self.adversarialMaster and adv_e > 0:
+                    if total_steps > adv_pretraining:
+                        adv_e = max((adv_e - (adv_step_drop*total_steps)),self.adversary_agent_settings.endE)
+            print("\n\n Starting at episode {0}".format(ep_init))
+            for ep_num in range(ep_init, num_episodes):
                 agent.reset_episode()
                 ep_adv_loss = 0
                 ep_def_loss = 0

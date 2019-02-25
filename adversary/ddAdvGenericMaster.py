@@ -240,7 +240,8 @@ class GenericAdvMaster():
         print("loading all models")
         for i in range(len(self.adv_agents)):
             individual_path = load_path+'/{0}Adv-{1}'.format(i, prefix)
-            self.adv_agents[i].loadModel(individual_path)
+            checkpoint = self.adv_agents[i].loadModel(individual_path)
+        return checkpoint
 
     def saveModel(self,load_path, interation, prefix):
         for i in range(len(self.adv_agents)):

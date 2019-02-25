@@ -11,6 +11,7 @@ import numpy as np
 import os
 import sys
 from numpy import random as random
+import re
 
 class ddGenAgent():
     def __init__(self, N_state, adv_settings, encoders):
@@ -96,10 +97,16 @@ class ddGenAgent():
         return l
 
     def loadModel(self, load_path):
-        print("Loading Model... ddAdv")
+        print("Loading Model...")
         print(load_path)
         ckpt = tf.train.get_checkpoint_state(load_path)
         self.saver.restore(self.sess,ckpt.model_checkpoint_path)
+        checkpoint_log = open(load_path+"/checkpoint")
+        check_line = checkpoint_log.readline()
+        checkpoint_log.close()
+        m = re.search(r'\d+\D', check_line)
+
+        return int(m.group(0)[:-1])
 
 
     def saveModel(self, load_path, iteration):

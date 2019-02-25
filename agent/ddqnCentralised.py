@@ -3,7 +3,7 @@ import agent.agentBase as aBase
 import numpy as np
 import os
 import sys
-
+import re
 class Agent(aBase.Agent):
     def __init__(self, N_action, N_state, tileFunction, agent_settings, tau, discountFactor):
 
@@ -84,6 +84,12 @@ class Agent(aBase.Agent):
         print(load_path)
         ckpt = tf.train.get_checkpoint_state(load_path)
         self.saver.restore(self.sess,ckpt.model_checkpoint_path)
+        checkpoint_log = open(load_path+"/checkpoint")
+        check_line = checkpoint_log.readline()
+        checkpoint_log.close()
+        m = re.search(r'\d+\D', check_line)
+
+        return int(m.group(0)[:-1])
 
 
     def saveModel(self, load_path, iteration):
