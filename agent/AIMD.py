@@ -33,6 +33,9 @@ class AIMDagent():
     def __exit__(self, type, value, tb):
         print("exit the AIMD")
 
+    def reset(self):
+        self.reset_episode()
+
     def reset_episode(self):
         self.rs = None
         self.pLast = None        
@@ -68,7 +71,7 @@ class AIMDagent():
             assert(1==2)
         else:
             recorded_rs = self.rs
-        self.past_predictions.pop()
+        self.past_predictions.pop(0)
         self.past_predictions.append([recorded_rs])
 
         return self.rs

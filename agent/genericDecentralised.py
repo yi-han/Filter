@@ -67,7 +67,7 @@ class AgentOfAgents(aBase.Agent):
             #print("agent has {0} actions".format(agent.N_action))
             action = action*agent.N_action+agentAction
         # print("final action {0}".format(action))
-        self.past_predictions.pop()
+        self.past_predictions.pop(0)
         self.past_predictions.append(prediction_as_list)
         return action
 
