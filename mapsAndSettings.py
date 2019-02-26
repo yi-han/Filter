@@ -282,7 +282,7 @@ class ddAdvAntiAimd(DdGenericDec):
     num_adv_agents = 1
     name = "ddAdvAntiAimd"
     include_other_attackers = False
-    prior_agent_actions = 4
+    prior_agent_actions = 6
 
 class sarGenericDec(object):
     name = "sarsaGenericDec"
@@ -327,6 +327,12 @@ class sarAdvSuper(sarAdvSplit):
     name = "sarsaAdvSuper"
     prior_agent_actions = 1
     include_other_attackers = True
+
+class sarAntiAimd(sarGenericDec):
+    name = "sarsaAntiAimd"
+    num_adv_agents = 1
+    include_other_attackers = False
+    prior_agent_actions = 6    
 
 def create_generic_dec(ds, ns):
     """
