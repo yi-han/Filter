@@ -5,7 +5,7 @@
 #SBATCH --time=2-12:00:00
 #SBATCH --account=punim0636
 #SBATCH --partition=physical
-#SBATCH --job-name=sample_sarsa_name
+#SBATCH --job-name=sampleDDQNText
 
 # Send yourself an email when the job:
 # aborts abnormally (fails)
@@ -25,7 +25,7 @@ module load Tensorflow/1.3.0-intel-2017.u2-Python-3.5.2
 # Launch multiple process python code
 
 echo "Starting physical throttle"
-time mpiexec -n 1 python3 runDDQN.py 0 2 "samplePath"
+time mpiexec -n 1 python3 runDDQN.py 0 1
 
 echo "done"
 

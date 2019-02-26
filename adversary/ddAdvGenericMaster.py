@@ -40,9 +40,11 @@ class GenericAdvMaster():
         self.defender_path = defender_path
 
         if adv_settings.include_encoder:
-            bandwidth_tiles = len(network_setting.host_sources)*network_setting.rate_attack_high
-            maxThrottlerBandwidth = bandwidth_tiles
+            maxThrottlerBandwidth = len(network_setting.host_sources)*network_setting.rate_attack_high
+            bandwidth_tiles = min(maxThrottlerBandwidth,100) # cap off our max bandwidth at 100 tiles. More than enough
             bandwidth_tilings = 8
+
+            print("my detected max bandwidth is {0}".format(maxThrottlerBandwidth))
             bandwidth_encoding = tileCoding.myTileInterface(maxThrottlerBandwidth, bandwidth_tiles, bandwidth_tilings)
 
             max_agent_value, agent_tilings = defender.get_max_agent_value()

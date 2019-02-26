@@ -7,13 +7,13 @@
 
 sed -i.bak "s/assignedNetwork.iterations_between_action = 30/assignedNetwork.iterations_between_action = 200/g" runAttacks.py
 rm runAttacks.py.bak
-#for file in runDDQN.py runDDQNAdditional.py runDDQNHundred.py runDDQNMalialis.py runDDQNNetQuick.py runSarsaDDQNCopy.py runSarsaAdditional.py runSarsaNoOverdrive.py; do
-#for file in runSARSA.py runSarsaAdditional.py runSarsaDDQNCopy.py runSarsaNoOverdrive.py runSarsaOriginal.py runSarsaX.py runDDQNMalialis.py runDDQNNetQuick.py; do
-for file in runSarsaAdditional.py runSarsaNoOverdrive.py runDDQNMalialis.py; do
+for file in runDDQN.py runDDQNAdditional.py runDDQNHundred.py; do # runDDQNMalialis.py runDDQNNetQuick.py runSarsaDDQNCopy.py runSarsaAdditional.py runSarsaNoOverdrive.py; do
+	#for file in runSARSA.py runSarsaAdditional.py runSarsaDDQNCopy.py runSarsaNoOverdrive.py runSarsaOriginal.py runSarsaX.py runDDQNMalialis.py runDDQNNetQuick.py; do
+	#for file in runSarsaAdditional.py runSarsaNoOverdrive.py runDDQNMalialis.py; do
 	sed -i.bak "s/loadAttacks = False/loadAttacks = True/g" $file
 	sed "s/runDDQN.py/$file/g" exp_physical_ddqn.slurm > output.slurm
 	rm $file.bak
-	sed -i.bak "s/0 2/0 10/g" output.slurm
+	sed -i.bak "s/0 2/0 5/g" output.slurm
 	sed -i.bak "s/samplePath/$1/g" output.slurm
 	sed -i.bak "s/sampleDDQNText/$file/g" output.slurm
 	sbatch output.slurm

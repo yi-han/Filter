@@ -92,9 +92,10 @@ class AIMDagent():
         return "AIMD"
 
     def get_max_agent_value(self):
-        max_agent_value = self.max_rate
+        max_agent_value = self.max_rate + self.epsilon # add an epsilon so we never hit the absolute max
         # effectively have the maximum throttle rate be two delta values greater than the max rate possible
         agent_tilings = 8
+        print(max_agent_value, agent_tilings)
         return (max_agent_value, agent_tilings)
 
     # def calculateThrottleRate(self, current_load, current_rs):

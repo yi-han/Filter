@@ -49,7 +49,7 @@ def run_attacks(assignedNetwork, assignedAgent, file_path, adversaryAttacker, pr
     original_iterations = assignedNetwork.iterations_between_action
 
     attack_location = load_attack_path+"onePerAttack.apkl"
-
+    print(attack_location)
     for attackClass in attackClasses:
         
         assignedNetwork.iterations_between_action = 200

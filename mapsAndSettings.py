@@ -290,7 +290,7 @@ class sarGenericDec(object):
     pre_train_steps = 75000
     annealing_episodes = 300000
     num_episodes = 750000
-    tau = 0.0001
+    tau = 0.001
     discount_factor = 0.6
     startE = 1
     endE = 0.0

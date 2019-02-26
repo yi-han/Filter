@@ -1,15 +1,15 @@
 # 
-sed 's/runDDQN/runDDQN/g' exp_gpgpu_heavy.slurm > output.slurm
-sed "s/samplePath/$1/g" output.slurm -i 
-sed 's/sampleDDQNText/dAdvAimdSmall/g' output.slurm -i 
+sed 's/runDDQN/runDDQN/g' exp_physical_ddqn.slurm > output.slurm
+sed "s/samplePath/sAdvAimdSmall/g" output.slurm -i 
+sed 's/sampleDDQNText/sAdvAimdSmall/g' output.slurm -i 
 sed 's/0 2/0 1/g' output.slurm -i 
 sbatch output.slurm
 sed 's/0 1/1 1/g' output.slurm -i 
 sbatch output.slurm
 
-sed 's/runDDQN/runDDQNAdditional/g' exp_gpgpu_heavy.slurm > output.slurm
-sed "s/samplePath/$1/g" output.slurm -i 
-sed 's/sampleDDQNText/dAdvAimdSMid/g' output.slurm -i 
+sed 's/runDDQN/runDDQNAdditional/g' exp_physical_ddqn.slurm > output.slurm
+sed "s/samplePath/sAdvAimdSMid/g" output.slurm -i 
+sed 's/sampleDDQNText/sAdvAimdSMid/g' output.slurm -i 
 sed 's/0 2/0 1/g' output.slurm -i 
 sbatch output.slurm
 sed 's/0 1/1 1/g' output.slurm -i 
