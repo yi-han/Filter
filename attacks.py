@@ -29,7 +29,7 @@ def generateAttacks(networkSettings, attackClasses, max_epLength = -1, num_episo
         os.makedirs(path)
     # for attackClass in attackClasses:
         # print(attackClass)
-    attack_path = path+"genericAttack.apkl"
+    attack_path = path+"onePerAttack.apkl"
     # just do it once 
     with open(attack_path, "wb") as f:
         
