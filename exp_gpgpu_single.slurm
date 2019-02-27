@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --nodes 1
 #SBATCH --partition gpgpu
-#SBATCH --time=0-14:00:00
+#SBATCH --time=3-14:00:00
 #SBATCH --cpus-per-task=1
 #SBATCH --job-name=sampleDDQNText
 #SBATCH --account=punim0621

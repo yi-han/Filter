@@ -19,7 +19,7 @@ class LinearSarsaSingular(object):
     name = "LinearSarsaSingular"
     max_epLength = 30 # or 60 if test
     y = 0
-    tau = 0.0125
+    tau = 0.1
     update_freq = 4
     batch_size = None
     num_episodes = 200000#82501
@@ -36,19 +36,6 @@ class LinearSarsaSingular(object):
     stateRepresentation = stateRepresentationEnum.throttler  
     has_bucket = False
 
-class LinearSarsaLong(LinearSarsaSingular):
-    name = "LinearSarsaLong"
-    num_episodes = 200001
-
-class LinearSarsaNoOverloadLong(LinearSarsaSingular):
-    name = "LinearNoOverloadLong"
-    num_episodes = 100001
-    reward_overload = None
-
-class LinearSarsaNoOverload(LinearSarsaSingular):
-    name = "LinearSarsaSingularNoOverload"
-    reward_overload = None
-    num_episodes = 62501#82501
 
 
 
@@ -61,7 +48,7 @@ class LinearSarsaSingularDDQNCopy(object):
     tau = 0.01 #Rate to update target network toward primary network. 
     update_freq = 4 #How often to perform a training step.
     batch_size = None #How many experiences to use for each training step.
-    num_episodes = 100001 #200001#    
+    num_episodes = 200001 #200001#    
     pre_train_steps = 20000 * max_epLength #40000 * max_epLength #
     annealing_steps = 60000 * max_epLength  #120000 * max_epLength  #
     startE = 1
@@ -94,12 +81,12 @@ class LinearSarsaLAI(object):
     reward_overload = -1
     stateRepresentation = stateRepresentationEnum.leaderAndIntermediate  
     has_bucket = False
-
+    
 class LinearSarsaLAIDDQN200(LinearSarsaLAI):
     # Idea (without using a ridiculous number of epLength, set the learning rate even lower and give proper exploration)
     name = "LinearDDQN200"
     max_epLength = 30
-    tau = 0.001
+    tau = 0.005
     num_episodes = 300001 #200001#    
     pre_train_steps = 40000 * max_epLength #40000 * max_epLength #
     annealing_steps = 120000 * max_epLength  #120000 * max_epLength  #
@@ -107,86 +94,6 @@ class LinearSarsaLAIDDQN200(LinearSarsaLAI):
     endE = 0.0
     stepDrop = (startE - endE)/annealing_steps
     reward_overload = None  
-
-
-class LinearSarsaLAIDDQN100Short(LinearSarsaLAI):
-    # Idea (without using a ridiculous number of epLength, set the learning rate even lower and give proper exploration)
-    name = "LinearDDQN100Short"
-    max_epLength = 30
-    tau = 0.001
-    num_episodes = 100001 #200001#    
-    pre_train_steps = 2000 * max_epLength #40000 * max_epLength #
-    annealing_steps = 78000 * max_epLength  #120000 * max_epLength  #
-    startE = 0.3
-    endE = 0.0
-    stepDrop = (startE - endE)/annealing_steps  
-    reward_overload = None
-
-class LinearLaiManyEpisodes(object):
-    name = "LinearLaiManyEpisodes"
-    max_epLength = 60
-    y = 0
-    tau = 0.001
-    update_freq = 4
-    batch_size = None
-    num_episodes = 1000001#82501
-    pre_train_steps = 0#2000 * max_epLength
-    annealing_steps = 800000 * max_epLength #1000*max_epLength #60000 * max_epLength 
-    startE = 0.3 #0.4
-    endE = 0.0
-    stepDrop = (startE - endE)/annealing_steps
-    agent = None
-    sub_agent = linCen.Agent
-    group_size = 1 # number of filters each agent controls
-    #stateletFunction = getStateletNoCommunication
-    reward_overload = None
-    stateRepresentation = stateRepresentationEnum.leaderAndIntermediate  
-    has_bucket = False
-
-
-class LinearTeamCommunicate(object):
-    # communication up till the server
-    name = "LinearTeamCommunicate"
-    max_epLength = 30 # or 60 if test
-    y = 0    
-    tau = 0.001 #Rate to update target network toward primary network. 
-    update_freq = 4 #How often to perform a training step.
-    batch_size = None #How many experiences to use for each training step.
-    num_episodes = 100001 #200001#    
-    pre_train_steps = 40000 * max_epLength #40000 * max_epLength #
-    annealing_steps = 120000 * max_epLength  #120000 * max_epLength  #
-    startE = 1
-    endE = 0.0
-    stepDrop = (startE - endE)/annealing_steps
-    agent = None
-    sub_agent = linCen.Agent
-    stateRepresentation = stateRepresentationEnum.server
-    reward_overload = -1
-    group_size = 1 # number of filters each agent controls
-    has_bucket = False
-
-
-
-class RandomAgent(object):
-    name = "RandomLong"
-    max_epLength = 500 # or 60 if test
-    y = 0
-    tau = 0.05
-    update_freq = 4
-    batch_size = None
-    num_episodes = 100001#82501
-    pre_train_steps = 0#2000 * max_epLength
-    annealing_steps = 80000 * max_epLength #1000*max_epLength #60000 * max_epLength 
-    startE = 0.3 #0.4
-    endE = 0.0
-    stepDrop = (startE - endE)/annealing_steps
-    agent = None
-    sub_agent = ranAg.Agent
-    group_size = 1 # number of filters each agent controls
-    #stateletFunction = getStateletNoCommunication
-    reward_overload = -1
-    stateRepresentation = stateRepresentationEnum.leaderAndIntermediate      
-    has_bucket = False
 
 
 # The class of the adversary to implement
@@ -217,7 +124,7 @@ assignedAgent.save_model_mode = defender_mode_enum.save
 trainHost = conAttack #coordAttack # conAttack #driftAttack #adversarialLeaf
 assignedNetwork.drift = 0
 
-intelligentOpposition = sarAdvShare #DdCoordinatedMasterSettings #DdRandomMasterSettings
+intelligentOpposition = DdGenericCentral #DdCoordinatedMasterSettings #DdRandomMasterSettings
 intelligentOpposition.save_model_mode = defender_mode_enum.save
 intelligentOpposition = None
 

@@ -487,6 +487,7 @@ def massSummary(load_path):
     We assume that prior summaries are deleted except the relevent one. 
     We use this to provide contextual information about the agent / advesary.
     """
+    print(load_path)
     ms = open("{0}/attack_summary_mass.csv".format(load_path), "w")
     ms.write("AttackType,Repeats,Agent,Drift,MeanPercentage,Range,SD,Tau,Pretraining,Annealing,TotalEpisodes,start_e,overload,adv_tau,adv_discount,adv_pretrain,adv_annealing_episodes,adv_episodes,adv_start_e\n")
     # Open up the first summary

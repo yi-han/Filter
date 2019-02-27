@@ -162,7 +162,7 @@ trainHost = conAttack #coordAttack # conAttack #driftAttack #adversarialLeaf
 assignedNetwork.drift = 0
 
 intelligentOpposition = lowDdSuper #DdCoordinatedLowlongDlowSettings #DdCoordinatedMasterSettings #DdRandomMasterSettings
-intelligentOpposition.save_model_mode = defender_mode_enum.load_continue
+intelligentOpposition.save_model_mode = defender_mode_enum.save
 # intelligentOpposition = None
 
 
