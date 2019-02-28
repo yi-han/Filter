@@ -12,6 +12,7 @@ TODO
     sort of fixed
 3) What throttle rate do i simulate for smart adversary? 
 """
+from enum import Enum
 
 class AIMDagent():
     def __init__(self, network_settings, agent_settings):
@@ -98,18 +99,66 @@ class AIMDagent():
         print(max_agent_value, agent_tilings)
         return (max_agent_value, agent_tilings)
 
-    # def calculateThrottleRate(self, current_load, current_rs):
-    #     # given the through rate, load and iterations per window, what's the % of traffic we let pass
+class AimdMovesEnum(Enum):
+    none = 0
+    decrease = 1
+    increase = 2
+    constant = 3
 
-    #     if current_rs == None:
-    #         # no throttle set
-    #         return 0
-    #     r_per_iteration = current_rs / self.iterations_per_window * self.seconds_per_window # traffic we allow through each second
 
-    #     if current_load <= r_per_iteration or r_per_iteration < 0:
-    #         return 0
-    #     else:
-    #         return 1 - (r_per_iteration / current_load)
+class AIMDvariant(AIMDagent):
 
 
 
+    def getPath(self=None):
+        return "AIMDvariant"
+
+    def reset_episode(self):
+        self.rs = None
+        self.pLast = None        
+        self.past_predictions = [[AimdMovesEnum.none.value]*self.num_predictions]*10
+
+    def predict(self, p, _):
+        # treat this as set the rate
+        # p is server load
+        # we calculate the maximum amount of traffic we allow pass through in a 
+        p = p[0][0]
+        # init_rs = self.rs
+
+        if p > self.upper:
+            if self.rs == None:
+                self.rs = (self.upper + self.lower)/self.num_throttles
+            else:
+                self.rs /= self.beta
+            self.pLast = p
+            recorded_rs = AimdMovesEnum.decrease.value
+        elif p < self.lower:
+            if self.pLast == None or self.rs == None or abs(p - self.pLast) < self.epsilon:
+                self.rs = None
+                self.pLast = None
+            else:
+                self.pLast = p
+                self.rs += self.delta
+            recorded_rs = AimdMovesEnum.increase.value
+        else:
+            if self.rs == None:
+                recorded_rs = AimdMovesEnum.none.value
+            else:
+                recorded_rs = AimdMovesEnum.constant.value
+
+        if self.rs != None and self.rs > self.max_rate:
+            print("how did it get that high?")
+            print(self.max_rate)
+            print(self.rs)
+            assert(1==2)
+
+        self.past_predictions.pop(0)
+        self.past_predictions.append([recorded_rs])
+        return self.rs
+    
+    def get_max_agent_value(self):
+        max_agent_value = AimdMovesEnum.constant.value + 1
+        # effectively have the maximum throttle rate be two delta values greater than the max rate possible
+        agent_tilings = 1
+        print(max_agent_value, agent_tilings)
+        return (max_agent_value, agent_tilings)

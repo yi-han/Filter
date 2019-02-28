@@ -7,12 +7,13 @@ import random
 """
 
 
-def isAttackActive(attack_start, attack_end, time_step):
-    return (attack_start <= time_step and time_step <= attack_end)
 
 
 class Host():
     # ideally you want to merge host with switch somewhat
+
+    def isAttackActive(self, time_step):
+        return (self.first_attack <= time_step and time_step <= self.last_attack)
 
     def __init__(self, destination_switch, rate_attack_low, rate_attack_high, rate_legal_low, rate_legal_high,
         max_epLength, adversarialMaster, iterations_per_action,  appendToSwitch = True ):
@@ -44,7 +45,7 @@ class Host():
 
     def sendTraffic(self, time_step, packet_size):
         if self.is_attacker:
-            if isAttackActive(self.first_attack, self.last_attack, time_step):
+            if self.isAttackActive(time_step):
                 self.destination_switch.new_illegal += packet_size
         if not self.is_attacker:
             self.destination_switch.new_legal += packet_size

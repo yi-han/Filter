@@ -95,6 +95,12 @@ class AIMDsettings(object):
     stepDrop = 0
     reward_overload = None
 
+class AIMDvariant(AIMDstandard):
+    name = "AIMDvariant"
+    sub_agent = agent.AIMD.AIMDvariant
+
+
+
 class NetworkMalialisSmall(object):
     name = "malialis_small"
     N_state = 3 #The number of state, i.e., the number of filters
@@ -282,7 +288,7 @@ class ddAdvAntiAimd(DdGenericDec):
     num_adv_agents = 1
     name = "ddAdvAntiAimd"
     include_other_attackers = False
-    prior_agent_actions = 6
+    prior_agent_actions = 3
 
 class sarGenericDec(object):
     name = "sarsaGenericDec"
@@ -294,11 +300,12 @@ class sarGenericDec(object):
     discount_factor = 0.6
     startE = 1
     endE = 0.0
-    
+    prior_agent_actions = 1
+    prior_adversary_actions = 3    
+
+
     max_epLength = None
     reward_overload = None
-    prior_agent_actions = 1
-    prior_adversary_actions = 3
     update_freq = 4
     batch_size = 32
     adversary_class = ddGeneric.GenericAdvMaster
@@ -332,7 +339,12 @@ class sarAntiAimd(sarGenericDec):
     name = "sarsaAntiAimd"
     num_adv_agents = 1
     include_other_attackers = False
-    prior_agent_actions = 6    
+    prior_agent_actions = 3  
+
+
+
+
+
 
 def create_generic_dec(ds, ns):
     """

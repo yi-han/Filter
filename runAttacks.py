@@ -51,7 +51,6 @@ def run_attacks(assignedNetwork, assignedAgent, file_path, adversaryAttacker, pr
     attack_location = load_attack_path+"onePerAttack.apkl"
     print(attack_location)
     for attackClass in attackClasses:
-        
         assignedNetwork.iterations_between_action = 200
         print(attackClass.getName())
         print("\n\n\n")
@@ -68,7 +67,7 @@ def run_attacks(assignedNetwork, assignedAgent, file_path, adversaryAttacker, pr
         init_adv_save_model = adversaryAttacker.save_model_mode
         adversaryAttacker.save_model_mode = mapsAndSettings.defender_mode_enum.test_short
 
-        
+        # we've intentionally left the actions at standard rate to reflect training for advesary
         # attackClasses.insert(adversarialLeaf, 0)
         print("doing adversaryAttacker")
         attackClass = adversarialLeaf
