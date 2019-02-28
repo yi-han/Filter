@@ -38,6 +38,22 @@ class sarGenAgent(linCen.Agent):
             # leaf.destination_switch.new_legal += legal_per_leaf
             # leaf.destination_switch.new_illegal += illegal_per_leaf
 
+    def predict(self, state, e, step):
+        if not self.leaves[0].isAttackActive(step):
+            # if the attack is off return 0
+            return 0
+        else:
+            return super().predict(state, e)
+    
+    def update(self, last_state, last_action, current_state, d, r, step, next_action=None):
+        # Stores an update to the buffer, actual Qlearning is done in action replay
+        if not self.leaves[0].isAttackActive(step-1):
+            # if the prior step was not an active attack we are to ignore it.
+            print("skipping update SHOULDNT HAPPEN {0}".format(step))
+            assert(1==2)
+            return
+        else:
+            return super().update(last_state, last_action, current_state, d, r, next_action)
 
     def initiate_episode(self):
         self.legal_traffic = 0.0
