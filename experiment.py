@@ -106,6 +106,7 @@ class Experiment:
 
 
         if self.adversary_agent_settings:
+            networkSettings.is_sig_attack = True # ensure we only have significant attacks when there is an advesary to mimic testing conditions
 
             print(self.adversary_class)
             self.adversarialMaster = self.adversary_agent_settings.adversary_class(self.adversary_agent_settings, self.network_settings, agent.getPath(), agent)

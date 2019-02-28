@@ -502,7 +502,7 @@ class network_full(object):
             max_bandwidth = 0 # maximum bandwidth that can be generated per turn
             for i in attackers:
                 max_bandwidth += self.hosts[i].traffic_rate
-            if max_bandwidth < self.upper_boundary*1.01:
+            if max_bandwidth < self.upper_boundary:
                 return self.generate_attackers()
      
     def record_attackers(self):
