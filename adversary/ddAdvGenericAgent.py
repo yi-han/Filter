@@ -51,7 +51,10 @@ class ddGenAgent():
 
 
         
-    def predict(self, state, e):
+    def predict(self, state, e, step):
+        if not self.leaves[0].isAttackActive(step):
+            # if the attack is off return 0
+            return 0
         assert(len(self.leaves)!=0)
         randomChoice = self.isRandomGuess(e)
         #print("I believe i can make {0} actions".format(self.N_action))
@@ -62,8 +65,14 @@ class ddGenAgent():
             action = self.sess.run(mainQN.predict,feed_dict={mainQN.input:[state]})[0]
         return action
 
-    def update(self, last_state, last_action, current_state, d, r, next_action=None):
+    def update(self, last_state, last_action, current_state, d, r, step, next_action=None):
         # Stores an update to the buffer, actual Qlearning is done in action replay
+        if not self.leaves[0].isAttackActive(step-1):
+            # if the prior step was not an active attack we are to ignore it.
+            print("skipping update SHOULDNT HAPPEN {0}".format(step))
+            assert(1==2)
+            return
+        
         self.myBuffer.store(np.array([deep_copy_state(last_state),last_action,r,deep_copy_state(current_state),d,False])) 
 
 

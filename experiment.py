@@ -239,8 +239,8 @@ class Experiment:
                 for step in range(max_epLength):
 
                     if self.adversarialMaster != None:
-                        adv_state = self.adversarialMaster.get_state(net, adv_e)
-                        advAction = self.adversarialMaster.predict(adv_state, adv_e)
+                        adv_state = self.adversarialMaster.get_state(net, adv_e, step)
+                        advAction = self.adversarialMaster.predict(adv_state, adv_e, step)
                     else:
                         advAction = None
                     a = agent.predict(net.get_state(), e) # generate an action
@@ -262,7 +262,7 @@ class Experiment:
                         if self.adversarialMaster != None:
                             adv_r = self.adversarialMaster.calc_reward(r)
                             if self.adversary_agent_settings.save_model_mode in self.agentSaveModes:
-                                self.adversarialMaster.update(adv_last_state, adv_last_action, adv_state, d, adv_r, advAction)
+                                self.adversarialMaster.update(adv_last_state, adv_last_action, adv_state, d, adv_r, step, advAction)
                             self.adversarialMaster.update_past_state(adv_last_action)
                         else:
                             adv_r = 0
@@ -384,9 +384,9 @@ class Experiment:
                         print("adversary_state: {0}\n".format(adv_last_state))
                     fail_seg = 0
                 if ep_num % 10000 == 0:
-                    if self.agent_settings.save_model_mode is mapsAndSettings.defender_mode_enum.save:  # only save the first iteration 
+                    if self.agent_settings.save_model_mode in self.agentSaveModes:  # only save the first iteration 
                         agent.saveModel(self.file_path, ep_num, prefix)
-                    if self.adversarialMaster and self.adversary_agent_settings.save_model_mode is mapsAndSettings.defender_mode_enum.save:
+                    if self.adversarialMaster and self.adversary_agent_settings.save_model_mode in self.agentSaveModes:
                         self.adversarialMaster.saveModel(self.file_path, ep_num, prefix)
 
 
@@ -414,11 +414,11 @@ class Experiment:
                     last_loss = 0
                 loss_lines.append("{0},{1},{2},{3},{4}\n".format(ep_num,total_steps,last_loss, ep_def_loss, ep_adv_loss))
 
-            if self.agent_settings.save_model_mode is mapsAndSettings.defender_mode_enum.save: # only save the first iteration 
+            if self.agent_settings.save_model_mode in self.agentSaveModes: # only save the first iteration 
                 # save the model only every 10,000 steps
                 agent.saveModel(self.file_path, ep_num, prefix)
 
-            if self.adversarialMaster and self.adversary_agent_settings.save_model_mode is mapsAndSettings.defender_mode_enum.save:
+            if self.adversarialMaster and self.adversary_agent_settings.save_model_mode in self.agentSaveModes:
                 self.adversarialMaster.saveModel(self.file_path, ep_num, prefix)
 
         reward_file = open("{0}/reward-{1}-{2}-{3}.csv".format(file_path,run_mode, self.adversary_class.getName(), prefix),"w")

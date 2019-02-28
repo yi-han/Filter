@@ -97,7 +97,7 @@ class GenericAdvMaster():
         for agent in self.adv_agents:
             agent.__exit__(type, value, tb)
 
-    def predict(self, state, e):
+    def predict(self, state, e, step):
         """
             only provide each agent with its corresponding state
             instead of combining the actions into a single action 
@@ -115,7 +115,7 @@ class GenericAdvMaster():
         # print("\n\npredictions")
         for i in range(len(self.adv_agents)):
 
-            agentAction = self.adv_agents[i].predict(state, e)
+            agentAction = self.adv_agents[i].predict(state, e, step)
             actions.append(agentAction)
 
 
@@ -135,7 +135,7 @@ class GenericAdvMaster():
 
 
 
-    def get_state(self, net, e):
+    def get_state(self, net, e, step):
         """ 
         Provide the bandwidth capacity for each agent,
         and bandwidth emmitted by each agent over last 3 steps
@@ -160,13 +160,14 @@ class GenericAdvMaster():
                 state.extend(past_prediction)
 
 
-
+        # sort of a hack. Do the prediction here as the move is done simultaneously 
         if self.adv_settings.include_other_attackers:
+
             combined_state = []
             associated_actions = []
             for i in range(len(self.adv_agents)):
                 combined_state.append(copy.deepcopy(state))
-                associated_action = self.adv_agents[i].predict(state,e)
+                associated_action = self.adv_agents[i].predict(state,e, step)
                 state.append(associated_action)
                 associated_actions.append(associated_action)
             # record the actions in the state variable
@@ -213,7 +214,7 @@ class GenericAdvMaster():
         self.prior_actions.pop(0)
         self.prior_actions.append(actions)
 
-    def update(self, last_state, last_actions, current_state, is_done, reward, next_actions):
+    def update(self, last_state, last_actions, current_state, is_done, reward, step, next_actions):
         # provide the update function to each individual state
         # reward = self.calc_reward(network_reward)
         for i in range(len(self.adv_agents)):
@@ -223,7 +224,7 @@ class GenericAdvMaster():
             t_last_state = self.extract_state(last_state, i)
             t_current_state = self.extract_state(current_state, i)
 
-            agent.update(t_last_state, last_action, t_current_state, is_done, reward, next_action)
+            agent.update(t_last_state, last_action, t_current_state, is_done, reward, step, next_action)
         
 
         # self.update_past_state(last_actions)
