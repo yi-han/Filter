@@ -31,7 +31,7 @@ class GenericAdvMaster():
 
         self.prior_agent_actions = adv_settings.prior_agent_actions # number of actions by the defender we use in state
         self.prior_adversary_actions = adv_settings.prior_adversary_actions # number of actions by advesary we use in state
-
+        self.packets_last_step = adv_settings.packets_last_step
         N_adv_state = defender.num_predictions*self.prior_agent_actions + (self.num_adv_agents * 1) + (self.num_adv_agents * self.prior_adversary_actions)# plus one due to bandwiths
 
 
@@ -47,14 +47,22 @@ class GenericAdvMaster():
             print("my detected max bandwidth is {0}".format(maxThrottlerBandwidth))
             bandwidth_encoding = tileCoding.myTileInterface(maxThrottlerBandwidth, bandwidth_tiles, bandwidth_tilings)
 
-            max_agent_value, agent_tilings = defender.get_max_agent_value()
-            agent_move_encoding = tileCoding.myTileInterface(max_agent_value, network_setting.action_per_throttler, agent_tilings)
+            max_agent_value, agent_tiles, agent_tilings = defender.get_max_agent_value()
+            agent_move_encoding = tileCoding.myTileInterface(max_agent_value, agent_tiles, agent_tilings)
             advesary_move_encoding = tileCoding.myTileInterface(adv_settings.action_per_agent, adv_settings.action_per_agent, agent_tilings)
 
-            encoders = [bandwidth_encoding]*self.num_adv_agents
-            encoders.extend([advesary_move_encoding]*(self.prior_adversary_actions*self.num_adv_agents))
-            encoders.extend([agent_move_encoding]*(self.prior_agent_actions*defender.num_predictions))
-            
+
+            packets_last_step_encoding = tileCoding.myTileInterface(1.001, 11, 8)
+            encoders = [bandwidth_encoding]*self.num_adv_agents # bandwidht each advAgent has
+            if self.prior_adversary_actions:
+                # move each advesary has made
+                encoders.extend([advesary_move_encoding]*(self.prior_adversary_actions*self.num_adv_agents)) 
+            if self.prior_agent_actions:
+                # move the defender made
+                encoders.extend([agent_move_encoding]*(self.prior_agent_actions*defender.num_predictions)) 
+            if self.packets_last_step:
+                # record the percentage of packets successfully made it to the server last round
+                encoders.extend([packets_last_step_encoding]) 
             print(len(encoders))
             print(N_adv_state)
 
@@ -135,11 +143,13 @@ class GenericAdvMaster():
 
 
 
-    def get_state(self, net, e, step):
+    def get_state(self, net, e, step, last_reward):
         """ 
         Provide the bandwidth capacity for each agent,
         and bandwidth emmitted by each agent over last 3 steps
         last 3 
+
+        pack_per_last_action is 
         """
         assert(len(self.prior_actions) == 3)
         
@@ -159,7 +169,9 @@ class GenericAdvMaster():
             for past_prediction in self.defender.past_predictions[-self.prior_agent_actions:]:
                 state.extend(past_prediction)
 
-
+        if self.packets_last_step:
+            percentage_packets = max(last_reward, 0) # remove negative reward
+            state.extend(percentage_packets)
         # sort of a hack. Do the prediction here as the move is done simultaneously 
         if self.adv_settings.include_other_attackers:
 

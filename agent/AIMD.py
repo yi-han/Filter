@@ -97,7 +97,7 @@ class AIMDagent():
         # effectively have the maximum throttle rate be two delta values greater than the max rate possible
         agent_tilings = 8
         print(max_agent_value, agent_tilings)
-        return (max_agent_value, agent_tilings)
+        return (max_agent_value, 10, agent_tilings)
 
 class AimdMovesEnum(Enum):
     none = 0
@@ -161,4 +161,4 @@ class AIMDvariant(AIMDagent):
         # effectively have the maximum throttle rate be two delta values greater than the max rate possible
         agent_tilings = 1
         print(max_agent_value, agent_tilings)
-        return (max_agent_value, agent_tilings)
+        return (max_agent_value, max_agent_value, agent_tilings)

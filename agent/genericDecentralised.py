@@ -168,4 +168,4 @@ class AgentOfAgents(aBase.Agent):
     def get_max_agent_value(self):
         max_agent_value = 10
         agent_tilings = 1
-        return max_agent_value, agent_tilings
+        return max_agent_value, max_agent_value, agent_tilings

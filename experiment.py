@@ -106,7 +106,7 @@ class Experiment:
 
 
         if self.adversary_agent_settings:
-            networkSettings.is_sig_attack = True # ensure we only have significant attacks when there is an advesary to mimic testing conditions
+            self.network_settings.is_sig_attack = True # ensure we only have significant attacks when there is an advesary to mimic testing conditions
 
             print(self.adversary_class)
             self.adversarialMaster = self.adversary_agent_settings.adversary_class(self.adversary_agent_settings, self.network_settings, agent.getPath(), agent)
@@ -237,10 +237,11 @@ class Experiment:
                 rAll = 0 # accumulative reward for system in the episode. #TODO shouldn't contribute in pretraining
                 
                 advRAll = 0 # total reward for episode
+                r = 0
                 for step in range(max_epLength):
 
                     if self.adversarialMaster != None:
-                        adv_state = self.adversarialMaster.get_state(net, adv_e, step)
+                        adv_state = self.adversarialMaster.get_state(net, adv_e, step, r)
                         advAction = self.adversarialMaster.predict(adv_state, adv_e, step)
                     else:
                         advAction = None

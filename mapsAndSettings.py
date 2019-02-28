@@ -240,11 +240,12 @@ class DdGenericDec(object):
     pre_train_steps = 50000
     annealing_episodes = 200000
     num_episodes = 500000
-    tau = 0.001
-    discount_factor = 0.6
+    tau = 0.0005
+    discount_factor = 0.5
     startE = 1
     endE = 0.0
-    
+    packets_last_step = False
+
     prior_agent_actions = 1
     prior_adversary_actions = 3
     update_freq = 4
@@ -262,7 +263,7 @@ class DdGenericCentral(DdGenericDec):
 
 class lowDdCentral(DdGenericCentral):
     name = "lowDdCentral"
-    tau = 0.0005
+    tau = 0.0001
 
 class DdGenericSplit(DdGenericDec):
     name = "ddGenSplit"
@@ -281,7 +282,7 @@ class ddSplitSuper(DdGenericSplit):
 
 class lowDdSuper(ddSplitSuper):
     name = "lowDdSuper"
-    tau = 0.0005
+    tau = 0.0001
 
 
 class ddAdvAntiAimd(DdGenericDec):
@@ -289,6 +290,8 @@ class ddAdvAntiAimd(DdGenericDec):
     name = "ddAdvAntiAimd"
     include_other_attackers = False
     prior_agent_actions = 3
+    packets_last_step = True
+    discount_factor = 0.6
 
 class sarGenericDec(object):
     name = "sarsaGenericDec"
@@ -302,7 +305,7 @@ class sarGenericDec(object):
     endE = 0.0
     prior_agent_actions = 1
     prior_adversary_actions = 3    
-
+    packets_last_step = False
 
     max_epLength = None
     reward_overload = None
@@ -340,7 +343,7 @@ class sarAntiAimd(sarGenericDec):
     num_adv_agents = 1
     include_other_attackers = False
     prior_agent_actions = 3  
-
+    packets_last_step = True
 
 
 
