@@ -42,6 +42,11 @@ class AIMDagent():
         self.pLast = None        
         self.past_predictions = [[self.max_rate]*self.num_predictions]*10
 
+    def belowEpsilon(self, load, epsilon):
+        # bit dubious whether this is meant to be below or above epsilon
+        #return abs(load)<epsilon
+        return load < epsilon
+
     def predict(self, p, _):
         # treat this as set the rate
         # p is server load
@@ -56,7 +61,7 @@ class AIMDagent():
                 self.rs /= self.beta
             self.pLast = p
         elif p < self.lower:
-            if self.pLast == None or self.rs == None or abs(p - self.pLast) < self.epsilon:
+            if self.pLast == None or self.rs == None or self.belowEpsilon((p - self.pLast), self.epsilon):
                 self.rs = None
                 self.pLast = None
             else:
@@ -133,7 +138,7 @@ class AIMDvariant(AIMDagent):
             self.pLast = p
             recorded_rs = AimdMovesEnum.decrease.value
         elif p < self.lower:
-            if self.pLast == None or self.rs == None or abs(p - self.pLast) < self.epsilon:
+            if self.pLast == None or self.rs == None or self.belowEpsilon((p - self.pLast), self.epsilon):
                 self.rs = None
                 self.pLast = None
             else:
