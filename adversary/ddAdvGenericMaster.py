@@ -32,8 +32,10 @@ class GenericAdvMaster():
         self.prior_agent_actions = adv_settings.prior_agent_actions # number of actions by the defender we use in state
         self.prior_adversary_actions = adv_settings.prior_adversary_actions # number of actions by advesary we use in state
         self.packets_last_step = adv_settings.packets_last_step
+        
         N_adv_state = defender.num_predictions*self.prior_agent_actions + (self.num_adv_agents * 1) + (self.num_adv_agents * self.prior_adversary_actions)# plus one due to bandwiths
-
+        if self.packets_last_step:
+            N_adv_state += 1
 
         self.adv_agents = []
         self.defender = defender
@@ -151,7 +153,7 @@ class GenericAdvMaster():
 
         pack_per_last_action is 
         """
-        assert(len(self.prior_actions) == 3)
+        assert(len(self.prior_actions) == self.prior_adversary_actions)
         
         # print("\n\n")
         state = list(map(lambda x: KbToMb(x), self.bandwidths)) # start off with bandwidths
@@ -171,7 +173,7 @@ class GenericAdvMaster():
 
         if self.packets_last_step:
             percentage_packets = max(last_reward, 0) # remove negative reward
-            state.extend(percentage_packets)
+            state.append(percentage_packets)
         # sort of a hack. Do the prediction here as the move is done simultaneously 
         if self.adv_settings.include_other_attackers:
 

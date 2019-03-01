@@ -1,31 +1,40 @@
 # 
-sed 's/runDDQN/runDDQN/g' exp_physical_ddqn.slurm > output.slurm
-sed "s/samplePath/ddAdvVariant/g" output.slurm -i 
-sed 's/sampleDDQNText/ddAdvVariant/g' output.slurm -i 
-sed 's/0 2/0 1/g' output.slurm -i 
+# sed 's/runDDQN/runDDQN/g' exp_physical_ddqn.slurm > output.slurm
+# sed "s/samplePath/$1/g" output.slurm -i 
+# sed 's/sampleDDQNText/dRandomSingle/g' output.slurm -i 
+# sed 's/0 2/0 2/g' output.slurm -i 
+# sbatch output.slurm
+# sed 's/0 1/1 1/g' output.slurm -i 
+# sbatch output.slurm
+
+sed 's/runDDQN/runSARSA/g' exp_physical_ddqn.slurm > output.slurm
+sed "s/samplePath/sGroupShort/g" output.slurm -i 
+sed 's/sampleDDQNText/sGroupShort/g' output.slurm -i 
+sed 's/0 2/0 2/g' output.slurm -i 
 sbatch output.slurm
 sed 's/0 1/1 1/g' output.slurm -i 
 sbatch output.slurm
 
-sed 's/runDDQN/runDDQNAdditional/g' exp_gpgpu_single.slurm > output.slurm
-sed "s/samplePath/sarAdvVariant/g" output.slurm -i 
-sed 's/sampleDDQNText/sarAdvVariant/g' output.slurm -i 
-sed 's/0 2/0 1/g' output.slurm -i 
+
+sed 's/runDDQN/runSarsaAdditional/g' exp_physical_ddqn.slurm > output.slurm
+sed "s/samplePath/sSplitShort/g" output.slurm -i 
+sed 's/sampleDDQNText/sSplitShort/g' output.slurm -i 
+sed 's/0 2/0 2/g' output.slurm -i 
 sbatch output.slurm
 sed 's/0 1/1 1/g' output.slurm -i 
 sbatch output.slurm
 
-# sed 's/runDDQN/runDDQNHundred/g' exp_gpgpu_single.slurm > output.slurm
-# sed "s/samplePath/dMidSuperHigh/g" output.slurm -i 
-# sed 's/sampleDDQNText/dMidGroupHigh/g' output.slurm -i 
+# sed 's/runDDQN/runSarsaDDQNCopy/g' exp_physical_ddqn.slurm > output.slurm
+# sed "s/samplePath/sSar100AdvGroup/g" output.slurm -i 
+# sed 's/sampleDDQNText/sSar100AdvGroup/g' output.slurm -i 
 # sed 's/0 2/0 1/g' output.slurm -i 
 # sbatch output.slurm
 # sed 's/0 1/1 1/g' output.slurm -i 
 # sbatch output.slurm
 
-# sed 's/runDDQN/runDDQNMalialis/g' exp_gpgpu_single.slurm > output.slurm
-# sed "s/samplePath/dMidSuperLow/g" output.slurm -i 
-# sed 's/sampleDDQNText/dMidSuperLow/g' output.slurm -i 
+# sed 's/runDDQN/runSarsaNoOverdrive/g' exp_physical_ddqn.slurm > output.slurm
+# sed "s/samplePath/sSar100AdvSuper/g" output.slurm -i 
+# sed 's/sampleDDQNText/sSar100AdvSuper/g' output.slurm -i 
 # sed 's/0 2/0 1/g' output.slurm -i 
 # sbatch output.slurm
 # sed 's/0 1/1 1/g' output.slurm -i 

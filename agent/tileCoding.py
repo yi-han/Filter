@@ -180,6 +180,7 @@ class myTileInterface:
     def initialise(self):
         # generate all the expected values in increments of 0.01 so that all tiles are initialised
         # shouldn't make much difference but its good to have everything sorted early
-        for i in np.arange(0.0, self.maxBandwidth, 0.1):
+        increments = min(0.1, self.maxBandwidth/self.numTiles/4) 
+        for i in np.arange(0.0, self.maxBandwidth, increments):
             self.encodeToVector(i)
 

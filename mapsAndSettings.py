@@ -25,8 +25,8 @@ class defender_mode_enum(Enum):
     save = 1
     load = 2
     test_short = 3
-    load_save = 4
-    load_continue = 5
+    load_save = 4 # for using a pre-made policy and continuing
+    load_continue = 5 # more for continuing one done half way
     
 class stateRepresentationEnum(Enum):
     throttler = 0 #always
@@ -41,9 +41,9 @@ class advesaryTypeEnum(Enum):
 class AIMDstandard(object):
     name = "AIMD"
     group_size = 1
-    delta = 0.15 # additive increase
+    delta = 0.4 # additive increase. Can be 0.5
     beta = 2 # multiplicative decrease
-    epsilon = 0.01
+    epsilon = 0.05
     stateRepresentation = stateRepresentationEnum.only_server # WRONG
     sub_agent = agent.AIMD.AIMDagent
 
@@ -248,6 +248,8 @@ class DdGenericDec(object):
 
     prior_agent_actions = 1
     prior_adversary_actions = 3
+    
+
     update_freq = 4
     batch_size = 32
     adversary_class = ddGeneric.GenericAdvMaster
@@ -259,6 +261,7 @@ class DdGenericDec(object):
 class DdGenericCentral(DdGenericDec):
     name = "ddGenCentral"
     num_adv_agents = 1
+    pre_train_steps = 100000
     include_other_attackers = False
 
 class lowDdCentral(DdGenericCentral):
@@ -303,6 +306,7 @@ class sarGenericDec(object):
     discount_factor = 0.6
     startE = 1
     endE = 0.0
+    
     prior_agent_actions = 1
     prior_adversary_actions = 3    
     packets_last_step = False
@@ -321,11 +325,20 @@ class sarGenericCen(sarGenericDec):
     name = "sarsaGenericCen"
     num_adv_agents = 1
 
+class sarAdvCenShort(sarGenericCen):
+    name = "sarasaAdvCenShort"
+    num_adv_agents = 1
+    prior_agent_actions = 1
+    prior_adversary_actions = 1
 
 class sarAdvSplit(sarGenericCen):
     name = "sarsaAdvSplit"
     num_adv_agents = 2 
 
+class sarAdvSplitShort(sarAdvSplit):
+    name = "sarShortSplit"
+    prior_agent_actions = 1
+    prior_adversary_actions = 1
 
 class sarAdvShare(sarAdvSplit):
     name = "sarsaAdvShare"

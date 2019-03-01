@@ -194,6 +194,8 @@ class GradualIncrease(Host):
         super().reset(is_attacker, traffic_rate)
 
 
+
+
 class CoordinatedRandom(Host):
     """
     everything but gradual attacks. Note all hosts work together (not a multivector attack)
@@ -215,10 +217,13 @@ class CoordinatedRandom(Host):
         # create a bunch of alterantive hosts that we can switch between
         self.active_host = None # the host that we are
         self.all_hosts = {}
+
+
         for hostClass in CoordinatedRandom.possibleClasses:
             # the appendToSwitch=False is SUPER important
             self.all_hosts[hostClass] = (hostClass(destination_switch, rate_attack_low, rate_attack_high, rate_legal_low, rate_legal_high,
-                max_epLength, adversarialMaster, appendToSwitch))
+                max_epLength, adversarialMaster, iterations_per_action, appendToSwitch))
+
 
         super().__init__(destination_switch, rate_attack_low, rate_attack_high, rate_legal_low, rate_legal_high,
         max_epLength, adversarialMaster, iterations_per_action, appendToSwitch)
@@ -251,12 +256,7 @@ class CoordinatedRandom(Host):
 
 
 
-class adversarialRandom(object):
-    """
-    This is the host wrapper that pretends to be a set of hosts but in reality connects with 
-    the adversarial Random Agent. We refer to it as random as we randomally assign the attack values
-    It has many leaves, each which the network believes to be a host
-    """
+
 
 
 class adversarialLeaf(Host):
