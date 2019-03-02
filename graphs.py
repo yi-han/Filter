@@ -33,12 +33,16 @@ averageFrom =  80000 #90000 #60000 #190000
 
 if not testAttacks:
     for attackType in [conAttack]:
-        attackName = "reward-save-{0}".format(attackType.getName())
-        distributions.distributions(directory, repetitions, averageFrom, attackName) #190000
-        distributions.reward_graph(directory, attackName, repetitions, name)
-        distributions.reward_graph(directory, attackName, repetitions, PerLegitTraffic = True, title = "\% Legit Traffic")
-        distributions.distributions(directory, repetitions, averageFrom, attackName, PerLegitTraffic = True) #190000
-        distributions.reward_graph(directory, "loss-save-ConstantAttack", repetitions, Loss = True, title = "Loss")
+        # attackName = "reward-save-{0}".format(attackType.getName())
+        # distributions.distributions(directory, repetitions, averageFrom, attackName) #190000
+        # distributions.reward_graph(directory, attackName, repetitions, name)
+        # distributions.reward_graph(directory, attackName, repetitions, PerLegitTraffic = True, title = "\% Legit Traffic")
+        # distributions.distributions(directory, repetitions, averageFrom, attackName, PerLegitTraffic = True) #190000
+        # distributions.reward_graph(directory, "loss-save-ConstantAttack", repetitions, Loss = True, title = "Loss")
+        attackName = "loss-load-AdversarialRandomMaster"
+        # distributions.distributions(directory, repetitions, averageFrom, attackName, Loss = True) #190000
+        distributions.reward_graph(directory, attackName, repetitions, Loss = True, title = "Loss")
+
 else:
     for attackType in attackClasses:
         attackName = "reward-test-{0}".format(attackType.getName())

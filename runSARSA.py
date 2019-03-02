@@ -115,10 +115,10 @@ Settings to change
 """
 
 assignedNetwork = NetworkSingleTeamMalialisMedium
-assignedAgent = AIMDstandard
+assignedAgent = LinearSarsaSingularDDQNCopy
 load_attack_path = "attackSimulations/{0}/".format(assignedNetwork.name)
 network_emulator = network.network_new.network_full # network_quick # network_full
-loadAttacks = True
+loadAttacks = False
 
 
 
@@ -126,9 +126,9 @@ assignedAgent.save_model_mode = defender_mode_enum.load
 trainHost = conAttack #coordAttack # conAttack #driftAttack #adversarialLeaf
 assignedNetwork.drift = 0
 
-intelligentOpposition = sarAdvCenShort #DdCoordinatedMasterSettings #DdRandomMasterSettings
+intelligentOpposition = DdGenericCentral #DdCoordinatedMasterSettings #DdRandomMasterSettings
 intelligentOpposition.save_model_mode = defender_mode_enum.save
-intelligentOpposition = None
+# intelligentOpposition = None
 
 ###
 assignedAgent.trained_drift = assignedNetwork.drift # we use this a copy of what the trained drift value is. We dont use this for the experiment

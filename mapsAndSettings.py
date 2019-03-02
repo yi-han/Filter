@@ -296,6 +296,7 @@ class ddAdvAntiAimd(DdGenericDec):
     packets_last_step = True
     discount_factor = 0.6
 
+
 class sarGenericDec(object):
     name = "sarsaGenericDec"
     num_adv_agents = -1

@@ -75,7 +75,7 @@ def reward_multiple(directory, max_num, reward_prefix, PerLegitTraffic=False, Lo
     if PerLegitTraffic:
         ep_reward = f.PerPacketIdeal#PerPacketIdeal #LastReward
     elif Loss:
-        ep_reward = f.Loss
+        ep_reward = f.EpDefLoss
     else:
         ep_reward = f.LastReward
 
@@ -91,7 +91,7 @@ def reward_multiple(directory, max_num, reward_prefix, PerLegitTraffic=False, Lo
         if PerLegitTraffic:
             ep_reward = np.array(f.PerPacketIdeal, dtype=float)  #PerPacketIdeal, dtype=float)
         elif Loss:
-            ep_reward = np.array(f.Loss, dtype=float)
+            ep_reward = np.array(f.EpDefLoss, dtype=float)
         else:
             ep_reward = np.array(f.LastReward, dtype=float)
         ep_reward.shape=(len(ep),1)
@@ -113,6 +113,7 @@ def reward_graph(directory, reward_type, max_num = None, title=None, PerLegitTra
     #print(path)
    
     if not max_num:
+        assert(1==2)
         (ep, ep_reward) = reward_single(directory, reward_type)
     else:
         (ep, ep_reward) = reward_multiple(directory, max_num, reward_type, PerLegitTraffic, Loss)
@@ -199,11 +200,11 @@ def dic_to_summary(results):
     summaryFile.close()
     # creates a quick summary for excel
 
-def distributions(directory, max_num = None, start_point=0, attack_name="", PerLegitTraffic = False):
+def distributions(directory, max_num = None, start_point=0, attack_name="", PerLegitTraffic = False, Loss=False):
     if not max_num:
         (ep, ep_reward) = reward_single(directory)
     else:
-        (ep, ep_reward) = reward_multiple(directory, max_num, attack_name, PerLegitTraffic)
+        (ep, ep_reward) = reward_multiple(directory, max_num, attack_name, PerLegitTraffic, Loss)
     print(len(ep_reward))
 
     ep_reward = np.array(ep_reward[start_point:])

@@ -119,6 +119,8 @@ print(len(buck_values))
 print(len(epsilon_values))
 
 
+iterations_per_action = 35
+
 if parameter_tune:
     i = 0
 
@@ -133,7 +135,7 @@ if parameter_tune:
                     assignedAgent.delta = delta
                     assignedAgent.beta = beta
                     assignedAgent.epsilon = epsilon
-                    runAttacks.run_attacks(assignedNetwork, assignedAgent, file_path, intelligentOpposition, i)
+                    runAttacks.run_attacks(assignedNetwork, assignedAgent, file_path, intelligentOpposition, i, iterations_per_action)
                     i+=1
 
     merge_summaries(file_path, i)

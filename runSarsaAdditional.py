@@ -115,7 +115,7 @@ Settings to change
 """
 
 assignedNetwork = NetworkSingleTeamMalialisMedium
-assignedAgent = LinearSarsaSingularDDQNCopy
+assignedAgent = AIMDvariant
 load_attack_path = "attackSimulations/{0}/".format(assignedNetwork.name)
 network_emulator = network.network_new.network_full # network_quick # network_full
 loadAttacks = False
@@ -126,7 +126,7 @@ assignedAgent.save_model_mode = defender_mode_enum.load
 trainHost = conAttack #coordAttack # conAttack #driftAttack #adversarialLeaf
 assignedNetwork.drift = 0
 
-intelligentOpposition = sarAdvSplitShort #DdCoordinatedMasterSettings #DdRandomMasterSettings
+intelligentOpposition = sarAntiAimd #DdCoordinatedMasterSettings #DdRandomMasterSettings
 intelligentOpposition.save_model_mode = defender_mode_enum.save
 # intelligentOpposition = None
 

@@ -30,7 +30,7 @@ attackClasses = [conAttack, gradualIncrease, shortPulse, mediumPulse,
 #     # save_attack = SaveAttackEnum.neither
 #     save_model = SaveModelEnum.load
 
-def run_attacks(assignedNetwork, assignedAgent, file_path, adversaryAttacker, prefix):
+def run_attacks(assignedNetwork, assignedAgent, file_path, adversaryAttacker, prefix, custom_iterations_between_action = 200):
 
     network = copy.deepcopy(assignedNetwork)
     agent = copy.deepcopy(assignedAgent)
@@ -51,7 +51,7 @@ def run_attacks(assignedNetwork, assignedAgent, file_path, adversaryAttacker, pr
     attack_location = load_attack_path+"onePerAttack.apkl"
     print(attack_location)
     for attackClass in attackClasses:
-        assignedNetwork.iterations_between_action = 200
+        assignedNetwork.iterations_between_action = custom_iterations_between_action
         print(attackClass.getName())
         print("\n\n\n")
         genericAgent = mapsAndSettings.create_generic_dec(agent, network)

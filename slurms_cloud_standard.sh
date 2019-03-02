@@ -1,25 +1,33 @@
 # 
-# sed 's/runDDQN/runDDQN/g' exp_physical_ddqn.slurm > output.slurm
-# sed "s/samplePath/$1/g" output.slurm -i 
-# sed 's/sampleDDQNText/dRandomSingle/g' output.slurm -i 
-# sed 's/0 2/0 2/g' output.slurm -i 
-# sbatch output.slurm
-# sed 's/0 1/1 1/g' output.slurm -i 
-# sbatch output.slurm
+sed 's/runDDQN/runDDQN/g' exp_gpgpu_single.slurm > output.slurm
+sed "s/samplePath/ddAimdNormal/g" output.slurm -i 
+sed 's/sampleDDQNText/ddAimdNormal/g' output.slurm -i 
+sed 's/0 2/0 1/g' output.slurm -i 
+sbatch output.slurm
+sed 's/0 1/1 1/g' output.slurm -i 
+sbatch output.slurm
+
+sed 's/runDDQN/runDDQNAdditional/g' exp_gpgpu_single.slurm > output.slurm
+sed "s/samplePath/ddAimdVariant/g" output.slurm -i 
+sed 's/sampleDDQNText/ddAimdVariant/g' output.slurm -i 
+sed 's/0 2/0 1/g' output.slurm -i 
+sbatch output.slurm
+sed 's/0 1/1 1/g' output.slurm -i 
+sbatch output.slurm
 
 sed 's/runDDQN/runSARSA/g' exp_physical_ddqn.slurm > output.slurm
-sed "s/samplePath/sGroupShort/g" output.slurm -i 
-sed 's/sampleDDQNText/sGroupShort/g' output.slurm -i 
-sed 's/0 2/0 2/g' output.slurm -i 
+sed "s/samplePath/ssAimdNormal/g" output.slurm -i 
+sed 's/sampleDDQNText/ssAimdNormal/g' output.slurm -i 
+sed 's/0 2/0 1/g' output.slurm -i 
 sbatch output.slurm
 sed 's/0 1/1 1/g' output.slurm -i 
 sbatch output.slurm
 
 
 sed 's/runDDQN/runSarsaAdditional/g' exp_physical_ddqn.slurm > output.slurm
-sed "s/samplePath/sSplitShort/g" output.slurm -i 
-sed 's/sampleDDQNText/sSplitShort/g' output.slurm -i 
-sed 's/0 2/0 2/g' output.slurm -i 
+sed "s/samplePath/ssAimdVariant/g" output.slurm -i 
+sed 's/sampleDDQNText/ssAimdVariant/g' output.slurm -i 
+sed 's/0 2/0 1/g' output.slurm -i 
 sbatch output.slurm
 sed 's/0 1/1 1/g' output.slurm -i 
 sbatch output.slurm

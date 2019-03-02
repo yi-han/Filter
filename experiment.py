@@ -190,7 +190,7 @@ class Experiment:
         print("Using the {0} agent:".format(name))
         reward_lines.append("Episode,StepsSoFar,TotalReward,LastReward,LengthEpisode,e,PerPacketIdeal, AdvTotalReward, AdvLastReward\n")
         packet_served_lines.append("Episode,PacketsReceived,PacketsServed,PercentageReceived,ServerFailures\n")
-        loss_lines.append("Episode,StepsSoFar,Loss,Exploration, EpDefLoss, EpAdvLoss\n")
+        loss_lines.append("Episode,StepsSoFar,Loss,Exploration,EpDefLoss,EpAdvLoss\n")
         #self.episode_rewards = []
 
         ep_init = 0
@@ -414,8 +414,7 @@ class Experiment:
                     last_loss = loss[-1]
                 else:
                     last_loss = 0
-                loss_lines.append("{0},{1},{2},{3},{4}\n".format(ep_num,total_steps,last_loss, ep_def_loss, ep_adv_loss))
-
+                loss_lines.append("{0},{1},{2},{3},{4}, {5}\n".format(ep_num,total_steps,last_loss, e, ep_def_loss, ep_adv_loss))
             if self.agent_settings.save_model_mode in self.agentSaveModes: # only save the first iteration 
                 # save the model only every 10,000 steps
                 agent.saveModel(self.file_path, ep_num, prefix)
