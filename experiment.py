@@ -265,7 +265,7 @@ class Experiment:
                             adv_r = self.adversarialMaster.calc_reward(r)
                             if self.adversary_agent_settings.save_model_mode in self.agentSaveModes:
                                 self.adversarialMaster.update(adv_last_state, adv_last_action, adv_state, d, adv_r, step, advAction)
-                            self.adversarialMaster.update_past_state(adv_last_action)
+                            self.adversarialMaster.update_past_state(advAction)
                         else:
                             adv_r = 0
 
@@ -315,12 +315,14 @@ class Experiment:
                                 # print("state = {1}, e = {0}".format(e, net.last_state))
 
                         #     # print("server state: {0}\n".format(net.switches[0].getWindow()))
-                                
-                        # print("In Episode - {0}".format(ep_num))
-                        # print("def | step {0} | action {1} | reward {2} | e {3}".format(step, last_action, r, e))
-                        # #     if self.adversarialMaster:
+                        
+                        # if step in range(14,17):  
+                        #     print("In Episode - {0}".format(ep_num))
+                        #     print("def | step {0} | action {1} | reward {2} | e {3}".format(step, last_action, r, e))
+                        #     if self.adversarialMaster:
                         #         print("adversary | ep {3} | action {0} | reward {1} | adv_e {2}".format(adv_last_action, adv_r, adv_e, ep_num))
-                        #         print("adversary_state: {0}\n".format(adv_last_state))
+                        #         print("adversary_state: {0}".format(adv_last_state))
+                        #         print("adv current state: {0} | action {1} \n\n".format(adv_state, advAction))
                         # if step == 22:
                         #     print("\n\n")
 
