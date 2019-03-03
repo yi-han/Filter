@@ -126,7 +126,7 @@ assignedAgent.save_model_mode = defender_mode_enum.load
 trainHost = conAttack #coordAttack # conAttack #driftAttack #adversarialLeaf
 assignedNetwork.drift = 0
 
-intelligentOpposition = sarGenericCen #DdCoordinatedMasterSettings #DdRandomMasterSettings
+intelligentOpposition = DdAdvGroupEverything #DdCoordinatedMasterSettings #DdRandomMasterSettings
 intelligentOpposition.save_model_mode = defender_mode_enum.save
 # intelligentOpposition = None
 

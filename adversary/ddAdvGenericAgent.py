@@ -161,10 +161,12 @@ class ddGenAgent():
     def initiate_episode(self):
         self.legal_traffic = 0.0
         self.illegal_traffic = 0.0
-
+        self.illegal_traffic_by_host = [] # 
         for leaf in self.leaves:
             if leaf.is_attacker:
                 self.illegal_traffic+=leaf.traffic_rate
+                self.illegal_traffic_by_host.append(leaf.traffic_rate)
             else:
                 self.legal_traffic += leaf.traffic_rate
+                self.illegal_traffic_by_host.append(0)
 

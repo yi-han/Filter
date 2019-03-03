@@ -37,6 +37,9 @@ class GenericAdvMaster():
         if self.packets_last_step:
             N_adv_state += 1
 
+        if self.adv_settings.include_indiv_hosts:
+            N_adv_state += len(network_setting.host_sources)
+
         self.adv_agents = []
         self.defender = defender
         self.defender_path = defender_path
@@ -161,6 +164,10 @@ class GenericAdvMaster():
         #print(self.prior_actions)
         #print("actions done")
         # state.extend(self.prior_actions)
+
+        if self.adv_settings.include_indiv_hosts:
+            state.extend(self.bandwidth_by_host)
+
         for prior_action in self.prior_actions:
             
             state.extend(prior_action)
@@ -214,10 +221,11 @@ class GenericAdvMaster():
         for _ in range(self.prior_adversary_actions): #num past experiences
             self.prior_actions.append([0] * self.num_adv_agents)
         self.bandwidths= [] # list of the traffic agent can emmit
-
+        self.bandwidth_by_host = [] # list of bandwidths of every single host
         for i in range(len(self.adv_agents)):
             self.adv_agents[i].initiate_episode() # just calculating the bandwidths
             self.bandwidths.append(self.adv_agents[i].illegal_traffic)
+            self.bandwidth_by_host.extend(self.adv_agents[i].illegal_traffic_by_host)
         # for i in range(len(attackers_per_host)):
         #     attackers = attackers_per_host[i]
         #     for _ in range(attackers):

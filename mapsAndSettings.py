@@ -251,6 +251,7 @@ class DdGenericDec(object):
 
     prior_agent_actions = 1
     prior_adversary_actions = 1
+    include_indiv_hosts = False    
     
 
     update_freq = 4
@@ -277,6 +278,15 @@ class DdAdvGroupLong(DdAdvGroupExtraAnnealing):
     name = "DdAdvGroupLong"
     pre_train_steps = 100000
     num_episodes = 1000000
+
+class DdAdvGroupEverything(DdGenericCentral):
+    name = "DdAdvGroupEverything"
+    pre_train_steps = 100000
+    num_episodes = 1000000
+    prior_agent_actions = 10
+    prior_adversary_actions = 10
+    packets_last_step = True
+    include_indiv_hosts = True    
 
 class lowDdCentral(DdGenericCentral):
     name = "lowDdCentral"
@@ -353,6 +363,7 @@ class sarGenericDec(object):
     prior_agent_actions = 1
     prior_adversary_actions = 1    
     packets_last_step = False
+    include_indiv_hosts = False    
 
     max_epLength = None
     reward_overload = None
