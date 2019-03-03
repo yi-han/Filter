@@ -39,7 +39,7 @@ class AIMDagent():
 
     def reset_episode(self):
         self.rs = None
-        self.pLast = None        
+        self.pLast = (-2 * self.epsilon)     
         self.past_predictions = [[self.max_rate]*self.num_predictions]*10
 
     def belowEpsilon(self, load, epsilon):
@@ -53,21 +53,21 @@ class AIMDagent():
         # we calculate the maximum amount of traffic we allow pass through in a 
         p = p[0][0]
         # init_rs = self.rs
-
+        # old_p = self.pLast
         if p > self.upper:
             if self.rs == None:
                 self.rs  = (self.upper + self.lower)/self.num_throttles
             else:
                 self.rs /= self.beta
-            self.pLast = p
+            #self.pLast = p
         elif p < self.lower:
-            if self.pLast == None or self.rs == None or self.belowEpsilon((p - self.pLast), self.epsilon):
+            if self.rs == None or self.belowEpsilon((p - self.pLast), self.epsilon):
                 self.rs = None
-                self.pLast = None
+                self.pLast = (-2 * self.epsilon)  
             else:
                 self.pLast = p
                 self.rs += self.delta
-        # print("\n\n\nserver load is {0} we had {2} and suggesting {1}".format(p, self.rs, init_rs))
+        # print("\n\n\nserver load is {0}, p_last is {3} we had {2} and suggesting {1}".format(p, self.rs, init_rs, old_p))
         if self.rs == None:
             recorded_rs = self.max_rate
         elif self.rs > self.max_rate:
@@ -120,36 +120,38 @@ class AIMDvariant(AIMDagent):
 
     def reset_episode(self):
         self.rs = None
-        self.pLast = None        
+        self.pLast = (-2 * self.epsilon)     
         self.past_predictions = [[AimdMovesEnum.none.value]*self.num_predictions]*10
 
+
+    
     def predict(self, p, _):
         # treat this as set the rate
         # p is server load
         # we calculate the maximum amount of traffic we allow pass through in a 
         p = p[0][0]
-        # init_rs = self.rs
 
         if p > self.upper:
             if self.rs == None:
-                self.rs = (self.upper + self.lower)/self.num_throttles
+                self.rs  = (self.upper + self.lower)/self.num_throttles
             else:
                 self.rs /= self.beta
-            self.pLast = p
-            recorded_rs = AimdMovesEnum.decrease.value
+            recorded_change = AimdMovesEnum.decrease.value
         elif p < self.lower:
-            if self.pLast == None or self.rs == None or self.belowEpsilon((p - self.pLast), self.epsilon):
+            if self.rs == None or self.belowEpsilon((p - self.pLast), self.epsilon):
                 self.rs = None
-                self.pLast = None
+                self.pLast = (-2 * self.epsilon)  
             else:
                 self.pLast = p
                 self.rs += self.delta
-            recorded_rs = AimdMovesEnum.increase.value
+        
+            recorded_change = AimdMovesEnum.increase.value
         else:
             if self.rs == None:
-                recorded_rs = AimdMovesEnum.none.value
+                recorded_change = AimdMovesEnum.none.value
             else:
-                recorded_rs = AimdMovesEnum.constant.value
+                recorded_change = AimdMovesEnum.constant.value
+
 
         if self.rs != None and self.rs > self.max_rate:
             print("how did it get that high?")
@@ -158,9 +160,9 @@ class AIMDvariant(AIMDagent):
             assert(1==2)
 
         self.past_predictions.pop(0)
-        self.past_predictions.append([recorded_rs])
-        return self.rs
-    
+        self.past_predictions.append([recorded_change])
+        return self.rs   
+
     def get_max_agent_value(self):
         max_agent_value = AimdMovesEnum.constant.value + 1
         # effectively have the maximum throttle rate be two delta values greater than the max rate possible

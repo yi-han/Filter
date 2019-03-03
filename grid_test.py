@@ -64,7 +64,7 @@ attackClasses = [conAttack, shortPulse, mediumPulse,
 assignedNetwork =  NetworkMalialisSmall #NetworkSingleTeamMalialisMedium
 assignedAgent =  AIMDsettings #ddqnSingleNoCommunicate #ddqn100MediumHierarchical
 load_attack_path = "attackSimulations/{0}/".format(assignedNetwork.name)
-parameter_tune = False
+parameter_tune = True
 assignedAgent.encoders = None
 
 assignedAgent.save_model_mode = defender_mode_enum.save
@@ -103,8 +103,7 @@ delta (bottom)
 
 
 """
-epsilon_values = np.arange(0.005, 1.0, 0.15).tolist()
-#epsilon_values.insert(0,0.1)
+epsilon_values = np.arange(0.001, 0.05, 0.01).tolist()
 beta_values = np.arange(1.25, 4, 0.25).tolist()
 beta_values.remove(2)
 beta_values.insert(0,2)
@@ -143,9 +142,6 @@ else:
     #experiment = experiment.Experiment(conAttack, GeneralSettings, assignedNetwork, assignedAgent, twist="{2}{0}Alias{1}".format(numTiles, partition, network_emulator.name))
 
     experiment = experiment.Experiment(trainHost, assignedNetwork, assignedAgent, intelligentOpposition)
-
-    genericAgent = create_generic_dec(assignedAgent, assignedNetwork)
-    experiment.run(0, genericAgent, file_path)
 
     genericAgent = create_generic_dec(assignedAgent, assignedNetwork)
     runAttacks.run_attacks(assignedNetwork, assignedAgent, file_path, intelligentOpposition, 0)

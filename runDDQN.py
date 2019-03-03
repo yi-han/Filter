@@ -152,7 +152,7 @@ attackClasses = [conAttack, shortPulse, mediumPulse,
 ###
 # Settings NetworkMalialisSmall
 assignedNetwork =   NetworkSingleTeamMalialisMedium
-assignedAgent =  AIMDstandard #ddqnSingleNoCommunicate #ddqn100MediumHierarchical
+assignedAgent =  AIMDvariant #ddqnSingleNoCommunicate #ddqn100MediumHierarchical
 load_attack_path = "attackSimulations/{0}/".format(assignedNetwork.name)
 loadAttacks = False
 assignedAgent.encoders = None
