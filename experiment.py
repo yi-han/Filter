@@ -227,7 +227,7 @@ class Experiment:
                 agent.reset_episode()
                 ep_adv_loss = 0
                 ep_def_loss = 0
-                #print("loading ep {0} out of {1}".format(ep_num, num_episodes))
+                # print("\n\n\n\nloading ep {0} out of {1}".format(ep_num, num_episodes))
                 
                 net.reset() # reset the network
                 if self.adversarialMaster != None:

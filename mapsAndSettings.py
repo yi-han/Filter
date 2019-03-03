@@ -38,47 +38,49 @@ class advesaryTypeEnum(Enum):
     standard = 0
     ddRandomMaster = 1 
 
-class AIMDstandard(object):
-    name = "AIMD"
-    group_size = 1
-    delta = 0.4 # additive increase. Can be 0.5
-    beta = 2 # multiplicative decrease
-    epsilon = 0.05
-    stateRepresentation = stateRepresentationEnum.only_server # WRONG
-    sub_agent = agent.AIMD.AIMDagent
 
-    num_episodes = 1
-    max_epLength = 30
-    y = delta
-    tau = beta
-    update_freq = None
-    batch_size = None
-    pre_train_steps = 0
-    annealing_steps = 0
-    startE = 0
-    endE = 0
-    stepDrop = 0
-    reward_overload = None
-    has_bucket = True
+# class AIMDstandard(object):
+#     name = "AIMD"
+#     group_size = 1
+#     delta = 0.4 # additive increase. Can be 0.5
+#     beta = 2 # multiplicative decrease
+#     epsilon = 0.05
+#     stateRepresentation = stateRepresentationEnum.only_server # WRONG
+#     sub_agent = agent.AIMD.AIMDagent
 
-class AIMDmalialis(AIMDstandard):
-    # sourced page 60 thesis
-    name = "AIMDMalialis"
-    delta = 0.01
 
-class AIMDmucking(AIMDstandard):
-    name = "AIMDmucking"
-    delta = 0.01
-    beta = 2
-    has_bucket = True
-    epsilon = 0.01
+#     num_episodes = 1
+#     max_epLength = 30
+#     y = delta
+#     tau = beta
+#     update_freq = None
+#     batch_size = None
+#     pre_train_steps = 0
+#     annealing_steps = 0
+#     startE = 0
+#     endE = 0
+#     stepDrop = 0
+#     reward_overload = None
+#     has_bucket = True
+
+# class AIMDmalialis(AIMDstandard):
+#     # sourced page 60 thesis
+#     name = "AIMDMalialis"
+#     delta = 0.01
+
+# class AIMDmucking(AIMDstandard):
+#     name = "AIMDmucking"
+#     delta = 0.01
+#     beta = 2
+#     has_bucket = True
+#     epsilon = 0.01
 
 class AIMDsettings(object):
     name = "AIMD"
     group_size = 1
     delta = 0.3 # additive increase
     beta = 2 # multiplicative decrease
-    epsilon = 0.5
+    epsilon = 0.005
     stateRepresentation = stateRepresentationEnum.only_server # WRONG
     sub_agent = agent.AIMD.AIMDagent
 
@@ -94,8 +96,9 @@ class AIMDsettings(object):
     endE = 0
     stepDrop = 0
     reward_overload = None
+    has_bucket = True
 
-class AIMDvariant(AIMDstandard):
+class AIMDvariant(AIMDsettings):
     name = "AIMDvariant"
     sub_agent = agent.AIMD.AIMDvariant
 
@@ -247,7 +250,7 @@ class DdGenericDec(object):
     packets_last_step = False
 
     prior_agent_actions = 1
-    prior_adversary_actions = 3
+    prior_adversary_actions = 1
     
 
     update_freq = 4
@@ -264,19 +267,52 @@ class DdGenericCentral(DdGenericDec):
     pre_train_steps = 100000
     include_other_attackers = False
 
+class DdAdvGroupExtraAnnealing(DdGenericCentral):
+    name = "DdAdvGroupExtraAnnealing"
+    pre_train_steps = 50000
+    annealing_episodes = 400000
+    num_episodes = 750000
+
+class DdAdvGroupLong(DdAdvGroupExtraAnnealing):
+    name = "DdAdvGroupLong"
+    pre_train_steps = 100000
+    num_episodes = 1000000
+
 class lowDdCentral(DdGenericCentral):
     name = "lowDdCentral"
     tau = 0.0001
+
+class DdGroupLowDiscount(DdGenericCentral):
+    name = "DdGroupLowDiscount"
+    discount_factor = 0.4
+
+class DdGroupHighDiscount(DdGenericCentral):
+    name = "DdGroupHighDiscount"
+    discount_factor = 0.6  
+
+
 
 class DdGenericSplit(DdGenericDec):
     name = "ddGenSplit"
     num_adv_agents = 2
     include_other_attackers = False
 
+
+class DdSplitLong(DdGenericSplit):
+    name = "ddSplitLong"  
+    pre_train_steps = 100000
+    annealing_episodes = 400000    
+    num_episodes = 1000000
+
+
+
+
 class ddSplitShare(DdGenericSplit):
     name = "ddSplitShare"
     include_other_attackers = True
     prior_agent_actions = 0
+
+
 
 class ddSplitSuper(DdGenericSplit):
     name = "ddSplitSuper"
@@ -286,6 +322,12 @@ class ddSplitSuper(DdGenericSplit):
 class lowDdSuper(ddSplitSuper):
     name = "lowDdSuper"
     tau = 0.0001
+
+class ddSuperLong(ddSplitSuper):
+    name = "ddSuperLong"
+    pre_train_steps = 100000
+    annealing_episodes = 400000    
+    num_episodes = 1000000    
 
 
 class ddAdvAntiAimd(DdGenericDec):
@@ -309,7 +351,7 @@ class sarGenericDec(object):
     endE = 0.0
     
     prior_agent_actions = 1
-    prior_adversary_actions = 3    
+    prior_adversary_actions = 1    
     packets_last_step = False
 
     max_epLength = None
@@ -326,20 +368,31 @@ class sarGenericCen(sarGenericDec):
     name = "sarsaGenericCen"
     num_adv_agents = 1
 
-class sarAdvCenShort(sarGenericCen):
+class sarGroupLowDiscount(sarGenericCen):
+    name = "sarGroupLowDiscount"
+    discount_factor = 0.4
+
+class sarGroupMidDiscount(sarGenericCen):
+    name = "sarGroupMidDiscount"
+    discount_factor = 0.5
+
+class sarGroupLong(sarGenericCen):
     name = "sarasaAdvCenShort"
     num_adv_agents = 1
-    prior_agent_actions = 1
-    prior_adversary_actions = 1
+    pre_train_steps = 100000
+    annealing_episodes = 600000
+    num_episodes = 1000000
+
 
 class sarAdvSplit(sarGenericCen):
     name = "sarsaAdvSplit"
     num_adv_agents = 2 
 
-class sarAdvSplitShort(sarAdvSplit):
-    name = "sarShortSplit"
-    prior_agent_actions = 1
-    prior_adversary_actions = 1
+class sarSplitLong(sarAdvSplit):
+    name = "sarSplitLong"
+    pre_train_steps = 100000
+    annealing_episodes = 600000
+    num_episodes = 1000000
 
 class sarAdvShare(sarAdvSplit):
     name = "sarsaAdvShare"
@@ -351,6 +404,13 @@ class sarAdvSuper(sarAdvSplit):
     name = "sarsaAdvSuper"
     prior_agent_actions = 1
     include_other_attackers = True
+
+class sarSuperLong(sarAdvSuper):
+    name = "sarSuperLong"
+    pre_train_steps = 100000
+    annealing_episodes = 600000
+    num_episodes = 1000000   
+
 
 class sarAntiAimd(sarGenericDec):
     name = "sarsaAntiAimd"

@@ -62,9 +62,9 @@ attackClasses = [conAttack, shortPulse, mediumPulse,
 ###
 # Settings
 assignedNetwork =  NetworkMalialisSmall #NetworkSingleTeamMalialisMedium
-assignedAgent =  AIMDstandard #ddqnSingleNoCommunicate #ddqn100MediumHierarchical
+assignedAgent =  AIMDsettings #ddqnSingleNoCommunicate #ddqn100MediumHierarchical
 load_attack_path = "attackSimulations/{0}/".format(assignedNetwork.name)
-parameter_tune = True
+parameter_tune = False
 assignedAgent.encoders = None
 
 assignedAgent.save_model_mode = defender_mode_enum.save
@@ -104,7 +104,7 @@ delta (bottom)
 
 """
 epsilon_values = np.arange(0.005, 1.0, 0.15).tolist()
-epsilon_values.insert(0,0.1)
+#epsilon_values.insert(0,0.1)
 beta_values = np.arange(1.25, 4, 0.25).tolist()
 beta_values.remove(2)
 beta_values.insert(0,2)

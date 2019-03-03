@@ -36,12 +36,15 @@ class LinearSarsaSingular(object):
     stateRepresentation = stateRepresentationEnum.throttler  
     has_bucket = False
 
+class LinSingularExploration(LinearSarsaSingular):
+    name = "linSingExp"
+    endE = 0.1
 
 class LinearSarsaLAI(object):
     name = "LinearSarsaLAI"
     max_epLength = 500
     y = 0
-    tau = 0.001
+    tau = 0.01
     update_freq = 4
     batch_size = None
     num_episodes = 100001#82501
@@ -85,7 +88,7 @@ class LinearSarsaLAIDDQN200(LinearSarsaLAI):
     # Idea (without using a ridiculous number of epLength, set the learning rate even lower and give proper exploration)
     name = "LinearDDQN200"
     max_epLength = 30
-    tau = 0.005
+    tau = 0.05
     num_episodes = 300001 #200001#    
     pre_train_steps = 40000 * max_epLength #40000 * max_epLength #
     annealing_steps = 120000 * max_epLength  #120000 * max_epLength  #
@@ -112,20 +115,20 @@ Settings to change
 """
 
 assignedNetwork = NetworkSingleTeamMalialisMedium
-assignedAgent = LinearSarsaLAIDDQN200
+assignedAgent = LinearSarsaSingularDDQNCopy
 load_attack_path = "attackSimulations/{0}/".format(assignedNetwork.name)
 network_emulator = network.network_new.network_full # network_quick # network_full
 loadAttacks = False
 
 
 
-assignedAgent.save_model_mode = defender_mode_enum.save
+assignedAgent.save_model_mode = defender_mode_enum.load
 trainHost = conAttack #coordAttack # conAttack #driftAttack #adversarialLeaf
 assignedNetwork.drift = 0
 
-intelligentOpposition = DdGenericCentral #DdCoordinatedMasterSettings #DdRandomMasterSettings
+intelligentOpposition = sarAdvSuper #DdCoordinatedMasterSettings #DdRandomMasterSettings
 intelligentOpposition.save_model_mode = defender_mode_enum.save
-intelligentOpposition = None
+# intelligentOpposition = None
 
 ###
 assignedAgent.trained_drift = assignedNetwork.drift # we use this a copy of what the trained drift value is. We dont use this for the experiment

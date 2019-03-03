@@ -168,6 +168,7 @@ class GenericAdvMaster():
         # pThrottles = []
 
         if self.prior_agent_actions>0:
+            
             for past_prediction in self.defender.past_predictions[-self.prior_agent_actions:]:
                 state.extend(past_prediction)
 

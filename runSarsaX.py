@@ -36,8 +36,30 @@ class LinearSarsaSingular(object):
     stateRepresentation = stateRepresentationEnum.throttler  
     has_bucket = False
 
+class LinSingularExploration(LinearSarsaSingular):
+    name = "linSingExp"
+    endE = 0.1
 
-
+class LinearSarsaLAI(object):
+    name = "LinearSarsaLAI"
+    max_epLength = 500
+    y = 0
+    tau = 0.01
+    update_freq = 4
+    batch_size = None
+    num_episodes = 100001#82501
+    pre_train_steps = 0#2000 * max_epLength
+    annealing_steps = 80000 * max_epLength #1000*max_epLength #60000 * max_epLength 
+    startE = 0.3 #0.4
+    endE = 0.0
+    stepDrop = (startE - endE)/annealing_steps
+    agent = None
+    sub_agent = linCen.Agent
+    group_size = 1 # number of filters each agent controls
+    #stateletFunction = getStateletNoCommunication
+    reward_overload = -1
+    stateRepresentation = stateRepresentationEnum.leaderAndIntermediate  
+    has_bucket = False
 
 
 class LinearSarsaSingularDDQNCopy(object):
@@ -61,32 +83,12 @@ class LinearSarsaSingularDDQNCopy(object):
     group_size = 1 # number of filters each agent controls
     has_bucket = False
 
-class LinearSarsaLAI(object):
-    name = "LinearSarsaLAI"
-    max_epLength = 500
-    y = 0
-    tau = 0.001
-    update_freq = 4
-    batch_size = None
-    num_episodes = 100001#82501
-    pre_train_steps = 0#2000 * max_epLength
-    annealing_steps = 80000 * max_epLength #1000*max_epLength #60000 * max_epLength 
-    startE = 0.3 #0.4
-    endE = 0.0
-    stepDrop = (startE - endE)/annealing_steps
-    agent = None
-    sub_agent = linCen.Agent
-    group_size = 1 # number of filters each agent controls
-    #stateletFunction = getStateletNoCommunication
-    reward_overload = -1
-    stateRepresentation = stateRepresentationEnum.leaderAndIntermediate  
-    has_bucket = False
-    
+
 class LinearSarsaLAIDDQN200(LinearSarsaLAI):
     # Idea (without using a ridiculous number of epLength, set the learning rate even lower and give proper exploration)
     name = "LinearDDQN200"
     max_epLength = 30
-    tau = 0.005
+    tau = 0.05
     num_episodes = 300001 #200001#    
     pre_train_steps = 40000 * max_epLength #40000 * max_epLength #
     annealing_steps = 120000 * max_epLength  #120000 * max_epLength  #
@@ -112,21 +114,21 @@ attackClasses = [conAttack, shortPulse, mediumPulse,
 Settings to change
 """
 
-assignedNetwork = NetworkSixFour
-assignedAgent = LinearSarsaSingular
+assignedNetwork = NetworkSingleTeamMalialisMedium
+assignedAgent = LinearSarsaSingularDDQNCopy
 load_attack_path = "attackSimulations/{0}/".format(assignedNetwork.name)
 network_emulator = network.network_new.network_full # network_quick # network_full
 loadAttacks = False
 
 
 
-assignedAgent.save_model_mode = defender_mode_enum.save
+assignedAgent.save_model_mode = defender_mode_enum.load
 trainHost = conAttack #coordAttack # conAttack #driftAttack #adversarialLeaf
 assignedNetwork.drift = 0
 
-intelligentOpposition = DdGenericCentral #DdCoordinatedMasterSettings #DdRandomMasterSettings
+intelligentOpposition = sarSuperLong #DdCoordinatedMasterSettings #DdRandomMasterSettings
 intelligentOpposition.save_model_mode = defender_mode_enum.save
-intelligentOpposition = None
+# intelligentOpposition = None
 
 ###
 assignedAgent.trained_drift = assignedNetwork.drift # we use this a copy of what the trained drift value is. We dont use this for the experiment

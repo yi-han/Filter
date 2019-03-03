@@ -121,7 +121,7 @@ def reward_graph(directory, reward_type, max_num = None, title=None, PerLegitTra
     if PerLegitTraffic:
         plt.ylim(0, 1)#((-0.8, 1.2))
     elif Loss:
-        plt.ylim(0, 0.2)
+        plt.ylim(0, 0.03)
     else:
         plt.ylim(-0.8, 1.2)
     plt.plot(ep,ep_reward, 'o-')
