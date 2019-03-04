@@ -357,7 +357,7 @@ class Experiment:
 
                     if self.adversarialMaster and self.adversary_agent_settings.save_model_mode in self.agentSaveModes:
 
-                        if adv_e > self.adversary_agent_settings.startE or steps < adv_pretraining_steps:
+                        if adv_e > self.adversary_agent_settings.startE or step < adv_pretraining_steps:
                             adv_e = self.adversary_agent_settings.startE
                         elif adv_e > self.adversary_agent_settings.endE:
                             adv_e -= adv_step_drop 

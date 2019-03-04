@@ -98,9 +98,9 @@ class AIMDsettings(object):
     reward_overload = None
     has_bucket = True
 
-class AIMDvariant(AIMDsettings):
-    name = "AIMDvariant"
-    sub_agent = agent.AIMD.AIMDvariant
+# class AIMDvariant(AIMDsettings):
+#     name = "AIMDvariant"
+#     sub_agent = agent.AIMD.AIMDvariant
 
 
 
@@ -252,7 +252,7 @@ class DdGenericDec(object):
     prior_agent_actions = 1
     prior_adversary_actions = 1
     include_indiv_hosts = False    
-    
+    prior_agent_delta_moves = 0
 
     update_freq = 4
     batch_size = 32
@@ -359,10 +359,21 @@ class ddAdvAntiAimd(DdGenericDec):
     num_adv_agents = 1
     name = "ddAdvAntiAimd"
     include_other_attackers = False
-    prior_agent_actions = 3
+    prior_agent_actions = 8
+    prior_adversary_actions = 8
     packets_last_step = True
     discount_factor = 0.6
 
+class ddAimdAlternative(DdGenericDec):
+    num_adv_agents = 1
+
+    name = "ddAimdAlternative"
+    prior_agent_delta_moves = 3
+    prior_agent_actions = 0
+    prior_adversary_actions = 3
+
+    packets_last_step = False
+    discount_factor = 0.6
 
 class sarGenericDec(object):
     name = "sarsaGenericDec"
@@ -379,6 +390,7 @@ class sarGenericDec(object):
     prior_adversary_actions = 1    
     packets_last_step = False
     include_indiv_hosts = False    
+    prior_agent_delta_moves = 0
 
     max_epLength = None
     reward_overload = None
@@ -451,7 +463,13 @@ class sarAntiAimd(sarGenericDec):
     prior_agent_actions = 3  
     packets_last_step = True
 
-
+class sarAimdAlternative(sarGenericDec):
+    num_adv_agents = 1
+    name = "sarAimdAlternative"
+    prior_agent_delta_moves = 3
+    prior_agent_actions = 0
+    packets_last_step = True
+    discount_factor = 0.6
 
 
 

@@ -40,6 +40,8 @@ class GenericAdvMaster():
         if self.adv_settings.include_indiv_hosts:
             N_adv_state += len(network_setting.host_sources)
 
+        N_adv_state += self.adv_settings.prior_agent_delta_moves
+
         self.adv_agents = []
         self.defender = defender
         self.defender_path = defender_path
@@ -58,6 +60,12 @@ class GenericAdvMaster():
 
 
             packets_last_step_encoding = tileCoding.myTileInterface(1.001, 11, 8)
+
+            if self.adv_settings.prior_agent_delta_moves:
+                max_delta_value, delta_tiles, delta_tilings = defender.get_move_delta_values()
+
+                prior_agent_delta_move_encoder = tileCoding.myTileInterface(max_delta_value, delta_tiles, delta_tilings)
+
             encoders = [bandwidth_encoding]*self.num_adv_agents # bandwidht each advAgent has
             if self.prior_adversary_actions:
                 # move each advesary has made
@@ -68,6 +76,9 @@ class GenericAdvMaster():
             if self.packets_last_step:
                 # record the percentage of packets successfully made it to the server last round
                 encoders.extend([packets_last_step_encoding]) 
+
+            if self.adv_settings.prior_agent_delta_moves:
+                encoders.extend(([prior_agent_delta_move_encoder]*self.adv_settings.prior_agent_delta_moves))
             print(len(encoders))
             print(N_adv_state)
 
@@ -164,12 +175,10 @@ class GenericAdvMaster():
         #print(self.prior_actions)
         #print("actions done")
         # state.extend(self.prior_actions)
-
         if self.adv_settings.include_indiv_hosts:
             state.extend(self.bandwidth_by_host)
 
         for prior_action in self.prior_actions:
-            
             state.extend(prior_action)
 
         # pThrottles = []
@@ -196,7 +205,10 @@ class GenericAdvMaster():
             combined_state.append(associated_actions)
             return combined_state
 
-
+        if self.adv_settings.prior_agent_delta_moves:
+            last_changes = self.defender.past_moves[(-1*self.adv_settings.prior_agent_delta_moves):]
+            for change in last_changes:
+                state.extend(change) 
         return np.array(state)
 
     def extract_state(self, combined_state, i):

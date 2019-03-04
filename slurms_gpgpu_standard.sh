@@ -1,8 +1,8 @@
 
 
 sed 's/runDDQN/runSARSA/g' exp_physical_ddqn.slurm > output.slurm
-sed "s/samplePath/sarGroupStandard/g" output.slurm -i 
-sed 's/sampleDDQNText/sarGroupStandard/g' output.slurm -i 
+sed "s/samplePath/ddEverything/g" output.slurm -i 
+sed 's/sampleDDQNText/ddEverything/g' output.slurm -i 
 sed 's/0 2/0 1/g' output.slurm -i 
 sbatch output.slurm
 sed 's/0 1/1 1/g' output.slurm -i 
