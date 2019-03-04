@@ -38,7 +38,7 @@ class Bucket():
 
     def __init__(self, iterations_between_action, bucket_capacity ):
         self.iterations_between_action = iterations_between_action
-        self.bucket_capacity = bucket_capacity
+        self.bucket_capacity = bucket_capacity / iterations_between_action
         self.reset()
     def reset(self):
         self.bucket_list = [] # to ensure FIFO

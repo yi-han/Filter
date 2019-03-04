@@ -1,5 +1,5 @@
 # doing all the tests
-sed 's/runSARSA/runDDQN/g' exp_physical.slurm > output.slurm
+sed 's/runDDQN/runDDQN/g' exp_physical.slurm > output.slurm
 sed "s/samplePath/$1/g" output.slurm -i 
 sed 's/sample_sarsa_name/smallSin/g' output.slurm -i 
 sed 's/0 5/0 2/g' output.slurm -i 

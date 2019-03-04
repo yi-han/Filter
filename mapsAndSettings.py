@@ -78,9 +78,9 @@ class advesaryTypeEnum(Enum):
 class AIMDsettings(object):
     name = "AIMD"
     group_size = 1
-    delta = 0.3 # additive increase
+    delta = 0.4 # additive increase
     beta = 2 # multiplicative decrease
-    epsilon = 0.005
+    epsilon = 0.001
     stateRepresentation = stateRepresentationEnum.only_server # WRONG
     sub_agent = agent.AIMD.AIMDagent
 
@@ -127,7 +127,7 @@ class NetworkMalialisSmall(object):
     iterations_between_action = 30 #200
 
     max_hosts_per_level = [3] # no communication therefore just one
-    bucket_capacity = 1#15#0.8
+    bucket_capacity = 18.1#15#0.8
 
     is_sig_attack = False
 
@@ -154,7 +154,7 @@ class NetworkSingleTeamMalialisMedium(object):
     iterations_between_action = 20 # 200
 
     max_hosts_per_level = [2, 6, 12]
-    bucket_capacity = 12
+    bucket_capacity = 12.1
 
     is_sig_attack = False
 
@@ -167,7 +167,7 @@ class NetworkSixFour(NetworkSingleTeamMalialisMedium):
     upper_boundary = 26 # malialis would have used 26
     lower_boundary = 18 # malialis would have used 20
     max_hosts_per_level = [4, 12, 24]
-    bucket_capacity = 24
+    bucket_capacity = 24.1
 
 
 class NetworkMalialisTeamFull(object):
@@ -279,6 +279,12 @@ class DdAdvGroupLong(DdAdvGroupExtraAnnealing):
     pre_train_steps = 100000
     num_episodes = 1000000
 
+class DdGroupAdvManyAction(DdAdvGroupLong):
+    name = "DdGroupAdvManyAction"
+    prior_adversary_actions = 3
+    prior_agent_actions = 3
+
+
 class DdAdvGroupEverything(DdGenericCentral):
     name = "DdAdvGroupEverything"
     pre_train_steps = 100000
@@ -340,6 +346,15 @@ class ddSuperLong(ddSplitSuper):
     num_episodes = 1000000    
 
 
+class DdAdvSuperEverything(ddSuperLong):
+    name = "DdAdvSuperEverything"
+    pre_train_steps = 100000
+    num_episodes = 1000000
+    prior_agent_actions = 10
+    prior_adversary_actions = 10
+    packets_last_step = True
+    include_indiv_hosts = True  
+
 class ddAdvAntiAimd(DdGenericDec):
     num_adv_agents = 1
     name = "ddAdvAntiAimd"
@@ -394,6 +409,9 @@ class sarGroupLong(sarGenericCen):
     annealing_episodes = 600000
     num_episodes = 1000000
 
+class sarGroupLongManyAdvActions(sarGroupLong):
+    name = "sarGroupLongManyAdvActions"
+    prior_adversary_actions = 3
 
 class sarAdvSplit(sarGenericCen):
     name = "sarsaAdvSplit"
@@ -422,6 +440,9 @@ class sarSuperLong(sarAdvSuper):
     annealing_episodes = 600000
     num_episodes = 1000000   
 
+class sarSuperLongManyAdvActions(sarSuperLong):
+    name = "sarSuperLongManyAdvActions"
+    prior_adversary_actions = 3
 
 class sarAntiAimd(sarGenericDec):
     name = "sarsaAntiAimd"
