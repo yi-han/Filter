@@ -115,12 +115,12 @@ class Experiment:
             
             if self.adversary_agent_settings.save_model_mode in self.agentTestModes:
                 # large assumption of learning or loading
-                adv_pretraining = 0
+                adv_pretraining_steps = 0
                 adv_e = self.adversary_agent_settings.endE
                 adv_step_drop = 0
             else:
                 adv_e = self.adversary_agent_settings.startE
-                adv_pretraining = self.adversary_agent_settings.pre_train_steps
+                adv_pretraining_steps = self.adversary_agent_settings.pre_train_steps
 
                 if self.agent_settings.save_model_mode is mapsAndSettings.defender_mode_enum.load:
 
@@ -129,9 +129,9 @@ class Experiment:
                     adv_annealing_episodes = self.adversary_agent_settings.annealing_episodes
                 else:
                     # both agent and attacker are learning
-                    if(num_episodes<(adv_pretraining+self.adversary_agent_settings.annealing_episodes)):
+                    if(num_episodes<(adv_pretraining_steps+self.adversary_agent_settings.annealing_episodes)):
                         print("\n\n we're resetting the number of adversary annealing_episodes")
-                        adv_annealing_episodes = num_episodes- adv_pretraining
+                        adv_annealing_episodes = num_episodes- adv_pretraining_steps
                     else:
                         adv_annealing_episodes = self.adversary_agent_settings.annealing_episodes
                 adv_step_drop = (adv_e - self.adversary_agent_settings.endE) / (adv_annealing_episodes  * max_epLength)
@@ -220,7 +220,7 @@ class Experiment:
 
 
                 if self.adversarialMaster and adv_e > 0:
-                    if total_steps > adv_pretraining:
+                    if total_steps > adv_pretraining_steps:
                         adv_e = max((adv_e - (adv_step_drop*total_steps)),self.adversary_agent_settings.endE)
             print("\n\n Starting at episode {0}".format(ep_init))
             for ep_num in range(ep_init, num_episodes):
@@ -357,7 +357,7 @@ class Experiment:
 
                     if self.adversarialMaster and self.adversary_agent_settings.save_model_mode in self.agentSaveModes:
 
-                        if adv_e > self.adversary_agent_settings.startE:
+                        if adv_e > self.adversary_agent_settings.startE or steps < adv_pretraining_steps:
                             adv_e = self.adversary_agent_settings.startE
                         elif adv_e > self.adversary_agent_settings.endE:
                             adv_e -= adv_step_drop 
