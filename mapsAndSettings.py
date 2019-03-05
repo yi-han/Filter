@@ -11,7 +11,10 @@ import agent.genericDecentralised as genericDecentralised
 import adversary.ddAdvGenericMaster as ddGeneric
 import adversary.ddAdvGenericAgent as ddGenAgent
 import adversary.sarsaAdvAgent as sarsaAdvAgent
+import adversary.dumbMaster as dumbMaster
+import adversary.dumbAgent as dumbAgent
 import pandas
+from network.utility import *
 import network.hosts as hosts
 import agent.AIMD
 import os
@@ -34,46 +37,42 @@ class stateRepresentationEnum(Enum):
     server = 2  # all the way to the server
     allThrottlers = 3
     only_server = 4
-class advesaryTypeEnum(Enum):
-    standard = 0
-    ddRandomMaster = 1 
 
 
-# class AIMDstandard(object):
-#     name = "AIMD"
-#     group_size = 1
-#     delta = 0.4 # additive increase. Can be 0.5
-#     beta = 2 # multiplicative decrease
-#     epsilon = 0.05
-#     stateRepresentation = stateRepresentationEnum.only_server # WRONG
-#     sub_agent = agent.AIMD.AIMDagent
 
 
-#     num_episodes = 1
-#     max_epLength = 30
-#     y = delta
-#     tau = beta
-#     update_freq = None
-#     batch_size = None
-#     pre_train_steps = 0
-#     annealing_steps = 0
-#     startE = 0
-#     endE = 0
-#     stepDrop = 0
-#     reward_overload = None
-#     has_bucket = True
+class adv_constant(object):
+    name = "constant_attack"
+    
+    adversary_class = dumbMaster.dumbMaster
+    adv_agent_class = dumbAgent.dumbAgent    
+    is_intelligent = False
+    num_adv_agents = 2
+    attack_strategy = advesaryStandardAttackEnum.constant
 
-# class AIMDmalialis(AIMDstandard):
-#     # sourced page 60 thesis
-#     name = "AIMDMalialis"
-#     delta = 0.01
+class adv_pulse_short(adv_constant):
+    name = "pulse_short"
+    attack_strategy = advesaryStandardAttackEnum.pulse_short
 
-# class AIMDmucking(AIMDstandard):
-#     name = "AIMDmucking"
-#     delta = 0.01
-#     beta = 2
-#     has_bucket = True
-#     epsilon = 0.01
+class adv_pulse_medium(adv_constant):
+    name = "pulse_medium"
+    attack_strategy = advesaryStandardAttackEnum.pulse_medium
+
+class adv_pulse_large(adv_constant):
+    name = "pulse_large"
+    attack_strategy = advesaryStandardAttackEnum.pulse_large
+
+class adv_gradual(adv_constant):
+    name = "gradual"
+    attack_strategy = advesaryStandardAttackEnum.gradual
+
+class adv_split(adv_constant):
+    name = "split"
+    attack_strategy = advesaryStandardAttackEnum.split
+
+class adv_random(adv_constant):
+    name = "random"
+    attack_strategy = advesaryStandardAttackEnum.random
 
 class AIMDsettings(object):
     name = "AIMD"
@@ -239,6 +238,7 @@ class NetworkMalialisTeamFull(object):
 
 class DdGenericDec(object):
     name = "dd DO NOT USE"
+    is_intelligent = True
     num_adv_agents = -1
     pre_train_steps = 50000
     annealing_episodes = 200000
@@ -393,6 +393,7 @@ class sarGenericDec(object):
     include_indiv_hosts = False    
     prior_agent_delta_moves = 0
 
+    is_intelligent = True
     max_epLength = None
     reward_overload = None
     update_freq = 4
@@ -517,7 +518,7 @@ def getSummary(adversary_classes, load_path, agent, smart_adversary, prefix):
     summary.write("AttackType,Agent,Drift,LegalPacketsReceived,LegalPacketsServed,Percentage,ServerFailures,Tau,Pretraining,Annealing,TotalEpisodes,start_e,overload,adv_tau,adv_discount,adv_pretrain,adv_annealing_episodes,adv_episodes,adv_start_e,delta,beta,epsilon,bucket_capacity, iteration\n")
     agentName = agent.name
     for adversary_class in adversary_classes:
-        attack_name = adversary_class.getName()
+        attack_name = adversary_class.name
         if adversary_class != hosts.adversarialLeaf:
             attack_type = attack_name
         else:

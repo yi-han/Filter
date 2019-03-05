@@ -110,7 +110,7 @@ class Experiment:
 
 
 
-        if self.adversary_agent_settings:
+        if self.adversary_agent_settings.is_intelligent:
             self.network_settings.is_sig_attack = True # ensure we only have significant attacks when there is an advesary to mimic testing conditions
 
             print(self.adversary_class)
@@ -142,8 +142,8 @@ class Experiment:
                 adv_step_drop = (adv_e - self.adversary_agent_settings.endE) / (adv_annealing_episodes  * max_epLength)
 
         else:
-            self.adversarialMaster = None 
-
+            self.adversarialMaster =  self.adversary_agent_settings.adversary_class(self.adversary_agent_settings, max_epLength)
+            adv_e = 0
 
         
 
@@ -200,13 +200,12 @@ class Experiment:
 
 
         with agent:
-            if self.adversarialMaster:
-                self.adversarialMaster.__enter__()
+            self.adversarialMaster.__enter__()
             if self.agent_settings.save_model_mode in self.agentLoadModes : #mapsAndSettings.defender_mode_enum.test
                 episode = agent.loadModel(self.file_path, prefix)
                 if self.agent_settings.save_model_mode == mapsAndSettings.defender_mode_enum.load_continue:
                     ep_init = episode
-            if self.adversarialMaster and self.adversary_agent_settings.save_model_mode in self.agentLoadModes:              
+            if self.adversary_agent_settings.is_intelligent and self.adversary_agent_settings.save_model_mode in self.agentLoadModes:              
                 episode = self.adversarialMaster.loadModel(self.file_path, prefix)
                 if self.adversary_agent_settings.save_model_mode == mapsAndSettings.defender_mode_enum.load_continue:
                     ep_init = episode  
@@ -222,7 +221,7 @@ class Experiment:
                         e = max((e - (stepDrop*total_steps)),endE)
 
 
-                if self.adversarialMaster and adv_e > 0:
+                if self.adversary_agent_settings.is_intelligent and adv_e > 0:
                     if total_steps > adv_pretraining_steps:
                         adv_e = max((adv_e - (adv_step_drop*total_steps)),self.adversary_agent_settings.endE)
             print("\n\n Starting at episode {0}".format(ep_init))
@@ -233,8 +232,7 @@ class Experiment:
                 # print("\n\n\n\nloading ep {0} out of {1}".format(ep_num, num_episodes))
                 
                 net.reset() # reset the network
-                if self.adversarialMaster != None:
-                    self.adversarialMaster.initiate_episode()
+                self.adversarialMaster.initiate_episode()
 
                 d = False # indicates that network is finished
                 rAll = 0 # accumulative reward for system in the episode. #TODO shouldn't contribute in pretraining
@@ -243,11 +241,9 @@ class Experiment:
                 r = 0
                 for step in range(max_epLength):
 
-                    if self.adversarialMaster != None:
-                        adv_state = self.adversarialMaster.get_state(net, adv_e, step, r)
-                        advAction = self.adversarialMaster.predict(adv_state, adv_e, step)
-                    else:
-                        advAction = None
+                    adv_state = self.adversarialMaster.get_state(net, adv_e, step, r)
+                    advAction = self.adversarialMaster.predict(adv_state, adv_e, step)
+
                     a = agent.predict(net.get_state(), e) # generate an action
                     #net.step(a, step) # take the action, update the network
                     
@@ -264,7 +260,7 @@ class Experiment:
                         if self.agent_settings.save_model_mode in self.agentSaveModes:
                             agent.update(net.last_state, last_action, net.get_state(), d, r, next_action = a)
 
-                        if self.adversarialMaster != None:
+                        if self.adversary_agent_settings.is_intelligent:
                             adv_r = self.adversarialMaster.calc_reward(r)
                             if self.adversary_agent_settings.save_model_mode in self.agentSaveModes:
                                 self.adversarialMaster.update(adv_last_state, adv_last_action, adv_state, d, adv_r, step, advAction)
@@ -319,7 +315,7 @@ class Experiment:
 
                         #     # print("server state: {0}\n".format(net.switches[0].getWindow()))
                         
-                        # if step in range(14,17):  
+                        # if step in range(15,22):  
                         #     print("In Episode - {0}".format(ep_num))
                         #     print("def | step {0} | action {1} | reward {2} | e {3}".format(step, last_action, r, e))
                         #     if self.adversarialMaster:
@@ -358,7 +354,7 @@ class Experiment:
                             loss.append(l)
                             ep_def_loss += abs(l)
 
-                    if self.adversarialMaster and self.adversary_agent_settings.save_model_mode in self.agentSaveModes:
+                    if self.adversary_agent_settings.is_intelligent and self.adversary_agent_settings.save_model_mode in self.agentSaveModes:
 
                         if adv_e > self.adversary_agent_settings.startE or total_steps < adv_pretraining_steps:
                             adv_e = self.adversary_agent_settings.startE
@@ -393,7 +389,7 @@ class Experiment:
                 if ep_num % 10000 == 0:
                     if self.agent_settings.save_model_mode in self.agentSaveModes:  # only save the first iteration 
                         agent.saveModel(self.file_path, ep_num, prefix)
-                    if self.adversarialMaster and self.adversary_agent_settings.save_model_mode in self.agentSaveModes:
+                    if self.adversary_agent_settings.is_intelligent and self.adversary_agent_settings.save_model_mode in self.agentSaveModes:
                         self.adversarialMaster.saveModel(self.file_path, ep_num, prefix)
 
 
@@ -424,20 +420,20 @@ class Experiment:
                 # save the model only every 10,000 steps
                 agent.saveModel(self.file_path, ep_num, prefix)
 
-            if self.adversarialMaster and self.adversary_agent_settings.save_model_mode in self.agentSaveModes:
+            if self.adversary_agent_settings.is_intelligent and self.adversary_agent_settings.save_model_mode in self.agentSaveModes:
                 self.adversarialMaster.saveModel(self.file_path, ep_num, prefix)
 
-        reward_file = open("{0}/reward-{1}-{2}-{3}.csv".format(file_path,run_mode, self.adversary_class.getName(), prefix),"w")
+        reward_file = open("{0}/reward-{1}-{2}-{3}.csv".format(file_path,run_mode, self.adversary_agent_settings.name, prefix),"w")
         for line in reward_lines:
             reward_file.write(line)
         reward_file.close()
 
-        loss_file = open("{0}/loss-{1}-{2}-{3}.csv".format(file_path,run_mode, self.adversary_class.getName(), prefix) ,"w")
+        loss_file = open("{0}/loss-{1}-{2}-{3}.csv".format(file_path,run_mode, self.adversary_agent_settings.name, prefix) ,"w")
         for line in loss_lines:
             loss_file.write(line)
         loss_file.close()
         
-        packet_served_file = open("{0}/packet_served-{1}-{2}-{3}.csv".format(file_path,run_mode, self.adversary_class.getName(), prefix),"w")
+        packet_served_file = open("{0}/packet_served-{1}-{2}-{3}.csv".format(file_path,run_mode, self.adversary_agent_settings.name, prefix),"w")
         for line in packet_served_lines:
             packet_served_file.write(line)
         packet_served_file.close()
