@@ -77,7 +77,7 @@ class adv_random(adv_constant):
 class AIMDsettings(object):
     name = "AIMD"
     group_size = 1
-    delta = 0.4 # additive increase
+    delta = 0.35 # additive increase
     beta = 2 # multiplicative decrease
     epsilon = 0.001
     stateRepresentation = stateRepresentationEnum.only_server # WRONG
@@ -369,12 +369,25 @@ class ddAimdAlternative(DdGenericDec):
     num_adv_agents = 1
 
     name = "ddAimdAlternative"
-    prior_agent_delta_moves = 3
+    prior_agent_delta_moves = 6
     prior_agent_actions = 0
-    prior_adversary_actions = 3
+    prior_adversary_actions = 6
 
-    packets_last_step = False
+    packets_last_step = True
     discount_factor = 0.6
+
+class ddAimdAExtended(DdGenericDec):
+    num_adv_agents = 1
+
+    name = "ddAimdAlternative"
+    prior_agent_delta_moves = 10
+    prior_agent_actions = 10
+    prior_adversary_actions = 10
+    include_indiv_hosts = True  
+
+    packets_last_step = True
+    discount_factor = 0.6
+
 
 class sarGenericDec(object):
     name = "sarsaGenericDec"
@@ -462,18 +475,26 @@ class sarAntiAimd(sarGenericDec):
     name = "sarsaAntiAimd"
     num_adv_agents = 1
     include_other_attackers = False
-    prior_agent_actions = 3  
+    prior_agent_actions = 5  
     packets_last_step = True
 
 class sarAimdAlternative(sarGenericDec):
     num_adv_agents = 1
     name = "sarAimdAlternative"
-    prior_agent_delta_moves = 3
+    prior_agent_delta_moves = 5
     prior_agent_actions = 0
     packets_last_step = True
     discount_factor = 0.6
 
 
+class sarAimdExtended(sarGenericDec):
+    num_adv_agents = 1
+    name = "sarAimdExtended"
+    prior_agent_delta_moves = 6
+    prior_agent_actions = 6
+    prior_agent_actions = 6
+    packets_last_step = True
+    discount_factor = 0.6    
 
 def create_generic_dec(ds, ns):
     """

@@ -303,6 +303,7 @@ class adversarialLeaf(Host):
 
 
     def sendTraffic(self, percent_emit):
+        assert(percent_emit<=1)
         packet_size = (self.traffic_per_iteration)*percent_emit
         if self.is_attacker:
             self.destination_switch.new_illegal += packet_size

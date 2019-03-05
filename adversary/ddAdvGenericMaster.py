@@ -104,6 +104,7 @@ class GenericAdvMaster():
         #self.throttlerLeafDic = {}
 
         self.name = adv_settings.name
+        self.N_adv_state = N_adv_state
 
     def __enter__(self):
         print("__enter__ GenericAdvMaster decentralised")
@@ -209,6 +210,7 @@ class GenericAdvMaster():
             last_changes = self.defender.past_moves[(-1*self.adv_settings.prior_agent_delta_moves):]
             for change in last_changes:
                 state.extend(change) 
+
         return np.array(state)
 
     def extract_state(self, combined_state, i):

@@ -121,20 +121,35 @@ Settings to change
 """
 
 assignedNetwork = NetworkSingleTeamMalialisMedium
-assignedAgent = LinearSarsaSingularDDQNCopy
+assignedAgent = AIMDsettings
 load_attack_path = "attackSimulations/{0}/".format(assignedNetwork.name)
 network_emulator = network.network_new.network_full # network_quick # network_full
 loadAttacks = False
 
 
 
-assignedAgent.save_model_mode = defender_mode_enum.save
+assignedAgent.save_model_mode = defender_mode_enum.load
 trainHost = adversarialLeaf #coordAttack # conAttack #driftAttack #adversarialLeaf
 assignedNetwork.drift = 0
 
-intelligentOpposition = adv_constant #DdCoordinatedMasterSettings #DdRandomMasterSettings
+opposition = adv_constant
+
+assert(opposition.is_intelligent==False) # not meant to be a smart advesary
+
+
+intelligentOpposition =  sarAimdAlternative #DdRandomMasterSettings
 intelligentOpposition.save_model_mode = defender_mode_enum.save
 # intelligentOpposition = None
+
+
+
+if intelligentOpposition == None:
+    intelligentOpposition = opposition
+
+
+
+
+
 
 ###
 assignedAgent.trained_drift = assignedNetwork.drift # we use this a copy of what the trained drift value is. We dont use this for the experiment
@@ -172,11 +187,11 @@ else:
 
 print('the filepath is {0}'.format(file_path))
 
-if assignedAgent.save_model_mode is defender_mode_enum.load and intelligentOpposition \
-    and intelligentOpposition.save_model_mode is defender_mode_enum.save:
-    # we've set the filepath, now we need to ensure that we have the right adversary
-    assert(trainHost==conAttack)
-    trainHost = adversarialLeaf
+# if assignedAgent.save_model_mode is defender_mode_enum.load and intelligentOpposition \
+#     and intelligentOpposition.save_model_mode is defender_mode_enum.save:
+#     # we've set the filepath, now we need to ensure that we have the right adversary
+#     assert(trainHost==conAttack)
+#     trainHost = adversarialLeaf
 if intelligentOpposition.save_model_mode is defender_mode_enum.neither:
     assert(trainHost==adversarialLeaf)
 

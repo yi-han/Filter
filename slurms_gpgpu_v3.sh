@@ -1,39 +1,48 @@
 # use this if we ever need to remake the entire base
 
-sed 's/runDDQN/runDDQN/g' exp_gpgpu_single.slurm > output.slurm
-sed "s/samplePath/$1/g" output.slurm -i 
-sed 's/sampleDDQNText/ddSinMid/g' output.slurm -i 
-sed 's/0 2/0 1/g' output.slurm -i 
-sbatch output.slurm
-# sed 's/0 1/1 1/g' output.slurm -i 
-# sbatch output.slurm
-
-
-# sed 's/runDDQN/runDDQNAdditional/g' exp_gpgpu_single.slurm > output.slurm
-# sed "s/samplePath/$1/g" output.slurm -i 
-# sed 's/sampleDDQNText/ddHierMid/g' output.slurm -i 
-# sed 's/0 2/0 1/g' output.slurm -i 
-# sbatch output.slurm
-# sed 's/0 1/1 1/g' output.slurm -i 
-# sbatch output.slurm
-
-
 sed 's/runDDQN/runSARSA/g' exp_physical_ddqn.slurm > output.slurm
 sed "s/samplePath/$1/g" output.slurm -i 
-sed 's/sampleDDQNText/sarSinMid/g' output.slurm -i 
+sed 's/sampleDDQNText/sarAimdVar/g' output.slurm -i 
 sed 's/0 2/0 1/g' output.slurm -i 
 sbatch output.slurm
-# sed 's/0 1/1 1/g' output.slurm -i 
-# sbatch output.slurm
+sed 's/0 1/1 1/g' output.slurm -i 
+sbatch output.slurm
+sed 's/1 1/2 1/g' output.slurm -i 
+sbatch output.slurm
+sed 's/2 1/3 1/g' output.slurm -i 
+sbatch output.slurm
+
+sed 's/runDDQN/runSarsaAdditional/g' exp_physical_ddqn.slurm > output.slurm
+sed "s/samplePath/$1/g" output.slurm -i 
+sed 's/sampleDDQNText/sarAimdExtended/g' output.slurm -i 
+sed 's/0 2/0 1/g' output.slurm -i 
+sbatch output.slurm
+sed 's/0 1/1 1/g' output.slurm -i 
+sbatch output.slurm
+sed 's/1 1/2 1/g' output.slurm -i 
+sbatch output.slurm
+sed 's/2 1/3 1/g' output.slurm -i 
+sbatch output.slurm
 
 
-# sed 's/runDDQN/runSarsaAdditional/g' exp_physical_ddqn.slurm > output.slurm
-# sed "s/samplePath/$1/g" output.slurm -i 
-# sed 's/sampleDDQNText/sarHierMid/g' output.slurm -i 
-# sed 's/0 2/0 1/g' output.slurm -i 
-# sbatch output.slurm
-# sed 's/0 1/1 1/g' output.slurm -i 
-# sbatch output.slurm
+sed 's/runDDQN/runSarsaDDQNCopy/g' exp_gpgpu_single.slurm > output.slurm
+sed "s/samplePath/$1/g" output.slurm -i 
+sed 's/sampleDDQNText/ddAimdVar/g' output.slurm -i 
+sed 's/0 2/0 1/g' output.slurm -i 
+sbatch output.slurm
+sed 's/0 1/1 1/g' output.slurm -i 
+sbatch output.slurm
+
+
+sed 's/runDDQN/runSarsaNoOverdrive/g' exp_gpgpu_single.slurm > output.slurm
+sed "s/samplePath/$1/g" output.slurm -i 
+sed 's/sampleDDQNText/ddAimdExtended/g' output.slurm -i 
+sed 's/0 2/0 1/g' output.slurm -i 
+sbatch output.slurm
+sed 's/0 1/1 1/g' output.slurm -i 
+sbatch output.slurm
+
+
 
 # sed 's/runDDQN/runDDQN/g' exp_gpgpu_single.slurm > output.slurm
 # sed "s/samplePath/$1/g" output.slurm -i 

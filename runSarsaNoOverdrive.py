@@ -97,6 +97,12 @@ class LinearSarsaLAIDDQN200(LinearSarsaLAI):
     stepDrop = (startE - endE)/annealing_steps
     reward_overload = None  
 
+class LinHierLong(LinearSarsaLAIDDQN200):
+    name = "LinHierLong"
+    max_epLength = 30    
+    pre_train_steps = 100000 * max_epLength 
+    annealing_steps = 200000 * max_epLength
+    num_episodes = 600001
 
 # The class of the adversary to implement
 conAttack = hostClass.ConstantAttack
@@ -114,8 +120,8 @@ attackClasses = [conAttack, shortPulse, mediumPulse,
 Settings to change
 """
 
-assignedNetwork = NetworkMalialisSmall
-assignedAgent = LinearSarsaSingularDDQNCopy
+assignedNetwork = NetworkSingleTeamMalialisMedium
+assignedAgent = AIMDsettings
 load_attack_path = "attackSimulations/{0}/".format(assignedNetwork.name)
 network_emulator = network.network_new.network_full # network_quick # network_full
 loadAttacks = False
@@ -123,12 +129,27 @@ loadAttacks = False
 
 
 assignedAgent.save_model_mode = defender_mode_enum.load
-trainHost = conAttack #coordAttack # conAttack #driftAttack #adversarialLeaf
+trainHost = adversarialLeaf #coordAttack # conAttack #driftAttack #adversarialLeaf
 assignedNetwork.drift = 0
 
-intelligentOpposition = sarAdvSplit #DdCoordinatedMasterSettings #DdRandomMasterSettings
+opposition = adv_constant
+
+assert(opposition.is_intelligent==False) # not meant to be a smart advesary
+
+
+intelligentOpposition =  ddAimdAExtended #DdRandomMasterSettings
 intelligentOpposition.save_model_mode = defender_mode_enum.save
 # intelligentOpposition = None
+
+
+
+if intelligentOpposition == None:
+    intelligentOpposition = opposition
+
+
+
+
+
 
 ###
 assignedAgent.trained_drift = assignedNetwork.drift # we use this a copy of what the trained drift value is. We dont use this for the experiment
@@ -159,19 +180,20 @@ twist = "{0}{1}".format(numTiles, network_emulator.name) #{2}{0}Alias{1}".format
 
 if (len(sys.argv)==4) and sys.argv[3] != "" :
     file_path = sys.argv[3]
-    proper_path = getPathName(assignedNetwork, assignedAgent, commStrategy, twist, trainHost)
+    proper_path = getPathName(assignedNetwork, assignedAgent, commStrategy, twist, intelligentOpposition)
     print("file should be: {0}".format(proper_path))
 else:
-    file_path = getPathName(assignedNetwork, assignedAgent, commStrategy, twist, trainHost)
+    file_path = getPathName(assignedNetwork, assignedAgent, commStrategy, twist, intelligentOpposition)
 
 print('the filepath is {0}'.format(file_path))
 
-if assignedAgent.save_model_mode is defender_mode_enum.load and intelligentOpposition \
-    and intelligentOpposition.save_model_mode is defender_mode_enum.save:
-    # we've set the filepath, now we need to ensure that we have the right adversary
-    assert(trainHost==conAttack)
-    trainHost = adversarialLeaf
-
+# if assignedAgent.save_model_mode is defender_mode_enum.load and intelligentOpposition \
+#     and intelligentOpposition.save_model_mode is defender_mode_enum.save:
+#     # we've set the filepath, now we need to ensure that we have the right adversary
+#     assert(trainHost==conAttack)
+#     trainHost = adversarialLeaf
+if intelligentOpposition.save_model_mode is defender_mode_enum.neither:
+    assert(trainHost==adversarialLeaf)
 
 print('the filepath is {0}'.format(file_path))
 
