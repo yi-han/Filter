@@ -103,6 +103,11 @@ class Experiment:
             e = endE
             stepDrop = 0
             pre_train_steps = 0
+        
+        if self.agent_settings.save_model_mode is mapsAndSettings.defender_mode_enum.test_short:
+            num_episodes = 500 #500
+            max_epLength = 60
+
 
 
         if self.adversary_agent_settings:
@@ -120,7 +125,7 @@ class Experiment:
                 adv_step_drop = 0
             else:
                 adv_e = self.adversary_agent_settings.startE
-                adv_pretraining_steps = self.adversary_agent_settings.pre_train_steps
+                adv_pretraining_steps = self.adversary_agent_settings.pre_train_steps * max_epLength
 
                 if self.agent_settings.save_model_mode is mapsAndSettings.defender_mode_enum.load:
 
@@ -139,9 +144,7 @@ class Experiment:
         else:
             self.adversarialMaster = None 
 
-        if self.agent_settings.save_model_mode is mapsAndSettings.defender_mode_enum.test_short:
-            num_episodes = 500 #500
-            max_epLength = 60
+
         
 
         run_mode = self.agent_settings.save_model_mode.name
@@ -357,7 +360,7 @@ class Experiment:
 
                     if self.adversarialMaster and self.adversary_agent_settings.save_model_mode in self.agentSaveModes:
 
-                        if adv_e > self.adversary_agent_settings.startE or step < adv_pretraining_steps:
+                        if adv_e > self.adversary_agent_settings.startE or total_steps < adv_pretraining_steps:
                             adv_e = self.adversary_agent_settings.startE
                         elif adv_e > self.adversary_agent_settings.endE:
                             adv_e -= adv_step_drop 

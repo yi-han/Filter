@@ -124,7 +124,7 @@ class NetworkMalialisSmall(object):
     legal_probability = 0.6 # probability that is a good guys
     upper_boundary = 8
     lower_boundary = 6 # for AIMD
-    iterations_between_action = 30 #200
+    iterations_between_action = 40 #200
 
     max_hosts_per_level = [3] # no communication therefore just one
     bucket_capacity = 18.1#15#0.8
@@ -151,7 +151,7 @@ class NetworkSingleTeamMalialisMedium(object):
     upper_boundary = 14 #12.5 # Mal would have used 14
     lower_boundary = 10 # for AIMD
 
-    iterations_between_action = 20 # 200
+    iterations_between_action = 30 # 200
 
     max_hosts_per_level = [2, 6, 12]
     bucket_capacity = 12.1
@@ -244,13 +244,13 @@ class DdGenericDec(object):
     annealing_episodes = 200000
     num_episodes = 500000
     tau = 0.0005
-    discount_factor = 0.5
+    discount_factor = 0.6
     startE = 1
     endE = 0.0
     packets_last_step = False
 
-    prior_agent_actions = 1
-    prior_adversary_actions = 1
+    prior_agent_actions = 5
+    prior_adversary_actions = 5
     include_indiv_hosts = False    
     prior_agent_delta_moves = 0
 
@@ -265,7 +265,7 @@ class DdGenericDec(object):
 class DdGenericCentral(DdGenericDec):
     name = "ddGenCentral"
     num_adv_agents = 1
-    pre_train_steps = 100000
+    pre_train_steps = 50000
     include_other_attackers = False
 
 class DdAdvGroupExtraAnnealing(DdGenericCentral):
@@ -312,6 +312,7 @@ class DdGenericSplit(DdGenericDec):
     name = "ddGenSplit"
     num_adv_agents = 2
     include_other_attackers = False
+    num_episodes = 600000
 
 
 class DdSplitLong(DdGenericSplit):
@@ -386,8 +387,8 @@ class sarGenericDec(object):
     startE = 1
     endE = 0.0
     
-    prior_agent_actions = 1
-    prior_adversary_actions = 1    
+    prior_agent_actions = 5
+    prior_adversary_actions = 5   
     packets_last_step = False
     include_indiv_hosts = False    
     prior_agent_delta_moves = 0
