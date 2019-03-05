@@ -71,7 +71,7 @@ def run_attacks(assignedNetwork, assignedAgent, file_path, adversaryAttacker, pr
         # attackClasses.insert(adversarialLeaf, 0)
         print("doing adversaryAttacker")
         attackClass = adversarialLeaf
-
+        assignedNetwork.iterations_between_action = custom_iterations_between_action
         genericAgent = mapsAndSettings.create_generic_dec(agent, network)
         #attack_location = load_attack_path+attackClass.getName()+".apkl"
         exp = experiment.Experiment(attackClass, network, 
@@ -80,6 +80,9 @@ def run_attacks(assignedNetwork, assignedAgent, file_path, adversaryAttacker, pr
         exp.run(prefix, genericAgent, file_path)
         adversaryAttacker.save_model_mode = init_adv_save_model
         attackClasses.append(adversarialLeaf)
+
+        assignedNetwork.iterations_between_action = original_iterations
+    
     mapsAndSettings.getSummary(attackClasses, file_path, agent, adversaryAttacker, prefix)
     if adversaryAttacker:
         attackClasses.remove(adversarialLeaf)
