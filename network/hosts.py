@@ -198,7 +198,6 @@ class GradualIncrease(Host):
 
 class CoordinatedRandom(Host):
     """
-    everything but gradual attacks. Note all hosts work together (not a multivector attack)
 
     Things to be careful of:
     1) In the init of Host we attach our object to the switch. Quite likely that the switch might call us via switch

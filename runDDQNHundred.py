@@ -1,147 +1,204 @@
-"""
-Idea is to run AIM with the assumption it's working and 
-try to get results kinda close to Malialis
-
-Parameters to tune:
-delta. 0.05 increments from 0.1 to 0.4 - 8
-beta: 1.25 / 1.5 / 2 / 2.5  - 3
-Ls: Margin inbetween - 5 / 10 / 15/ 20 / 25/ 30 / 40 % - 7
-
-
-8 * 3 * 7 ~ 2.4 hours for each grid search
-"""
 import sys
 import experiment
 import network.hosts as hostClass
-import agent.ddqnCentralised as ddCen
 import network.network_new
+import agent.tileCoding as tileCoding
+import agent.linearSarsaCentralised as linCen
+import agent.randomAgent as ranAg
+#import agent.sarsaDecentralised as sarDec# import agent.ddqnDecentralised as ddDec
 from mapsAndSettings import *
-import numpy as np
 import runAttacks
+assert(len(sys.argv)>=3)
 
 
-# class AIMDtest(object):
-#     name = "AIMD"
-#     group_size = 1
-#     delta = 0.3 # additive increase
-#     beta = 2 # multiplicative decrease
-#     epsilon = 0.1 # our error
-
-#     stateRepresentation = stateRepresentationEnum.only_server # WRONG
-#     sub_agent = agent.AIMD.AIMDagent
-    
-
-#     num_episodes = 1
-#     max_epLength = 30
-#     y = 0
-#     tau = beta
-#     update_freq = None
-#     batch_size = None
-#     pre_train_steps = delta
-#     annealing_steps = 0
-#     startE = 0
-#     endE = 0
-#     stepDrop = 0
-#     reward_overload = None
 
 
+
+class LinearSarsaSingular(object):
+    # note we have two dependencies
+    name = "LinearSarsaSingular"
+    max_epLength = 30 # or 60 if test
+    y = 0
+    tau = 0.1
+    update_freq = 4
+    batch_size = None
+    num_episodes = 200000#82501
+    pre_train_steps = 0#2000 * max_epLength
+    annealing_steps = 50000 * max_epLength #1000*max_epLength #60000 * max_epLength 
+    startE = 0.4 #0.4
+    endE = 0.0
+    stepDrop = (startE - endE)/annealing_steps
+    agent = None
+    sub_agent = linCen.Agent
+    group_size = 1 # number of filters each agent controls
+    #stateletFunction = getStateletNoCommunication
+    reward_overload = -1
+    stateRepresentation = stateRepresentationEnum.throttler  
+    has_bucket = False
+
+class LinSingularExploration(LinearSarsaSingular):
+    name = "linSingExp"
+    endE = 0.1
+
+class LinearSarsaLAI(object):
+    name = "LinearSarsaLAI"
+    max_epLength = 500
+    y = 0
+    tau = 0.01
+    update_freq = 4
+    batch_size = None
+    num_episodes = 100001#82501
+    pre_train_steps = 0#2000 * max_epLength
+    annealing_steps = 80000 * max_epLength #1000*max_epLength #60000 * max_epLength 
+    startE = 0.3 #0.4
+    endE = 0.0
+    stepDrop = (startE - endE)/annealing_steps
+    agent = None
+    sub_agent = linCen.Agent
+    group_size = 1 # number of filters each agent controls
+    #stateletFunction = getStateletNoCommunication
+    reward_overload = -1
+    stateRepresentation = stateRepresentationEnum.leaderAndIntermediate  
+    has_bucket = False
+
+
+class LinearSarsaSingularDDQNCopy(object):
+    # copy from ddqnSingleNoCommunicate
+    name = "LinearSarsaSingularDDQNCopy"
+    max_epLength = 30 # or 60 if test
+    y = 0    
+    tau = 0.01 #Rate to update target network toward primary network. 
+    update_freq = 4 #How often to perform a training step.
+    batch_size = None #How many experiences to use for each training step.
+    num_episodes = 200001 #200001#    
+    pre_train_steps = 20000 * max_epLength #40000 * max_epLength #
+    annealing_steps = 60000 * max_epLength  #120000 * max_epLength  #
+    startE = 1
+    endE = 0.0
+    stepDrop = (startE - endE)/annealing_steps
+    agent = None
+    sub_agent = linCen.Agent
+    stateRepresentation = stateRepresentationEnum.throttler
+    reward_overload = None
+    group_size = 1 # number of filters each agent controls
+    has_bucket = False
+
+
+class LinearSarsaLAIDDQN200(LinearSarsaLAI):
+    # Idea (without using a ridiculous number of epLength, set the learning rate even lower and give proper exploration)
+    name = "LinearDDQN200"
+    max_epLength = 30
+    tau = 0.05
+    num_episodes = 300001 #200001#    
+    pre_train_steps = 40000 * max_epLength #40000 * max_epLength #
+    annealing_steps = 120000 * max_epLength  #120000 * max_epLength  #
+    startE = 1
+    endE = 0.0
+    stepDrop = (startE - endE)/annealing_steps
+    reward_overload = None  
+
+
+# The class of the adversary to implement
 conAttack = hostClass.ConstantAttack
 shortPulse = hostClass.ShortPulse
 mediumPulse = hostClass.MediumPulse
 largePulse = hostClass.LargePulse
 gradualIncrease = hostClass.GradualIncrease
-# driftAttack = hostClass.DriftAttack
 coordAttack = hostClass.CoordinatedRandom
 adversarialLeaf = hostClass.adversarialLeaf
-
-
 
 attackClasses = [conAttack, shortPulse, mediumPulse,
     largePulse, gradualIncrease] 
 
-###
-# Settings
-assignedNetwork =  NetworkSixFour #NetworkSingleTeamMalialisMedium
-assignedAgent =  AIMDsettings #ddqnSingleNoCommunicate #ddqn100MediumHierarchical
-load_attack_path = "attackSimulations/{0}/".format(assignedNetwork.name)
-parameter_tune = True
-assignedAgent.encoders = None
+"""
+Settings to change
+"""
 
-assignedAgent.save_model_mode = defender_mode_enum.save
+assignedNetwork = NetworkSixFour
+assignedAgent = LinearSarsaSingularDDQNCopy
+load_attack_path = "attackSimulations/{0}/".format(assignedNetwork.name)
+network_emulator = network.network_new.network_full # network_quick # network_full
+loadAttacks = False
+
+
+
+assignedAgent.save_model_mode = defender_mode_enum.load
 trainHost = conAttack #coordAttack # conAttack #driftAttack #adversarialLeaf
 assignedNetwork.drift = 0
 
-# intelligentOpposition = DdRandomMasterSettings #DdCoordinatedLowlongDlowSettings #DdCoordinatedMasterSettings #DdRandomMasterSettings
-# intelligentOpposition.save_model_mode = defender_mode_enum.save
-intelligentOpposition = None
-
-
-network_emulator = network.network_new.network_full #network_quick # network_full
+intelligentOpposition = DdGenericSplit #DdCoordinatedMasterSettings #DdRandomMasterSettings
+intelligentOpposition.save_model_mode = defender_mode_enum.save
+# intelligentOpposition = None
 
 ###
-
-
 assignedAgent.trained_drift = assignedNetwork.drift # we use this a copy of what the trained drift value is. We dont use this for the experiment
 assignedNetwork.emulator = network_emulator
-
-
-twist="{0}".format(network_emulator.name)
 commStrategy = calc_comm_strategy(assignedAgent.stateRepresentation)
-file_path = getPathName(assignedNetwork, assignedAgent, commStrategy, twist, trainHost)
+
+"""
+This is the encoder for the sarsa, this might be better positioned somewhere else
+"""
+encoders = []
+level = 0 # level 0 is throttlers, level 1 is intermeditary etc
+for max_hosts in assignedNetwork.max_hosts_per_level:
+    maxThrottlerBandwidth = assignedNetwork.rate_attack_high * max_hosts # a throttler doesn't face more than X
+    if level == 0:
+        numTiles = 6 * max_hosts
+    elif assignedAgent.stateRepresentation == stateRepresentationEnum.throttler:
+        continue
+    else:
+        numTiles = 6 # just set at 6.
+    numTilings = 8
+    tileCoder = tileCoding.myTileInterface(maxThrottlerBandwidth, numTiles, numTilings)
+    encoders.append(tileCoder)
+    level += 1
+assignedAgent.encoders = encoders
+
+twist = "{0}{1}".format(numTiles, network_emulator.name) #{2}{0}Alias{1}".format(numTiles, "", network_emulator.name)
+
+
+if (len(sys.argv)==4) and sys.argv[3] != "" :
+    file_path = sys.argv[3]
+    proper_path = getPathName(assignedNetwork, assignedAgent, commStrategy, twist, trainHost)
+    print("file should be: {0}".format(proper_path))
+else:
+    file_path = getPathName(assignedNetwork, assignedAgent, commStrategy, twist, trainHost)
+
+print('the filepath is {0}'.format(file_path))
 
 if assignedAgent.save_model_mode is defender_mode_enum.load and intelligentOpposition \
     and intelligentOpposition.save_model_mode is defender_mode_enum.save:
     # we've set the filepath, now we need to ensure that we have the right adversary
     assert(trainHost==conAttack)
     trainHost = adversarialLeaf
-"""
-Variables:
-epsilon
-beta (second, do 2 first though)
-bucketValue (do as percentage of maximum of server)
-delta (bottom)
 
 
-"""
-epsilon_values = np.arange(0.001, 0.05, 0.01).tolist()
-beta_values = np.arange(1.25, 4, 0.25).tolist()
-beta_values.remove(2)
-beta_values.insert(0,2)
-buck_values = np.arange(0.8, 4, 0.2).tolist()
-delta_values = np.arange(0.05, 0.8, 0.05).tolist()
+print('the filepath is {0}'.format(file_path))
 
-repeats = len(delta_values) * len(beta_values) * len(buck_values) * len(epsilon_values)
-print("repeats = {0}".format(repeats))
-print(len(delta_values))
-print(len(beta_values))
-print(len(buck_values))
-print(len(epsilon_values))
+start_num = int(sys.argv[1])
+length_core= int(sys.argv[2])
 
+if loadAttacks:
+    for i in range(start_num, start_num+length_core):
 
-iterations_per_action = 35
+        runAttacks.run_attacks(assignedNetwork, assignedAgent, file_path, intelligentOpposition, i)
 
-if parameter_tune:
-    i = 0
-
-    for epsilon in epsilon_values:
-        for beta in beta_values:
-            for buck_value in buck_values:
-                for delta in delta_values:
-                    assignedAgent.buck_value = buck_value
-                    print("testing for {0} {1} {2} {3}".format(delta, beta, buck_value, epsilon))
-                    assignedNetwork.bucket_capacity = assignedNetwork.upper_boundary*buck_value
-                    print("bucket is = {0}".format(assignedNetwork.bucket_capacity))
-                    assignedAgent.delta = delta
-                    assignedAgent.beta = beta
-                    assignedAgent.epsilon = epsilon
-                    runAttacks.run_attacks(assignedNetwork, assignedAgent, file_path, intelligentOpposition, i, iterations_per_action)
-                    i+=1
-
-    merge_summaries(file_path, i)
 else:
     #experiment = experiment.Experiment(conAttack, GeneralSettings, assignedNetwork, assignedAgent, twist="{2}{0}Alias{1}".format(numTiles, partition, network_emulator.name))
 
     experiment = experiment.Experiment(trainHost, assignedNetwork, assignedAgent, intelligentOpposition)
 
-    genericAgent = create_generic_dec(assignedAgent, assignedNetwork)
-    runAttacks.run_attacks(assignedNetwork, assignedAgent, file_path, intelligentOpposition, 0)
+
+
+    for i in range(start_num, length_core+start_num):
+        genericAgent = create_generic_dec(assignedAgent, assignedNetwork)
+        # genericAgent = None        
+        print("Im doing it for {0}".format(i))
+        experiment.run(i, genericAgent, file_path)
+
+        genericAgent = create_generic_dec(assignedAgent, assignedNetwork)
+        runAttacks.run_attacks(assignedNetwork, assignedAgent, file_path, intelligentOpposition, i)
+
+
+
+

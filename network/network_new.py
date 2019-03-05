@@ -4,7 +4,7 @@ import numpy as np
 import math
 #import copy
 import pickle
-from mapsAndSettings import stateRepresentationEnum, advesaryTypeEnum
+from mapsAndSettings import stateRepresentationEnum
 from network.utility import *
 #import agent # i think this is the other folder but I dont think it would have access to this?
 

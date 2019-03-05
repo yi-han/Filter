@@ -1,3 +1,5 @@
+from enum import Enum
+
 DELTA = 0.001
 INF = 9999999
 MbTKb = 1000 # ratio for converting Mb to Kb
@@ -33,3 +35,12 @@ def deep_copy_state(state):
     state_copy = np.empty_like(state)
     state_copy[:] = state
     return state_copy
+
+class advesaryStandardAttackEnum(Enum):
+    constant = 0
+    pulse_short = 1 
+    pulse_medium = 2
+    pulse_large = 3
+    gradual = 4
+    split = 5
+    random = 6

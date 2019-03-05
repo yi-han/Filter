@@ -1,4 +1,4 @@
-
+# testing differnt sarsa advesary
 
 sed 's/runDDQN/runSARSA/g' exp_physical_ddqn.slurm > output.slurm
 sed "s/samplePath/ddEverything/g" output.slurm -i 

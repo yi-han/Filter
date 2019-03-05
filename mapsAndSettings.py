@@ -563,7 +563,7 @@ def getSummary(adversary_classes, load_path, agent, smart_adversary, prefix):
 
 
 
-def getPathName(network_settings, agent_settings, commStrategy, twist, host_train):
+def getPathName(network_settings, agent_settings, commStrategy, twist, train_opposition):
     # host train is the type of host the agent was trained on. 
 
     drift = network_settings.drift
@@ -571,7 +571,7 @@ def getPathName(network_settings, agent_settings, commStrategy, twist, host_trai
         drift_text = "Drift_{0}".format(drift)
     else:
         drift_text = ""
-    return drift_text + host_train.getName() + network_settings.name + agent_settings.name + commStrategy  + twist
+    return drift_text + train_opposition.name +"_" + network_settings.name + agent_settings.name + commStrategy  + twist
 
 
 

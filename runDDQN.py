@@ -152,17 +152,17 @@ attackClasses = [conAttack, shortPulse, mediumPulse,
 ###
 # Settings NetworkMalialisSmall
 assignedNetwork =   NetworkSingleTeamMalialisMedium
-assignedAgent =  AIMDsettings #ddqnSingleNoCommunicate #ddqn100MediumHierarchical
+assignedAgent =  ddqnSingleNoCommunicate #ddqnSingleNoCommunicate #ddqn100MediumHierarchical
 load_attack_path = "attackSimulations/{0}/".format(assignedNetwork.name)
 loadAttacks = False
 assignedAgent.encoders = None
 
-assignedAgent.save_model_mode = defender_mode_enum.load
-trainHost = conAttack #coordAttack # conAttack #driftAttack #adversarialLeaf
+assignedAgent.save_model_mode = defender_mode_enum.save
+trainHost = adversarialLeaf #coordAttack # conAttack #driftAttack #adversarialLeaf
 assignedNetwork.drift = 0
 
-intelligentOpposition = ddAdvAntiAimd #DdCoordinatedLowlongDlowSettings #DdCoordinatedMasterSettings #DdRandomMasterSettings
-intelligentOpposition.save_model_mode = defender_mode_enum.save
+intelligentOpposition = adv_constant #ddAdvAntiAimd #DdCoordinatedLowlongDlowSettings #DdCoordinatedMasterSettings #DdRandomMasterSettings
+intelligentOpposition.save_model_mode = defender_mode_enum.neither
 # intelligentOpposition = None
 
 
@@ -180,11 +180,11 @@ commStrategy = calc_comm_strategy(assignedAgent.stateRepresentation)
 
 if (len(sys.argv)>=4) and sys.argv[3] != "" :
     file_path = sys.argv[3]
-    proper_path = getPathName(assignedNetwork, assignedAgent, commStrategy, twist, trainHost)
+    proper_path = getPathName(assignedNetwork, assignedAgent, commStrategy, twist, intelligentOpposition)
 
     print("file should be: {0}".format(proper_path))
 else:
-    file_path = getPathName(assignedNetwork, assignedAgent, commStrategy, twist, trainHost)
+    file_path = getPathName(assignedNetwork, assignedAgent, commStrategy, twist, intelligentOpposition)
 
 print('the filepath is {0}'.format(file_path))
 if assignedAgent.save_model_mode in [defender_mode_enum.load, defender_mode_enum.load_save] and intelligentOpposition \
@@ -192,7 +192,8 @@ if assignedAgent.save_model_mode in [defender_mode_enum.load, defender_mode_enum
     # we've set the filepath, now we need to ensure that we have the right adversary
     assert(trainHost==conAttack)
     trainHost = adversarialLeaf
-
+if intelligentOpposition.save_model_mode is defender_mode_enum.neither:
+    assert(trainHost==adversarialLeaf)
 
 start_num = int(sys.argv[1])
 length_core= int(sys.argv[2])
