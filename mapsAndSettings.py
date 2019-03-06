@@ -327,38 +327,6 @@ class DdSplitLong(DdGenericSplit):
 
 
 
-class ddSplitShare(DdGenericSplit):
-    name = "ddSplitShare"
-    include_other_attackers = True
-    prior_agent_actions = 0
-
-
-
-class ddSplitSuper(DdGenericSplit):
-    name = "ddSplitSuper"
-    include_other_attackers = True
-    prior_agent_actions = 1
-
-class lowDdSuper(ddSplitSuper):
-    name = "lowDdSuper"
-    tau = 0.0001
-
-class ddSuperLong(ddSplitSuper):
-    name = "ddSuperLong"
-    pre_train_episodes = 100000
-    annealing_episodes = 400000    
-    num_episodes = 1000000    
-
-
-class DdAdvSuperEverything(ddSuperLong):
-    name = "DdAdvSuperEverything"
-    pre_train_episodes = 100000
-    num_episodes = 1000000
-    prior_agent_actions = 10
-    prior_adversary_actions = 10
-    packets_last_step = True
-    include_indiv_hosts = True  
-
 class ddAdvAntiAimd(DdGenericDec):
     num_adv_agents = 1
     name = "ddAdvAntiAimd"
@@ -453,26 +421,6 @@ class sarSplitLong(sarAdvSplit):
     annealing_episodes = 600000
     num_episodes = 1000000
 
-class sarAdvShare(sarAdvSplit):
-    name = "sarsaAdvShare"
-    prior_agent_actions = 0
-    include_other_attackers = True
-
-
-class sarAdvSuper(sarAdvSplit):
-    name = "sarsaAdvSuper"
-    prior_agent_actions = 1
-    include_other_attackers = True
-
-class sarSuperLong(sarAdvSuper):
-    name = "sarSuperLong"
-    pre_train_episodes = 100000
-    annealing_episodes = 600000
-    num_episodes = 1000000   
-
-class sarSuperLongManyAdvActions(sarSuperLong):
-    name = "sarSuperLongManyAdvActions"
-    prior_adversary_actions = 3
 
 class sarAntiAimd(sarGenericDec):
     name = "sarsaAntiAimd"
