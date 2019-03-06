@@ -129,8 +129,9 @@ class dumbMaster():
         # Another idea is to use an alternate probablity distribution
         
 
-        splitStrategies = [advAttackEnum.constant, advAttackEnum.pulse_short, advAttackEnum.pulse_medium, advAttackEnum.pulse_large]
-        actual_strategies = [advAttackEnum.constant, advAttackEnum.pulse_short, advAttackEnum.pulse_medium, advAttackEnum.pulse_large, advAttackEnum.gradual, advAttackEnum.split]
+        splitStrategies = [advAttackEnum.constant, advAttackEnum.pulse_short, advAttackEnum.pulse_large]
+        # note we left out pulse medium
+        random_strategies = [advAttackEnum.constant, advAttackEnum.constant, advAttackEnum.pulse_short, advAttackEnum.pulse_medium, advAttackEnum.pulse_large, advAttackEnum.gradual, advAttackEnum.gradual, advAttackEnum.split]
         
         if chosen_strategy == None:
             chosen_strategy = self.adv_settings.attack_strategy
@@ -140,7 +141,7 @@ class dumbMaster():
             self.current_strategy = (strategy1, strategy2)
         elif chosen_strategy == advAttackEnum.random:
             # choose a differnt strategy
-            chosen_strategy = random.choice(actual_strategies)
+            chosen_strategy = random.choice(random_strategies)
             return self.initiate_episode(chosen_strategy)
         else:
             # strategy is a constant without any randomness

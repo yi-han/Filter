@@ -89,8 +89,8 @@ class AIMDsettings(object):
     tau = beta
     update_freq = None
     batch_size = None
-    pre_train_steps = 0
-    annealing_steps = 0
+    pre_train_episodes = 0
+    annealing_episodes = 0
     startE = 0
     endE = 0
     stepDrop = 0
@@ -128,6 +128,7 @@ class NetworkMalialisSmall(object):
     max_hosts_per_level = [3] # no communication therefore just one
     bucket_capacity = 18.1#15#0.8
 
+    max_epLength = 30
     is_sig_attack = False
 
 class NetworkSingleTeamMalialisMedium(object):
@@ -154,6 +155,7 @@ class NetworkSingleTeamMalialisMedium(object):
 
     max_hosts_per_level = [2, 6, 12]
     bucket_capacity = 12.1
+    max_epLength = 30
 
     is_sig_attack = False
 
@@ -200,6 +202,7 @@ class NetworkMalialisTeamFull(object):
     max_hosts_per_level = [2, 6, 12, 60]    
     bucket_capacity = 12
     is_sig_attack = False
+    max_epLength = 30
 
 ### This is an experimental one where i have not set an even set of hosts
 # class NetworkMalialisTeamFull(object):
@@ -240,7 +243,7 @@ class DdGenericDec(object):
     name = "dd DO NOT USE"
     is_intelligent = True
     num_adv_agents = -1
-    pre_train_steps = 50000
+    pre_train_episodes = 50000
     annealing_episodes = 200000
     num_episodes = 500000
     tau = 0.0005
@@ -265,18 +268,18 @@ class DdGenericDec(object):
 class DdGenericCentral(DdGenericDec):
     name = "ddGenCentral"
     num_adv_agents = 1
-    pre_train_steps = 50000
+    pre_train_episodes = 50000
     include_other_attackers = False
 
 class DdAdvGroupExtraAnnealing(DdGenericCentral):
     name = "DdAdvGroupExtraAnnealing"
-    pre_train_steps = 50000
+    pre_train_episodes = 50000
     annealing_episodes = 400000
     num_episodes = 750000
 
 class DdAdvGroupLong(DdAdvGroupExtraAnnealing):
     name = "DdAdvGroupLong"
-    pre_train_steps = 100000
+    pre_train_episodes = 100000
     num_episodes = 1000000
 
 class DdGroupAdvManyAction(DdAdvGroupLong):
@@ -287,7 +290,7 @@ class DdGroupAdvManyAction(DdAdvGroupLong):
 
 class DdAdvGroupEverything(DdGenericCentral):
     name = "DdAdvGroupEverything"
-    pre_train_steps = 100000
+    pre_train_episodes = 100000
     num_episodes = 1000000
     prior_agent_actions = 10
     prior_adversary_actions = 10
@@ -317,7 +320,7 @@ class DdGenericSplit(DdGenericDec):
 
 class DdSplitLong(DdGenericSplit):
     name = "ddSplitLong"  
-    pre_train_steps = 100000
+    pre_train_episodes = 100000
     annealing_episodes = 400000    
     num_episodes = 1000000
 
@@ -342,14 +345,14 @@ class lowDdSuper(ddSplitSuper):
 
 class ddSuperLong(ddSplitSuper):
     name = "ddSuperLong"
-    pre_train_steps = 100000
+    pre_train_episodes = 100000
     annealing_episodes = 400000    
     num_episodes = 1000000    
 
 
 class DdAdvSuperEverything(ddSuperLong):
     name = "DdAdvSuperEverything"
-    pre_train_steps = 100000
+    pre_train_episodes = 100000
     num_episodes = 1000000
     prior_agent_actions = 10
     prior_adversary_actions = 10
@@ -392,7 +395,7 @@ class ddAimdAExtended(DdGenericDec):
 class sarGenericDec(object):
     name = "sarsaGenericDec"
     num_adv_agents = -1
-    pre_train_steps = 75000
+    pre_train_episodes = 75000
     annealing_episodes = 300000
     num_episodes = 750000
     tau = 0.001
@@ -432,7 +435,7 @@ class sarGroupMidDiscount(sarGenericCen):
 class sarGroupLong(sarGenericCen):
     name = "sarasaAdvCenShort"
     num_adv_agents = 1
-    pre_train_steps = 100000
+    pre_train_episodes = 100000
     annealing_episodes = 600000
     num_episodes = 1000000
 
@@ -446,7 +449,7 @@ class sarAdvSplit(sarGenericCen):
 
 class sarSplitLong(sarAdvSplit):
     name = "sarSplitLong"
-    pre_train_steps = 100000
+    pre_train_episodes = 100000
     annealing_episodes = 600000
     num_episodes = 1000000
 
@@ -463,7 +466,7 @@ class sarAdvSuper(sarAdvSplit):
 
 class sarSuperLong(sarAdvSuper):
     name = "sarSuperLong"
-    pre_train_steps = 100000
+    pre_train_episodes = 100000
     annealing_episodes = 600000
     num_episodes = 1000000   
 
@@ -552,8 +555,8 @@ def getSummary(adversary_classes, load_path, agent, smart_adversary, prefix):
         sum_server_failures = sum(packet_file.ServerFailures)
         percentage_received = sum_packets_received/sum_packets_sent*100
         tau = agent.tau
-        pretraining = agent.pre_train_steps / agent.max_epLength
-        annealing = agent.annealing_steps / agent.max_epLength
+        pretraining = agent.pre_train_episodes
+        annealing = agent.annealing_episodes
         total_episodes = agent.num_episodes
         start_e = agent.startE
         if agent.reward_overload==-1:
@@ -566,11 +569,12 @@ def getSummary(adversary_classes, load_path, agent, smart_adversary, prefix):
         summary.write("{0},{1},{12},{2},{3},{4},{5},{6},{7},{8},{9},{10},{11},".format(attack_type, agent.name,
             sum_packets_received, sum_packets_sent, percentage_received, sum_server_failures,
             tau, pretraining, annealing, total_episodes, start_e, overload, agent.trained_drift))
-        if adversary_class != hosts.adversarialLeaf:
-            summary.write(",,,,,,")
-        else:
+        if smart_adversary.is_intelligent != hosts.adversarialLeaf:
             summary.write("{0},{1},{2},{3},{4},{5},".format(smart_adversary.tau, smart_adversary.discount_factor,
-                smart_adversary.pre_train_steps, smart_adversary.annealing_episodes, smart_adversary.num_episodes, smart_adversary.startE))
+                smart_adversary.pre_train_episodes, smart_adversary.annealing_episodes, smart_adversary.num_episodes, smart_adversary.startE))
+        else:
+            summary.write(",,,,,,")
+
         if agent.stateRepresentation == stateRepresentationEnum.only_server:
             summary.write("{0},{1},{2},".format(agent.delta, agent.beta, agent.epsilon))
             try:
