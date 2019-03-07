@@ -84,7 +84,6 @@ class AIMDsettings(object):
     sub_agent = agent.AIMD.AIMDagent
 
     num_episodes = 1
-    max_epLength = 30
     y = delta
     tau = beta
     update_freq = None
@@ -485,16 +484,13 @@ def create_generic_dec(ds, ns):
 
 
 
-def getSummary(adversary_classes, load_path, agent, smart_adversary, prefix):
+def getSummary(adversary_classes, load_path, agent, prefix):
     summary = open("{0}/attackSummary-{1}.csv".format(load_path,prefix), "w")
     summary.write("AttackType,Agent,Drift,LegalPacketsReceived,LegalPacketsServed,Percentage,ServerFailures,Tau,Pretraining,Annealing,TotalEpisodes,start_e,overload,adv_tau,adv_discount,adv_pretrain,adv_annealing_episodes,adv_episodes,adv_start_e,delta,beta,epsilon,bucket_capacity, iteration\n")
     agentName = agent.name
     for adversary_class in adversary_classes:
         attack_name = adversary_class.name
-        if adversary_class != hosts.adversarialLeaf:
-            attack_type = attack_name
-        else:
-            attack_type = smart_adversary.name
+
         file_path = "{0}/packet_served-{1}-{2}-{3}.csv".format(load_path,agent.save_model_mode.name, attack_name, prefix)
         packet_file = pandas.read_csv(file_path)
         #print(packet_file)
@@ -514,12 +510,12 @@ def getSummary(adversary_classes, load_path, agent, smart_adversary, prefix):
         else:
             overload = 'misc'
 
-        summary.write("{0},{1},{12},{2},{3},{4},{5},{6},{7},{8},{9},{10},{11},".format(attack_type, agent.name,
+        summary.write("{0},{1},{12},{2},{3},{4},{5},{6},{7},{8},{9},{10},{11},".format(attack_name, agent.name,
             sum_packets_received, sum_packets_sent, percentage_received, sum_server_failures,
             tau, pretraining, annealing, total_episodes, start_e, overload, agent.trained_drift))
-        if smart_adversary.is_intelligent != hosts.adversarialLeaf:
-            summary.write("{0},{1},{2},{3},{4},{5},".format(smart_adversary.tau, smart_adversary.discount_factor,
-                smart_adversary.pre_train_episodes, smart_adversary.annealing_episodes, smart_adversary.num_episodes, smart_adversary.startE))
+        if adversary_class.is_intelligent:
+            summary.write("{0},{1},{2},{3},{4},{5},".format(adversary_class.tau, adversary_class.discount_factor,
+                adversary_class.pre_train_episodes, adversary_class.annealing_episodes, adversary_class.num_episodes, adversary_class.startE))
         else:
             summary.write(",,,,,,")
 

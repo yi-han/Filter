@@ -89,7 +89,11 @@ class Experiment:
         startE = self.agent_settings.startE
         endE = self.agent_settings.endE
         max_epLength = self.network_settings.max_epLength
-        stepDrop = (startE - endE)/(self.agent_settings.annealing_episodes*max_epLength)
+        if startE > endE:
+            stepDrop = (startE - endE)/(self.agent_settings.annealing_episodes*max_epLength)
+        else:
+            assert(startE == endE)
+            stepDrop = 0
         agent = preloaded_agent
         agent.reset()
 

@@ -85,7 +85,7 @@ def run_attacks(assignedNetwork, assignedAgent, file_path, adversaryAttacker, pr
 
         assignedNetwork.iterations_between_action = original_iterations
     
-    mapsAndSettings.getSummary(attackers, file_path, agent, adversaryAttacker, prefix)
+    mapsAndSettings.getSummary(attackers, file_path, agent, prefix)
     if adversaryAttacker.is_intelligent:
         attackers.remove(adversaryAttacker)
     #undo changes
