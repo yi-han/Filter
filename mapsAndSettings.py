@@ -471,14 +471,13 @@ def create_generic_dec(ds, ns):
         agent_to_allocate = min(throttlers_not_allocated, group_size)
         state_size = calcStateSize(ns.N_state, ds.stateRepresentation)
         print(agent_to_allocate)
-        sub_agent_list.append(sub_agent(ns.action_per_throttler**agent_to_allocate, state_size, ds.encoders, ds, ds.tau, ds.y
-            ))
+        sub_agent_list.append(sub_agent(ns.action_per_throttler**agent_to_allocate, state_size, ds.encoders, ds))
         throttlers_not_allocated -= agent_to_allocate
 
     #print("\nTest {0} \n".format(sub_agent_list[0].N_action))
     master = genericDecentralised.AgentOfAgents(
         ns.N_action, ns.action_per_throttler, ns.N_state,
-            sub_agent_list, ds.tau, ds.y
+            sub_agent_list, ds.tau, ds.discount_factor
         )
     return master
 

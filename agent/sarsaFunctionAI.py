@@ -78,7 +78,7 @@ class qTable():
             #print(state[i].size)
         return q_value
 
-    def updateQvalue(self, state, alpha, rewardPq):
+    def updateQvalue(self, state, tau, rewardPq):
         # we've calculated the policy result and now we update the matrix
 
         # calculate the state vectors so only use once.
@@ -88,7 +88,7 @@ class qTable():
             state_vectors.append(self.tile_wrapper.encoders[i].encodeToVector(state[i]))
 
 
-        delta = alpha*(rewardPq - self.getQValue(state, state_vectors))
+        delta = tau*(rewardPq - self.getQValue(state, state_vectors))
 
 
         for i in range(len(self.w_matrix)):
@@ -114,14 +114,14 @@ class SarsaFunctionAI:
 
     """
     
-    def __init__(self, actions, encoders, alpha, gamma, agent_settings): 
-        # note i set gamma to 0 to reflect the implementation by Malialis
-        # alpha is learning rate
-        # gamma is discount
+    def __init__(self, actions, encoders, agent_settings): 
+        # note i set discount_factor to 0 to reflect the implementation by Malialis
+        # tau is learning rate
+        # discount_factor is discount
 
         self.actions = actions
-        self.alpha = alpha
-        self.gamma = gamma
+        self.tau = agent_settings.tau
+        self.discount_factor = agent_settings.discount_factor
 
         
         self.tile_wrapper = TileWrapper(encoders)
@@ -174,9 +174,9 @@ class SarsaFunctionAI:
         # assume the reward has the discount incorporated. Allows this to be used 
         # between qlearning and sarsa
 
-        # rewardPq = gamma*Q(next) + reward
+        # rewardPq = discount_factor*Q(next) + reward
         action_num = self.actions.index(action)
-        delta = self.q_tables[action_num].updateQvalue(state, self.alpha, rewardPq)
+        delta = self.q_tables[action_num].updateQvalue(state, self.tau, rewardPq)
         self.cumLoss += abs(delta)
 
 
@@ -185,7 +185,7 @@ class SarsaFunctionAI:
         # we do the sarsa step and then feed it to a generalised td learner
 
         qnext = self.getQ(state2, action2)
-        self.learnCore(state1, action1, reward + self.gamma * qnext)
+        self.learnCore(state1, action1, reward + self.discount_factor * qnext)
 
 
     def getData(self):
@@ -193,8 +193,8 @@ class SarsaFunctionAI:
         data = {}
         
         data['q_tables']=self.q_tables
-        data['alpha'] = self.alpha
-        data['gamma'] = self.gamma
+        data['tau'] = self.tau
+        data['discount_factor'] = self.discount_factor
         data['actions'] = self.actions
         data['n_features'] = self.n_features
        
@@ -211,10 +211,10 @@ class SarsaFunctionAI:
         # given a dictionary of preloaded values check that parameters fit
         # the current experiment and then load the q values
 
-        if dataDict['alpha'] != self.alpha or dataDict['gamma'] != self.gamma or \
+        if dataDict['tau'] != self.tau or dataDict['discount_factor'] != self.discount_factor or \
             dataDict['actions'] != self.actions or dataDict['n_features'] != self.n_features:
-            print("alpha {0} | {1}".format(dataDict['alpha'], self.alpha))
-            print("gamma {0} | {1}".format(dataDict['gamma'], self.gamma))
+            print("tau {0} | {1}".format(dataDict['tau'], self.tau))
+            print("discount_factor {0} | {1}".format(dataDict['discount_factor'], self.discount_factor))
             print("actions {0} | {1}".format(dataDict['actions'], self.actions))
             print("n_features {0} | {1}".format(dataDict['n_features'], self.n_features))
             raise ValueError('Experiments parameters do not match saved file')

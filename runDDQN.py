@@ -19,7 +19,7 @@ assert(len(sys.argv)>= 3)
 class ddqnSingleNoCommunicate(object):
     group_size = 1
     name = "DDQN100SingleNoCommunicate"
-    y = 0    
+    discount_factor = 0    
     tau = 0.01 #Rate to update target network toward primary network. 
     update_freq = 4 #How often to perform a training step.
     batch_size = 32 #How many experiences to use for each training step.
@@ -42,7 +42,7 @@ class ddqnMalialisTrue(object):
 
     """
     name = "DDQNDecGenMalialisTrue"
-    y = 0
+    discount_factor = 0
     tau = 0.1
     update_freq = 4
     batch_size = 32
@@ -64,7 +64,7 @@ class ddqnMalialisTrue(object):
 # class ddqnDoubleHierarchical(object):
 #     group_size = 1
 #     name = "DDQN200Hierarchical"
-# #     y = 0    
+# #     discount_factor = 0    
 #     tau = 0.001 #Rate to update target network toward primary network. 
 #     update_freq = 4 #How often to perform a training step.
 #     batch_size = 32 #How many experiences to use for each training step.
@@ -83,7 +83,7 @@ class ddqnMalialisTrue(object):
 class ddqn50MediumHierachical(object):
     group_size = 1
     name = "ddqn50MediumHierachical"
-    y = 0    
+    discount_factor = 0    
     tau = 0.001 #Rate to update target network toward primary network. 
     update_freq = 4 #How often to perform a training step.
     batch_size = 32 #How many experiences to use for each training step.
@@ -101,7 +101,7 @@ class ddqn50MediumHierachical(object):
 class ddqn100MediumHierarchical(object):
     group_size = 1
     name = "ddqn100MediumHierarchical"
-    y = 0    
+    discount_factor = 0    
     tau = 0.001 #Rate to update target network toward primary network. 
     update_freq = 4 #How often to perform a training step.
     batch_size = 32 #How many experiences to use for each training step.

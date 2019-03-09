@@ -15,7 +15,7 @@ class sarGenAgent(linCen.Agent):
 
 
 
-        super().__init__(N_action, N_state, encoders, adv_settings, tau, discount_factor)
+        super().__init__(N_action, N_state, encoders, adv_settings)
 
     def addLeaves(self, leaves):
         for leaf in leaves:

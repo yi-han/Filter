@@ -17,17 +17,15 @@ assert(len(sys.argv)>=3)
 class LinearSarsaSingular(object):
     # note we have two dependencies
     name = "LinearSarsaSingular"
-    max_epLength = 30 # or 60 if test
-    y = 0
+    discount_factor = 0
     tau = 0.1
     update_freq = 4
     batch_size = None
     num_episodes = 200000#82501
-    pre_train_steps = 0#2000 * max_epLength
-    annealing_steps = 50000 * max_epLength #1000*max_epLength #60000 * max_epLength 
+    pre_train_episodes = 0#2000
+    annealing_episodes = 50000 #10 #60000 
     startE = 0.4 #0.4
     endE = 0.0
-    stepDrop = (startE - endE)/annealing_steps
     agent = None
     sub_agent = linCen.Agent
     group_size = 1 # number of filters each agent controls
@@ -42,17 +40,16 @@ class LinSingularExploration(LinearSarsaSingular):
 
 class LinearSarsaLAI(object):
     name = "LinearSarsaLAI"
-    max_epLength = 500
-    y = 0
+    #max_epLength = 500
+    discount_factor = 0
     tau = 0.01
     update_freq = 4
     batch_size = None
     num_episodes = 100001#82501
-    pre_train_steps = 0#2000 * max_epLength
-    annealing_steps = 80000 * max_epLength #1000*max_epLength #60000 * max_epLength 
+    pre_train_episodes = 0#2000 * max_epLength
+    annealing_episodes = 80000 #10 #60000 
     startE = 0.3 #0.4
     endE = 0.0
-    stepDrop = (startE - endE)/annealing_steps
     agent = None
     sub_agent = linCen.Agent
     group_size = 1 # number of filters each agent controls
@@ -65,17 +62,15 @@ class LinearSarsaLAI(object):
 class LinearSarsaSingularDDQNCopy(object):
     # copy from ddqnSingleNoCommunicate
     name = "LinearSarsaSingularDDQNCopy"
-    max_epLength = 30 # or 60 if test
-    y = 0    
+    discount_factor = 0    
     tau = 0.01 #Rate to update target network toward primary network. 
     update_freq = 4 #How often to perform a training step.
     batch_size = None #How many experiences to use for each training step.
     num_episodes = 200001 #200001#    
-    pre_train_steps = 20000 * max_epLength #40000 * max_epLength #
-    annealing_steps = 60000 * max_epLength  #120000 * max_epLength  #
+    pre_train_episodes = 20000 #40000 #
+    annealing_episodes = 60000  #120000  #
     startE = 1
     endE = 0.0
-    stepDrop = (startE - endE)/annealing_steps
     agent = None
     sub_agent = linCen.Agent
     stateRepresentation = stateRepresentationEnum.throttler
@@ -87,21 +82,19 @@ class LinearSarsaSingularDDQNCopy(object):
 class LinearSarsaLAIDDQN200(LinearSarsaLAI):
     # Idea (without using a ridiculous number of epLength, set the learning rate even lower and give proper exploration)
     name = "LinearDDQN200"
-    max_epLength = 30
     tau = 0.05
     num_episodes = 300001 #200001#    
-    pre_train_steps = 40000 * max_epLength #40000 * max_epLength #
-    annealing_steps = 120000 * max_epLength  #120000 * max_epLength  #
+    pre_train_episodes = 40000 #40000 #
+    annealing_episodes = 120000  #120000  #
     startE = 1
     endE = 0.0
-    stepDrop = (startE - endE)/annealing_steps
+    episodeDrop = (startE - endE)/annealing_episodes
     reward_overload = None  
 
 class LinHierLong(LinearSarsaLAIDDQN200):
     name = "LinHierLong"
-    max_epLength = 30    
-    pre_train_steps = 100000 * max_epLength 
-    annealing_steps = 200000 * max_epLength
+    pre_train_episodes = 100000 
+    annealing_episodes = 200000
     num_episodes = 600001
 
 # The class of the adversary to implement
@@ -121,10 +114,10 @@ Settings to change
 """
 
 assignedNetwork = NetworkSingleTeamMalialisMedium
-assignedAgent = AIMDsettings
+assignedAgent = LinearSarsaSingularDDQNCopy
 load_attack_path = "attackSimulations/{0}/".format(assignedNetwork.name)
 network_emulator = network.network_new.network_full # network_quick # network_full
-loadAttacks = False
+loadAttacks = True
 
 
 
@@ -134,17 +127,21 @@ assignedNetwork.drift = 0
 
 opposition = adv_constant
 
-assert(opposition.is_intelligent==False) # not meant to be a smart advesary
 
 
-intelligentOpposition =  sarAimdExtended #DdRandomMasterSettings
+intelligentOpposition =  sarGenericCen #DdRandomMasterSettings
 intelligentOpposition.save_model_mode = defender_mode_enum.save
 # intelligentOpposition = None
 
 
-
+assert(trainHost==adversarialLeaf)
+assert(opposition.is_intelligent==False) # not meant to be a smart advesary
 if intelligentOpposition == None:
+    print("no smart opposition detected")
     intelligentOpposition = opposition
+    intelligentOpposition.save_model_mode = defender_mode_enum.neither
+else:
+    assert(assignedAgent.save_model_mode != defender_mode_enum.save)
 
 
 
@@ -180,10 +177,10 @@ twist = "{0}{1}".format(numTiles, network_emulator.name) #{2}{0}Alias{1}".format
 
 if (len(sys.argv)==4) and sys.argv[3] != "" :
     file_path = sys.argv[3]
-    proper_path = getPathName(assignedNetwork, assignedAgent, commStrategy, twist, intelligentOpposition)
+    proper_path = getPathName(assignedNetwork, assignedAgent, commStrategy, twist, opposition)
     print("file should be: {0}".format(proper_path))
 else:
-    file_path = getPathName(assignedNetwork, assignedAgent, commStrategy, twist, intelligentOpposition)
+    file_path = getPathName(assignedNetwork, assignedAgent, commStrategy, twist, opposition)
 
 print('the filepath is {0}'.format(file_path))
 
@@ -192,8 +189,7 @@ print('the filepath is {0}'.format(file_path))
 #     # we've set the filepath, now we need to ensure that we have the right adversary
 #     assert(trainHost==conAttack)
 #     trainHost = adversarialLeaf
-if intelligentOpposition.save_model_mode is defender_mode_enum.neither:
-    assert(trainHost==adversarialLeaf)
+#if intelligentOpposition.save_model_mode is defender_mode_enum.neither:
 
 print('the filepath is {0}'.format(file_path))
 

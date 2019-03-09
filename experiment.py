@@ -78,8 +78,7 @@ class Experiment:
         
         self.file_path = file_path
 
-        y = self.agent_settings.y
-        tau = self.agent_settings.tau
+
         update_freq = self.agent_settings.update_freq
         batch_size = self.agent_settings.batch_size
 
@@ -212,7 +211,8 @@ class Experiment:
             if self.opposition_settings.is_intelligent and self.opposition_settings.save_model_mode in self.agentLoadModes:              
                 episode = self.adversarialMaster.loadModel(self.file_path, prefix)
                 if self.opposition_settings.save_model_mode == mapsAndSettings.defender_mode_enum.load_continue:
-                    ep_init = episode  
+                    ep_init = episode
+
             fail_seg = 0
             adv_last_action = None
             reward_per_print = 0

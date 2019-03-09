@@ -17,7 +17,7 @@ assert(len(sys.argv)>=3)
 class LinearSarsaSingular(object):
     # note we have two dependencies
     name = "LinearSarsaSingular"
-    y = 0
+    discount_factor = 0
     tau = 0.1
     update_freq = 4
     batch_size = None
@@ -41,7 +41,7 @@ class LinSingularExploration(LinearSarsaSingular):
 class LinearSarsaLAI(object):
     name = "LinearSarsaLAI"
     #max_epLength = 500
-    y = 0
+    discount_factor = 0
     tau = 0.01
     update_freq = 4
     batch_size = None
@@ -62,7 +62,7 @@ class LinearSarsaLAI(object):
 class LinearSarsaSingularDDQNCopy(object):
     # copy from ddqnSingleNoCommunicate
     name = "LinearSarsaSingularDDQNCopy"
-    y = 0    
+    discount_factor = 0    
     tau = 0.01 #Rate to update target network toward primary network. 
     update_freq = 4 #How often to perform a training step.
     batch_size = None #How many experiences to use for each training step.
@@ -114,10 +114,10 @@ Settings to change
 """
 
 assignedNetwork = NetworkSingleTeamMalialisMedium
-assignedAgent = AIMDsettings
+assignedAgent = LinearSarsaSingularDDQNCopy
 load_attack_path = "attackSimulations/{0}/".format(assignedNetwork.name)
 network_emulator = network.network_new.network_full # network_quick # network_full
-loadAttacks = True
+loadAttacks = False
 
 
 
@@ -125,13 +125,13 @@ assignedAgent.save_model_mode = defender_mode_enum.load
 trainHost = adversarialLeaf #coordAttack # conAttack #driftAttack #adversarialLeaf
 assignedNetwork.drift = 0
 
-opposition = adv_random
+opposition = adv_constant
 
 
 
 intelligentOpposition =  DdGenericCentral #DdRandomMasterSettings
 intelligentOpposition.save_model_mode = defender_mode_enum.save
-intelligentOpposition = None
+# intelligentOpposition = None
 
 
 assert(trainHost==adversarialLeaf)

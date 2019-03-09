@@ -16,11 +16,13 @@ import os
 # from sklearn.externals import joblib
 class Agent(aBase.Agent):
 
-    def __init__(self, N_action, N_state, encoders, agent_settings, alph, gam):
-
+    def __init__(self, N_action, N_state, encoders, agent_settings):
+        self.tau = agent_settings.tau
+        self.discount_factor = agent_settings.discount_factor
         super().__init__()
         self.ai = SarsaFunctionAI(
-            actions=range(N_action), encoders = encoders, alpha=alph, gamma=gam, agent_settings=agent_settings)
+            actions=range(N_action), encoders = encoders, agent_settings=agent_settings)
+
 
 
         self.N_action = N_action
