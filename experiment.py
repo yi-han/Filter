@@ -149,6 +149,7 @@ class Experiment:
             adv_e = 0
         else:
             self.adversarialMaster = None
+            assert(1==2) # shouldn't happen
 
         
 
@@ -352,16 +353,20 @@ class Experiment:
                     last_action = a   
                     total_steps += 1
                     
-                    if ep_num > pre_train_episodes:
-                        if e > startE:
-                            e = startE
-                        elif e > endE:
-                            e -= stepDrop
-                        elif e < endE:
-                            e = endE
-                            print("manual set e to end_e \n\n")
+                    if self.agent_settings.save_model_mode in self.agentSaveModes:
+
+                        if ep_num > pre_train_episodes:
+                            if e > startE:
+                                e = startE
+                            elif e > endE:
+                                e -= stepDrop
+                            elif e < endE:
+                                e = endE
+                                print("manual set e to end_e \n\n")
+                        else:
+                            e = 1 # pretraining
                     else:
-                        e = 1 # pretraining
+                        e = endE
 
                     if update_freq and self.agent_settings.save_model_mode in self.agentSaveModes and total_steps % (update_freq) == 0:
                         l = agent.actionReplay(net.get_state(), batch_size)
@@ -383,6 +388,8 @@ class Experiment:
                         if total_steps % self.opposition_settings.update_freq == 0:
                             adv_loss = self.adversarialMaster.actionReplay(adv_state, self.opposition_settings.batch_size)
                             ep_adv_loss += abs(adv_loss)
+                    elif self.opposition_settings.is_intelligent:
+                        adv_e = self.opposition_settings.endE
                     else:
                         adv_e = 0
 
