@@ -149,7 +149,7 @@ class ddGenAgent():
         # send legitimate traffic
         # legal_per_leaf = self.legal_traffic/len(self.leaves)
 
-        if not self.leaves[0].isAttackActive(step):
+        if not self.leaves[0].isAttackActive(time_step):
             assert(action==0)
 
         percent_emit = action/10
