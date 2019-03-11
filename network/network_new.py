@@ -550,7 +550,7 @@ class network_full(object):
         if adv_action:
             assert( self.adversaryMaster!=None)
 
-            self.adversaryMaster.sendTraffic(adv_action)
+            self.adversaryMaster.sendTraffic(adv_action, time_step)
         else:
             for host in self.hosts:
                 host.sendTraffic(time_step)

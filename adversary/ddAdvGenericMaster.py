@@ -146,10 +146,10 @@ class GenericAdvMaster():
 
         return actions
 
-    def sendTraffic(self, actions):
+    def sendTraffic(self, actions, step):
         #given the actioons send the traffic
         for i in range(len(self.adv_agents)):
-            self.adv_agents[i].sendTraffic(actions[i])
+            self.adv_agents[i].sendTraffic(actions[i], step)
 
     def calc_reward(self, network_reward):
         # convert the network reward to the adversarial reward

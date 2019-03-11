@@ -302,13 +302,17 @@ class adversarialLeaf(Host):
         self.agent = assignedAgent
 
 
-    def sendTraffic(self, percent_emit):
+    def sendTraffic(self, percent_emit, time_step):
         assert(percent_emit<=1)
-        packet_size = (self.traffic_per_iteration)*percent_emit
+        if not self.isAttackActive(time_step) and percent_emit != 0:
+            assert(1==2)
+        rate_traffic = self.traffic_per_iteration * percent_emit
+        
         if self.is_attacker:
-            self.destination_switch.new_illegal += packet_size
+            super().sendTraffic(time_step, rate_traffic)
         else:
-            self.destination_switch.new_legal += self.traffic_per_iteration        
+            super().sendTraffic(time_step, self.traffic_per_iteration)
+
 
 """
 

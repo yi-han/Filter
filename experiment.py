@@ -346,6 +346,7 @@ class Experiment:
                     net.step(a, step, advAction) # take the action, update the network
                     # ideally get rid of double up
 
+
                     if self.adversarialMaster != None:
                         adv_last_action = advAction
                         adv_last_state = adv_state                          
@@ -353,20 +354,37 @@ class Experiment:
                     last_action = a   
                     total_steps += 1
                     
-                    if self.agent_settings.save_model_mode in self.agentSaveModes:
 
-                        if ep_num > pre_train_episodes:
-                            if e > startE:
-                                e = startE
-                            elif e > endE:
-                                e -= stepDrop
-                            elif e < endE:
-                                e = endE
-                                print("manual set e to end_e \n\n")
-                        else:
-                            e = 1 # pretraining
+                    
+
+                    if self.agent_settings.save_model_mode in self.agentSaveModes:
+                        if ep_num < pre_train_episodes:
+                            e = 1
+                        elif e > self.agent_settings.startE:
+                            e = self.agent_settings.startE
+                        elif e > self.agent_settings.endE:
+                            e -= step_drop 
+                        elif e < self.agent_settings.endE:
+                            #assert(1==3)
+                            e = self.agent_settings.endE
                     else:
-                        e = endE
+                        e = self.agent_settings.endE
+                    
+
+
+
+                    if self.opposition_settings and self.opposition_settings.is_intelligent and self.opposition_settings.save_model_mode in self.agentSaveModes:
+                        if ep_num < adv_pretraining_episodes:
+                            adv_e = 1
+                        elif adv_e > self.opposition_settings.startE:
+                            adv_e = self.opposition_settings.startE
+                        elif adv_e > self.opposition_settings.endE:
+                            adv_e -= adv_step_drop 
+                        elif adv_e < self.opposition_settings.endE:
+                            #assert(1==3)
+                            adv_e = self.opposition_settings.endE                    
+
+
 
                     if update_freq and self.agent_settings.save_model_mode in self.agentSaveModes and total_steps % (update_freq) == 0:
                         l = agent.actionReplay(net.get_state(), batch_size)
@@ -388,10 +406,10 @@ class Experiment:
                         if total_steps % self.opposition_settings.update_freq == 0:
                             adv_loss = self.adversarialMaster.actionReplay(adv_state, self.opposition_settings.batch_size)
                             ep_adv_loss += abs(adv_loss)
-                    elif self.opposition_settings.is_intelligent:
+                    elif self.opposition_settings:
                         adv_e = self.opposition_settings.endE
                     else:
-                        adv_e = 0
+                        assert(1==2)
 
 
                 #self.episode_rewards.append(net.rewards_per_step) DO LATER

@@ -11,11 +11,13 @@ Comprised of many DDQN networks with one per adversarial agent
 from network.utility import advesaryStandardAttackEnum as advAttackEnum
 import random
 
-
 """
 Algorithms to determine attacks
 
 """
+
+
+
 def predict_constant_attack(step):
     return 10
 
@@ -78,6 +80,9 @@ class dumbMaster():
 
         """
 
+        if not self.adv_agents[0].leaves[0].isAttackActive(step):
+            # action is 0 if it's not an active attack
+            return 0
 
         if attack_strategy == advAttackEnum.constant:
 
@@ -102,10 +107,10 @@ class dumbMaster():
         return [action1, action2]
 
 
-    def sendTraffic(self, actions):
+    def sendTraffic(self, actions, step):
         #given the actioons send the traffic
         for i in range(len(self.adv_agents)):
-            self.adv_agents[i].sendTraffic(actions[i])
+            self.adv_agents[i].sendTraffic(actions[i], step)
 
     def calc_reward(self, network_reward):
         # convert the network reward to the adversarial reward

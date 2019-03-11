@@ -49,6 +49,8 @@ class adv_constant(object):
     is_intelligent = False
     num_adv_agents = 2
     attack_strategy = advesaryStandardAttackEnum.constant
+    endE = 0
+    startE = 0
 
 class adv_pulse_short(adv_constant):
     name = "pulse_short"

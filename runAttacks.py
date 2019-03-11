@@ -87,7 +87,7 @@ def run_attacks(assignedNetwork, assignedAgent, file_path, smart_attacker, prefi
         assignedNetwork.iterations_between_action = original_iterations
     
     mapsAndSettings.getSummary(attackers, file_path, agent, prefix)
-    if smart_attacker:
+    if smart_attacker and smart_attacker.is_intelligent:
         attackers.remove(smart_attacker)
     #undo changes
 
