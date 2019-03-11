@@ -19,17 +19,15 @@ assert(len(sys.argv)>= 3)
 class ddqnSingleNoCommunicate(object):
     group_size = 1
     name = "DDQN100SingleNoCommunicate"
-    max_epLength = 30 # or 60 if test
-    y = 0    
+    discount_factor = 0    
     tau = 0.01 #Rate to update target network toward primary network. 
     update_freq = 4 #How often to perform a training step.
     batch_size = 32 #How many experiences to use for each training step.
     num_episodes = 200001 #100001#    
-    pre_train_steps = 20000 * max_epLength #40000 * max_epLength #
-    annealing_steps = 60000 * max_epLength  #120000 * max_epLength  #
+    pre_train_episodes = 20000  #40000  #
+    annealing_episodes = 60000   #120000   #
     startE = 1
     endE = 0.0
-    stepDrop = (startE - endE)/annealing_steps
     agent = None
     sub_agent = ddCen.Agent
     stateRepresentation = stateRepresentationEnum.throttler
@@ -44,17 +42,15 @@ class ddqnMalialisTrue(object):
 
     """
     name = "DDQNDecGenMalialisTrue"
-    max_epLength = 30 # or 60 if test
-    y = 0
+    discount_factor = 0
     tau = 0.1
     update_freq = 4
     batch_size = 32
     num_episodes = 200001#82501
-    pre_train_steps = 2000 * max_epLength
-    annealing_steps = 50000 * max_epLength #1000*max_epLength #60000 * max_epLength 
+    pre_train_episodes = 2000 
+    annealing_episodes = 50000  #1000*max_epLength #60000  
     startE = 0.4 #0.4
     endE = 0.0
-    stepDrop = (startE - endE)/annealing_steps
     agent = None
     sub_agent = ddCen.Agent
     group_size = 1 # number of filters each agent controls
@@ -68,17 +64,16 @@ class ddqnMalialisTrue(object):
 # class ddqnDoubleHierarchical(object):
 #     group_size = 1
 #     name = "DDQN200Hierarchical"
-#     max_epLength = 30 # or 60 if test
-#     y = 0    
+# #     discount_factor = 0    
 #     tau = 0.001 #Rate to update target network toward primary network. 
 #     update_freq = 4 #How often to perform a training step.
 #     batch_size = 32 #How many experiences to use for each training step.
 #     num_episodes = 200001 #200001#    
-#     pre_train_steps = 40000 * max_epLength #40000 * max_epLength #
-#     annealing_steps = 120000 * max_epLength  #120000 * max_epLength  #
+#     pre_train_episodes = 40000  #40000  #
+#     annealing_episodes = 120000   #120000   #
 #     startE = 1
 #     endE = 0.0
-#     stepDrop = (startE - endE)/annealing_steps
+#
 #     agent = None
 #     sub_agent = ddCen.Agent
 #     stateRepresentation = stateRepresentationEnum.leaderAndIntermediate
@@ -88,17 +83,15 @@ class ddqnMalialisTrue(object):
 class ddqn50MediumHierachical(object):
     group_size = 1
     name = "ddqn50MediumHierachical"
-    max_epLength = 30 # or 60 if test
-    y = 0    
+    discount_factor = 0    
     tau = 0.001 #Rate to update target network toward primary network. 
     update_freq = 4 #How often to perform a training step.
     batch_size = 32 #How many experiences to use for each training step.
     num_episodes = 200001 #200001#    
-    pre_train_steps = 10000 * max_epLength #40000 * max_epLength #
-    annealing_steps = 30000 * max_epLength  #120000 * max_epLength  #
+    pre_train_episodes = 10000  #40000  #
+    annealing_episodes = 30000   #120000   #
     startE = 0.3
     endE = 0.0
-    stepDrop = (startE - endE)/annealing_steps
     agent = None
     sub_agent = ddCen.Agent
     stateRepresentation = stateRepresentationEnum.leaderAndIntermediate
@@ -108,17 +101,15 @@ class ddqn50MediumHierachical(object):
 class ddqn100MediumHierarchical(object):
     group_size = 1
     name = "ddqn100MediumHierarchical"
-    max_epLength = 30 # or 60 if test
-    y = 0    
+    discount_factor = 0    
     tau = 0.001 #Rate to update target network toward primary network. 
     update_freq = 4 #How often to perform a training step.
     batch_size = 32 #How many experiences to use for each training step.
     num_episodes = 200001 #200001#    
-    pre_train_steps = 20000 * max_epLength #40000 * max_epLength #
-    annealing_steps = 60000 * max_epLength  #120000 * max_epLength  #
+    pre_train_episodes = 20000  #40000  #
+    annealing_episodes = 60000   #120000   #
     startE = 0.3
     endE = 0.0
-    stepDrop = (startE - endE)/annealing_steps
     agent = None
     sub_agent = ddCen.Agent
     stateRepresentation = stateRepresentationEnum.leaderAndIntermediate
@@ -161,9 +152,21 @@ assignedAgent.save_model_mode = defender_mode_enum.save
 trainHost = adversarialLeaf #coordAttack # conAttack #driftAttack #adversarialLeaf
 assignedNetwork.drift = 0
 
-intelligentOpposition = adv_random #ddAdvAntiAimd #DdCoordinatedLowlongDlowSettings #DdCoordinatedMasterSettings #DdRandomMasterSettings
-intelligentOpposition.save_model_mode = defender_mode_enum.neither
-# intelligentOpposition = None
+opposition = adv_constant
+intelligentOpposition = DdGenericCentral #ddAdvAntiAimd #DdCoordinatedLowlongDlowSettings #DdCoordinatedMasterSettings #DdRandomMasterSettings
+intelligentOpposition.save_model_mode = defender_mode_enum.save
+intelligentOpposition = None
+
+
+assert(trainHost==adversarialLeaf)
+assert(opposition.is_intelligent==False) # not meant to be a smart advesary
+if intelligentOpposition == None:
+    print("no smart opposition detected")
+    intelligentOpposition = opposition
+    intelligentOpposition.save_model_mode = defender_mode_enum.neither
+else:
+    assert(assignedAgent.save_model_mode != defender_mode_enum.save)
+
 
 
 network_emulator = network.network_new.network_full #network_quick # network_full
@@ -180,20 +183,15 @@ commStrategy = calc_comm_strategy(assignedAgent.stateRepresentation)
 
 if (len(sys.argv)>=4) and sys.argv[3] != "" :
     file_path = sys.argv[3]
-    proper_path = getPathName(assignedNetwork, assignedAgent, commStrategy, twist, intelligentOpposition)
+    proper_path = getPathName(assignedNetwork, assignedAgent, commStrategy, twist, opposition)
 
     print("file should be: {0}".format(proper_path))
 else:
-    file_path = getPathName(assignedNetwork, assignedAgent, commStrategy, twist, intelligentOpposition)
+    file_path = getPathName(assignedNetwork, assignedAgent, commStrategy, twist, opposition)
 
 print('the filepath is {0}'.format(file_path))
-if assignedAgent.save_model_mode in [defender_mode_enum.load, defender_mode_enum.load_save] and intelligentOpposition \
-    and intelligentOpposition.save_model_mode in [defender_mode_enum.save, defender_mode_enum.load_continue]:
-    # we've set the filepath, now we need to ensure that we have the right adversary
-    assert(trainHost==conAttack)
-    trainHost = adversarialLeaf
-if intelligentOpposition.save_model_mode is defender_mode_enum.neither:
-    assert(trainHost==adversarialLeaf)
+
+
 
 start_num = int(sys.argv[1])
 length_core= int(sys.argv[2])

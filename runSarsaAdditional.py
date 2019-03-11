@@ -117,11 +117,11 @@ assignedNetwork = NetworkSingleTeamMalialisMedium
 assignedAgent = LinearSarsaSingularDDQNCopy
 load_attack_path = "attackSimulations/{0}/".format(assignedNetwork.name)
 network_emulator = network.network_new.network_full # network_quick # network_full
-loadAttacks = True
+loadAttacks = False
 
 
 
-assignedAgent.save_model_mode = defender_mode_enum.load
+assignedAgent.save_model_mode = defender_mode_enum.save
 trainHost = adversarialLeaf #coordAttack # conAttack #driftAttack #adversarialLeaf
 assignedNetwork.drift = 0
 
@@ -129,9 +129,9 @@ opposition = adv_constant
 
 
 
-intelligentOpposition =  sarGenericCen #DdRandomMasterSettings
+intelligentOpposition =  DdGenericCentral #DdRandomMasterSettings
 intelligentOpposition.save_model_mode = defender_mode_enum.save
-# intelligentOpposition = None
+intelligentOpposition = None
 
 
 assert(trainHost==adversarialLeaf)
