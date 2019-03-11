@@ -5,7 +5,7 @@ import os
 import sys
 import re
 class Agent(aBase.Agent):
-    def __init__(self, N_action, N_state, tileFunction, agent_settings, tau, discountFactor):
+    def __init__(self, N_action, N_state, tileFunction, agent_settings):
 
 
         tf.reset_default_graph() # note remove for the decentralised one
@@ -16,11 +16,13 @@ class Agent(aBase.Agent):
         self.init = tf.global_variables_initializer()
         self.saver = tf.train.Saver()
         self.trainables = tf.trainable_variables()
+        tau = agent_settings.tau
         self.targetOps = updateTargetGraph(self.trainables,tau)
         self.targetOps = updateTargetGraph(self.trainables,tau)
         self.myBuffer = Memory(capacity=300000)
         self.N_action = N_action
-        self.y = discountFactor
+        self.y = agent_settings.discount_factor
+
         self.sess = tf.Session()
     
     def __enter__(self):

@@ -89,10 +89,10 @@ class Experiment:
         endE = self.agent_settings.endE
         max_epLength = self.network_settings.max_epLength
         if startE > endE:
-            stepDrop = (startE - endE)/(self.agent_settings.annealing_episodes*max_epLength)
+            step_drop = (startE - endE)/(self.agent_settings.annealing_episodes*max_epLength)
         else:
             assert(startE == endE)
-            stepDrop = 0
+            step_drop = 0
         agent = preloaded_agent
         agent.reset()
 
@@ -104,7 +104,7 @@ class Experiment:
 
         if self.agent_settings.save_model_mode in self.agentTestModes:
             e = endE
-            stepDrop = 0
+            step_drop = 0
             pre_train_episodes = 0
         
         if self.agent_settings.save_model_mode is mapsAndSettings.defender_mode_enum.test_short:
@@ -228,7 +228,7 @@ class Experiment:
                 # lower the exploration rate
                 if e>0:
                     if e > pre_train_episodes:
-                        e = max((e - (stepDrop*total_steps)),endE)
+                        e = max((e - (step_drop*total_steps)),endE)
 
 
                 if self.opposition_settings and self.opposition_settings.is_intelligent and adv_e > 0:
