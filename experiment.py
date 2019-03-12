@@ -76,10 +76,9 @@ class Experiment:
         self.opposition_settings = oppositionSettings
 
 
-        self.agentTestModes = [mapsAndSettings.defender_mode_enum.test_short, mapsAndSettings.defender_mode_enum.load, mapsAndSettings.defender_mode_enum.load_save]
+        self.agentLoadModes = [mapsAndSettings.defender_mode_enum.test_short, mapsAndSettings.defender_mode_enum.load, mapsAndSettings.defender_mode_enum.load_save, mapsAndSettings.defender_mode_enum.load_continue]
         self.agentSaveModes = [mapsAndSettings.defender_mode_enum.save, mapsAndSettings.defender_mode_enum.load_save, mapsAndSettings.defender_mode_enum.load_continue]
-        self.agentLoadModes = self.agentTestModes.copy()
-        self.agentLoadModes.append(mapsAndSettings.defender_mode_enum.load_continue)
+        self.agentTestModes = [mapsAndSettings.defender_mode_enum.test_short]
 
         assert AgentSettings.trained_drift != -1 # ensure we have it set, dont ever use in experiment
 
@@ -204,7 +203,7 @@ class Experiment:
                 e = calculate_e(ep_init, pre_train_episodes, self.agent_settings.startE, self.agent_settings.endE, self.agent_settings.annealing_episodes)
             # set e for advesary
             if self.opposition_settings.is_intelligent and self.opposition_settings.save_model_mode in self.agentSaveModes:
-                advE = calculate_e(ep_init, adv_pretrain_episodes, self.opposition_settings.startE, self.opposition_settings.endE, self.opposition_settings.annealing_episodes)
+                adv_e = calculate_e(ep_init, adv_pretrain_episodes, self.opposition_settings.startE, self.opposition_settings.endE, self.opposition_settings.annealing_episodes)
 
 
 
