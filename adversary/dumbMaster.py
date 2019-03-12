@@ -142,6 +142,7 @@ class dumbMaster():
             chosen_strategy = self.adv_settings.attack_strategy
         if chosen_strategy == advAttackEnum.split: 
             strategy1 = random.choice(splitStrategies)
+            splitStrategies.remove(strategy1) # to ensure something different
             strategy2 = random.choice(splitStrategies)
             self.current_strategy = (strategy1, strategy2)
         elif chosen_strategy == advAttackEnum.random:
