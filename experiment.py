@@ -47,6 +47,18 @@ from network.network_new import *
 import network.hosts as hosts
 import mapsAndSettings
 
+def calculate_e(current_episode, pretraining_episodes, startE, endE, annealing_episodes):
+    if current_episode < pretraining_episodes:
+        return 1
+    elif current_episode >= (pretraining_episodes + annealing_episodes):
+        return endE
+    elif current_episode == pretraining_episodes:
+        return startE
+    else:
+        percentRemaining = 1 - ((current_episode- pretraining_episodes)/annealing_episodes)
+        assert(percentComplete > 0 and percentComplete < 1)
+        e = endE + ((startE - endE)*percentRemaining)
+        return e
 
 class Experiment:
 
@@ -71,132 +83,99 @@ class Experiment:
 
         assert AgentSettings.trained_drift != -1 # ensure we have it set, dont ever use in experiment
 
-    def run(self, prefix, preloaded_agent, file_path):
+    def run(self, prefix, agent, file_path):
         N_action = self.network_settings.N_action
         N_state = self.network_settings.N_state
-        action_per_throttler = self.network_settings.action_per_throttler
-        
+        action_per_throttler = self.network_settings.action_per_throttler 
         self.file_path = file_path
-
-
         update_freq = self.agent_settings.update_freq
         batch_size = self.agent_settings.batch_size
-
-        num_episodes = self.agent_settings.num_episodes
-        pre_train_episodes = self.agent_settings.pre_train_episodes
-        e = 1 # always start full exploration. Gets overwritten in training
-        startE = self.agent_settings.startE
-        endE = self.agent_settings.endE
-        max_epLength = self.network_settings.max_epLength
-        if startE > endE:
-            step_drop = (startE - endE)/(self.agent_settings.annealing_episodes*max_epLength)
-        else:
-            assert(startE == endE)
-            step_drop = 0
-        agent = preloaded_agent
-        agent.reset()
-
-
-        """
-        One big operation for number of episodes
-
-        """
-
-        if self.agent_settings.save_model_mode in self.agentTestModes:
-            e = endE
-            step_drop = 0
-            pre_train_episodes = 0
-        
-        if self.agent_settings.save_model_mode is mapsAndSettings.defender_mode_enum.test_short:
-            num_episodes = 500 #500
-            max_epLength = 60
-
-
-
-        if self.opposition_settings and self.opposition_settings.is_intelligent:
-            self.network_settings.is_sig_attack = True # ensure we only have significant attacks when there is an advesary to mimic testing conditions
-
-            print(self.adversary_class)
-            self.adversarialMaster = self.opposition_settings.adversary_class(self.opposition_settings, self.network_settings, agent.getPath(), agent)
-            assert(self.adversary_class == hosts.adversarialLeaf)
-
-            
-            if self.opposition_settings.save_model_mode in self.agentTestModes:
-                # large assumption of learning or loading
-                adv_pretraining_episodes = 0
-                adv_e = self.opposition_settings.endE
-                adv_step_drop = 0
-            else:
-                adv_e = self.opposition_settings.startE
-                adv_pretraining_episodes = self.opposition_settings.pre_train_episodes
-
-                if self.agent_settings.save_model_mode is mapsAndSettings.defender_mode_enum.load:
-
-                    # if we're loading the defender but saving the adversary
-                    num_episodes = self.opposition_settings.num_episodes
-                    adv_annealing_episodes = self.opposition_settings.annealing_episodes
-                else:
-                    # both agent and attacker are learning
-                    if(num_episodes<(adv_pretraining_episodes+self.opposition_settings.annealing_episodes)):
-                        print("\n\n we're resetting the number of adversary annealing_episodes")
-                        adv_annealing_episodes = num_episodes- adv_pretraining_episodes
-                    else:
-                        adv_annealing_episodes = self.opposition_settings.annealing_episodes
-                adv_step_drop = (adv_e - self.opposition_settings.endE) / (adv_annealing_episodes  * max_epLength)
-
-        elif self.opposition_settings:
-            self.adversarialMaster =  self.opposition_settings.adversary_class(self.opposition_settings, max_epLength)
-            adv_e = 0
-        else:
-            self.adversarialMaster = None
-            assert(1==2) # shouldn't happen
-
-        
-
-        run_mode = self.agent_settings.save_model_mode.name
-     
-
-        print("Experiment has {0} episodes".format(num_episodes))
-
-        reward_overload = self.agent_settings.reward_overload
-        if reward_overload:
-            print("using reward overload")
-        print("\n Prefix {0}".format(prefix))
-        print("using proper network")
-        net = self.network_settings.emulator(self.network_settings, reward_overload, self.adversary_class, max_epLength, self.representationType, self.agent_settings, self.adversarialMaster, load_attack_path=self.load_attack_path)
-        # print("using quick network")
-        # net = network_quick(self.network_settings, reward_overload, self.adversary_class, max_epLength, self.representationType, load_attack_path = self.load_attack_path)
         #create lists to contain total rewards and steps per episode
         stepList = []
         rList = []
         advRList = []
         loss = []
+        # determine reward for a prediction at start of episode, we choose the second step as first step is random
+        reward_lines = []
+        loss_lines = []
+        packet_served_lines = []    
+
         total_steps = 0
-        rewards_tampered = 0
-        experiences_added = 0
-        largest_gradient = 0
-        fail = 0 # The total number of fails
-
-        name = self.agent_settings.name
-
+        fail = 0 # The total number of fails 
+        e = 1 # always start full exploration. Gets overwritten in training
+        agent.reset()
         
 
-        print("Path is {0}".format(self.file_path))
 
+
+        """
+        Determine the episodes and exploration for the defender
+
+        """
+
+        if self.agent_settings.save_model_mode in self.agentTestModes:
+            num_episodes = 500 #500
+            max_epLength = 60
+        else:
+            num_episodes = self.agent_settings.num_episodes
+            max_epLength = self.network_settings.max_epLength
+
+        if self.agent_settings.save_model_mode in self.agentSaveModes: #self.agentLoadModes:
+            pre_train_episodes = self.agent_settings.pre_train_episodes
+            step_drop = (self.agent_settings.startE - self.agent_settings.endE)/(self.agent_settings.annealing_episodes*max_epLength)
+            # work out e later
+        else:
+            assert(self.agent_settings.save_model_mode in self.agentLoadModes)
+            e = self.agent_settings.endE
+            step_drop = 0
+            pre_train_episodes = 0
+
+        if self.opposition_settings.is_intelligent:
+            # we have a smart advesary. We default to the largest of the number of episodes for defender or attacker
+            self.network_settings.is_sig_attack = True # ensure we only have significant attacks when there is an advesary to mimic testing conditions
+            assert(self.adversary_class == hosts.adversarialLeaf)
+            self.adversarialMaster = self.opposition_settings.adversary_class(self.opposition_settings, self.network_settings, agent.getPath(), agent)
+
+            if self.opposition_settings.save_model_mode in self.agentTestModes:
+                assert(self.agent_settings.save_model_mode in self.agentTestModes)
+                # if this is true we already have number of episodes set
+            else:
+                num_episodes = max(num_episodes, self.opposition_settings.num_episodes)
+                assert(not self.agent_settings.save_model_mode in self.agentTestModes)
+            
+            if self.opposition_settings.save_model_mode in self.agentSaveModes:          
+                adv_pretrain_episodes = self.opposition_settings.pre_train_episodes
+                adv_step_drop = (self.opposition_settings.startE - self.opposition_settings.endE) / (self.opposition_settings.annealing_episodes  * max_epLength)
+
+            else:
+                assert(self.opposition_settings.save_model_mode in self.agentLoadModes)
+                adv_pretrain_episodes = 0
+                adv_e = self.opposition_settings.endE
+                adv_step_drop = 0      
+        else:
+            self.adversarialMaster =  self.opposition_settings.adversary_class(self.opposition_settings, max_epLength)
+            adv_e = 0
+
+        net = self.network_settings.emulator(self.network_settings, self.agent_settings.reward_overload, self.adversary_class, max_epLength, self.representationType, self.agent_settings, self.adversarialMaster, load_attack_path=self.load_attack_path)
+
+        print("Experiment has {0} episodes".format(num_episodes))
+        print("\n Prefix {0}".format(prefix))
+        print("Path is {0}".format(self.file_path))
 
         #Make a path for our model to be saved in.
 
         if not os.path.exists(file_path):
-            os.makedirs(file_path)
+            try:
+                os.makedirs(file_path)                
+            except OSError as exc:
+                if exc.errno != errno.EEXIST:
+                    raise
+                assert(os.path.exists(file_path))
+                pass
 
-        # determine reward for a prediction at start of episode, we choose the second step as first step is random
-
-        reward_lines = []
-        loss_lines = []
-        packet_served_lines = []
         # Similar to init. Different from reward_file as this is if exploration is 0. Measures how accurate it is at the moment.
         
-        print("Using the {0} agent:".format(name))
+        print("Using the {0} agent:".format(self.agent_settings.name))
         reward_lines.append("Episode,StepsSoFar,TotalReward,LastReward,LengthEpisode,e,PerPacketIdeal, AdvTotalReward, AdvLastReward\n")
         packet_served_lines.append("Episode,PacketsReceived,PacketsServed,PercentageReceived,ServerFailures\n")
         loss_lines.append("Episode,StepsSoFar,Loss,Exploration,EpDefLoss,EpAdvLoss\n")
@@ -206,13 +185,12 @@ class Experiment:
 
 
         with agent:
-            if self.adversarialMaster: 
-                self.adversarialMaster.__enter__()
+            self.adversarialMaster.__enter__()
             if self.agent_settings.save_model_mode in self.agentLoadModes : #mapsAndSettings.defender_mode_enum.test
                 episode = agent.loadModel(self.file_path, prefix)
                 if self.agent_settings.save_model_mode == mapsAndSettings.defender_mode_enum.load_continue:
                     ep_init = episode
-            if self.opposition_settings and self.opposition_settings.is_intelligent and self.opposition_settings.save_model_mode in self.agentLoadModes:              
+            if self.opposition_settings.is_intelligent and self.opposition_settings.save_model_mode in self.agentLoadModes:              
                 episode = self.adversarialMaster.loadModel(self.file_path, prefix)
                 if self.opposition_settings.save_model_mode == mapsAndSettings.defender_mode_enum.load_continue:
                     ep_init = episode
@@ -221,19 +199,15 @@ class Experiment:
             adv_last_action = None
             reward_per_print = 0
 
-            if ep_init > 0:
-                print("Not sure if updated this for pre_train_episodes")
-                assert(1==2)
-                total_steps = ep_init*max_epLength
-                # lower the exploration rate
-                if e>0:
-                    if e > pre_train_episodes:
-                        e = max((e - (step_drop*total_steps)),endE)
+            # set e for defender
+            if self.agent_settings.save_model_mode in self.agentSaveModes:
+                e = calculate_e(ep_init, pre_train_episodes, self.agent_settings.startE, self.agent_settings.endE, self.agent_settings.annealing_episodes)
+            # set e for advesary
+            if self.opposition_settings.is_intelligent and self.opposition_settings.save_model_mode in self.agentSaveModes:
+                advE = calculate_e(ep_init, adv_pretrain_episodes, self.opposition_settings.startE, self.opposition_settings.endE, self.opposition_settings.annealing_episodes)
 
 
-                if self.opposition_settings and self.opposition_settings.is_intelligent and adv_e > 0:
-                    if total_steps > adv_pretraining_steps:
-                        adv_e = max((adv_e - (adv_step_drop*total_steps)),self.opposition_settings.endE)
+
             print("\n\n Starting at episode {0}".format(ep_init))
             for ep_num in range(ep_init, num_episodes):
                 agent.reset_episode()
@@ -274,7 +248,7 @@ class Experiment:
                         if self.agent_settings.save_model_mode in self.agentSaveModes:
                             agent.update(net.last_state, last_action, net.get_state(), d, r, next_action = a)
 
-                        if self.opposition_settings and self.opposition_settings.is_intelligent:
+                        if self.opposition_settings.is_intelligent:
                             adv_r = self.adversarialMaster.calc_reward(r)
                             if self.opposition_settings.save_model_mode in self.agentSaveModes:
                                 self.adversarialMaster.update(adv_last_state, adv_last_action, adv_state, d, adv_r, step, advAction)
@@ -373,8 +347,8 @@ class Experiment:
 
 
 
-                    if self.opposition_settings and self.opposition_settings.is_intelligent and self.opposition_settings.save_model_mode in self.agentSaveModes:
-                        if ep_num < adv_pretraining_episodes:
+                    if self.opposition_settings.is_intelligent and self.opposition_settings.save_model_mode in self.agentSaveModes:
+                        if ep_num < adv_pretrain_episodes:
                             adv_e = 1
                         elif adv_e > self.opposition_settings.startE:
                             adv_e = self.opposition_settings.startE
@@ -392,8 +366,8 @@ class Experiment:
                             loss.append(l)
                             ep_def_loss += abs(l)
 
-                    if self.opposition_settings and self.opposition_settings.is_intelligent and self.opposition_settings.save_model_mode in self.agentSaveModes:
-                        if ep_num < adv_pretraining_episodes:
+                    if self.opposition_settings.is_intelligent and self.opposition_settings.save_model_mode in self.agentSaveModes:
+                        if ep_num < adv_pretrain_episodes:
                             adv_e = 1
                         elif adv_e > self.opposition_settings.startE:
                             adv_e = self.opposition_settings.startE
@@ -430,7 +404,7 @@ class Experiment:
                 if ep_num % 10000 == 0:
                     if self.agent_settings.save_model_mode in self.agentSaveModes:  # only save the first iteration 
                         agent.saveModel(self.file_path, ep_num, prefix)
-                    if self.opposition_settings and self.opposition_settings.is_intelligent and self.opposition_settings.save_model_mode in self.agentSaveModes:
+                    if self.opposition_settings.is_intelligent and self.opposition_settings.save_model_mode in self.agentSaveModes:
                         self.adversarialMaster.saveModel(self.file_path, ep_num, prefix)
 
 
@@ -461,8 +435,10 @@ class Experiment:
                 # save the model only every 10,000 steps
                 agent.saveModel(self.file_path, ep_num, prefix)
 
-            if self.opposition_settings and self.opposition_settings.is_intelligent and self.opposition_settings.save_model_mode in self.agentSaveModes:
+            if self.opposition_settings.is_intelligent and self.opposition_settings.save_model_mode in self.agentSaveModes:
                 self.adversarialMaster.saveModel(self.file_path, ep_num, prefix)
+
+        run_mode = self.agent_settings.save_model_mode.name
 
         reward_file = open("{0}/reward-{1}-{2}-{3}.csv".format(file_path,run_mode, self.opposition_settings.name, prefix),"w")
         for line in reward_lines:
@@ -478,7 +454,7 @@ class Experiment:
         for line in packet_served_lines:
             packet_served_file.write(line)
         packet_served_file.close()
-        print("{0} is:".format(name))
+        print("{0} is:".format(self.agent_settings.name))
         print("Percent of succesful episodes: " + str(100 - fail*100/total_steps) + "%")
 
 

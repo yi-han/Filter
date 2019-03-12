@@ -80,23 +80,23 @@ class ddqnMalialisTrue(object):
 #     reward_overload = None    
 
 
-class ddqn50MediumHierachical(object):
-    group_size = 1
-    name = "ddqn50MediumHierachical"
-    discount_factor = 0    
-    tau = 0.001 #Rate to update target network toward primary network. 
-    update_freq = 4 #How often to perform a training step.
-    batch_size = 32 #How many experiences to use for each training step.
-    num_episodes = 200001 #200001#    
-    pre_train_episodes = 10000  #40000  #
-    annealing_episodes = 30000   #120000   #
-    startE = 0.3
-    endE = 0.0
-    agent = None
-    sub_agent = ddCen.Agent
-    stateRepresentation = stateRepresentationEnum.leaderAndIntermediate
-    reward_overload = None       
-    has_bucket = False
+# class ddqn50MediumHierachical(object):
+#     group_size = 1
+#     name = "ddqn50MediumHierachical"
+#     discount_factor = 0    
+#     tau = 0.001 #Rate to update target network toward primary network. 
+#     update_freq = 4 #How often to perform a training step.
+#     batch_size = 32 #How many experiences to use for each training step.
+#     num_episodes = 200001 #200001#    
+#     pre_train_episodes = 10000  #40000  #
+#     annealing_episodes = 30000   #120000   #
+#     startE = 0.3
+#     endE = 0.0
+#     agent = None
+#     sub_agent = ddCen.Agent
+#     stateRepresentation = stateRepresentationEnum.leaderAndIntermediate
+#     reward_overload = None       
+#     has_bucket = False
 
 class ddqn100MediumHierarchical(object):
     group_size = 1
@@ -152,7 +152,7 @@ assignedAgent.save_model_mode = defender_mode_enum.save
 trainHost = adversarialLeaf #coordAttack # conAttack #driftAttack #adversarialLeaf
 assignedNetwork.drift = 0
 
-opposition = adv_constant
+opposition = adv_random
 intelligentOpposition = DdGenericCentral #ddAdvAntiAimd #DdCoordinatedLowlongDlowSettings #DdCoordinatedMasterSettings #DdRandomMasterSettings
 intelligentOpposition.save_model_mode = defender_mode_enum.save
 intelligentOpposition = None

@@ -1,4 +1,4 @@
-# redo constant base
+# redo base
 
 sed 's/runDDQN/runSARSA/g' exp_cloud.slurm > output.slurm
 sed 's/sampleDDQNText/sarConOrig/g' output.slurm -i
