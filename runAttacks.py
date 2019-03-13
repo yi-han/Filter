@@ -33,19 +33,18 @@ DEFAULT_NUMBER_ATTACKS = 200
 
 def run_attacks(assignedNetwork, assignedAgent, file_path, smart_attacker, prefix, custom_iterations_between_action = DEFAULT_NUMBER_ATTACKS):
     assert(custom_iterations_between_action == DEFAULT_NUMBER_ATTACKS)
-    network = copy.deepcopy(assignedNetwork)
-    agent = copy.deepcopy(assignedAgent)
 
 
-    load_attack_path = "attackSimulations/{0}/".format(network.name)
+
+    load_attack_path = "attackSimulations/{0}/".format(assignedNetwork.name)
     network_emulator = network_new.network_full # network_quick # network_full
-    network.emulator = network_emulator
+    assignedNetwork.emulator = network_emulator
 
-    initial_save_mode = agent.save_model_mode
-    initial_drift = network.drift
+    initial_save_mode = assignedAgent.save_model_mode
+    initial_drift = assignedNetwork.drift
 
-    network.drift = 0 # we don't use drift in testing
-    agent.save_model_mode = mapsAndSettings.defender_mode_enum.test_short
+    assignedNetwork.drift = 0 # we don't use drift in testing
+    assignedAgent.save_model_mode = mapsAndSettings.defender_mode_enum.test_short
     
     original_iterations = assignedNetwork.iterations_between_action
 
@@ -53,16 +52,17 @@ def run_attacks(assignedNetwork, assignedAgent, file_path, smart_attacker, prefi
     print(attack_location)
     
     attackClass = adversarialLeaf
+    assignedNetwork.save_per_step_stats = True
 
 
     for attacker in attackers:
         assignedNetwork.iterations_between_action = custom_iterations_between_action
         print(attacker.name)
         print("\n\n\n")
-        genericAgent = mapsAndSettings.create_generic_dec(agent, network)
+        genericAgent = mapsAndSettings.create_generic_dec(assignedAgent, assignedNetwork)
         
-        exp = experiment.Experiment(attackClass, network, 
-            agent, attacker, load_attack_path=attack_location)       
+        exp = experiment.Experiment(attackClass, assignedNetwork, 
+            assignedAgent, attacker, load_attack_path=attack_location)       
 
 
         exp.run(prefix, genericAgent, file_path)
@@ -75,10 +75,10 @@ def run_attacks(assignedNetwork, assignedAgent, file_path, smart_attacker, prefi
         # attackClasses.insert(adversarialLeaf, 0)
         print("doing smart_attacker")
         assignedNetwork.iterations_between_action = custom_iterations_between_action
-        genericAgent = mapsAndSettings.create_generic_dec(agent, network)
+        genericAgent = mapsAndSettings.create_generic_dec(assignedAgent, assignedNetwork)
         #attack_location = load_attack_path+attackClass.getName()+".apkl"
-        exp = experiment.Experiment(attackClass, network, 
-            agent, smart_attacker, load_attack_path=attack_location)
+        exp = experiment.Experiment(attackClass, assignedNetwork, 
+            assignedAgent, smart_attacker, load_attack_path=attack_location)
 
         exp.run(prefix, genericAgent, file_path)
         smart_attacker.save_model_mode = init_adv_save_model
@@ -86,13 +86,15 @@ def run_attacks(assignedNetwork, assignedAgent, file_path, smart_attacker, prefi
 
         assignedNetwork.iterations_between_action = original_iterations
     
-    mapsAndSettings.getSummary(attackers, file_path, agent, prefix)
+    mapsAndSettings.getSummary(attackers, file_path, assignedAgent, prefix)
     if smart_attacker and smart_attacker.is_intelligent:
         attackers.remove(smart_attacker)
     #undo changes
 
-    network.drift = initial_drift
-    agent.save_model_mode = initial_save_mode
+    assignedNetwork.drift = initial_drift
+    assignedAgent.save_model_mode = initial_save_mode
+    assignedNetwork.save_per_step_stats = False
+
 
 
 

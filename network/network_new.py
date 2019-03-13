@@ -449,10 +449,10 @@ class network_full(object):
             self.record_attackers()
         #self.set_rate()
         self.current_state = None
-        self.legitimate_sent = 0
-        self.legitimate_served = 0
-        self.illegal_sent = 0
-        self.illegal_served = 0
+        self.legitimate_sent_ep = 0
+        self.legitimate_served_ep = 0
+        self.illegal_sent_ep = 0
+        self.illegal_served_ep = 0
         self.rewards_per_step = [] # keep track of the rewards at every step
         self.server_failures = 0
 
@@ -704,7 +704,7 @@ class network_full(object):
                 assert(abs(server_throttle_level * traffic_level - self.upper_boundary )< DELTA) 
                 new_legit_rate = legitimate_rate * server_throttle_level
                 #print("{0} vs {1}".format(new_legit_rate, legitimate_rate_all))
-                self.legitimate_served += new_legit_rate
+                self.legitimate_served_ep += new_legit_rate
 
         else:
             # we dont do the drift until now because before now it didn't matter
@@ -716,17 +716,17 @@ class network_full(object):
             if legitimate_rate_all != 0:
                 reward += legitimate_rate/legitimate_rate_all
         
-            self.legitimate_served += legitimate_rate
+            self.legitimate_served_ep += legitimate_rate
         
-        self.legitimate_sent += legitimate_rate_all
-        self.illegal_served += self.switches[0].illegal_window
-        self.illegal_sent += (self.switches[0].illegal_window + self.switches[0].dropped_illegal_window)
+        self.legitimate_sent_ep += legitimate_rate_all
+        self.illegal_served_ep += self.switches[0].illegal_window
+        self.illegal_sent_ep += (self.switches[0].illegal_window + self.switches[0].dropped_illegal_window)
         reward = clip(-1, 1, reward)
 
         self.cache_reward = reward
         return reward
 
-    def getPacketServedAtMoment(self):
+    def getStepPacketStatistics(self):
         """
         Experimental statistic. 
         Calculate the load at the server. If it is above the capacity/steps report 0. 
@@ -734,14 +734,17 @@ class network_full(object):
         Do note there is an accumulative effect so this is very imprecise
 
         """
-        legitimate_rate = self.switches[0].legal_window
+        legitimate_served = self.switches[0].legal_window
         legitimate_sent = self.switches[0].legal_window + self.switches[0].dropped_legal_window
-        attacker_rate = self.switches[0].illegal_window
+        illegal_served = self.switches[0].illegal_window
+        illegal_sent = self.switches[0].illegal_window + self.switches[0].dropped_illegal_window
 
-        if legitimate_rate + attacker_rate > self.upper_boundary:
-            return 0.0
+        if legitimate_served + illegal_served > self.upper_boundary or legitimate_served == 0:
+            legal_received_per = 0
         else:
-            return MbToKb(legitimate_rate/legitimate_sent)
+            legal_received_per = legitimate_served/legitimate_sent
+
+        return (KbToMb(legitimate_served), KbToMb(legitimate_sent), legal_received_per, KbToMb(illegal_sent))
 
 
     def step(self, action, step_count, adv_action = None):
@@ -772,13 +775,16 @@ class network_full(object):
     def getLegitStats(self):
         # returns % of packets served in an episode
         # meant to be used at end of an epsisode
-        if self.legitimate_sent == 0:
+        if self.legitimate_sent_ep == 0:
             legal_per = 0
         else:
-            legal_per = self.legitimate_served / self.legitimate_sent
-        return self.legitimate_served, self.legitimate_sent, legal_per, self.server_failures, self.illegal_served, self.illegal_sent
-
-    
+            legal_per = self.legitimate_served_ep / self.legitimate_sent_ep
+        
+        legit_serve_ep = KbToMb(self.legitimate_served_ep)
+        legit_sent_ep = KbToMb(self.legitimate_sent_ep)
+        illegal_served_ep = KbToMb(self.illegal_served_ep)
+        illegal_sent_ep =  KbToMb(self.illegal_sent_ep)
+        return (legit_serve_ep, legit_sent_ep, legal_per, self.server_failures, illegal_served_ep, illegal_sent_ep)
     # def save_attacks(self):
     #     with open(self.load_attack_path, "wb") as f:
     #         print("saving the attack")

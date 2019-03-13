@@ -131,6 +131,7 @@ class NetworkMalialisSmall(object):
 
     max_epLength = 30
     is_sig_attack = False
+    save_per_step_stats = False
 
 class NetworkSingleTeamMalialisMedium(object):
     name = "single_team_malialis_medium"
@@ -159,6 +160,7 @@ class NetworkSingleTeamMalialisMedium(object):
     max_epLength = 30
 
     is_sig_attack = False
+    save_per_step_stats = False
 
 
 class NetworkSixFour(NetworkSingleTeamMalialisMedium):
@@ -204,6 +206,7 @@ class NetworkMalialisTeamFull(object):
     bucket_capacity = 12
     is_sig_attack = False
     max_epLength = 30
+    save_per_step_stats = False
 
 ### This is an experimental one where i have not set an even set of hosts
 # class NetworkMalialisTeamFull(object):
@@ -503,7 +506,7 @@ def getSummary(adversary_classes, load_path, agent, prefix):
         packet_file = pandas.read_csv(file_path)
         #print(packet_file)
         sum_legal_received = sum(packet_file.LegalReceived)
-        sum_legal_sent = sum(packet_file.LegalServed)
+        sum_legal_sent = sum(packet_file.LegalSent)
         sum_server_failures = sum(packet_file.ServerFailures)
         adv_packets_sent = sum(packet_file.IllegalSent)
         percentage_received = sum_legal_received/sum_legal_sent*100

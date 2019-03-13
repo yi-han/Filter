@@ -13,7 +13,6 @@ assert(len(sys.argv)>=3)
 
 
 
-
 class LinearSarsaSingular(object):
     # note we have two dependencies
     name = "LinearSarsaSingular"
@@ -79,23 +78,39 @@ class LinearSarsaSingularDDQNCopy(object):
     has_bucket = False
 
 
-class LinearSarsaLAIDDQN200(LinearSarsaLAI):
+
+class LinearSarsaLAIDDQN350(LinearSarsaLAI):
     # Idea (without using a ridiculous number of epLength, set the learning rate even lower and give proper exploration)
-    name = "LinearDDQN200"
+    name = "LinearDDQN350"
     tau = 0.05
-    num_episodes = 300001 #200001#    
+    num_episodes = 350001 #200001#    
     pre_train_episodes = 40000 #40000 #
-    annealing_episodes = 120000  #120000  #
+    annealing_episodes = 160000  #120000  #
     startE = 1
     endE = 0.0
     episodeDrop = (startE - endE)/annealing_episodes
     reward_overload = None  
 
-class LinHierLong(LinearSarsaLAIDDQN200):
-    name = "LinHierLong"
-    pre_train_episodes = 100000 
-    annealing_episodes = 200000
-    num_episodes = 600001
+class LinTest(object):
+    # note we have two dependencies
+    name = "LinearTest"
+    discount_factor = 0
+    tau = 0.1
+    update_freq = 4
+    batch_size = None
+    num_episodes = 20#82501
+    pre_train_episodes = 1#2000
+    annealing_episodes = 5 #10 #60000 
+    startE = 0.4 #0.4
+    endE = 0.0
+    agent = None
+    sub_agent = linCen.Agent
+    group_size = 1 # number of filters each agent controls
+    #stateletFunction = getStateletNoCommunication
+    reward_overload = -1
+    stateRepresentation = stateRepresentationEnum.throttler  
+    has_bucket = False
+
 
 # The class of the adversary to implement
 conAttack = hostClass.ConstantAttack
@@ -114,24 +129,21 @@ Settings to change
 """
 
 assignedNetwork = NetworkSingleTeamMalialisMedium
-assignedAgent = LinearSarsaSingularDDQNCopy
+assignedAgent = AIMDsettings
 load_attack_path = "attackSimulations/{0}/".format(assignedNetwork.name)
 network_emulator = network.network_new.network_full # network_quick # network_full
 loadAttacks = False
 
 
 
-assignedAgent.save_model_mode = defender_mode_enum.save
+assignedAgent.save_model_mode = defender_mode_enum.load
 trainHost = adversarialLeaf #coordAttack # conAttack #driftAttack #adversarialLeaf
 assignedNetwork.drift = 0
 
-opposition = adv_random
-
-
-
-intelligentOpposition =  DdGenericCentral #DdRandomMasterSettings
+opposition = adv_constant #adv_random # adv_constant
+intelligentOpposition =  ddAimdAExtended #
 intelligentOpposition.save_model_mode = defender_mode_enum.save
-intelligentOpposition = None
+# intelligentOpposition = None
 
 
 assert(trainHost==adversarialLeaf)

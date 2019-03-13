@@ -13,7 +13,6 @@ assert(len(sys.argv)>=3)
 
 
 
-
 class LinearSarsaSingular(object):
     # note we have two dependencies
     name = "LinearSarsaSingular"
@@ -79,6 +78,7 @@ class LinearSarsaSingularDDQNCopy(object):
     has_bucket = False
 
 
+
 class LinearSarsaLAIDDQN350(LinearSarsaLAI):
     # Idea (without using a ridiculous number of epLength, set the learning rate even lower and give proper exploration)
     name = "LinearDDQN350"
@@ -91,6 +91,25 @@ class LinearSarsaLAIDDQN350(LinearSarsaLAI):
     episodeDrop = (startE - endE)/annealing_episodes
     reward_overload = None  
 
+class LinTest(object):
+    # note we have two dependencies
+    name = "LinearTest"
+    discount_factor = 0
+    tau = 0.1
+    update_freq = 4
+    batch_size = None
+    num_episodes = 20#82501
+    pre_train_episodes = 1#2000
+    annealing_episodes = 5 #10 #60000 
+    startE = 0.4 #0.4
+    endE = 0.0
+    agent = None
+    sub_agent = linCen.Agent
+    group_size = 1 # number of filters each agent controls
+    #stateletFunction = getStateletNoCommunication
+    reward_overload = -1
+    stateRepresentation = stateRepresentationEnum.throttler  
+    has_bucket = False
 
 
 # The class of the adversary to implement
@@ -110,24 +129,21 @@ Settings to change
 """
 
 assignedNetwork = NetworkSingleTeamMalialisMedium
-assignedAgent = LinearSarsaLAIDDQN350
+assignedAgent = AIMDsettings
 load_attack_path = "attackSimulations/{0}/".format(assignedNetwork.name)
 network_emulator = network.network_new.network_full # network_quick # network_full
 loadAttacks = False
 
 
 
-assignedAgent.save_model_mode = defender_mode_enum.save
+assignedAgent.save_model_mode = defender_mode_enum.load
 trainHost = adversarialLeaf #coordAttack # conAttack #driftAttack #adversarialLeaf
 assignedNetwork.drift = 0
 
-opposition = adv_random
-
-
-
-intelligentOpposition =  DdGenericCentral #DdRandomMasterSettings
+opposition = adv_constant #adv_random # adv_constant
+intelligentOpposition =  sarAimdAlternative #
 intelligentOpposition.save_model_mode = defender_mode_enum.save
-intelligentOpposition = None
+# intelligentOpposition = None
 
 
 assert(trainHost==adversarialLeaf)

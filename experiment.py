@@ -100,7 +100,7 @@ class Experiment:
         loss_lines = []
         adv_loss_lines = []
         packet_served_lines = []    
-
+        server_actions_lines = [] # file for recording the actions and the moves by actors
         total_steps = 0
         fail = 0 # The total number of fails 
         e = 1 # always start full exploration. Gets overwritten in training
@@ -178,12 +178,16 @@ class Experiment:
         
         print("Using the {0} agent:".format(self.agent_settings.name))
         reward_lines.append("Episode,StepsSoFar,TotalReward,LastReward,LengthEpisode,e,PerPacketIdeal,AdvTotalReward,AdvLastReward\n")
-        packet_served_lines.append("Episode,LegalReceived,LegalServed,PercentageReceived,ServerFailures,IllegalServed,IllegalSent\n")
+        packet_served_lines.append("Episode,LegalReceived,LegalSent,PercentageReceived,ServerFailures,IllegalServed,IllegalSent\n")
         loss_lines.append("Episode,StepsSoFar,Loss,Exploration,EpDefLoss\n")
         #self.episode_rewards = []
         if self.opposition_settings.is_intelligent and self.opposition_settings.save_model_mode in self.agentSaveModes:
             adv_loss_lines.append("Episode,StepsSoFar,Loss,Exploration,EpDefLoss\n")
-
+        server_actions_line = "Episode,Step,LegalReceived,LegalSent,LegalPercentage,IllegalSent,NumAdvesary"
+        for i in range(self.opposition_settings.num_adv_agents):
+            server_actions_line += ",AdvAction{0}".format(i)
+        server_actions_line += "\n"
+        server_actions_lines.append(server_actions_line)
         ep_init = 0
 
 
@@ -228,12 +232,9 @@ class Experiment:
                 advRAll = 0 # total reward for episode
                 r = 0
                 for step in range(max_epLength):
-                    if self.opposition_settings:
 
-                        adv_state = self.adversarialMaster.get_state(net, adv_e, step, r)
-                        advAction = self.adversarialMaster.predict(adv_state, adv_e, step)
-                    else:
-                        advAction = None
+                    adv_state = self.adversarialMaster.get_state(net, adv_e, step, r)
+                    adv_action = self.adversarialMaster.predict(adv_state, adv_e, step)
 
                     a = agent.predict(net.get_state(), e) # generate an action
                     #net.step(a, step) # take the action, update the network
@@ -254,8 +255,8 @@ class Experiment:
                         if self.opposition_settings.is_intelligent:
                             adv_r = self.adversarialMaster.calc_reward(r)
                             if self.opposition_settings.save_model_mode in self.agentSaveModes:
-                                self.adversarialMaster.update(adv_last_state, adv_last_action, adv_state, d, adv_r, step, advAction)
-                            self.adversarialMaster.update_past_state(advAction)
+                                self.adversarialMaster.update(adv_last_state, adv_last_action, adv_state, d, adv_r, step, adv_action)
+                            self.adversarialMaster.update_past_state(adv_action)
                         else:
                             adv_r = 0
 
@@ -296,7 +297,7 @@ class Experiment:
                         # print("Bucket load {0}".format(list(map(lambda throttler: throttler.bucket.bucket_load, net.throttlers))))
                         # print("reward was {0}".format(r))
                         #     print("server at {0}".format(net.switches[0].legal_window + net.switches[0].illegal_window))
-                        #     #print("adversary | ep {3} | action {0} | reward {1} | e {2}".format(advAction, r, adv_e, ep_num))
+                        #     #print("adversary | ep {3} | action {0} | reward {1} | e {2}".format(adv_action, r, adv_e, ep_num))
                         #     print(net.switches[3].past_throttles)
                         #     if step==23:
                         #         print("adv_state {0}".format(adv_state))
@@ -312,7 +313,7 @@ class Experiment:
                         #     if self.adversarialMaster:
                         #         print("adversary | ep {3} | action {0} | reward {1} | adv_e {2}".format(adv_last_action, adv_r, adv_e, ep_num))
                         #         print("adversary_state: {0}".format(adv_last_state))
-                        #         print("adv current state: {0} | action {1} \n\n".format(adv_state, advAction))
+                        #         print("adv current state: {0} | action {1} \n\n".format(adv_state, adv_action))
                         # if step == 22:
                         #     print("\n\n")
 
@@ -320,12 +321,12 @@ class Experiment:
                             fail += 1
                             fail_seg += 1
                     
-                    net.step(a, step, advAction) # take the action, update the network
+                    net.step(a, step, adv_action) # take the action, update the network
                     # ideally get rid of double up
 
 
                     if self.adversarialMaster != None:
-                        adv_last_action = advAction
+                        adv_last_action = adv_action
                         adv_last_state = adv_state                          
                     
                     last_action = a   
@@ -389,6 +390,17 @@ class Experiment:
                     else:
                         assert(1==2)
 
+                    server_actions_line = "Episode,Step,LegalReceived,LegalSent,LegalPercentage,IllegalSent,NumAdvesary"
+                    
+                    (legit_served, legit_sent, legal_per, illegal_sent) = net.getStepPacketStatistics()
+                    server_actions_line = "{0},{1},{2},{3},{4},{5},{6}".format(ep_num, step, legit_served, legit_sent, legal_per, illegal_sent, self.opposition_settings.num_adv_agents)
+                    
+                    if self.network_settings.save_per_step_stats:
+                        for i in range(self.opposition_settings.num_adv_agents):
+                            server_actions_line += ",{0}".format(adv_action[i])
+
+                        server_actions_line+= "\n"
+                        server_actions_lines.append(server_actions_line)
 
                 #self.episode_rewards.append(net.rewards_per_step) DO LATER
 
@@ -468,6 +480,14 @@ class Experiment:
                 opposition_loss_file.write(line)
             opposition_loss_file.close()
 
+        if self.network_settings.save_per_step_stats:
+            server_actions_file = open("{0}/server_action_stats-{1}-{2}-{3}.csv".format(file_path,run_mode, self.opposition_settings.name, prefix),"w")
+            
+            for line in server_actions_lines:
+                server_actions_file.write(line)
+            server_actions_file.close()
+        else:
+            assert(1==2)       
 
 
 
