@@ -146,18 +146,13 @@ class ddGenAgent():
         # legitimate traffic is constant, adversarial traffic is dependent ono action
 
 
-        # send legitimate traffic
-        # legal_per_leaf = self.legal_traffic/len(self.leaves)
-
         if not self.leaves[0].isAttackActive(time_step):
             assert(action==0)
 
         percent_emit = action/10
-        # illegal_per_leaf = self.illegal_traffic * percent_emit / len(self.leaves)
         for leaf in self.leaves:
             leaf.sendTraffic(percent_emit,time_step)
-            # leaf.destination_switch.new_legal += legal_per_leaf
-            # leaf.destination_switch.new_illegal += illegal_per_leaf
+
 
 
     def initiate_episode(self):

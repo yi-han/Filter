@@ -299,7 +299,7 @@ class DdGroupAdvManyAction(DdAdvGroupLong):
 class DdAdvGroupEverything(DdGenericCentral):
     name = "DdAdvGroupEverything"
     pre_train_episodes = 100000
-    num_episodes = 1000000
+    num_episodes = 500000
     prior_agent_actions = 10
     prior_adversary_actions = 10
     packets_last_step = True
@@ -335,14 +335,14 @@ class DdSplitLong(DdGenericSplit):
 
 
 
-class ddAdvAntiAimd(DdGenericDec):
-    num_adv_agents = 1
-    name = "ddAdvAntiAimd"
-    include_other_attackers = False
-    prior_agent_actions = 8
-    prior_adversary_actions = 8
-    packets_last_step = True
-    discount_factor = 0.6
+# class ddAdvAntiAimd(DdGenericDec):
+#     num_adv_agents = 1
+#     name = "ddAdvAntiAimd"
+#     include_other_attackers = False
+#     prior_agent_actions = 8
+#     prior_adversary_actions = 8
+#     packets_last_step = True
+#     discount_factor = 0.6
 
 class ddAimdAlternative(DdGenericDec):
     num_adv_agents = 1
@@ -430,12 +430,12 @@ class sarSplitLong(sarAdvSplit):
     num_episodes = 1000000
 
 
-class sarAntiAimd(sarGenericDec):
-    name = "sarsaAntiAimd"
-    num_adv_agents = 1
-    include_other_attackers = False
-    prior_agent_actions = 5  
-    packets_last_step = True
+# class sarAntiAimd(sarGenericDec):
+#     name = "sarsaAntiAimd"
+#     num_adv_agents = 1
+#     include_other_attackers = False
+#     prior_agent_actions = 5  
+#     packets_last_step = True
 
 class sarAimdAlternative(sarGenericDec):
     num_adv_agents = 1
