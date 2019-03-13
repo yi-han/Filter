@@ -13,7 +13,6 @@ assert(len(sys.argv)>=3)
 
 
 
-
 class LinearSarsaSingular(object):
     # note we have two dependencies
     name = "LinearSarsaSingular"
@@ -92,6 +91,27 @@ class LinearSarsaLAIDDQN350(LinearSarsaLAI):
     episodeDrop = (startE - endE)/annealing_episodes
     reward_overload = None  
 
+class LinTest(object):
+    # note we have two dependencies
+    name = "LinearTest"
+    discount_factor = 0
+    tau = 0.1
+    update_freq = 4
+    batch_size = None
+    num_episodes = 20#82501
+    pre_train_episodes = 1#2000
+    annealing_episodes = 5 #10 #60000 
+    startE = 0.4 #0.4
+    endE = 0.0
+    agent = None
+    sub_agent = linCen.Agent
+    group_size = 1 # number of filters each agent controls
+    #stateletFunction = getStateletNoCommunication
+    reward_overload = -1
+    stateRepresentation = stateRepresentationEnum.throttler  
+    has_bucket = False
+
+
 # The class of the adversary to implement
 conAttack = hostClass.ConstantAttack
 shortPulse = hostClass.ShortPulse
@@ -116,7 +136,7 @@ loadAttacks = False
 
 
 
-assignedAgent.save_model_mode = defender_mode_enum.load
+assignedAgent.save_model_mode = defender_mode_enum.save
 trainHost = adversarialLeaf #coordAttack # conAttack #driftAttack #adversarialLeaf
 assignedNetwork.drift = 0
 

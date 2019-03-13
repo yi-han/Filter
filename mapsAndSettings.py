@@ -266,6 +266,13 @@ class DdGenericDec(object):
     include_other_attackers = False
     include_encoder = False
 
+class ddTest(DdGenericDec):
+    name = "ddTest"
+    num_adv_agents =1
+    pre_train_episodes = 2
+    annealing_episodes = 4
+    num_episodes = 20
+
 class DdGenericCentral(DdGenericDec):
     name = "ddGenCentral"
     num_adv_agents = 1
@@ -495,11 +502,11 @@ def getSummary(adversary_classes, load_path, agent, prefix):
         file_path = "{0}/packet_served-{1}-{2}-{3}.csv".format(load_path,agent.save_model_mode.name, attack_name, prefix)
         packet_file = pandas.read_csv(file_path)
         #print(packet_file)
-        sum_packets_received = sum(packet_file.PacketsReceived)
-        sum_packets_sent = sum(packet_file.PacketsServed)
+        sum_legal_received = sum(packet_file.LegalReceived)
+        sum_legal_sent = sum(packet_file.LegalServed)
         sum_server_failures = sum(packet_file.ServerFailures)
         adv_packets_sent = sum(packet_file.IllegalSent)
-        percentage_received = sum_packets_received/sum_packets_sent*100
+        percentage_received = sum_legal_received/sum_legal_sent*100
         tau = agent.tau
         pretraining = agent.pre_train_episodes
         annealing = agent.annealing_episodes
@@ -512,8 +519,8 @@ def getSummary(adversary_classes, load_path, agent, prefix):
         else:
             overload = 'misc'
 
-        summary.write("{0},{1},{2},{3},{4},{5},{6},{7},{8},{9},{10},{11},{12}".format(attack_name, agent.name,
-            sum_packets_received, sum_packets_sent, percentage_received, sum_server_failures,
+        summary.write("{0},{1},{2},{3},{4},{5},{6},{7},{8},{9},{10},{11},{12},".format(attack_name, agent.name,
+            sum_legal_received, sum_legal_sent, percentage_received, sum_server_failures,
             tau, pretraining, annealing, total_episodes, start_e, overload, adv_packets_sent))
         if adversary_class.is_intelligent:
             summary.write("{0},{1},{2},{3},{4},{5},".format(adversary_class.tau, adversary_class.discount_factor,

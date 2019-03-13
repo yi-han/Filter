@@ -177,7 +177,7 @@ class Experiment:
         # Similar to init. Different from reward_file as this is if exploration is 0. Measures how accurate it is at the moment.
         
         print("Using the {0} agent:".format(self.agent_settings.name))
-        reward_lines.append("Episode,StepsSoFar,TotalReward,LastReward,LengthEpisode,e,PerPacketIdeal, AdvTotalReward, AdvLastReward\n")
+        reward_lines.append("Episode,StepsSoFar,TotalReward,LastReward,LengthEpisode,e,PerPacketIdeal,AdvTotalReward,AdvLastReward\n")
         packet_served_lines.append("Episode,LegalReceived,LegalServed,PercentageReceived,ServerFailures,IllegalServed,IllegalSent\n")
         loss_lines.append("Episode,StepsSoFar,Loss,Exploration,EpDefLoss\n")
         #self.episode_rewards = []
