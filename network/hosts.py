@@ -13,7 +13,7 @@ class Host():
     # ideally you want to merge host with switch somewhat
 
     def isAttackActive(self, time_step):
-        return (self.first_attack <= time_step and time_step <= self.last_attack)
+        return (self.first_attack < time_step and time_step < self.last_attack)
 
     def __init__(self, destination_switch, rate_attack_low, rate_attack_high, rate_legal_low, rate_legal_high,
         max_epLength, adversarialMaster, iterations_per_action,  appendToSwitch = True ):

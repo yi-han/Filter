@@ -40,7 +40,6 @@ class stateRepresentationEnum(Enum):
 
 
 
-
 class adv_constant(object):
     name = "constant_attack"
     
@@ -51,6 +50,10 @@ class adv_constant(object):
     attack_strategy = advesaryStandardAttackEnum.constant
     endE = 0
     startE = 0
+
+class adv_singular_constant_attack(adv_constant):
+    name = "singular_constant_attack"
+    num_adv_agents = 1
 
 class adv_pulse_short(adv_constant):
     name = "pulse_short"

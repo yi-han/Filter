@@ -50,7 +50,7 @@ class dumbMaster():
         self.num_adv_agents = adv_settings.num_adv_agents # number of adversarial agents
         self.adv_agents = []
 
-        assert(self.num_adv_agents == 2)
+        #assert(self.num_adv_agents == 2)
         for _ in range(self.num_adv_agents):
             self.adv_agents.append(self.adv_settings.adv_agent_class())
 
