@@ -94,9 +94,11 @@ class Experiment:
         rList = []
         advRList = []
         loss = []
+        adv_loss = []
         # determine reward for a prediction at start of episode, we choose the second step as first step is random
         reward_lines = []
         loss_lines = []
+        adv_loss_lines = []
         packet_served_lines = []    
 
         total_steps = 0
@@ -176,9 +178,11 @@ class Experiment:
         
         print("Using the {0} agent:".format(self.agent_settings.name))
         reward_lines.append("Episode,StepsSoFar,TotalReward,LastReward,LengthEpisode,e,PerPacketIdeal, AdvTotalReward, AdvLastReward\n")
-        packet_served_lines.append("Episode,PacketsReceived,PacketsServed,PercentageReceived,ServerFailures\n")
-        loss_lines.append("Episode,StepsSoFar,Loss,Exploration,EpDefLoss,EpAdvLoss\n")
+        packet_served_lines.append("Episode,LegalReceived,LegalServed,PercentageReceived,ServerFailures,IllegalServed,IllegalSent\n")
+        loss_lines.append("Episode,StepsSoFar,Loss,Exploration,EpDefLoss\n")
         #self.episode_rewards = []
+        if self.opposition_settings.is_intelligent and self.opposition_settings.save_model_mode in self.agentSaveModes:
+            adv_loss_lines.append("Episode,StepsSoFar,Loss,Exploration,EpDefLoss\n")
 
         ep_init = 0
 
@@ -377,8 +381,9 @@ class Experiment:
                             adv_e = self.opposition_settings.endE
                             print("manual set adv_e to adv_e_Ende")
                         if total_steps % self.opposition_settings.update_freq == 0:
-                            adv_loss = self.adversarialMaster.actionReplay(adv_state, self.opposition_settings.batch_size)
-                            ep_adv_loss += abs(adv_loss)
+                            adv_l = self.adversarialMaster.actionReplay(adv_state, self.opposition_settings.batch_size)
+                            adv_loss.append(adv_l)
+                            ep_adv_loss += abs(adv_l)
                     elif self.opposition_settings:
                         adv_e = self.opposition_settings.endE
                     else:
@@ -412,7 +417,7 @@ class Experiment:
                 rList.append(rAll)
                 advRList.append(advRAll)
                 # grab stats before doing two more
-                legit_served, legit_all, legit_per, server_failures = net.getLegitStats()
+                legit_served, legit_all, legit_per, server_failures, illegal_served, illegal_all = net.getLegitStats()
                 
                 # for f_step in range(2):
                 #     # do two steps without learning (so nothing implicit) and see if we can see how well it performs
@@ -422,14 +427,17 @@ class Experiment:
                 # how well the system performs assuming no exploration (only useful for training)
                 agent_performance =  0# we ignore this to reduce timenet.getPacketServedAtMoment()
 
-                packet_served_lines.append("{0}, {1}, {2}, {3}, {4}\n".format(ep_num, legit_served, legit_all, legit_per, server_failures))
+                packet_served_lines.append("{0},{1},{2},{3},{4},{5},{6}\n".format(ep_num, legit_served, legit_all, legit_per, server_failures, illegal_served, illegal_all))
 
                 reward_lines.append("{0},{1},{2},{3},{4},{5},{6},{7},{8}\n".format(ep_num, total_steps, rList[-1], r, stepList[-1], e, agent_performance, advRList[-1], adv_r))
                 if len(loss) > 0:
                     last_loss = loss[-1]
                 else:
                     last_loss = 0
-                loss_lines.append("{0},{1},{2},{3},{4}, {5}\n".format(ep_num,total_steps,last_loss, e, ep_def_loss, ep_adv_loss))
+                loss_lines.append("{0},{1},{2},{3},{4}\n".format(ep_num,total_steps,last_loss, e, ep_def_loss))
+                if self.opposition_settings.is_intelligent and len(adv_loss)>0:
+                    last_adv_loss = adv_loss[-1]
+                    adv_loss_lines.append("{0},{1},{2},{3},{4}\n".format(ep_num,total_steps,last_adv_loss, e, ep_adv_loss))
             if self.agent_settings.save_model_mode in self.agentSaveModes: # only save the first iteration 
                 # save the model only every 10,000 steps
                 agent.saveModel(self.file_path, ep_num, prefix)
@@ -453,6 +461,16 @@ class Experiment:
         for line in packet_served_lines:
             packet_served_file.write(line)
         packet_served_file.close()
+
+        if self.opposition_settings.is_intelligent and len(adv_loss)>0:
+            opposition_loss_file = open("{0}/adv_loss-{1}-{2}-{3}.csv".format(file_path,run_mode, self.opposition_settings.name, prefix),"w")
+            for line in adv_loss_lines:
+                opposition_loss_file.write(line)
+            opposition_loss_file.close()
+
+
+
+
         print("{0} is:".format(self.agent_settings.name))
         print("Percent of succesful episodes: " + str(100 - fail*100/total_steps) + "%")
 

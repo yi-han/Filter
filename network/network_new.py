@@ -449,8 +449,10 @@ class network_full(object):
             self.record_attackers()
         #self.set_rate()
         self.current_state = None
-        self.legitimate_all = 0
+        self.legitimate_sent = 0
         self.legitimate_served = 0
+        self.illegal_sent = 0
+        self.illegal_served = 0
         self.rewards_per_step = [] # keep track of the rewards at every step
         self.server_failures = 0
 
@@ -716,8 +718,9 @@ class network_full(object):
         
             self.legitimate_served += legitimate_rate
         
-        self.legitimate_all += legitimate_rate_all
-
+        self.legitimate_sent += legitimate_rate_all
+        self.illegal_served += self.switches[0].illegal_window
+        self.illegal_sent += (self.switches[0].illegal_window + self.switches[0].dropped_illegal_window)
         reward = clip(-1, 1, reward)
 
         self.cache_reward = reward
@@ -769,11 +772,11 @@ class network_full(object):
     def getLegitStats(self):
         # returns % of packets served in an episode
         # meant to be used at end of an epsisode
-        if self.legitimate_all == 0:
-            return (0, 0, 0)
+        if self.legitimate_sent == 0:
+            legal_per = 0
         else:
-            per = self.legitimate_served / self.legitimate_all
-            return self.legitimate_served, self.legitimate_all, per, self.server_failures
+            legal_per = self.legitimate_served / self.legitimate_sent
+        return self.legitimate_served, self.legitimate_sent, legal_per, self.server_failures, self.illegal_served, self.illegal_sent
 
     
     # def save_attacks(self):
