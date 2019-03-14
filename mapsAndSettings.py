@@ -285,44 +285,6 @@ class DdGenericCentral(DdGenericDec):
     pre_train_episodes = 50000
     include_other_attackers = False
 
-class DdAdvGroupExtraAnnealing(DdGenericCentral):
-    name = "DdAdvGroupExtraAnnealing"
-    pre_train_episodes = 50000
-    annealing_episodes = 400000
-    num_episodes = 750000
-
-class DdAdvGroupLong(DdAdvGroupExtraAnnealing):
-    name = "DdAdvGroupLong"
-    pre_train_episodes = 100000
-    num_episodes = 1000000
-
-class DdGroupAdvManyAction(DdAdvGroupLong):
-    name = "DdGroupAdvManyAction"
-    prior_adversary_actions = 3
-    prior_agent_actions = 3
-
-
-class DdAdvGroupEverything(DdGenericCentral):
-    name = "DdAdvGroupEverything"
-    pre_train_episodes = 100000
-    num_episodes = 500000
-    prior_agent_actions = 10
-    prior_adversary_actions = 10
-    packets_last_step = True
-    include_indiv_hosts = True    
-
-class lowDdCentral(DdGenericCentral):
-    name = "lowDdCentral"
-    tau = 0.0001
-
-class DdGroupLowDiscount(DdGenericCentral):
-    name = "DdGroupLowDiscount"
-    discount_factor = 0.4
-
-class DdGroupHighDiscount(DdGenericCentral):
-    name = "DdGroupHighDiscount"
-    discount_factor = 0.6  
-
 
 
 class DdGenericSplit(DdGenericDec):
@@ -331,12 +293,6 @@ class DdGenericSplit(DdGenericDec):
     include_other_attackers = False
     num_episodes = 600000
 
-
-class DdSplitLong(DdGenericSplit):
-    name = "ddSplitLong"  
-    pre_train_episodes = 100000
-    annealing_episodes = 400000    
-    num_episodes = 1000000
 
 
 
@@ -360,6 +316,16 @@ class ddAimdAlternative(DdGenericDec):
 
     packets_last_step = True
     discount_factor = 0.6
+
+
+class ddAimdDual(DdGenericDec):
+    name = "ddAimdDual"
+    num_adv_agents = 2
+    prior_agent_delta_moves = 5
+    prior_agent_actions = 0
+    packets_last_step = True
+    discount_factor = 0.6
+
 
 class ddAimdAExtended(DdGenericDec):
     num_adv_agents = 1
@@ -406,34 +372,16 @@ class sarGenericCen(sarGenericDec):
     name = "sarsaGenericCen"
     num_adv_agents = 1
 
-class sarGroupLowDiscount(sarGenericCen):
-    name = "sarGroupLowDiscount"
-    discount_factor = 0.4
 
-class sarGroupMidDiscount(sarGenericCen):
-    name = "sarGroupMidDiscount"
-    discount_factor = 0.5
-
-class sarGroupLong(sarGenericCen):
-    name = "sarasaAdvCenShort"
-    num_adv_agents = 1
-    pre_train_episodes = 100000
-    annealing_episodes = 600000
-    num_episodes = 1000000
-
-class sarGroupLongManyAdvActions(sarGroupLong):
-    name = "sarGroupLongManyAdvActions"
-    prior_adversary_actions = 3
 
 class sarAdvSplit(sarGenericCen):
     name = "sarsaAdvSplit"
     num_adv_agents = 2 
 
-class sarSplitLong(sarAdvSplit):
-    name = "sarSplitLong"
-    pre_train_episodes = 100000
-    annealing_episodes = 600000
+class sarAdvSplitLong(sarAdvSplit):
+    name = "sarsaAdvSplitLong"
     num_episodes = 1000000
+
 
 
 # class sarAntiAimd(sarGenericDec):
@@ -450,6 +398,15 @@ class sarAimdAlternative(sarGenericDec):
     prior_agent_actions = 0
     packets_last_step = True
     discount_factor = 0.6
+
+class sarAimdDual(sarGenericDec):
+    num_adv_agents = 2
+    name = "sarAimdDual"
+    prior_agent_delta_moves = 5
+    prior_agent_actions = 0
+    packets_last_step = True
+    discount_factor = 0.6
+
 
 
 class sarAimdExtended(sarGenericDec):
