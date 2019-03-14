@@ -348,7 +348,11 @@ class Experiment:
                     else:
                         e = self.agent_settings.endE
                     
-
+                    if update_freq and self.agent_settings.save_model_mode in self.agentSaveModes and total_steps % (update_freq) == 0:
+                        l = agent.actionReplay(net.get_state(), batch_size)
+                        if l:
+                            loss.append(l)
+                            ep_def_loss += abs(l)
 
 
                     if self.opposition_settings.is_intelligent and self.opposition_settings.save_model_mode in self.agentSaveModes:
@@ -362,33 +366,12 @@ class Experiment:
                             #assert(1==3)
                             adv_e = self.opposition_settings.endE                    
 
-
-
-                    if update_freq and self.agent_settings.save_model_mode in self.agentSaveModes and total_steps % (update_freq) == 0:
-                        l = agent.actionReplay(net.get_state(), batch_size)
-                        if l:
-                            loss.append(l)
-                            ep_def_loss += abs(l)
-
-                    if self.opposition_settings.is_intelligent and self.opposition_settings.save_model_mode in self.agentSaveModes:
-                        if ep_num < adv_pretrain_episodes:
-                            adv_e = 1
-                        elif adv_e > self.opposition_settings.startE:
-                            adv_e = self.opposition_settings.startE
-                        elif adv_e > self.opposition_settings.endE:
-                            adv_e -= adv_step_drop 
-                        elif adv_e < self.opposition_settings.endE:
-                            #assert(1==3)
-                            adv_e = self.opposition_settings.endE
-                            print("manual set adv_e to adv_e_Ende")
                         if total_steps % self.opposition_settings.update_freq == 0:
                             adv_l = self.adversarialMaster.actionReplay(adv_state, self.opposition_settings.batch_size)
                             adv_loss.append(adv_l)
                             ep_adv_loss += abs(adv_l)
-                    elif self.opposition_settings:
-                        adv_e = self.opposition_settings.endE
-                    else:
-                        assert(1==2)
+
+
 
                     server_actions_line = "Episode,Step,LegalReceived,LegalSent,LegalPercentage,IllegalSent,NumAdvesary"
                     

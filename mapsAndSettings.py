@@ -248,7 +248,6 @@ class NetworkMalialisTeamFull(object):
 
 class DdGenericDec(object):
     name = "dd DO NOT USE"
-    is_intelligent = True
     num_adv_agents = -1
     pre_train_episodes = 50000
     annealing_episodes = 200000
@@ -264,6 +263,7 @@ class DdGenericDec(object):
     include_indiv_hosts = False    
     prior_agent_delta_moves = 0
 
+    is_intelligent = True
     update_freq = 4
     batch_size = 32
     adversary_class = ddGeneric.GenericAdvMaster
