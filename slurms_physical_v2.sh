@@ -1,4 +1,4 @@
-# redo base
+# base for medium
 
 sed 's/runDDQN/runSARSA/g' exp_cloud.slurm > output.slurm
 sed 's/sampleDDQNText/sarConOrig/g' output.slurm -i
@@ -67,9 +67,6 @@ sed 's/7 1/8 1/g' output.slurm -i
 sbatch output.slurm
 sed 's/8 1/9 1/g' output.slurm -i
 sbatch output.slurm
-
-
-
 
 
 
