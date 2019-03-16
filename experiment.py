@@ -311,14 +311,17 @@ class Experiment:
 
                         #     # print("server state: {0}\n".format(net.switches[0].getWindow()))
                         
-                        # if step in range(20,22):  
-                        #     print("In Episode - {0}".format(ep_num))
+                        # if step in range(0,8) or step in range(53,57):  
+                        #     print("In Episode - {0} Step - {1}".format(ep_num, step))
+
+                        #     print("prio state was {0}".format(net.last_state))
                         #     print("def | step {0} | action {1} | reward {2} | e {3}".format(step, last_action, r, e))
-                        #     if self.adversarialMaster:
-                        #         print("adversary | ep {3} | action {0} | reward {1} | adv_e {2}".format(adv_last_action, adv_r, adv_e, ep_num))
-                        #         print("adversary_state: {0}".format(adv_last_state))
-                        #         print("adv current state: {0} | action {1} \n\n".format(adv_state, adv_action))
-                        # if step == 22:
+                        #     print("advesary made move {0}".format(adv_action))
+                            # if self.adversarialMaster:
+                            #     print("adversary | ep {3} | action {0} | reward {1} | adv_e {2}".format(adv_last_action, adv_r, adv_e, ep_num))
+                            #     print("adversary_state: {0}".format(adv_last_state))
+                            #     print("adv current state: {0} | action {1} \n\n".format(adv_state, adv_action))
+                        # if step == 57:
                         #     print("\n\n")
 
                         if r < 0:
@@ -398,7 +401,8 @@ class Experiment:
                     reward_per_print = 0
                     print("E={0} Fails = {1} FailPer = {2}".format(e,fail_seg, (fail_seg*100/(1000*max_epLength))))
                     print("def | step {0} | action {1} | reward {2} | e {3}".format(step, last_action, r, e))
-                    print("state was {0}".format(net.get_state()))
+                    print("prio state was {0}".format(net.last_state))
+                    print("this state was {0}".format(net.get_state()))
 
                     if self.adversarialMaster:
                         print("adversary | ep {3} | action {0} | reward {1} | adv_e {2}".format(adv_last_action, adv_r, adv_e, ep_num))
@@ -473,8 +477,6 @@ class Experiment:
             for line in server_actions_lines:
                 server_actions_file.write(line)
             server_actions_file.close()
-        else:
-            assert(1==2)       
 
 
 

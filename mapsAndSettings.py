@@ -330,7 +330,7 @@ class ddAimdDual(DdGenericDec):
 class ddAimdAExtended(DdGenericDec):
     num_adv_agents = 1
 
-    name = "ddAimdAlternative"
+    name = "ddAimdAExtended"
     prior_agent_delta_moves = 10
     prior_agent_actions = 10
     prior_adversary_actions = 10
@@ -571,14 +571,13 @@ def massSummary(load_path):
     """
     print(load_path)
     ms = open("{0}/attack_summary_mass.csv".format(load_path), "w")
-    ms.write("AttackType,Repeats,Agent,Drift,MeanPercentage,Range,SD,Tau,Pretraining,Annealing,TotalEpisodes,start_e,overload,adv_tau,adv_discount,adv_pretrain,adv_annealing_episodes,adv_episodes,adv_start_e\n")
+    ms.write("AttackType,Repeats,Agent,MeanPercentage,Range,SD,Tau,Pretraining,Annealing,TotalEpisodes,start_e,overload,adv_tau,adv_discount,adv_pretrain,adv_annealing_episodes,adv_episodes,adv_start_e\n")
     # Open up the first summary
 
     init_summary_path = "{0}/attackSummary-0.csv".format(load_path)
     init_summary = pandas.read_csv(init_summary_path)
     num_attacks = len(init_summary['AttackType'])
     agent_used = init_summary.iloc[-1]["Agent"]
-    drift = init_summary.iloc[-1]["Drift"]
     tau = init_summary.iloc[-1]["Tau"]
     pretraining = init_summary.iloc[-1]["Pretraining"]
     annealing = init_summary.iloc[-1]["Annealing"]
@@ -603,11 +602,15 @@ def massSummary(load_path):
         packet_file_path = "{0}/attackSummary-{1}.csv".format(load_path, prefix)
         if os.path.exists(packet_file_path):
             packet_file = open(packet_file_path)
-            packet_file.readline()       
+            #packet_pandas = pandas.read_csv(packet_file_path)
+
+            header = packet_file.readline().split(",")
+            attacker_index = header.index("AttackType")
+            mean_percentage_index = header.index("Percentage")
             for line in packet_file.readlines():
                 line = line.split(",")
-                attacker = line[0]
-                percentage = line[5]
+                attacker = line[attacker_index]
+                percentage = line[mean_percentage_index]
                 if first_file:
                     # we're grabbing the attack names in order
                     attack_names.append(attacker)
@@ -622,7 +625,7 @@ def massSummary(load_path):
         percentages = data_scores[attack_name]
         ms.write("{0},{1},".format(attack_name,len(percentages)))
         if len(percentages)>0:
-            ms.write("{0},{1},".format(agent_used, drift))
+            ms.write("{0},".format(agent_used))
 
             # calc and add mean, range,
             num_per = np.array(percentages) 
