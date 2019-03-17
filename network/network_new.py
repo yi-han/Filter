@@ -253,10 +253,10 @@ class Switch():
 
         for dest in self.destination_links:
             dest.destination_switch.new_legal += (legal_pass/num_dests)
-            dest.destination_switch.new_dropped_legal += ((legal_dropped + self.dropped_legal)/num_dests)
+            dest.destination_switch.new_dropped_legal += ((legal_dropped + self.dropped_legal))
 
             dest.destination_switch.new_illegal += (illegal_pass/num_dests)
-            dest.destination_switch.new_dropped_illegal += ((illegal_dropped+ self.dropped_illegal)/num_dests)
+            dest.destination_switch.new_dropped_illegal += ((illegal_dropped+ self.dropped_illegal))
             
         self.iterations_since_throttle += 1
     def updateSwitch(self):
@@ -271,7 +271,7 @@ class Switch():
         self.illegal_window += self.illegal_traffic
 
         self.dropped_legal_window += self.dropped_legal
-        self.dropped_illegal_window += self.dropped_illegal_window
+        self.dropped_illegal_window += self.dropped_illegal
         # reset new traffic values
         self.new_legal = 0
         self.new_illegal = 0
@@ -704,14 +704,27 @@ class network_full(object):
         legitimate_sent = self.switches[0].legal_window + self.switches[0].dropped_legal_window
         illegal_served = self.switches[0].illegal_window
         illegal_sent = self.switches[0].illegal_window + self.switches[0].dropped_illegal_window
-
+        
         if legitimate_served + illegal_served > self.upper_boundary or legitimate_served == 0:
             legal_received_per = 0
         else:
             legal_received_per = legitimate_served/legitimate_sent
 
-        return (KbToMb(legitimate_served), KbToMb(legitimate_sent), legal_received_per, KbToMb(illegal_sent))
+        return (KbToMb(legitimate_served), KbToMb(legitimate_sent), legal_received_per, KbToMb(illegal_served), KbToMb(illegal_sent))
 
+    def getHostCapacity(self):
+        # return the packet capacity for attacker and legal traffic
+        legal_traffic = 0
+        illegal_traffic = 0
+        for host in self.hosts:
+            if host.is_attacker:
+                illegal_traffic+=host.traffic_rate
+            else:
+                legal_traffic += host.traffic_rate
+        legal_traffic = KbToMb(legal_traffic)
+        illegal_traffic = KbToMb(illegal_traffic)
+        combined = legal_traffic+ illegal_traffic
+        return (legal_traffic, illegal_traffic, combined)
 
     def step(self, action, step_count, adv_action = None):
         # input the actions. Just sets drop probabilities at the moment

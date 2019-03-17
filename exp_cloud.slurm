@@ -6,7 +6,6 @@
 #SBATCH --account=punim0636
 #SBATCH --partition=cloud,physical
 #SBATCH --job-name=sampleDDQNText
-
 # Send yourself an email when the job:
 # aborts abnormally (fails)
 #SBATCH --mail-type=FAIL

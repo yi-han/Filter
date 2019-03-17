@@ -187,7 +187,10 @@ class Experiment:
         #self.episode_rewards = []
         if self.opposition_settings.is_intelligent and self.opposition_settings.save_model_mode in self.agentSaveModes:
             adv_loss_lines.append("Episode,StepsSoFar,Loss,Exploration,EpDefLoss\n")
-        server_actions_line = "Episode,Step,LegalReceived,LegalSent,LegalPercentage,IllegalSent,NumAdvesary"
+        server_actions_line = "Episode,Step,LegalReceived,LegalSent,LegalPercentage,IllegalServed,IllegalSent,TotalSent,LegalCap,IllegalCap,TotalCap,NumAdvesary"
+
+        for i in range(self.network_settings.N_state):
+            server_actions_line += ",DefAction{0}".format(i)
         for i in range(self.opposition_settings.num_adv_agents):
             server_actions_line += ",AdvAction{0}".format(i)
         server_actions_line += "\n"
@@ -235,6 +238,10 @@ class Experiment:
                 
                 advRAll = 0 # total reward for episode
                 r = 0
+                
+                if self.network_settings.save_per_step_stats:
+                    (legal_capacity, illegal_capacity, total_capacity) = net.getHostCapacity()
+
                 for step in range(max_epLength):
 
                     adv_state = self.adversarialMaster.get_state(net, adv_e, step, r)
@@ -381,15 +388,19 @@ class Experiment:
 
 
 
-                    server_actions_line = "Episode,Step,LegalReceived,LegalSent,LegalPercentage,IllegalSent,NumAdvesary"
                     
-                    (legit_served, legit_sent, legal_per, illegal_sent) = net.getStepPacketStatistics()
-                    server_actions_line = "{0},{1},{2},{3},{4},{5},{6}".format(ep_num, step, legit_served, legit_sent, legal_per, illegal_sent, self.opposition_settings.num_adv_agents)
                     
                     if self.network_settings.save_per_step_stats:
+                        (legit_served, legit_sent, legal_per, illegal_served, illegal_sent) = net.getStepPacketStatistics()
+                        total_sent = legit_sent+illegal_sent
+                        server_actions_line = "{0},{1},{2},{3},{4},{5},{6},{7},{8},{9},{10},{11}".format(ep_num, step, legit_served, legit_sent, legal_per, illegal_served, illegal_sent, total_sent, legal_capacity, illegal_capacity, total_capacity, self.opposition_settings.num_adv_agents)
+
+                        for i in range(self.network_settings.N_state):
+                            server_actions_line += ",{0}".format(a[i])
                         for i in range(self.opposition_settings.num_adv_agents):
                             server_actions_line += ",{0}".format(adv_action[i])
-
+                        
+                        
                         server_actions_line+= "\n"
                         server_actions_lines.append(server_actions_line)
 
