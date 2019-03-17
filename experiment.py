@@ -143,7 +143,10 @@ class Experiment:
                 assert(self.agent_settings.save_model_mode in self.agentTestModes)
                 # if this is true we already have number of episodes set
             else:
-                num_episodes = max(num_episodes, self.opposition_settings.num_episodes)
+                if self.agent_settings.save_model_mode in self.agentSaveModes:
+                    num_episodes = max(num_episodes, self.opposition_settings.num_episodes)
+                else:
+                    num_episodes = self.opposition_settings.num_episodes
                 assert(not self.agent_settings.save_model_mode in self.agentTestModes)
             
             if self.opposition_settings.save_model_mode in self.agentInitialiseMode:          
@@ -181,6 +184,8 @@ class Experiment:
         # Similar to init. Different from reward_file as this is if exploration is 0. Measures how accurate it is at the moment.
         
         print("Using the {0} agent:".format(self.agent_settings.name))
+        print("Advesary is {0}".format(self.opposition_settings.name))
+        print("There are {0} episodes this simulation".format(num_episodes))
         reward_lines.append("Episode,StepsSoFar,TotalReward,LastReward,LengthEpisode,e,PerPacketIdeal,AdvTotalReward,AdvLastReward\n")
         packet_served_lines.append("Episode,LegalReceived,LegalSent,PercentageReceived,ServerFailures,IllegalServed,IllegalSent\n")
         loss_lines.append("Episode,StepsSoFar,Loss,Exploration,EpDefLoss\n")
