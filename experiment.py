@@ -46,6 +46,7 @@ from enum import Enum
 from network.network_new import *
 import network.hosts as hosts
 import mapsAndSettings
+import errno
 
 def calculate_e(current_episode, pretraining_episodes, startE, endE, annealing_episodes):
     if current_episode < pretraining_episodes:
