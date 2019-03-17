@@ -53,37 +53,26 @@ class AgentOfAgents(aBase.Agent):
         prediction_as_list = []
         for i in range(len(self.agents)):
             # number of states is number of agents
-            
-            # print(self.agents[i])
-            #print(self.agents[0].N_action)
+
             agent = self.agents[i]
-            #N_state = agent.N_state
-            #(statelet, state) = self.getStatelet(state, N_state)
+
             statelet = state[i]
             #print(statelet)
             agentAction = agent.predict(statelet, e)
             prediction_as_list.append(agentAction)
-            # print("{0} for {1}".format(agentAction, statelet))
-            #print("agent has {0} actions".format(agent.N_action))
-            action = action*agent.N_action+agentAction
-        # print("final action {0}".format(action))
+
         self.past_predictions.pop(0)
         self.past_predictions.append(prediction_as_list)
-        return action
+        return prediction_as_list
 
     def update(self, last_state, network_action, current_state, is_done, reward, next_action=None):
         # provide the update function to each individual state
 
-        #actions = AgentOfAgents.actionToActions(action, self.num_agents, self.action_per_throttler)
-        N_action_list = [agent.N_action for agent in self.agents]
-        actions = AgentOfAgents.genericActionToactions(network_action, N_action_list)
-        # print("\nupdate")
-        # print(N_action_list)
-        # print("state {0}".format(last_state))
-        # print("action was {0}".format(network_action))
+        actions = network_action
+
 
         if network_action == None:
-            network_action = 0
+            network_action = [0]*self.N_state
 
         for i in range(len(self.agents)):
             agent = self.agents[i]
@@ -143,6 +132,7 @@ class AgentOfAgents(aBase.Agent):
         self.past_predictions = [[0]*self.num_predictions]*10
 
     def genericActionToactions(network_action, N_action_list):
+        
         actions = []
         #print("")
 

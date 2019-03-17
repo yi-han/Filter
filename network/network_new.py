@@ -566,25 +566,21 @@ class network_full(object):
             # simulates adding new traffic to the hosts
             switch.updateSwitch()
 
-    def set_drop_probability(self, action):
+    def set_drop_probability(self, actions):
 
         if self.representationType == stateRepresentationEnum.only_server:
-            # if its only server then the action is actually meant to be a throttle rate
+            # if its only server then the actions is actually meant to be a throttle rate
 
             for switch_id in self.filter_list:
-                self.switches[switch_id].setThrottle(action)
+                self.switches[switch_id].setThrottle(actions)
         else:
+            assert(self.N_state == len(actions))
             for i in range(self.N_state):
-                j = self.N_state - (i + 1) # start at one below host, end at 0
-                divider = self.action_per_throttler**j
-
+                action = actions[i]
+                drop_prob = action/ self.action_per_throttler # to turn into a percentage
                 switch_id = self.filter_list[i]
-                drop_prob = int(action / divider)
-                action = action - (drop_prob*divider)
-                drop_prob /= self.action_per_throttler # to turn into a percentage
                 self.switches[switch_id].setThrottle(drop_prob)
 
-            assert(action==0) 
 
     def initialise(self, f_link, representationType, defender_settings, iterations_between_action, bucket_capacity):
         for i in range(self.N_switch):
@@ -643,31 +639,7 @@ class network_full(object):
         return r
     """
 
-    def adjust_drift(self):
-        #obsolete
-        assert(1==2)
-        # assume there is some drift, we want to return the stats with the associated drift
 
-        # Drift rules:
-        # Drift implies % illegal traffic categorised as legal traffic
-        # also have 25% of that rate of legal traffic set as illegal traffic
-
-        legitimate_rate = self.switches[0].legal_window
-        legitimate_rate_all = legitimate_rate + self.switches[0].dropped_legal_window
-        attacker_rate = self.switches[0].illegal_window
-        attacker_rate_all = attacker_rate + self.switches[0].dropped_illegal_window
-
-        illegal_to_legal = self.drift # illegal traffic misclassified as legal
-        legal_to_illegal = 0.25*self.drift # legal traffic misclassified as illegal
-
-        new_legit_rate = (1 - legal_to_illegal)* legitimate_rate + (illegal_to_legal * attacker_rate)
-        new_attacker_rate = (1 - illegal_to_legal) * attacker_rate + (legal_to_illegal*legitimate_rate)
-        new_legitimate_rate_all = (1 - legal_to_illegal)* legitimate_rate_all + (illegal_to_legal * attacker_rate_all)
-
-        #print("{0} {1} {2} To {3} {4} {5}".format(legitimate_rate, legitimate_rate_all, attacker_rate,
-        #        new_legit_rate, new_legitimate_rate_all, new_attacker_rate))
-
-        return (new_legit_rate, new_legitimate_rate_all, new_attacker_rate)
     def calculate_reward(self):
         
         if self.cache_reward != None:
@@ -676,12 +648,12 @@ class network_full(object):
         # currently if we're 1.1 times over we receive a punishment of -0.1, seems rather low. Maybe -1.5?        
         reward = 0.0
 
-        legitimate_rate = self.switches[0].legal_window
-        legitimate_rate_all = legitimate_rate + self.switches[0].dropped_legal_window
-        attacker_rate = self.switches[0].illegal_window
-        #assert((legitimate_rate+attacker_rate)==self.switches[0].getWindow())
+        legitimate_served = self.switches[0].legal_window
+        legitimate_sent = legitimate_served + self.switches[0].dropped_legal_window
+        attacker_served = self.switches[0].illegal_window
+        #assert((legitimate_served+attacker_served)==self.switches[0].getWindow())
 
-        if legitimate_rate + attacker_rate > self.upper_boundary:
+        if legitimate_served + attacker_served > self.upper_boundary:
             #used to set the reward to "reward_overload" in this case, but didn't work well
            
             # print("\n\n\n negative reward")
@@ -689,7 +661,7 @@ class network_full(object):
             if self.reward_overload:
                 reward = self.reward_overload
             else:
-                reward -= ((legitimate_rate + attacker_rate)/self.upper_boundary - 1.0)
+                reward -= ((legitimate_served + attacker_served)/self.upper_boundary - 1.0)
             
             self.server_failures +=1
 
@@ -697,28 +669,22 @@ class network_full(object):
             # the negative is you're having to throttle at the server as opposed to at the enemy
             # I deactivated it as the results (apart from gradually increasing) all were closer without
             if False:
-                traffic_level = legitimate_rate + attacker_rate
+                traffic_level = legitimate_served + attacker_served
                 overload_amount = traffic_level - self.upper_boundary
                 overload_percent = overload_amount/traffic_level
                 server_throttle_level = 1-overload_percent
                 assert(abs(server_throttle_level * traffic_level - self.upper_boundary )< DELTA) 
-                new_legit_rate = legitimate_rate * server_throttle_level
-                #print("{0} vs {1}".format(new_legit_rate, legitimate_rate_all))
+                new_legit_rate = legitimate_served * server_throttle_level
                 self.legitimate_served_ep += new_legit_rate
 
         else:
-            # we dont do the drift until now because before now it didn't matter
-            # print("\nprior")
-            # print("{0} {1} {2} = {3}".format(legitimate_rate, legitimate_rate_all, attacker_rate, legitimate_rate/legitimate_rate_all))
-            #legitimate_rate, legitimate_rate_all, attacker_rate = self.adjust_drift()
-            # print("{0} {1} {2} = {3}".format(legitimate_rate, legitimate_rate_all, attacker_rate, legitimate_rate/legitimate_rate_all))
 
-            if legitimate_rate_all != 0:
-                reward += legitimate_rate/legitimate_rate_all
+            if legitimate_sent != 0:
+                reward += legitimate_served/legitimate_sent
         
-            self.legitimate_served_ep += legitimate_rate
+            self.legitimate_served_ep += legitimate_served
         
-        self.legitimate_sent_ep += legitimate_rate_all
+        self.legitimate_sent_ep += legitimate_sent
         self.illegal_served_ep += self.switches[0].illegal_window
         self.illegal_sent_ep += (self.switches[0].illegal_window + self.switches[0].dropped_illegal_window)
         reward = clip(-1, 1, reward)

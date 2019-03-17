@@ -153,6 +153,7 @@ class GenericAdvMaster():
 
     def calc_reward(self, network_reward):
         # convert the network reward to the adversarial reward
+        assert(network_reward<=1)
         if network_reward<0:
             return 1
         else:

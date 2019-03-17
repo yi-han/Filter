@@ -257,6 +257,7 @@ class Experiment:
                             agent.update(net.last_state, last_action, net.get_state(), d, r, next_action = a)
 
                         if self.opposition_settings.is_intelligent:
+                            
                             adv_r = self.adversarialMaster.calc_reward(r)
                             if self.opposition_settings.save_model_mode in self.agentSaveModes:
                                 self.adversarialMaster.update(adv_last_state, adv_last_action, adv_state, d, adv_r, step, adv_action)
