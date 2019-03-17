@@ -67,7 +67,7 @@ class Host():
         # we start the attack at step 5 and stops at t=55
         (is_attacker, traffic_rate) = details
         Host.reset(self, is_attacker, traffic_rate)
-        self.first_attack = 4 # manually set
+        self.first_attack = 5 # manually set
         self.last_attack = 55 # manually set
 
 
