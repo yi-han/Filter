@@ -12,6 +12,7 @@ import os
 import sys
 from numpy import random as random
 import re
+from network.utility import *
 
 class ddGenAgent():
     def __init__(self, N_state, adv_settings, encoders):
@@ -166,4 +167,7 @@ class ddGenAgent():
             else:
                 self.legal_traffic += leaf.traffic_rate
                 self.illegal_traffic_by_host.append(0)
+        self.legal_traffic = KbToMb(self.legal_traffic)
+        self.illegal_traffic = KbToMb(self.illegal_traffic)
+
 

@@ -278,7 +278,10 @@ class Switch():
         self.new_dropped_legal = 0
         self.new_dropped_illegal = 0
 
+
     def resetWindow(self):
+
+
         self.legal_window=0
         self.illegal_window = 0
         self.dropped_legal_window = 0
@@ -291,6 +294,9 @@ class Switch():
         return KbToMb(self.legal_window + self.illegal_window)
 
     def getImmediateState(self):
+        assert(1==2)
+        # does not use kbToMb
+        # why does this exist?
         return self.legal_traffic + self.illegal_traffic
 
     def setThrottle(self, throttle_rate):
@@ -312,10 +318,13 @@ class Switch():
         self.resetWindow()
         self.throttle_rate = None # represents not set
         self.iterations_since_throttle = 0
+        self.past_loads = [0]*20
         if self.bucket:
             self.bucket.reset()
 
-
+    def update_past_load(self):
+        self.past_loads.pop(0)
+        self.past_loads.append(self.getWindow())
 
 
     def printSwitch(self):
@@ -743,7 +752,8 @@ class network_full(object):
         for i in range(self.iterations_between_action): # each time delay is 10 ms, 10*200 = 2000 ms = 2 seconds
            self.move_traffic(step_count, adv_action)
            #self.rewards_per_step.append(self.calculate_reward())
-
+        for switch in self.switches:
+            switch.update_past_load()
         #self.record_average_throttle()
 
         #self.adversary.takeStep()

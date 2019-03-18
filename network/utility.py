@@ -31,10 +31,10 @@ def clip(min_value, max_value, value):
     else:
         return value
 
-def deep_copy_state(state):
-    state_copy = np.empty_like(state)
-    state_copy[:] = state
-    return state_copy
+# def deep_copy_state(state):
+#     state_copy = np.empty_like(state)
+#     state_copy[:] = state
+#     return state_copy
 
 class advesaryStandardAttackEnum(Enum):
     constant = 0

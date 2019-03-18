@@ -1,5 +1,6 @@
 
 import agent.linearSarsaCentralised as linCen
+from network.utility import *
 
 
 class sarGenAgent(linCen.Agent):
@@ -62,3 +63,5 @@ class sarGenAgent(linCen.Agent):
             else:
                 self.legal_traffic += leaf.traffic_rate
                 self.illegal_traffic_by_host.append(0)
+        self.legal_traffic = KbToMb(self.legal_traffic)
+        self.illegal_traffic = KbToMb(self.illegal_traffic)

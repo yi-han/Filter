@@ -256,12 +256,14 @@ class DdGenericDec(object):
     discount_factor = 0.6
     startE = 1
     endE = 0.0
+    
     packets_last_step = False
-
+    prior_server_loads = 0
     prior_agent_actions = 5
     prior_adversary_actions = 5
     include_indiv_hosts = False    
     prior_agent_delta_moves = 0
+    include_legal_traffic = False
 
     is_intelligent = True
     update_freq = 4
@@ -306,6 +308,17 @@ class DdGenericSplit(DdGenericDec):
 #     packets_last_step = True
 #     discount_factor = 0.6
 
+class ddAimd(DdGenericDec):
+    num_adv_agents = 1
+
+    name = "ddAimd"
+    prior_agent_delta_moves = 6
+    prior_agent_actions = 0
+    prior_adversary_actions = 6
+
+    packets_last_step = False
+    discount_factor = 0.6    
+
 class ddAimdAlternative(DdGenericDec):
     num_adv_agents = 1
 
@@ -339,6 +352,18 @@ class ddAimdAExtended(DdGenericDec):
     packets_last_step = True
     discount_factor = 0.6
 
+class ddAimdExtProper(DdGenericDec):
+    num_adv_agents = 1
+    name = "ddAimdProper"
+    prior_agent_delta_moves = 7
+    prior_agent_actions = 7
+    prior_adversary_actions = 7
+    prior_server_loads = 7
+    include_legal_traffic = True
+ 
+    discount_factor = 0.5
+
+
 
 class sarGenericDec(object):
     name = "sarsaGenericDec"
@@ -356,6 +381,8 @@ class sarGenericDec(object):
     packets_last_step = False
     include_indiv_hosts = False    
     prior_agent_delta_moves = 0
+    prior_server_loads = 0
+    include_legal_traffic = False
 
     is_intelligent = True
     max_epLength = None
@@ -390,6 +417,14 @@ class sarAdvSplitLong(sarAdvSplit):
 #     include_other_attackers = False
 #     prior_agent_actions = 5  
 #     packets_last_step = True
+
+class sarAimd(sarGenericDec):
+    num_adv_agents = 1
+    name = "sarAimd"
+    prior_agent_delta_moves = 5
+    prior_agent_actions = 0
+    packets_last_step = False
+    discount_factor = 0.6
 
 class sarAimdAlternative(sarGenericDec):
     num_adv_agents = 1

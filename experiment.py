@@ -331,11 +331,11 @@ class Experiment:
                         #     print("prio state was {0}".format(net.last_state))
                         #     print("def | step {0} | action {1} | reward {2} | e {3}".format(step, last_action, r, e))
                         #     print("advesary made move {0}".format(adv_action))
-                            # if self.adversarialMaster:
-                            #     print("adversary | ep {3} | action {0} | reward {1} | adv_e {2}".format(adv_last_action, adv_r, adv_e, ep_num))
-                            #     print("adversary_state: {0}".format(adv_last_state))
-                            #     print("adv current state: {0} | action {1} \n\n".format(adv_state, adv_action))
-                        # if step == 57:
+                        #     if self.adversarialMaster:
+                        #         print("adversary | ep {3} | action {0} | reward {1} | adv_e {2}".format(adv_last_action, adv_r, adv_e, ep_num))
+                        #         print("adversary_state: {0}".format(adv_last_state))
+                        #         print("adv current state: {0} | action {1} \n\n".format(adv_state, adv_action))
+                        # if step == 20:
                         #     print("\n\n")
 
                         if r < 0:
