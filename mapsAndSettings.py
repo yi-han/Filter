@@ -295,6 +295,13 @@ class DdGenericSplit(DdGenericDec):
     include_other_attackers = False
     num_episodes = 600000
 
+class ddExpThree(DdGenericDec):
+    name = "ddExpThree"
+    num_adv_agents = 2
+    include_other_attackers = False
+    pre_train_episodes = 50000
+    annealing_episodes = 300000
+    num_episodes = 600000 
 
 
 
@@ -310,7 +317,6 @@ class DdGenericSplit(DdGenericDec):
 
 class ddAimd(DdGenericDec):
     num_adv_agents = 1
-
     name = "ddAimd"
     prior_agent_delta_moves = 6
     prior_agent_actions = 0
@@ -318,6 +324,11 @@ class ddAimd(DdGenericDec):
 
     packets_last_step = False
     discount_factor = 0.6    
+
+    pre_train_episodes = 50000
+    annealing_episodes = 150000
+    num_episodes = 350000
+
 
 class ddAimdAlternative(DdGenericDec):
     num_adv_agents = 1
@@ -363,7 +374,9 @@ class ddAimdExtProper(DdGenericDec):
  
     discount_factor = 0.5
 
-
+    pre_train_episodes = 50000
+    annealing_episodes = 150000
+    num_episodes = 350000
 
 class sarGenericDec(object):
     name = "sarsaGenericDec"
@@ -405,9 +418,12 @@ class sarAdvSplit(sarGenericCen):
     name = "sarsaAdvSplit"
     num_adv_agents = 2 
 
-class sarAdvSplitLong(sarAdvSplit):
-    name = "sarsaAdvSplitLong"
-    num_episodes = 1000000
+class sarAdvExpThree(sarGenericCen):
+    name = "sarsaAdvExpThree"
+    num_adv_agents = 2 
+    pre_train_episodes = 50000
+    annealing_episodes = 300000
+    num_episodes = 600000    
 
 
 
@@ -425,6 +441,10 @@ class sarAimd(sarGenericDec):
     prior_agent_actions = 0
     packets_last_step = False
     discount_factor = 0.6
+
+    pre_train_episodes = 75000
+    annealing_episodes = 225000
+    num_episodes = 500000
 
 class sarAimdAlternative(sarGenericDec):
     num_adv_agents = 1
