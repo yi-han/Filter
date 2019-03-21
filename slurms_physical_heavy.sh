@@ -8,13 +8,13 @@ sbatch output.slurm
 sed 's/0 1/1 1/g' output.slurm -i
 sbatch output.slurm
 
-sed 's/runDDQN/runDDQNAdditional/g' exp_gpgpu_single.slurm > output.slurm
-sed 's/sampleDDQNText/ddDualAimd/g' output.slurm -i
-sed "s/samplePath/ddDualAimd/g" output.slurm -i 
-sed 's/0 2/0 1/g' output.slurm -i
-sbatch output.slurm
-sed 's/0 1/1 1/g' output.slurm -i
-sbatch output.slurm
+# sed 's/runDDQN/runDDQNAdditional/g' exp_gpgpu_single.slurm > output.slurm
+# sed 's/sampleDDQNText/ddDualAimd/g' output.slurm -i
+# sed "s/samplePath/ddDualAimd/g" output.slurm -i 
+# sed 's/0 2/0 1/g' output.slurm -i
+# sbatch output.slurm
+# sed 's/0 1/1 1/g' output.slurm -i
+# sbatch output.slurm
 
 sed 's/runDDQN/runSarsaY/g' exp_gpgpu_single.slurm > output.slurm
 sed 's/sampleDDQNText/ddSinEverythingAimd/g' output.slurm -i

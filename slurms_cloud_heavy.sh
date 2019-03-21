@@ -1,32 +1,31 @@
-sed 's/runDDQN/runSARSA/g' exp_gpgpu_single.slurm > output.slurm
-sed "s/samplePath/ddMidAimdVariant/g" output.slurm -i 
-sed 's/sampleDDQNText/ddMidAimdVariant/g' output.slurm -i 
-sed 's/0 2/0 1/g' output.slurm -i 
+# aimd tests
+
+sed 's/runDDQN/runDDQN/g' exp_cloud.slurm > output.slurm
+sed 's/sampleDDQNText/ddSingleAimd/g' output.slurm -i
+sed "s/samplePath/ddSingleAimd/g" output.slurm -i 
 sbatch output.slurm
-sed 's/0 1/1 1/g' output.slurm -i 
+
+sed 's/runDDQN/runDDQNAdditional/g' exp_cloud.slurm > output.slurm
+sed 's/sampleDDQNText/ddDualAimd/g' output.slurm -i
+sed "s/samplePath/ddDualAimd/g" output.slurm -i 
 sbatch output.slurm
 
 
-sed 's/runDDQN/runSarsaAdditional/g' exp_gpgpu_single.slurm > output.slurm
-sed "s/samplePath/ddMidAimdExtended/g" output.slurm -i 
-sed 's/sampleDDQNText/ddMidAimdExtended/g' output.slurm -i 
-sed 's/0 2/0 1/g' output.slurm -i 
-sbatch output.slurm
-sed 's/0 1/1 1/g' output.slurm -i 
+sed 's/runDDQN/runSarsaY/g' exp_cloud.slurm > output.slurm
+sed 's/sampleDDQNText/ddSinEverythingAimd/g' output.slurm -i
+sed "s/samplePath/ddSinEverythingAimd/g" output.slurm -i 
 sbatch output.slurm
 
-sed 's/runDDQN/runSarsaDDQNCopy/g' exp_cloud.slurm > output.slurm
-sed "s/samplePath/sarMidAimdVariant/g" output.slurm -i 
-sed 's/sampleDDQNText/sarMidAimdVariant/g' output.slurm -i 
-sed 's/0 2/0 1/g' output.slurm -i 
-sbatch output.slurm
-sed 's/0 1/1 1/g' output.slurm -i 
+
+sed 's/runDDQN/runDDQNHundred/g' exp_cloud.slurm > output.slurm
+sed 's/sampleDDQNText/sarSingleAimd/g' output.slurm -i
+sed "s/samplePath/sarSingleAimd/g" output.slurm -i 
+sed 's/0 2/0 4/g' output.slurm -i
 sbatch output.slurm
 
-sed 's/runDDQN/runSarsaNoOverdrive/g' exp_cloud.slurm > output.slurm
-sed "s/samplePath/sarMidAimdExtended/g" output.slurm -i 
-sed 's/sampleDDQNText/sarMidAimdExtended/g' output.slurm -i 
-sed 's/0 2/0 1/g' output.slurm -i 
-sbatch output.slurm
-sed 's/0 1/1 1/g' output.slurm -i 
+
+sed 's/runDDQN/runDDQNMalialis/g' exp_cloud.slurm > output.slurm
+sed 's/sampleDDQNText/sarDualAimd/g' output.slurm -i
+sed "s/samplePath/sarDualAimd/g" output.slurm -i 
+sed 's/0 2/0 4/g' output.slurm -i
 sbatch output.slurm

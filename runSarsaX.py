@@ -5,7 +5,6 @@ import network.network_new
 import agent.tileCoding as tileCoding
 import agent.linearSarsaCentralised as linCen
 import agent.randomAgent as ranAg
-#import agent.sarsaDecentralised as sarDec# import agent.ddqnDecentralised as ddDec
 from mapsAndSettings import *
 import runAttacks
 assert(len(sys.argv)>=3)
@@ -128,7 +127,7 @@ attackClasses = [conAttack, shortPulse, mediumPulse,
 Settings to change
 """
 
-assignedNetwork = NetworkSingleTeamMalialisMedium
+assignedNetwork = NetworkSixFour
 assignedAgent = LinearSarsaLAIDDQN350
 load_attack_path = "attackSimulations/{0}/".format(assignedNetwork.name)
 network_emulator = network.network_new.network_full # network_quick # network_full
@@ -140,7 +139,7 @@ assignedAgent.save_model_mode = defender_mode_enum.load
 trainHost = adversarialLeaf #coordAttack # conAttack #driftAttack #adversarialLeaf
 assignedNetwork.drift = 0
 
-opposition = adv_constant #adv_random # adv_constant
+opposition = adv_random #adv_random # adv_constant
 intelligentOpposition =  sarAdvSplit #
 intelligentOpposition.save_model_mode = defender_mode_enum.save
 # intelligentOpposition = None

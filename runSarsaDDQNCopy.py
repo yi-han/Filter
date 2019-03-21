@@ -5,7 +5,6 @@ import network.network_new
 import agent.tileCoding as tileCoding
 import agent.linearSarsaCentralised as linCen
 import agent.randomAgent as ranAg
-#import agent.sarsaDecentralised as sarDec# import agent.ddqnDecentralised as ddDec
 from mapsAndSettings import *
 import runAttacks
 assert(len(sys.argv)>=3)
@@ -136,12 +135,12 @@ loadAttacks = False
 
 
 
-assignedAgent.save_model_mode = defender_mode_enum.load
+assignedAgent.save_model_mode = defender_mode_enum.load_save
 trainHost = adversarialLeaf #coordAttack # conAttack #driftAttack #adversarialLeaf
 assignedNetwork.drift = 0
 
-opposition = adv_constant #adv_random # adv_constant
-intelligentOpposition =  DdGenericSplit #
+opposition = adv_random #adv_random # adv_constant
+intelligentOpposition =  ddExpThree #
 intelligentOpposition.save_model_mode = defender_mode_enum.save
 # intelligentOpposition = None
 
