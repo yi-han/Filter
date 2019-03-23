@@ -264,6 +264,7 @@ class DdGenericDec(object):
     include_indiv_hosts = False    
     prior_agent_delta_moves = 0
     include_legal_traffic = False
+    prior_server_percentages = 0
 
     is_intelligent = True
     update_freq = 4
@@ -318,37 +319,74 @@ class ddExpThree(DdGenericDec):
 class ddAimd(DdGenericDec):
     num_adv_agents = 1
     name = "ddAimd"
-    prior_agent_delta_moves = 6
-    prior_agent_actions = 0
     prior_adversary_actions = 6
+    
+    prior_agent_actions = 0
+    prior_agent_delta_moves = 6
+    prior_server_loads = 0 
+    prior_server_percentages = 0
 
-    packets_last_step = False
+
     discount_factor = 0.6    
-
     pre_train_episodes = 50000
     annealing_episodes = 150000
     num_episodes = 350000
 
 
-class ddAimdAlternative(DdGenericDec):
+class ddAimdAlt1(DdGenericDec):
     num_adv_agents = 1
-
-    name = "ddAimdAlternative"
-    prior_agent_delta_moves = 6
-    prior_agent_actions = 0
+    name = "ddAimdAlt1"
     prior_adversary_actions = 6
-
-    packets_last_step = True
-    discount_factor = 0.6
-
-
-class ddAimdDual(DdGenericDec):
-    name = "ddAimdDual"
-    num_adv_agents = 2
-    prior_agent_delta_moves = 5
+    
     prior_agent_actions = 0
-    packets_last_step = True
-    discount_factor = 0.6
+    prior_agent_delta_moves = 6
+    prior_server_loads = 0 
+    prior_server_percentages = 6
+
+
+    discount_factor = 0.6    
+    pre_train_episodes = 50000
+    annealing_episodes = 150000
+    num_episodes = 350000
+
+class ddAimdLarge(DdGenericDec):
+    num_adv_agents = 1
+    name = "ddAimdLarge"
+    prior_adversary_actions = 6
+    include_legal_traffic = True
+    
+    prior_agent_actions = 6
+    prior_agent_delta_moves = 6
+    prior_server_loads = 6
+    prior_server_percentages = 6
+
+
+    discount_factor = 0.6    
+    pre_train_episodes = 50000
+    annealing_episodes = 150000
+    num_episodes = 350000
+
+
+
+# class ddAimdAlternative(DdGenericDec):
+#     num_adv_agents = 1
+
+#     name = "ddAimdAlternative"
+#     prior_agent_delta_moves = 6
+#     prior_agent_actions = 0
+#     prior_adversary_actions = 6
+
+#     packets_last_step = True
+#     discount_factor = 0.6
+
+
+# class ddAimdDual(DdGenericDec):
+#     name = "ddAimdDual"
+#     num_adv_agents = 2
+#     prior_agent_delta_moves = 5
+#     prior_agent_actions = 0
+#     packets_last_step = True
+#     discount_factor = 0.6
 
 
 class ddAimdAExtended(DdGenericDec):
@@ -395,6 +433,8 @@ class sarGenericDec(object):
     include_indiv_hosts = False    
     prior_agent_delta_moves = 0
     prior_server_loads = 0
+    prior_server_percentages = 0
+
     include_legal_traffic = False
 
     is_intelligent = True
@@ -427,13 +467,6 @@ class sarAdvExpThree(sarGenericCen):
 
 
 
-# class sarAntiAimd(sarGenericDec):
-#     name = "sarsaAntiAimd"
-#     num_adv_agents = 1
-#     include_other_attackers = False
-#     prior_agent_actions = 5  
-#     packets_last_step = True
-
 class sarAimd(sarGenericDec):
     num_adv_agents = 1
     name = "sarAimd"
@@ -445,33 +478,29 @@ class sarAimd(sarGenericDec):
     pre_train_episodes = 75000
     annealing_episodes = 225000
     num_episodes = 500000
+ 
 
-class sarAimdAlternative(sarGenericDec):
+class sarAimdAlt1(sarGenericDec):
     num_adv_agents = 1
-    name = "sarAimdAlternative"
+    name = "sarAimdAlt1"
     prior_agent_delta_moves = 5
     prior_agent_actions = 0
-    packets_last_step = True
+    prior_adversary_actions = 5
+    prior_server_loads = 0    
+    prior_server_percentages = 5
+    include_legal_traffic = False
     discount_factor = 0.6
 
-class sarAimdDual(sarGenericDec):
-    num_adv_agents = 2
-    name = "sarAimdDual"
-    prior_agent_delta_moves = 5
-    prior_agent_actions = 0
-    packets_last_step = True
-    discount_factor = 0.6
-
-
-
-class sarAimdExtended(sarGenericDec):
+class sarAimdLarge(sarGenericDec):
     num_adv_agents = 1
-    name = "sarAimdExtended"
-    prior_agent_delta_moves = 6
-    prior_agent_actions = 6
-    prior_agent_actions = 6
-    packets_last_step = True
-    discount_factor = 0.6    
+    name = "sarAimdLarge"
+    prior_agent_delta_moves = 5
+    prior_agent_actions = 5
+    prior_adversary_actions = 5
+    prior_server_loads = 5   
+    prior_server_percentages = 5
+    include_legal_traffic = True
+    discount_factor = 0.6
 
 def create_generic_dec(ds, ns):
     """

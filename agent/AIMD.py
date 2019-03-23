@@ -66,15 +66,16 @@ class AIMDagent():
                 self.rs  = (self.upper + self.lower)/self.num_throttles
             else:
                 self.rs /= self.beta
-            recorded_move = AimdMovesEnum.increase.value
+            recorded_move = AimdMovesEnum.decrease.value
         elif p < self.lower:
             if self.rs == None or self.belowEpsilon((p - self.pLast), self.epsilon):
                 self.rs = None
-                self.pLast = (-2 * self.epsilon)  
+                self.pLast = (-2 * self.epsilon)
+                recorded_move = AimdMovesEnum.none.value
             else:
                 self.pLast = p
                 self.rs += self.delta
-            recorded_move = AimdMovesEnum.increase.value
+                recorded_move = AimdMovesEnum.increase.value
         else:
             if self.rs == None:
                 recorded_move = AimdMovesEnum.none.value
@@ -95,6 +96,7 @@ class AIMDagent():
         self.past_predictions.append([recorded_rs])
         self.past_moves.pop(0)
         self.past_moves.append([recorded_move])
+        # print("we set it as {0} | {1} with a delta of {2}".format(self.rs, recorded_rs, recorded_move))
 
         return self.rs
 

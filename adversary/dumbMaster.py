@@ -121,7 +121,7 @@ class dumbMaster():
 
 
 
-    def get_state(self, net, e, step, last_reward):
+    def get_state(self, net, e, step):
         return []
 
 

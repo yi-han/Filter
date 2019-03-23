@@ -195,16 +195,19 @@ class Experiment:
             adv_loss_lines.append("Episode,StepsSoFar,Loss,Exploration,EpDefLoss\n")
         server_actions_line = "Episode,Step,LegalReceived,LegalSent,LegalPercentage,IllegalServed,IllegalSent,TotalSent,LegalCap,IllegalCap,TotalCap,NumAdvesary"
 
-        for i in range(self.network_settings.N_state):
-            server_actions_line += ",DefAction{0}".format(i)
-        for i in range(self.opposition_settings.num_adv_agents):
-            server_actions_line += ",AdvAction{0}".format(i)
-        server_actions_line += "\n"
-        server_actions_lines.append(server_actions_line)
+
         ep_init = 0
 
 
         with agent:
+            # different number of predicitons depending if aimd or rt
+            for i in range(agent.num_predictions):
+                server_actions_line += ",DefAction{0}".format(i)
+            for i in range(self.opposition_settings.num_adv_agents):
+                server_actions_line += ",AdvAction{0}".format(i)
+            server_actions_line += "\n"
+            server_actions_lines.append(server_actions_line)
+
             self.adversarialMaster.__enter__()
             if self.agent_settings.save_model_mode in self.agentLoadModes : #mapsAndSettings.defender_mode_enum.test
                 episode = agent.loadModel(self.file_path, prefix)
@@ -250,7 +253,7 @@ class Experiment:
 
                 for step in range(max_epLength):
 
-                    adv_state = self.adversarialMaster.get_state(net, adv_e, step, r)
+                    adv_state = self.adversarialMaster.get_state(net, adv_e, step)
                     adv_action = self.adversarialMaster.predict(adv_state, adv_e, step)
 
                     a = agent.predict(net.get_state(), e) # generate an action
@@ -330,11 +333,11 @@ class Experiment:
 
                         #     print("prio state was {0}".format(net.last_state))
                         #     print("def | step {0} | action {1} | reward {2} | e {3}".format(step, last_action, r, e))
-                        #     print("advesary made move {0}".format(adv_action))
                         #     if self.adversarialMaster:
+                        #         print("adversary state was: {0}".format(adv_last_state))
                         #         print("adversary | ep {3} | action {0} | reward {1} | adv_e {2}".format(adv_last_action, adv_r, adv_e, ep_num))
-                        #         print("adversary_state: {0}".format(adv_last_state))
                         #         print("adv current state: {0} | action {1} \n\n".format(adv_state, adv_action))
+                        #         print("")
                         # if step == 20:
                         #     print("\n\n")
 
@@ -400,9 +403,11 @@ class Experiment:
                         (legit_served, legit_sent, legal_per, illegal_served, illegal_sent) = net.getStepPacketStatistics()
                         total_sent = legit_sent+illegal_sent
                         server_actions_line = "{0},{1},{2},{3},{4},{5},{6},{7},{8},{9},{10},{11}".format(ep_num, step, legit_served, legit_sent, legal_per, illegal_served, illegal_sent, total_sent, legal_capacity, illegal_capacity, total_capacity, self.opposition_settings.num_adv_agents)
-
-                        for i in range(self.network_settings.N_state):
-                            server_actions_line += ",{0}".format(a[i])
+                        if isinstance(a, list):
+                            for i in range(self.network_settings.N_state):
+                                server_actions_line += ",{0}".format(a[i])
+                        else:
+                            server_actions_line += ",{0}".format(a)
                         for i in range(self.opposition_settings.num_adv_agents):
                             server_actions_line += ",{0}".format(adv_action[i])
                         

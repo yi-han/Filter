@@ -177,7 +177,7 @@ class Bucket():
 
 
 class Switch():
-    def __init__(self, switch_id, is_filter, representation, defender_settings, iterations_between_action, bucket_capacity):
+    def __init__(self, switch_id, is_filter, representation, defender_settings, iterations_between_action, bucket_capacity, server_capacity):
         self.id = switch_id # id
         self.source_links = [] # places sending traffic to switch
         self.destination_links = [] # where traffic is getting sent
@@ -205,7 +205,7 @@ class Switch():
         self.representation = representation
 
         self.is_filter = is_filter
-
+        self.server_capacity = server_capacity
         if defender_settings.has_bucket and is_filter:
             # initiate a bucket
             self.bucket = Bucket(iterations_between_action, bucket_capacity)
@@ -318,14 +318,19 @@ class Switch():
         self.resetWindow()
         self.throttle_rate = None # represents not set
         self.iterations_since_throttle = 0
-        self.past_loads = [0]*20
+        self.past_server_loads = [0]*20
+        self.past_server_percentages = [0]*20
         if self.bucket:
             self.bucket.reset()
 
-    def update_past_load(self):
-        self.past_loads.pop(0)
-        self.past_loads.append(self.getWindow())
-
+    def update_past_server_load(self):
+        # NB: We assume this is only for the server
+        self.past_server_loads.pop(0)
+        self.past_server_percentages.pop(0)
+        load = min(self.getWindow(), self.server_capacity*1.5)
+        # Once we exceed the server capacity this information is useless
+        self.past_server_loads.append(load)
+        self.past_server_percentages.append(load/self.server_capacity)
 
     def printSwitch(self):
        print("switch_id {0} | load {1} | window {2}".format(self.id, self.legal_traffic + self.illegal_traffic, self.getWindow()))
@@ -400,7 +405,7 @@ class network_full(object):
     name = "Network_Full"
 
     def __init__(self, network_settings, reward_overload, host_class, max_epLength, representationType, defender_settings, adversaryMaster, load_attack_path = None, save_attack=False):
-        
+        self.network_settings = network_settings
         self.iterations_between_action = network_settings.iterations_between_action# ideally set at 200
         self.host_sources = np.empty_like(network_settings.host_sources)
         self.host_sources[:] = network_settings.host_sources
@@ -602,7 +607,7 @@ class network_full(object):
         
         for i in range(self.N_switch):
             is_filter = i in self.filter_list
-            self.switches.append(Switch(i, is_filter, representationType, defender_settings, iterations_between_action, bucket_capacity))
+            self.switches.append(Switch(i, is_filter, representationType, defender_settings, iterations_between_action, bucket_capacity, self.network_settings.upper_boundary))
 
         
         for i in range(0, self.N_switch-1):
@@ -753,7 +758,7 @@ class network_full(object):
            self.move_traffic(step_count, adv_action)
            #self.rewards_per_step.append(self.calculate_reward())
         for switch in self.switches:
-            switch.update_past_load()
+            switch.update_past_server_load()
         #self.record_average_throttle()
 
         #self.adversary.takeStep()
