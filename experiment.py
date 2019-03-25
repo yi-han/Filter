@@ -328,16 +328,18 @@ class Experiment:
 
                         #     # print("server state: {0}\n".format(net.switches[0].getWindow()))
                         
+                        # if step == 1:
+                        #     net.printHostInformation()
                         # if step in range(0,8) or step in range(53,57):  
                         #     print("In Episode - {0} Step - {1}".format(ep_num, step))
 
                         #     print("prio state was {0}".format(net.last_state))
                         #     print("def | step {0} | action {1} | reward {2} | e {3}".format(step, last_action, r, e))
                         #     if self.adversarialMaster:
-                        #         print("adversary state was: {0}".format(adv_last_state))
+                        #     #     print("adversary state was: {0}".format(adv_last_state))
                         #         print("adversary | ep {3} | action {0} | reward {1} | adv_e {2}".format(adv_last_action, adv_r, adv_e, ep_num))
-                        #         print("adv current state: {0} | action {1} \n\n".format(adv_state, adv_action))
-                        #         print("")
+                        #         #print("adv current state: {0} | action {1} \n\n".format(adv_state, adv_action))
+                            
                         # if step == 20:
                         #     print("\n\n")
 

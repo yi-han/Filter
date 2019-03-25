@@ -156,7 +156,7 @@ class NetworkSingleTeamMalialisMedium(object):
     upper_boundary = 14 #12.5 # Mal would have used 14
     lower_boundary = 10 # for AIMD
 
-    iterations_between_action = 30 # 200
+    iterations_between_action = 30 #30 # 200
 
     max_hosts_per_level = [2, 6, 12]
     bucket_capacity = 12.1
@@ -305,17 +305,6 @@ class ddExpThree(DdGenericDec):
     num_episodes = 600000 
 
 
-
-
-# class ddAdvAntiAimd(DdGenericDec):
-#     num_adv_agents = 1
-#     name = "ddAdvAntiAimd"
-#     include_other_attackers = False
-#     prior_agent_actions = 8
-#     prior_adversary_actions = 8
-#     packets_last_step = True
-#     discount_factor = 0.6
-
 class ddAimd(DdGenericDec):
     num_adv_agents = 1
     name = "ddAimd"
@@ -332,6 +321,18 @@ class ddAimd(DdGenericDec):
     annealing_episodes = 150000
     num_episodes = 350000
 
+class ddAimd2(ddAimd):
+    num_adv_agents = 1
+    name = "ddAimd2"
+    prior_adversary_actions = 6
+
+    pre_train_episodes = 100000
+    annealing_episodes = 300000
+    num_episodes = 500000
+
+class ddAimd3(ddAimd2):
+    name = "ddAimd3"
+    discount_factor = 0.3
 
 class ddAimdAlt1(DdGenericDec):
     num_adv_agents = 1
@@ -348,6 +349,18 @@ class ddAimdAlt1(DdGenericDec):
     pre_train_episodes = 50000
     annealing_episodes = 150000
     num_episodes = 350000
+
+class ddAimdAlt2(ddAimdAlt1):
+    num_adv_agents = 1
+    name = "ddAimdAlt2"
+
+    pre_train_episodes = 100000
+    annealing_episodes = 300000
+    num_episodes = 500000
+
+class ddAimdAlt3(ddAimdAlt2):
+    name = "ddAimdAlt3"
+    discount_factor = 0.3
 
 class ddAimdLarge(DdGenericDec):
     num_adv_agents = 1
@@ -366,55 +379,43 @@ class ddAimdLarge(DdGenericDec):
     annealing_episodes = 150000
     num_episodes = 350000
 
+class ddAimdLarge2(ddAimdLarge):
+    name = "ddAimdLarge2"
+    pre_train_episodes = 100000
+    annealing_episodes = 300000
+    num_episodes = 500000    
+   
+class ddAimdLarge3(ddAimdLarge2):
+    name = "ddAimdLarge3"
+    discount_factor = 0.3
 
 
-# class ddAimdAlternative(DdGenericDec):
+# class ddAimdAExtended(DdGenericDec):
 #     num_adv_agents = 1
 
-#     name = "ddAimdAlternative"
-#     prior_agent_delta_moves = 6
-#     prior_agent_actions = 0
-#     prior_adversary_actions = 6
+#     name = "ddAimdAExtended"
+#     prior_agent_delta_moves = 10
+#     prior_agent_actions = 10
+#     prior_adversary_actions = 10
+#     include_indiv_hosts = True  
 
 #     packets_last_step = True
 #     discount_factor = 0.6
 
-
-# class ddAimdDual(DdGenericDec):
-#     name = "ddAimdDual"
-#     num_adv_agents = 2
-#     prior_agent_delta_moves = 5
-#     prior_agent_actions = 0
-#     packets_last_step = True
-#     discount_factor = 0.6
-
-
-class ddAimdAExtended(DdGenericDec):
-    num_adv_agents = 1
-
-    name = "ddAimdAExtended"
-    prior_agent_delta_moves = 10
-    prior_agent_actions = 10
-    prior_adversary_actions = 10
-    include_indiv_hosts = True  
-
-    packets_last_step = True
-    discount_factor = 0.6
-
-class ddAimdExtProper(DdGenericDec):
-    num_adv_agents = 1
-    name = "ddAimdProper"
-    prior_agent_delta_moves = 7
-    prior_agent_actions = 7
-    prior_adversary_actions = 7
-    prior_server_loads = 7
-    include_legal_traffic = True
+# class ddAimdExtProper(DdGenericDec):
+#     num_adv_agents = 1
+#     name = "ddAimdProper"
+#     prior_agent_delta_moves = 7
+#     prior_agent_actions = 7
+#     prior_adversary_actions = 7
+#     prior_server_loads = 7
+#     include_legal_traffic = True
  
-    discount_factor = 0.5
+#     discount_factor = 0.5
 
-    pre_train_episodes = 50000
-    annealing_episodes = 150000
-    num_episodes = 350000
+#     pre_train_episodes = 50000
+#     annealing_episodes = 150000
+#     num_episodes = 350000
 
 class sarGenericDec(object):
     name = "sarsaGenericDec"
@@ -478,7 +479,16 @@ class sarAimd(sarGenericDec):
     pre_train_episodes = 75000
     annealing_episodes = 225000
     num_episodes = 500000
- 
+
+class sarAimd2(sarAimd):
+    name = "sarAimd2"
+    pre_train_episodes = 75000
+    annealing_episodes = 225000
+    num_episodes = 500000    
+
+class sarAimd3(sarAimd2):
+    name = "sarAimd3"
+    discount_factor = 0.3
 
 class sarAimdAlt1(sarGenericDec):
     num_adv_agents = 1
@@ -491,6 +501,16 @@ class sarAimdAlt1(sarGenericDec):
     include_legal_traffic = False
     discount_factor = 0.6
 
+class sarAimdAlt2(sarAimdAlt1):
+    name = "sarAimdAlt2"
+    pre_train_episodes = 75000
+    annealing_episodes = 225000
+    num_episodes = 500000  
+
+class sarAimdAlt3(sarAimdAlt2):
+    name = "sarAimdAlt3"
+    discount_factor = 0.3
+
 class sarAimdLarge(sarGenericDec):
     num_adv_agents = 1
     name = "sarAimdLarge"
@@ -501,6 +521,16 @@ class sarAimdLarge(sarGenericDec):
     prior_server_percentages = 5
     include_legal_traffic = True
     discount_factor = 0.6
+
+class sarAimdLarge2(sarAimdLarge):
+    name = "sarAimdLarge2"
+    pre_train_episodes = 75000
+    annealing_episodes = 225000
+    num_episodes = 500000 
+
+class sarAimdLarge3(sarAimdLarge2):
+    name = "sarAimdLarge3"
+    discount_factor = 0.3
 
 def create_generic_dec(ds, ns):
     """

@@ -335,6 +335,8 @@ class Switch():
     def printSwitch(self):
        print("switch_id {0} | load {1} | window {2}".format(self.id, self.legal_traffic + self.illegal_traffic, self.getWindow()))
 
+
+
     def setRepresentation(self, allThrottlers):
         self.stateSwitches.append(self) #always include self
          
@@ -798,6 +800,26 @@ class network_full(object):
             else:
                 dest = None
             print("id {0} | load {1} | window {2} | destination {3}".format(switch.id, switch.getImmediateState(), switch.getWindow(), dest))
+
+    def printHostInformation(self):
+        # for debugging
+        attackers = []
+        capacities = []
+        attackCap = 0
+        legCap = 0
+        for host in self.hosts:
+            attackers.append(host.is_attacker)
+            tf = KbToMb(host.traffic_rate)
+            capacities.append(tf)
+
+            if host.is_attacker:
+                attackCap += tf
+            else:
+                legCap += tf
+        print(attackers)
+        print(capacities)
+        print("attack {0} legal {1}".format(attackCap, legCap))
+
 
     # def record_average_throttle(self):
     #     for switch in self.switches:
