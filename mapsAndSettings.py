@@ -334,6 +334,10 @@ class ddAimd3(ddAimd2):
     name = "ddAimd3"
     discount_factor = 0.3
 
+class ddAim4(ddAimd2):
+    name = "ddAimd4"
+    discount_factor = 0.9
+
 class ddAimdAlt1(DdGenericDec):
     num_adv_agents = 1
     name = "ddAimdAlt1"
@@ -362,6 +366,10 @@ class ddAimdAlt3(ddAimdAlt2):
     name = "ddAimdAlt3"
     discount_factor = 0.3
 
+class ddAimdAlt4(ddAimdAlt2):
+    name = "ddAimdAlt4"
+    discount_factor = 0.9
+
 class ddAimdLarge(DdGenericDec):
     num_adv_agents = 1
     name = "ddAimdLarge"
@@ -389,6 +397,9 @@ class ddAimdLarge3(ddAimdLarge2):
     name = "ddAimdLarge3"
     discount_factor = 0.3
 
+class ddAimdLarge4(ddAimdLarge2):
+    name = "ddAimdLarge4"
+    discount_factor = 0.9
 
 # class ddAimdAExtended(DdGenericDec):
 #     num_adv_agents = 1
