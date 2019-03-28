@@ -100,6 +100,7 @@ class AIMDsettings(object):
     stepDrop = 0
     reward_overload = None
     has_bucket = True
+    history_size = 1
 
 # class AIMDvariant(AIMDsettings):
 #     name = "AIMDvariant"
@@ -373,7 +374,9 @@ class ddAimdLarge4(ddAimdLarge2):
     name = "ddAimdLarge4"
     discount_factor = 0.9
 
-
+class ddAimdLarge5(ddAimdLarge2):
+    name = "ddAimdLarge5"
+    discount_factor = 0.8
 
 class sarGenericDec(object):
     name = "sarsaGenericDec"
