@@ -318,23 +318,26 @@ class Switch():
         self.resetWindow()
         self.throttle_rate = None # represents not set
         self.iterations_since_throttle = 0
-        self.past_server_loads = [0]*20
+        self.past_windows = [0]*20
         self.past_server_percentages = [0]*20
         if self.bucket:
             self.bucket.reset()
 
     def update_past_server_load(self):
         # NB: We assume this is only for the server
-        self.past_server_loads.pop(0)
+        self.past_windows.pop(0)
         self.past_server_percentages.pop(0)
         load = min(self.getWindow(), self.server_capacity*1.5)
         # Once we exceed the server capacity this information is useless
-        self.past_server_loads.append(load)
+        self.past_windows.append(load)
         self.past_server_percentages.append(load/self.server_capacity)
 
     def printSwitch(self):
        print("switch_id {0} | load {1} | window {2}".format(self.id, self.legal_traffic + self.illegal_traffic, self.getWindow()))
 
+
+    def getPastWindows(self, history_size):
+        return self.past_windows[-history_size:]
 
 
     def setRepresentation(self, allThrottlers):
@@ -371,11 +374,11 @@ class Switch():
             print(self.representation)
             assert(1==2)
 
-    def get_state(self):
+    def get_state(self, history_size):
         # get the state for the agent associated with the throttler
         response = []
         for switch in self.stateSwitches:
-            response.append(switch.getWindow())
+            response.extend(switch.getPastWindows(history_size))
         return response
 
 class link(object):
@@ -454,7 +457,7 @@ class network_full(object):
         self.hostClass.classReset()
         bucket_capacity = MbToKb(network_settings.bucket_capacity)
         self.initialise(network_settings.topologyFile, representationType, defender_settings, network_settings.iterations_between_action, bucket_capacity)
-        self.last_state = np.empty_like(self.get_state())
+        #self.last_state = np.empty_like(self.get_state())
 
     def reset(self):
         if self.load_attack_path: # if we provide a file to oad from use it
@@ -464,7 +467,6 @@ class network_full(object):
         if self.save_attack:# is self.SaveAttackEnum.save:
             self.record_attackers()
         #self.set_rate()
-        self.current_state = None
         self.legitimate_sent_ep = 0
         self.legitimate_served_ep = 0
         self.illegal_sent_ep = 0
@@ -538,16 +540,12 @@ class network_full(object):
             self.hosts[i].load_details(host_data[i])
 
 
-    def get_state(self):
+    def get_state(self, history_size):
         # get the state for the agent associated with the throttler
-        
-        if self.current_state:
-            # we're trying to cache the current state
-            return self.current_state
 
         response = []
         for i in self.filter_list:
-            response.append(self.switches[i].get_state())
+            response.append(self.switches[i].get_state(history_size))
         
         # error checking. Print out full state
         # full_state = []
@@ -559,7 +557,6 @@ class network_full(object):
         # print("global State")
         # print(full_state)
 
-        self.current_state = response
         return response
 
         
@@ -747,8 +744,6 @@ class network_full(object):
         # ideally i would move calculations here
         # adv action is action by adversary
         self.cache_reward = None 
-        self.last_state = self.get_state()
-        self.current_state = None # we need to reset the state to undo the cache
         for switch in self.switches:
             switch.resetWindow()
         

@@ -176,6 +176,9 @@ class NetworkSixFour(NetworkSingleTeamMalialisMedium):
     max_hosts_per_level = [4, 12, 24]
     bucket_capacity = 24.1
 
+class NetTest(NetworkSingleTeamMalialisMedium):
+    iterations_between_action = 2
+    
 
 class NetworkMalialisTeamFull(object):
     name = "full_team_malialias"
@@ -211,41 +214,10 @@ class NetworkMalialisTeamFull(object):
     max_epLength = 30
     save_per_step_stats = False
 
-### This is an experimental one where i have not set an even set of hosts
-# class NetworkMalialisTeamFull(object):
-#     name = "full_team_malialias"
-#     N_state = 30
-#     N_action = 1000000000000000000000000000000
-#     action_per_throttler = 10
-#     N_switch = 47
-#     host_sources = [4, 4, 4, 5, 6, 6, 44, 44, 44, 45, 46, 46, 
-#     9, 10, 10, 10, 11, 11, 13, 14, 14, 14, 15, 15, 
-#     18, 18, 19, 20, 20, 20, 22, 22, 23, 24, 24, 24,
-#     27, 28, 28, 28, 29, 29, 31, 32, 32, 32, 33, 33,
-#     36, 36, 36, 37, 38, 38, 40, 40, 40, 41, 42, 42]
 
-#     servers = [0]
-#     filters = [4, 5, 6, 44, 45, 46,
-#     9, 10, 11, 13, 14, 15,
-#     18, 19, 20, 22, 23, 24,
-#     27, 28, 29, 31, 32, 33,
-#     36, 37, 38, 40, 41, 42]
-
-#     topologyFile = 'topologies/full_team.txt'
-#     rate_legal_low = 0.05 
-#     rate_legal_high = 1 
-#     rate_attack_low = 2.5 
-#     rate_attack_high = 6
-#     legal_probability = 0.6 # probability that is a good guys
-#     upper_boundary = 62
-#     lower_boundary = 56
-#     iterations_between_action = 10
-#     max_hosts_per_level = [2, 6, 12, 60]   
-
-
-
-
-
+#################
+###Adversaries###
+###############3#
 class DdGenericDec(object):
     name = "dd DO NOT USE"
     num_adv_agents = -1
@@ -401,32 +373,7 @@ class ddAimdLarge4(ddAimdLarge2):
     name = "ddAimdLarge4"
     discount_factor = 0.9
 
-# class ddAimdAExtended(DdGenericDec):
-#     num_adv_agents = 1
 
-#     name = "ddAimdAExtended"
-#     prior_agent_delta_moves = 10
-#     prior_agent_actions = 10
-#     prior_adversary_actions = 10
-#     include_indiv_hosts = True  
-
-#     packets_last_step = True
-#     discount_factor = 0.6
-
-# class ddAimdExtProper(DdGenericDec):
-#     num_adv_agents = 1
-#     name = "ddAimdProper"
-#     prior_agent_delta_moves = 7
-#     prior_agent_actions = 7
-#     prior_adversary_actions = 7
-#     prior_server_loads = 7
-#     include_legal_traffic = True
- 
-#     discount_factor = 0.5
-
-#     pre_train_episodes = 50000
-#     annealing_episodes = 150000
-#     num_episodes = 350000
 
 class sarGenericDec(object):
     name = "sarsaGenericDec"
@@ -464,8 +411,6 @@ class sarGenericCen(sarGenericDec):
     name = "sarsaGenericCen"
     num_adv_agents = 1
 
-
-
 class sarAdvSplit(sarGenericCen):
     name = "sarsaAdvSplit"
     num_adv_agents = 2 
@@ -476,8 +421,6 @@ class sarAdvExpThree(sarGenericCen):
     pre_train_episodes = 50000
     annealing_episodes = 300000
     num_episodes = 600000    
-
-
 
 class sarAimd(sarGenericDec):
     num_adv_agents = 1
@@ -543,38 +486,38 @@ class sarAimdLarge3(sarAimdLarge2):
     name = "sarAimdLarge3"
     discount_factor = 0.3
 
-def create_generic_dec(ds, ns):
+def create_generic_dec(def_settings, ns):
     """
-    ds = defender_settings, ns = network_settings
+    def_settings = defender_settings, ns = network_settings
 
     We can make agents into groups.
 
     """
 
-    if "AIMD" in ds.name:
-        return ds.sub_agent(ns, ds)
+    if "AIMD" in def_settings.name:
+        return def_settings.sub_agent(ns, def_settings)
 
     throttlers_not_allocated = ns.N_state
 
-    group_size = ds.group_size
-    sub_agent = ds.sub_agent
+    group_size = def_settings.group_size
+    sub_agent = def_settings.sub_agent
     #num_teams = math.ceil(ns.N_state/group_size)
-    #stateletFunction = ds.stateletFunction
+    #stateletFunction = def_settings.stateletFunction
     sub_agent_list = []
 
     print(sub_agent)
     while throttlers_not_allocated > 0:
         print("currently {0} throttlers_not_allocated".format(throttlers_not_allocated))
         agent_to_allocate = min(throttlers_not_allocated, group_size)
-        state_size = calcStateSize(ns.N_state, ds.stateRepresentation)
+        state_size = calcStateSize(ns.N_state, def_settings.stateRepresentation, def_settings.history_size)
         print(agent_to_allocate)
-        sub_agent_list.append(sub_agent(ns.action_per_throttler**agent_to_allocate, state_size, ds.encoders, ds))
+        sub_agent_list.append(sub_agent(ns.action_per_throttler**agent_to_allocate, state_size, def_settings.encoders, def_settings))
         throttlers_not_allocated -= agent_to_allocate
 
     #print("\nTest {0} \n".format(sub_agent_list[0].N_action))
     master = genericDecentralised.AgentOfAgents(
         ns.N_action, ns.action_per_throttler, ns.N_state,
-            sub_agent_list, ds.tau, ds.discount_factor
+            sub_agent_list, def_settings.tau, def_settings.discount_factor
         )
     return master
 
@@ -642,17 +585,19 @@ def getPathName(network_settings, agent_settings, commStrategy, twist, train_opp
 
 
 
-def calcStateSize(total_throttlers, stateRepresentation):
+def calcStateSize(total_throttlers, stateRepresentation, history_size):
     if stateRepresentation == stateRepresentationEnum.throttler:
-        return 1
+        num_routers = 1
     elif stateRepresentation == stateRepresentationEnum.leaderAndIntermediate:
-        return 3
+        num_routers = 3
     elif stateRepresentation == stateRepresentationEnum.server:
-        return 4
+        num_routers = 4
     elif stateRepresentation == stateRepresentationEnum.allThrottlers:
-        return total_throttlers
+        num_routers = total_throttlers
     else:
         assert(1==2)
+
+    return num_routers * history_size
 
 
 def calc_comm_strategy(stateRepresentation):

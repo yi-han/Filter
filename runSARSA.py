@@ -19,15 +19,16 @@ class LinearSarsaSingular(object):
     tau = 0.1
     update_freq = 4
     batch_size = None
-    num_episodes = 200000#82501
+    num_episodes = 200000#62500
     pre_train_episodes = 0#2000
-    annealing_episodes = 50000 #10 #60000 
+    annealing_episodes = 50000
     startE = 0.4 #0.4
     endE = 0.0
     agent = None
     sub_agent = linCen.Agent
     group_size = 1 # number of filters each agent controls
     #stateletFunction = getStateletNoCommunication
+    history_size = 1 # number of past iterations to look at
     reward_overload = -1
     stateRepresentation = stateRepresentationEnum.throttler  
     has_bucket = False
@@ -48,6 +49,8 @@ class LinearSarsaLAI(object):
     annealing_episodes = 80000 #10 #60000 
     startE = 0.3 #0.4
     endE = 0.0
+    history_size = 1 # number of past iterations to look at
+
     agent = None
     sub_agent = linCen.Agent
     group_size = 1 # number of filters each agent controls
@@ -69,6 +72,7 @@ class LinearSarsaSingularDDQNCopy(object):
     annealing_episodes = 60000  #120000  #
     startE = 1
     endE = 0.0
+    history_size = 1 # number of past iterations to look at
     agent = None
     sub_agent = linCen.Agent
     stateRepresentation = stateRepresentationEnum.throttler
@@ -102,6 +106,7 @@ class LinTest(object):
     annealing_episodes = 5 #10 #60000 
     startE = 0.4 #0.4
     endE = 0.0
+    history_size = 1 # number of past iterations to look at
     agent = None
     sub_agent = linCen.Agent
     group_size = 1 # number of filters each agent controls
@@ -128,19 +133,19 @@ Settings to change
 """
 
 assignedNetwork = NetworkSingleTeamMalialisMedium
-assignedAgent = LinearSarsaSingularDDQNCopy
+assignedAgent = AIMDsettings
 load_attack_path = "attackSimulations/{0}/".format(assignedNetwork.name)
 network_emulator = network.network_new.network_full # network_quick # network_full
 loadAttacks = False
 
 
 
-assignedAgent.save_model_mode = defender_mode_enum.load_save
+assignedAgent.save_model_mode = defender_mode_enum.load
 trainHost = adversarialLeaf #coordAttack # conAttack #driftAttack #adversarialLeaf
 assignedNetwork.drift = 0
 
 opposition = adv_random #adv_random # adv_constant
-intelligentOpposition =  ddExpThree #
+intelligentOpposition =  sarAimdExtProper #
 intelligentOpposition.save_model_mode = defender_mode_enum.save
 # intelligentOpposition = None
 

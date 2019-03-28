@@ -1,4 +1,4 @@
-# aimd trial two
+# aimd base
 
 sed 's/runDDQN/runDDQN/g' exp_gpgpu_single.slurm > output.slurm
 sed 's/sampleDDQNText/ddAimd/g' output.slurm -i

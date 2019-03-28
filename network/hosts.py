@@ -1,5 +1,6 @@
 import numpy as np
 import random
+import network.utility as utility
 """
 1) Shouldn't be keeping a counter, use the one provided by experiment
 2) update to be handle variable
@@ -67,8 +68,8 @@ class Host():
         # we start the attack at step 5 and stops at t=55
         (is_attacker, traffic_rate) = details
         Host.reset(self, is_attacker, traffic_rate)
-        self.first_attack = 5 # manually set
-        self.last_attack = 55 # manually set
+        self.first_attack = utility.ATTACK_START # manually set
+        self.last_attack = 60 - utility.ATTACK_START # manually set
 
 
 # class DriftAttack(Host):

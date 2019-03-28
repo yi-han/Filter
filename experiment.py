@@ -244,19 +244,25 @@ class Experiment:
 
                 d = False # indicates that network is finished
                 rAll = 0 # accumulative reward for system in the episode. #TODO shouldn't contribute in pretraining
-                
+                t_packet_received = 0
+                t_packet_sent = 0
                 advRAll = 0 # total reward for episode
                 r = 0
                 
                 if self.network_settings.save_per_step_stats:
                     (legal_capacity, illegal_capacity, total_capacity) = net.getHostCapacity()
 
+
+                defender_state = None
                 for step in range(max_epLength):
 
                     adv_state = self.adversarialMaster.get_state(net, adv_e, step)
                     adv_action = self.adversarialMaster.predict(adv_state, adv_e, step)
 
-                    a = agent.predict(net.get_state(), e) # generate an action
+                    last_defender_state = defender_state
+                    defender_state = net.get_state(self.agent_settings.history_size)
+
+                    a = agent.predict(defender_state, e) # generate an action
                     #net.step(a, step) # take the action, update the network
                     
                     if step > 0: # when step==0, the actions are chosen randomly, and the state is NULL
@@ -266,11 +272,13 @@ class Experiment:
                         r = net.calculate_reward()
                         rAll += r
 
-
+                        p_received, p_sent, legal_received_per, _a, _b = net.getStepPacketStatistics()
+                        t_packet_received += p_received 
+                        t_packet_sent += p_sent
                         ### why are we putting in the current state??? Shouldn't it be last state
                         ### or better, shouldn't it involve both the last state and current state?
                         if self.agent_settings.save_model_mode in self.agentSaveModes:
-                            agent.update(net.last_state, last_action, net.get_state(), d, r, next_action = a)
+                            agent.update(last_defender_state, last_action, defender_state, d, r, next_action = a)
 
                         if self.opposition_settings.is_intelligent:
                             
@@ -282,66 +290,21 @@ class Experiment:
                             adv_r = 0
 
                         advRAll += adv_r
-                        #if debug:                
-                        # if(net.get_state() != net.last_state):
-                        #     print("E = {1} | step = {2} | current_state: {0}".format(net.get_state(), ep_num, step))
-                        #     print(r)
-                        # elif finished == False:
-                        #     print("\n\n\n")
-                        #     finished = True
-                        # # print("last state: {0}".format(net.last_state))
-                        # if ep_num == 0:# or ep_num == 1:
-                        #     throttler = net.switches[6]
-                        #     throttle_combined = (throttler.legal_window+throttler.dropped_legal_window)
-                        #     assert(throttler.is_filter)
-                        #     router = net.switches[7]
-                        #     below_combined = (router.legal_window+router.dropped_legal_window)
-                        #     after = net.switches[4]
-                        #     after_combined = (after.legal_window+after.dropped_legal_window)
-                        #     further = net.switches[2]
-                        #     further_combined = (further.legal_window+further.dropped_legal_window)
-
-                        # if step>1 and abs(throttle_combined + below_combined - further_combined) >10:
-                            # print("Ep {0} Step {1}".format(ep_num, step))
-                            # print("throttler = {0}".format(throttle_combined))
-
-                            # print("below = {0}".format(below_combined))
-
-                            # print("after = {0}".format(after_combined))
-
-                            # print("further = {0}".format(further_combined))
-
-                        #     print("\n\n")
-                        # print("def | step {0} | action {1} | reward {2} | e {3}".format(step, last_action, r, e))
-                        # print("state was {0}".format(net.get_state()))
-                        # print("experimental load is {0}".format(net.getPacketServedAtMoment()))
-                        # print("Bucket load {0}".format(list(map(lambda throttler: throttler.bucket.bucket_load, net.throttlers))))
-                        # print("reward was {0}".format(r))
-                        #     print("server at {0}".format(net.switches[0].legal_window + net.switches[0].illegal_window))
-                        #     #print("adversary | ep {3} | action {0} | reward {1} | e {2}".format(adv_action, r, adv_e, ep_num))
-                        #     print(net.switches[3].past_throttles)
-                        #     if step==23:
-                        #         print("adv_state {0}".format(adv_state))
-                               
-
-                                # print("state = {1}, e = {0}".format(e, net.last_state))
-
-                        #     # print("server state: {0}\n".format(net.switches[0].getWindow()))
-                        
+          
                         # if step == 1:
                         #     net.printHostInformation()
                         # if step in range(0,8) or step in range(53,57):  
                         #     print("In Episode - {0} Step - {1}".format(ep_num, step))
 
-                        #     print("prio state was {0}".format(net.last_state))
-                        #     print("def | step {0} | action {1} | reward {2} | e {3}".format(step, last_action, r, e))
+                        #     print("prio state was {0}".format(last_defender_state))
+                        #     print("def | step {0} | action {1} | reward {2} | e {3}".format(step-1, last_action, r, e))
                         #     if self.adversarialMaster:
                         #     #     print("adversary state was: {0}".format(adv_last_state))
                         #         print("adversary | ep {3} | action {0} | reward {1} | adv_e {2}".format(adv_last_action, adv_r, adv_e, ep_num))
                         #         #print("adv current state: {0} | action {1} \n\n".format(adv_state, adv_action))
                             
                         # if step == 20:
-                        #     print("\n\n")
+                        #   print("\n\n")
 
                         if r < 0:
                             fail += 1
@@ -375,7 +338,7 @@ class Experiment:
                         e = self.agent_settings.endE
                     
                     if update_freq and self.agent_settings.save_model_mode in self.agentSaveModes and total_steps % (update_freq) == 0:
-                        l = agent.actionReplay(net.get_state(), batch_size)
+                        l = agent.actionReplay(defender_state, batch_size)
                         if l:
                             loss.append(l)
                             ep_def_loss += abs(l)
@@ -423,11 +386,14 @@ class Experiment:
                 if ep_num % 1000 == 0:
                     print("Completed Episode - {0}".format(ep_num))
                     print("average reward = {0}".format(reward_per_print/1000/max_epLength*100))
+                    print("average Per = {0}".format(t_packet_received/t_packet_sent))
                     reward_per_print = 0
+                    t_packet_received = 0
+                    t_packet_sent = 0
                     print("E={0} Fails = {1} FailPer = {2}".format(e,fail_seg, (fail_seg*100/(1000*max_epLength))))
-                    print("def | step {0} | action {1} | reward {2} | e {3}".format(step, last_action, r, e))
-                    print("prio state was {0}".format(net.last_state))
-                    print("this state was {0}".format(net.get_state()))
+                    print("def | step {0} | action {1} | reward {2} | e {3}".format(step-1, last_action, r, e))
+                    print("prio state was {0}".format(last_defender_state))
+                    print("this state was {0}".format(defender_state))
 
                     if self.adversarialMaster:
                         print("adversary | ep {3} | action {0} | reward {1} | adv_e {2}".format(adv_last_action, adv_r, adv_e, ep_num))

@@ -53,7 +53,7 @@ class ddGenAgent():
 
         
     def predict(self, state, e, step):
-        if not self.leaves[0].isAttackActive(step):
+        if not self.leaves[0].isAttackActive(step) or step < ATTACK_START:
             # if the attack is off return 0
             return 0
         assert(len(self.leaves)!=0)

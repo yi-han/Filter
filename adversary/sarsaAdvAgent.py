@@ -28,7 +28,7 @@ class sarGenAgent(linCen.Agent):
         # legitimate traffic is constant, adversarial traffic is dependent ono action
 
 
-        if not self.leaves[0].isAttackActive(time_step):
+        if not self.leaves[0].isAttackActive(time_step) or step < ATTACK_START:
             assert(action==0)
 
         percent_emit = action/10

@@ -235,7 +235,7 @@ class GenericAdvMaster():
                 state.extend(change) 
 
         if self.adv_settings.prior_server_loads:
-            prior_loads = net.switches[0].past_server_loads[-self.adv_settings.prior_server_loads:]
+            prior_loads = net.switches[0].getPastWindows(self.adv_settings.prior_server_loads)
             state.extend(prior_loads)
 
         if self.adv_settings.prior_server_percentages:
@@ -296,6 +296,8 @@ class GenericAdvMaster():
     def update(self, last_state, last_actions, current_state, is_done, reward, step, next_actions):
         # provide the update function to each individual state
         # reward = self.calc_reward(network_reward)
+        if step < ATTACK_START:
+            return # we don't want to update when we are manually doing action 0
         for i in range(len(self.adv_agents)):
             agent = self.adv_agents[i]
             last_action = last_actions[i]

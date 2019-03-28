@@ -5,6 +5,8 @@ INF = 9999999
 MbTKb = 1000 # ratio for converting Mb to Kb
 KbTMb = 0.001 # ratio for converting Kb to Mb
 
+ATTACK_START = 2 # the number of steps before an attack can start in evaluation
+
 ROUND_SPOT = 6
 def KbToMb(kb):
     return kb*KbTMb

@@ -19,9 +19,9 @@ class LinearSarsaSingular(object):
     tau = 0.1
     update_freq = 4
     batch_size = None
-    num_episodes = 200000#82501
+    num_episodes = 200000#62500
     pre_train_episodes = 0#2000
-    annealing_episodes = 50000 #10 #60000 
+    annealing_episodes = 50000
     startE = 0.4 #0.4
     endE = 0.0
     agent = None
@@ -127,7 +127,7 @@ attackClasses = [conAttack, shortPulse, mediumPulse,
 Settings to change
 """
 
-assignedNetwork = NetworkSixFour
+assignedNetwork = NetworkSingleTeamMalialisMedium
 assignedAgent = LinearSarsaLAIDDQN350
 load_attack_path = "attackSimulations/{0}/".format(assignedNetwork.name)
 network_emulator = network.network_new.network_full # network_quick # network_full
@@ -141,7 +141,7 @@ assignedNetwork.drift = 0
 
 opposition = adv_random #adv_random # adv_constant
 intelligentOpposition =  sarAdvSplit #
-intelligentOpposition.save_model_mode = defender_mode_enum.save
+intelligentOpposition.save_model_mode = defender_mode_enum.load_continue
 # intelligentOpposition = None
 
 

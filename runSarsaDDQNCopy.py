@@ -19,9 +19,9 @@ class LinearSarsaSingular(object):
     tau = 0.1
     update_freq = 4
     batch_size = None
-    num_episodes = 200000#82501
+    num_episodes = 200000#62500
     pre_train_episodes = 0#2000
-    annealing_episodes = 50000 #10 #60000 
+    annealing_episodes = 50000
     startE = 0.4 #0.4
     endE = 0.0
     agent = None
@@ -135,12 +135,12 @@ loadAttacks = False
 
 
 
-assignedAgent.save_model_mode = defender_mode_enum.load_save
+assignedAgent.save_model_mode = defender_mode_enum.load
 trainHost = adversarialLeaf #coordAttack # conAttack #driftAttack #adversarialLeaf
 assignedNetwork.drift = 0
 
 opposition = adv_random #adv_random # adv_constant
-intelligentOpposition =  ddExpThree #
+intelligentOpposition =  DdGenericSplit #
 intelligentOpposition.save_model_mode = defender_mode_enum.save
 # intelligentOpposition = None
 
