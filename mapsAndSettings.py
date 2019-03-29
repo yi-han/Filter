@@ -41,7 +41,7 @@ class stateRepresentationEnum(Enum):
 
 
 class adv_constant(object):
-    name = "constant_attack"
+    name = "constantAttack"
     
     adversary_class = dumbMaster.dumbMaster
     adv_agent_class = dumbAgent.dumbAgent    
@@ -51,20 +51,16 @@ class adv_constant(object):
     endE = 0
     startE = 0
 
-class adv_singular_constant_attack(adv_constant):
-    name = "singular_constant_attack"
-    num_adv_agents = 1
-
 class adv_pulse_short(adv_constant):
-    name = "pulse_short"
+    name = "pulseShort"
     attack_strategy = advesaryStandardAttackEnum.pulse_short
 
 class adv_pulse_medium(adv_constant):
-    name = "pulse_medium"
+    name = "pulseMedium"
     attack_strategy = advesaryStandardAttackEnum.pulse_medium
 
 class adv_pulse_large(adv_constant):
-    name = "pulse_large"
+    name = "pulseLarge"
     attack_strategy = advesaryStandardAttackEnum.pulse_large
 
 class adv_gradual(adv_constant):
@@ -311,6 +307,10 @@ class ddAim4(ddAimd2):
     name = "ddAimd4"
     discount_factor = 0.9
 
+class ddAim5(ddAimd2):
+    name = "ddAimd5"
+    discount_factor = 0.8   
+
 class ddAimdAlt1(DdGenericDec):
     num_adv_agents = 1
     name = "ddAimdAlt1"
@@ -342,6 +342,10 @@ class ddAimdAlt3(ddAimdAlt2):
 class ddAimdAlt4(ddAimdAlt2):
     name = "ddAimdAlt4"
     discount_factor = 0.9
+
+class ddAimdAlt5(ddAimdAlt2):
+    name = "ddAimdAlt5"
+    discount_factor = 0.8    
 
 class ddAimdLarge(DdGenericDec):
     num_adv_agents = 1
@@ -377,6 +381,23 @@ class ddAimdLarge4(ddAimdLarge2):
 class ddAimdLarge5(ddAimdLarge2):
     name = "ddAimdLarge5"
     discount_factor = 0.8
+
+class ddAimdExtreme(DdGenericDec):
+    num_adv_agents = 1
+    name = "ddAimdExtreme"
+    prior_adversary_actions = 6
+    include_legal_traffic = True
+    
+    prior_agent_actions = 6
+    prior_agent_delta_moves = 6
+    prior_server_loads = 6
+    prior_server_percentages = 6
+    include_indiv_hosts = True
+
+    discount_factor = 0.8    
+    pre_train_episodes = 50000
+    annealing_episodes = 150000
+    num_episodes = 350000
 
 class sarGenericDec(object):
     name = "sarsaGenericDec"

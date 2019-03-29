@@ -228,7 +228,8 @@ class Experiment:
             # set e for advesary
             if self.opposition_settings.is_intelligent and self.opposition_settings.save_model_mode in self.agentInitialiseMode:
                 adv_e = calculate_e(ep_init, adv_pretrain_episodes, self.opposition_settings.startE, self.opposition_settings.endE, self.opposition_settings.annealing_episodes)
-
+            t_packet_received = 0
+            t_packet_sent = 0
 
 
             print("\n\n Starting at episode {0}".format(ep_init))
@@ -244,8 +245,7 @@ class Experiment:
 
                 d = False # indicates that network is finished
                 rAll = 0 # accumulative reward for system in the episode. #TODO shouldn't contribute in pretraining
-                t_packet_received = 0
-                t_packet_sent = 0
+
                 advRAll = 0 # total reward for episode
                 r = 0
                 

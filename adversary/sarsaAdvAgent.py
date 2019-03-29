@@ -23,20 +23,20 @@ class sarGenAgent(linCen.Agent):
             assert(not leaf in self.leaves)
             self.leaves.append(leaf)
 
-    def sendTraffic(self, action, time_step):
+    def sendTraffic(self, action, step):
         # we distribute all the legitimate traffic + adversarial traffic
         # legitimate traffic is constant, adversarial traffic is dependent ono action
 
 
-        if not self.leaves[0].isAttackActive(time_step) or step < ATTACK_START:
+        if not self.leaves[0].isAttackActive(step) or step < ATTACK_START:
             assert(action==0)
 
         percent_emit = action/10
         for leaf in self.leaves:
-            leaf.sendTraffic(percent_emit,time_step)
+            leaf.sendTraffic(percent_emit,step)
 
     def predict(self, state, e, step):
-        if not self.leaves[0].isAttackActive(step):
+        if not self.leaves[0].isAttackActive(step) or step < ATTACK_START:
             # if the attack is off return 0
             return 0
         else:
