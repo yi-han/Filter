@@ -28,12 +28,16 @@ class ddqnSingleNoCommunicate(object):
     annealing_episodes = 60000   #120000   #
     startE = 1
     endE = 0.0
+    history_size = 1 # number of past iterations to look at
     agent = None
     sub_agent = ddCen.Agent
     stateRepresentation = stateRepresentationEnum.throttler
     reward_overload = None
     has_bucket = False
 
+class ddqnSingleMemory(ddqnSingleNoCommunicate):
+    name = "ddqnSingleMemory"
+    history_size = 5
 
 class ddqnMalialisTrue(object):
     """
@@ -51,6 +55,7 @@ class ddqnMalialisTrue(object):
     annealing_episodes = 50000  #1000*max_epLength #60000  
     startE = 0.4 #0.4
     endE = 0.0
+    history_size = 1 # number of past iterations to look at
     agent = None
     sub_agent = ddCen.Agent
     group_size = 1 # number of filters each agent controls
@@ -74,11 +79,16 @@ class ddqn100MediumHierarchical(object):
     annealing_episodes = 60000   #120000   #
     startE = 0.3
     endE = 0.0
+    history_size = 1 # number of past iterations to look at
     agent = None
     sub_agent = ddCen.Agent
     stateRepresentation = stateRepresentationEnum.leaderAndIntermediate
     reward_overload = None   
     has_bucket = False
+
+class ddqnHierMemory(ddqn100MediumHierarchical):
+    name = "ddqnHierMemory"
+    history_size = 5
 
 
 class ddqnHierExploration(ddqn100MediumHierarchical):
@@ -89,6 +99,11 @@ class ddqnSingularExploration(ddqnSingleNoCommunicate):
     name = "ddqnSingExp"
     endE = 0.1
 
+class ddTest(ddqnHierMemory):
+    name = "ddTest"
+    num_episodes = 1001
+    pre_train_episodes = 2
+    annealing_episodes = 4
 # The class of the adversary to implement
 conAttack = hostClass.ConstantAttack
 shortPulse = hostClass.ShortPulse
@@ -106,7 +121,7 @@ attackClasses = [conAttack, shortPulse, mediumPulse,
 
 ###
 # Settings NetworkMalialisSmall
-assignedNetwork =   NetworkSingleTeamMalialisMedium
+assignedNetwork =   NetworkSixFour
 assignedAgent =  AIMDsettings #ddqnSingleNoCommunicate #ddqn100MediumHierarchical
 load_attack_path = "attackSimulations/{0}/".format(assignedNetwork.name)
 loadAttacks = False
@@ -117,7 +132,7 @@ trainHost = adversarialLeaf #coordAttack # conAttack #driftAttack #adversarialLe
 assignedNetwork.drift = 0
 
 opposition = adv_random #adv_random #adv_constant
-intelligentOpposition = sarAimdLarge3 #ddAdvAntiAimd #DdCoordinatedLowlongDlowSettings #DdCoordinatedMasterSettings #DdRandomMasterSettings
+intelligentOpposition = sarAimdLarge2 #ddAdvAntiAimd #DdCoordinatedLowlongDlowSettings #DdCoordinatedMasterSettings #DdRandomMasterSettings
 intelligentOpposition.save_model_mode = defender_mode_enum.save
 # intelligentOpposition = None
 

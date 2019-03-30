@@ -399,6 +399,10 @@ class ddAimdExtreme(DdGenericDec):
     annealing_episodes = 150000
     num_episodes = 350000
 
+class ddAimdExtreme2(ddAimdExtreme):
+    name = "ddAimdExtreme2"
+    discount_factor = 1
+
 class sarGenericDec(object):
     name = "sarsaGenericDec"
     num_adv_agents = -1

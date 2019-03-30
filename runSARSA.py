@@ -37,6 +37,32 @@ class LinSingularExploration(LinearSarsaSingular):
     name = "linSingExp"
     endE = 0.1
 
+
+class LinearSarsaSingularDDQNCopy(object):
+    # copy from ddqnSingleNoCommunicate
+    name = "LinearSarsaSingularDDQNCopy"
+    discount_factor = 0    
+    tau = 0.01 #Rate to update target network toward primary network. 
+    update_freq = 4 #How often to perform a training step.
+    batch_size = None #How many experiences to use for each training step.
+    num_episodes = 200001 #200001#    
+    pre_train_episodes = 20000 #40000 #
+    annealing_episodes = 60000  #120000  #
+    startE = 1
+    endE = 0.0
+    history_size = 1 # number of past iterations to look at
+    agent = None
+    sub_agent = linCen.Agent
+    stateRepresentation = stateRepresentationEnum.throttler
+    reward_overload = None
+    group_size = 1 # number of filters each agent controls
+    has_bucket = False
+
+class LinSinDDMemory(LinearSarsaSingularDDQNCopy):
+    name = "LinSinDDMemory"
+    tau = 0.005
+    history_size = 5
+
 class LinearSarsaLAI(object):
     name = "LinearSarsaLAI"
     #max_epLength = 500
@@ -60,32 +86,11 @@ class LinearSarsaLAI(object):
     has_bucket = False
 
 
-class LinearSarsaSingularDDQNCopy(object):
-    # copy from ddqnSingleNoCommunicate
-    name = "LinearSarsaSingularDDQNCopy"
-    discount_factor = 0    
-    tau = 0.01 #Rate to update target network toward primary network. 
-    update_freq = 4 #How often to perform a training step.
-    batch_size = None #How many experiences to use for each training step.
-    num_episodes = 200001 #200001#    
-    pre_train_episodes = 20000 #40000 #
-    annealing_episodes = 60000  #120000  #
-    startE = 1
-    endE = 0.0
-    history_size = 1 # number of past iterations to look at
-    agent = None
-    sub_agent = linCen.Agent
-    stateRepresentation = stateRepresentationEnum.throttler
-    reward_overload = None
-    group_size = 1 # number of filters each agent controls
-    has_bucket = False
-
-
 
 class LinearSarsaLAIDDQN350(LinearSarsaLAI):
     # Idea (without using a ridiculous number of epLength, set the learning rate even lower and give proper exploration)
     name = "LinearDDQN350"
-    tau = 0.05
+    tau = 0.005
     num_episodes = 350001 #200001#    
     pre_train_episodes = 40000 #40000 #
     annealing_episodes = 160000  #120000  #
@@ -93,6 +98,11 @@ class LinearSarsaLAIDDQN350(LinearSarsaLAI):
     endE = 0.0
     episodeDrop = (startE - endE)/annealing_episodes
     reward_overload = None  
+
+class LinHierMemory(LinearSarsaLAIDDQN350):
+    name = "LinHierMemory"
+    tau = 0.001
+    history_size = 5
 
 class LinTest(object):
     # note we have two dependencies
@@ -132,22 +142,22 @@ attackClasses = [conAttack, shortPulse, mediumPulse,
 Settings to change
 """
 
-assignedNetwork = NetworkSingleTeamMalialisMedium
-assignedAgent = AIMDsettings
+assignedNetwork = NetworkSixFour
+assignedAgent = LinearSarsaSingular
 load_attack_path = "attackSimulations/{0}/".format(assignedNetwork.name)
 network_emulator = network.network_new.network_full # network_quick # network_full
 loadAttacks = False
 
 
 
-assignedAgent.save_model_mode = defender_mode_enum.load
+assignedAgent.save_model_mode = defender_mode_enum.save
 trainHost = adversarialLeaf #coordAttack # conAttack #driftAttack #adversarialLeaf
 assignedNetwork.drift = 0
 
-opposition = adv_random #adv_random # adv_constant
-intelligentOpposition =  sarAimdExtProper #
+opposition = adv_constant #adv_random # adv_constant
+intelligentOpposition =  sarGenericCen #
 intelligentOpposition.save_model_mode = defender_mode_enum.save
-# intelligentOpposition = None
+intelligentOpposition = None
 
 
 assert(trainHost==adversarialLeaf)
@@ -184,7 +194,7 @@ for max_hosts in assignedNetwork.max_hosts_per_level:
         numTiles = 6 # just set at 6.
     numTilings = 8
     tileCoder = tileCoding.myTileInterface(maxThrottlerBandwidth, numTiles, numTilings)
-    encoders.append(tileCoder)
+    encoders.extend([tileCoder]*assignedAgent.history_size)
     level += 1
 assignedAgent.encoders = encoders
 
