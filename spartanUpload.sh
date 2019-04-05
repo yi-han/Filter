@@ -24,6 +24,7 @@ for dest in jpattison; do
 	exp_physical.slurm \
 	exp_physical_ddqn.slurm \
 	phys_attempt.slurm \
+	cloud_copy.slurm \
 	helloWorld.py \
 	slurms_cloud_standard.sh \
 	slurms_cloud_heavy.sh \

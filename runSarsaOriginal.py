@@ -150,14 +150,14 @@ loadAttacks = False
 
 
 
-assignedAgent.save_model_mode = defender_mode_enum.save
+assignedAgent.save_model_mode = defender_mode_enum.load
 trainHost = adversarialLeaf #coordAttack # conAttack #driftAttack #adversarialLeaf
 assignedNetwork.drift = 0
 
 opposition = adv_constant #adv_random # adv_constant
-intelligentOpposition =  sarGenericCen #
+intelligentOpposition =  DdGenericSplit #
 intelligentOpposition.save_model_mode = defender_mode_enum.save
-intelligentOpposition = None
+# intelligentOpposition = None
 
 
 assert(trainHost==adversarialLeaf)

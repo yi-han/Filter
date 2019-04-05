@@ -1,98 +1,192 @@
-# exp3
-# cp -R ../$1/ddConSin e3DdAdvDdSinDef
-# cp -R ../$1/ddConHier e3DdAdvDdHierDef
-# cp -R ../$1/sarConSinDD e3DdAdvSarSinDef
-# cp -R ../$1/sarConHier e3DdAdvSarHierDef
-# rm */*.csv
+#!/bin/sh
 
-# cp -R e3DdAdvDdSinDef e3SarAdvDdSinDef
-# cp -R e3DdAdvDdHierDef e3SarAdvDdHierDef
-# cp -R e3DdAdvSarSinDef e3SarAdvSarSinDef
-# cp -R e3DdAdvSarHierDef e3SarAdvSarHierDef
+# dd adv. Exp3
 
 
-# sed 's/runDDQN/runDDQN/g' exp_gpgpu_single.slurm > output.slurm
-# sed 's/sampleDDQNText/e3DdAdvDdSinDef/g' output.slurm -i 
-# sed "s/samplePath/e3DdAdvDdSinDef/g" output.slurm -i 
-# sed 's/0 2/0 1/g' output.slurm -i 
-# sbatch output.slurm
-# sed 's/0 1/1 1/g' output.slurm -i 
-# sbatch output.slurm
+origName="sarOrig"
+prefix="e3ddAdv"
+newName="$prefix$origName"
+
+sJob1=$(sbatch cloud_copy.slurm $1 $origName $newName)
+
+
+echo "waiting for $sJob1"
+sed "s/runDDQN/runSARSA/g" exp_cloud.slurm > output.slurm
+sed "s/sampleDDQNText/$newName/g" output.slurm -i
+sed "s/samplePath/$newName/g" output.slurm -i 
+sed "s/0 2/0 1/g" output.slurm -i
+sbatch  --dependency=afterok:${sJob1##* } output.slurm 
+sed "s/0 1/1 1/g" output.slurm -i
+sbatch  --dependency=afterok:${sJob1##* } output.slurm 
+sed "s/1 1/2 1/g" output.slurm -i
+sbatch  --dependency=afterok:${sJob1##* } output.slurm 
+sed "s/2 1/3 1/g" output.slurm -i
+sbatch  --dependency=afterok:${sJob1##* } output.slurm 
+sed "s/3 1/4 1/g" output.slurm -i
+sbatch  --dependency=afterok:${sJob1##* } output.slurm 
 
 
 
-# sed 's/runDDQN/runDDQNAdditional/g' exp_physical_ddqn.slurm > output.slurm
-# sed 's/sampleDDQNText/e3SarAdvDdSinDef/g' output.slurm -i 
-# sed "s/samplePath/e3SarAdvDdSinDef/g" output.slurm -i 
-# sed 's/0 2/0 1/g' output.slurm -i 
-# sbatch output.slurm
-# sed 's/0 1/1 1/g' output.slurm -i 
-# sbatch output.slurm
-# sed 's/1 1/2 1/g' output.slurm -i 
-# sbatch output.slurm
-# sed 's/2 1/3 1/g' output.slurm -i 
-# sbatch output.slurm
-
-# sed 's/runDDQN/runDDQNHundred/g' exp_gpgpu_single.slurm > output.slurm
-# sed 's/sampleDDQNText/e3DdAdvDdHierDef/g' output.slurm -i 
-# sed "s/samplePath/e3DdAdvDdHierDef/g" output.slurm -i 
-# sed 's/0 2/0 1/g' output.slurm -i 
-# sbatch output.slurm
-# sed 's/0 1/1 1/g' output.slurm -i 
-# sbatch output.slurm
+origName="sarSinDD"
+prefix="e3ddAdv"
+newName="$prefix$origName"
+sJob2=$(sbatch cloud_copy.slurm $1 $origName $newName)
 
 
-# sed 's/runDDQN/runDDQNMalialis/g' exp_physical_ddqn.slurm > output.slurm
-# sed 's/sampleDDQNText/e3SarAdvDdHierDef/g' output.slurm -i 
-# sed "s/samplePath/e3SarAdvDdHierDef/g" output.slurm -i 
-# sed 's/0 2/0 1/g' output.slurm -i 
-# sbatch output.slurm
-# sed 's/0 1/1 1/g' output.slurm -i 
-# sbatch output.slurm
-# sed 's/1 1/2 1/g' output.slurm -i 
-# sbatch output.slurm
-# sed 's/2 1/3 1/g' output.slurm -i 
-# sbatch output.slurm
+sed "s/runDDQN/runSarsaAdditional/g" exp_cloud.slurm > output.slurm
+sed "s/sampleDDQNText/$newName/g" output.slurm -i
+sed "s/samplePath/$newName/g" output.slurm -i 
+sed "s/0 2/0 1/g" output.slurm -i
+sbatch --dependency=afterok:${sJob2##* } output.slurm
+sed "s/0 1/1 1/g" output.slurm -i
+sbatch --dependency=afterok:${sJob2##* } output.slurm
+sed "s/1 1/2 1/g" output.slurm -i
+sbatch --dependency=afterok:${sJob2##* } output.slurm
+sed "s/2 1/3 1/g" output.slurm -i
+sbatch --dependency=afterok:${sJob2##* } output.slurm
+sed "s/3 1/4 1/g" output.slurm -i
+sbatch --dependency=afterok:${sJob2##* } output.slurm
 
-sed 's/runDDQN/runSARSA/g' exp_gpgpu_single.slurm > output.slurm
-sed 's/sampleDDQNText/e3DdAdvSarSinDef/g' output.slurm -i 
-sed "s/samplePath/e3DdAdvSarSinDef/g" output.slurm -i 
-sed 's/0 2/0 1/g' output.slurm -i 
-sbatch output.slurm
-sed 's/0 1/1 1/g' output.slurm -i 
-sbatch output.slurm
+origName="sarSinDdMemory"
+prefix="e3ddAdv"
+newName="$prefix$origName"
+sJob3=$(sbatch cloud_copy.slurm $1 $origName $newName)
+
+sed "s/runDDQN/runSarsaDDQNCopy/g" exp_cloud.slurm > output.slurm
+sed "s/sampleDDQNText/$newName/g" output.slurm -i
+sed "s/samplePath/$newName/g" output.slurm -i 
+sed "s/0 2/0 2/g" output.slurm -i
+sbatch --dependency=afterok:${sJob3##* } output.slurm
+sed "s/0 2/0 1/g" output.slurm -i
+sbatch --dependency=afterok:${sJob3##* } output.slurm
+sed "s/0 1/1 1/g" output.slurm -i
+sbatch --dependency=afterok:${sJob3##* } output.slurm
+sed "s/1 1/2 1/g" output.slurm -i
+sbatch --dependency=afterok:${sJob3##* } output.slurm
+sed "s/2 1/3 1/g" output.slurm -i
+sbatch --dependency=afterok:${sJob3##* } output.slurm
+sed "s/3 1/4 1/g" output.slurm -i
+sbatch --dependency=afterok:${sJob3##* } output.slurm
+
+origName="sarHier"
+prefix="e3ddAdv"
+newName="$prefix$origName"
+sJob4=$(sbatch cloud_copy.slurm $1 $origName $newName)
+
+sed "s/runDDQN/runSarsaNoOverdrive/g" exp_cloud.slurm > output.slurm
+sed "s/sampleDDQNText/$newName/g" output.slurm -i
+sed "s/samplePath/$newName/g" output.slurm -i 
+sed "s/0 2/0 1/g" output.slurm -i
+sbatch --dependency=afterok:${sJob4##* } output.slurm
+sed "s/0 1/1 1/g" output.slurm -i
+sbatch --dependency=afterok:${sJob4##* } output.slurm
+sed "s/1 1/2 1/g" output.slurm -i
+sbatch --dependency=afterok:${sJob4##* } output.slurm
+sed "s/2 1/3 1/g" output.slurm -i
+sbatch --dependency=afterok:${sJob4##* } output.slurm
+sed "s/3 1/4 1/g" output.slurm -i
+sbatch --dependency=afterok:${sJob4##* } output.slurm
+
+origName="sarHierMem"
+prefix="e3ddAdv"
+newName="$prefix$origName"
+sJob5=$(sbatch cloud_copy.slurm $1 $origName $newName)
+sed "s/runDDQN/runSarsaOriginal/g" exp_cloud.slurm > output.slurm
+sed "s/sampleDDQNText/$newName/g" output.slurm -i
+sed "s/samplePath/$newName/g" output.slurm -i 
+sed "s/0 2/0 2/g" output.slurm -i
+sbatch --dependency=afterok:${sJob5##* } output.slurm
+sed "s/0 2/0 1/g" output.slurm -i
+sbatch --dependency=afterok:${sJob5##* } output.slurm
+sed "s/0 1/1 1/g" output.slurm -i
+sbatch --dependency=afterok:${sJob5##* } output.slurm
+sed "s/1 1/2 1/g" output.slurm -i
+sbatch --dependency=afterok:${sJob5##* } output.slurm
+sed "s/2 1/3 1/g" output.slurm -i
+sbatch --dependency=afterok:${sJob5##* } output.slurm
+sed "s/3 1/4 1/g" output.slurm -i
+sbatch --dependency=afterok:${sJob5##* } output.slurm
+
+origName="ddSin"
+prefix="e3ddAdv"
+newName="$prefix$origName"
+sJob6=$(sbatch cloud_copy.slurm $1 $origName $newName)
+
+sed "s/runDDQN/runDDQN/g" exp_cloud.slurm > output.slurm
+sed "s/sampleDDQNText/$newName/g" output.slurm -i
+sed "s/samplePath/$newName/g" output.slurm -i 
+sed "s/0 2/0 1/g" output.slurm -i
+sbatch --dependency=afterok:${sJob6##* } output.slurm
+sed "s/0 1/1 1/g" output.slurm -i
+sbatch --dependency=afterok:${sJob6##* } output.slurm
+sed "s/1 1/2 1/g" output.slurm -i
+sbatch --dependency=afterok:${sJob6##* } output.slurm
+sed "s/2 1/3 1/g" output.slurm -i
+sbatch --dependency=afterok:${sJob6##* } output.slurm
+sed "s/3 1/4 1/g" output.slurm -i
+sbatch --dependency=afterok:${sJob6##* } output.slurm
 
 
-sed 's/runDDQN/runSarsaAdditional/g' exp_physical_ddqn.slurm > output.slurm
-sed 's/sampleDDQNText/e3SarAdvSarSinDef/g' output.slurm -i 
-sed "s/samplePath/e3SarAdvSarSinDef/g" output.slurm -i 
-sed 's/0 2/0 1/g' output.slurm -i 
-sbatch output.slurm
-sed 's/0 1/1 1/g' output.slurm -i 
-sbatch output.slurm
-sed 's/1 1/2 1/g' output.slurm -i 
-sbatch output.slurm
-sed 's/2 1/3 1/g' output.slurm -i 
-sbatch output.slurm
+
+origName="ddSinMem"
+prefix="e3ddAdv"
+newName="$prefix$origName"
+sJob7=$(sbatch cloud_copy.slurm $1 $origName $newName)
+
+sed "s/runDDQN/runDDQNAdditional/g" exp_cloud.slurm > output.slurm
+sed "s/sampleDDQNText/$newName/g" output.slurm -i
+sed "s/samplePath/$newName/g" output.slurm -i 
+sed "s/0 2/0 1/g" output.slurm -i
+sbatch --dependency=afterok:${sJob7##* } output.slurm
+sed "s/0 1/1 1/g" output.slurm -i
+sbatch --dependency=afterok:${sJob7##* } output.slurm
+sed "s/1 1/2 1/g" output.slurm -i
+sbatch --dependency=afterok:${sJob7##* } output.slurm
+sed "s/2 1/3 1/g" output.slurm -i
+sbatch --dependency=afterok:${sJob7##* } output.slurm
+sed "s/3 1/4 1/g" output.slurm -i
+sbatch --dependency=afterok:${sJob7##* } output.slurm
 
 
-# sed 's/runDDQN/runSarsaDDQNCopy/g' exp_gpgpu_single.slurm > output.slurm
-# sed 's/sampleDDQNText/e3DdAdvSarHierDef/g' output.slurm -i 
-# sed "s/samplePath/e3DdAdvSarHierDef/g" output.slurm -i 
-# sed 's/0 2/0 1/g' output.slurm -i 
-# sbatch output.slurm
-# sed 's/0 1/1 1/g' output.slurm -i 
-# sbatch output.slurm
+
+origName="ddHier"
+prefix="e3ddAdv"
+newName="$prefix$origName"
+sJob8=$(sbatch cloud_copy.slurm $1 $origName $newName)
+
+sed "s/runDDQN/runDDQNHundred/g" exp_cloud.slurm > output.slurm
+sed "s/sampleDDQNText/$newName/g" output.slurm -i
+sed "s/samplePath/$newName/g" output.slurm -i 
+sed "s/0 2/0 1/g" output.slurm -i
+sbatch --dependency=afterok:${sJob8##* } output.slurm
+sed "s/0 1/1 1/g" output.slurm -i
+sbatch --dependency=afterok:${sJob8##* } output.slurm
+sed "s/1 1/2 1/g" output.slurm -i
+sbatch --dependency=afterok:${sJob8##* } output.slurm
+sed "s/2 1/3 1/g" output.slurm -i
+sbatch --dependency=afterok:${sJob8##* } output.slurm
+sed "s/3 1/4 1/g" output.slurm -i
+sbatch --dependency=afterok:${sJob8##* } output.slurm
 
 
-# sed 's/runDDQN/runSarsaNoOverdrive/g' exp_physical_ddqn.slurm > output.slurm
-# sed 's/sampleDDQNText/e3SarAdvSarHierDef/g' output.slurm -i 
-# sed "s/samplePath/e3SarAdvSarHierDef/g" output.slurm -i 
-# sed 's/0 2/0 1/g' output.slurm -i 
-# sbatch output.slurm
-# sed 's/0 1/1 1/g' output.slurm -i 
-# sbatch output.slurm
-# sed 's/1 1/2 1/g' output.slurm -i 
-# sbatch output.slurm
-# sed 's/2 1/3 1/g' output.slurm -i 
-# sbatch output.slurm
+origName="ddHierMem"
+prefix="e3ddAdv"
+newName="$prefix$origName"
+sJob9=$(sbatch cloud_copy.slurm $1 $origName $newName)
+
+sed "s/runDDQN/runDDQNMalialis/g" exp_cloud.slurm > output.slurm
+sed "s/sampleDDQNText/$newName/g" output.slurm -i
+sed "s/samplePath/$newName/g" output.slurm -i 
+sed "s/0 2/0 1/g" output.slurm -i
+sbatch --dependency=afterok:${sJob9##* } output.slurm
+sed "s/0 1/1 1/g" output.slurm -i
+sbatch --dependency=afterok:${sJob9##* } output.slurm
+sed "s/1 1/2 1/g" output.slurm -i
+sbatch --dependency=afterok:${sJob9##* } output.slurm
+sed "s/2 1/3 1/g" output.slurm -i
+sbatch --dependency=afterok:${sJob9##* } output.slurm
+sed "s/3 1/4 1/g" output.slurm -i
+sbatch --dependency=afterok:${sJob9##* } output.slurm
+
+
+
