@@ -41,7 +41,7 @@ class stateRepresentationEnum(Enum):
 
 
 class adv_constant(object):
-    name = "constantAttack"
+    name = "Constant Attack"
     
     adversary_class = dumbMaster.dumbMaster
     adv_agent_class = dumbAgent.dumbAgent    
@@ -52,27 +52,27 @@ class adv_constant(object):
     startE = 0
 
 class adv_pulse_short(adv_constant):
-    name = "pulseShort"
+    name = "Burst Short"
     attack_strategy = advesaryStandardAttackEnum.pulse_short
 
 class adv_pulse_medium(adv_constant):
-    name = "pulseMedium"
+    name = "Burst Medium"
     attack_strategy = advesaryStandardAttackEnum.pulse_medium
 
 class adv_pulse_large(adv_constant):
-    name = "pulseLarge"
+    name = "Burst Large"
     attack_strategy = advesaryStandardAttackEnum.pulse_large
 
 class adv_gradual(adv_constant):
-    name = "gradual"
+    name = "Gradual"
     attack_strategy = advesaryStandardAttackEnum.gradual
 
 class adv_split(adv_constant):
-    name = "split"
+    name = "Split"
     attack_strategy = advesaryStandardAttackEnum.split
 
 class adv_random(adv_constant):
-    name = "random"
+    name = "Random"
     attack_strategy = advesaryStandardAttackEnum.random
 
 class AIMDsettings(object):
@@ -124,7 +124,7 @@ class NetworkMalialisSmall(object):
     legal_probability = 0.6 # probability that is a good guys
     upper_boundary = 8
     lower_boundary = 6 # for AIMD
-    iterations_between_action = 40 #200
+    iterations_between_action = 200#40 #200
 
     max_hosts_per_level = [3] # no communication therefore just one
     bucket_capacity = 18.1#15#0.8
@@ -153,7 +153,7 @@ class NetworkSingleTeamMalialisMedium(object):
     upper_boundary = 14 #12.5 # Mal would have used 14
     lower_boundary = 10 # for AIMD
 
-    iterations_between_action = 30 #30 # 200
+    iterations_between_action = 200#30 #30 # 200
 
     max_hosts_per_level = [2, 6, 12]
     bucket_capacity = 12.1
