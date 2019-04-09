@@ -45,13 +45,5 @@ sbatch output.slurm
 sed 's/runDDQN/runSarsaDDQNCopy/g' exp_cloud.slurm > output.slurm
 sed 's/sampleDDQNText/AIMD/g' output.slurm -i
 sed "s/samplePath/AIMD/g" output.slurm -i 
-sed 's/0 2/0 2/g' output.slurm -i
-sbatch output.slurm
-sed 's/0 2/2 2/g' output.slurm -i
-sbatch output.slurm
-sed 's/0 2/4 2/g' output.slurm -i
-sbatch output.slurm
-sed 's/0 2/6 2/g' output.slurm -i
-sbatch output.slurm
-sed 's/0 2/8 2/g' output.slurm -i
+sed 's/0 2/0 10/g' output.slurm -i
 sbatch output.slurm
