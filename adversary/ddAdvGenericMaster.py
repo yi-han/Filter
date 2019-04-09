@@ -145,7 +145,7 @@ class GenericAdvMaster():
         for agent in self.adv_agents:
             agent.__exit__(type, value, tb)
 
-    def predict(self, state, e, step):
+    def predict(self, state, e, current_second):
         """
             only provide each agent with its corresponding state
             instead of combining the actions into a single action 
@@ -163,16 +163,16 @@ class GenericAdvMaster():
         # print("\n\npredictions")
         for i in range(len(self.adv_agents)):
 
-            agentAction = self.adv_agents[i].predict(state, e, step)
+            agentAction = self.adv_agents[i].predict(state, e, current_second)
             actions.append(agentAction)
 
 
         return actions
 
-    def sendTraffic(self, actions, step):
+    def sendTraffic(self, actions, current_second):
         #given the actioons send the traffic
         for i in range(len(self.adv_agents)):
-            self.adv_agents[i].sendTraffic(actions[i], step)
+            self.adv_agents[i].sendTraffic(actions[i], current_second)
 
     def calc_reward(self, network_reward):
         # convert the network reward to the adversarial reward
@@ -184,7 +184,7 @@ class GenericAdvMaster():
 
 
 
-    def get_state(self, net, e, step):
+    def get_state(self, net, e, current_second):
         """ 
         Provide the ill_bandwidth capacity for each agent,
         and ill_bandwidth emmitted by each agent over last 3 steps
@@ -222,7 +222,7 @@ class GenericAdvMaster():
             associated_actions = []
             for i in range(len(self.adv_agents)):
                 combined_state.append(copy.deepcopy(state))
-                associated_action = self.adv_agents[i].predict(state,e, step)
+                associated_action = self.adv_agents[i].predict(state, e, current_second)
                 state.append(associated_action)
                 associated_actions.append(associated_action)
             # record the actions in the state variable
@@ -294,6 +294,7 @@ class GenericAdvMaster():
         self.prior_actions.append(actions)
 
     def update(self, last_state, last_actions, current_state, is_done, reward, step, next_actions):
+        assert(1==2) # i think we have step and current second.
         # provide the update function to each individual state
         # reward = self.calc_reward(network_reward)
         if step < ATTACK_START:

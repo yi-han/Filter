@@ -41,7 +41,7 @@ class stateRepresentationEnum(Enum):
 
 
 class adv_constant(object):
-    name = "Constant Attack"
+    name = "Constant-Attack"
     
     adversary_class = dumbMaster.dumbMaster
     adv_agent_class = dumbAgent.dumbAgent    
@@ -51,16 +51,18 @@ class adv_constant(object):
     endE = 0
     startE = 0
 
+    actions_per_second = 0.5 # change the move every 2 seconds
+
 class adv_pulse_short(adv_constant):
-    name = "Burst Short"
+    name = "Burst-Short"
     attack_strategy = advesaryStandardAttackEnum.pulse_short
 
 class adv_pulse_medium(adv_constant):
-    name = "Burst Medium"
+    name = "Burst-Medium"
     attack_strategy = advesaryStandardAttackEnum.pulse_medium
 
 class adv_pulse_large(adv_constant):
-    name = "Burst Large"
+    name = "Burst-Large"
     attack_strategy = advesaryStandardAttackEnum.pulse_large
 
 class adv_gradual(adv_constant):
@@ -124,12 +126,12 @@ class NetworkMalialisSmall(object):
     legal_probability = 0.6 # probability that is a good guys
     upper_boundary = 8
     lower_boundary = 6 # for AIMD
-    iterations_between_action = 200#40 #200
+    iterations_between_second = 100 # at 100 we are dealing wiht centiseconds
 
     max_hosts_per_level = [3] # no communication therefore just one
     bucket_capacity = 18.1#15#0.8
 
-    max_epLength = 30
+    ep_length = 60 # Training is an episode of 60 seconds
     is_sig_attack = False
     save_per_step_stats = False
 

@@ -107,10 +107,10 @@ class dumbMaster():
         return [action1, action2]
 
 
-    def sendTraffic(self, actions, step):
+    def sendTraffic(self, actions, is_active_attack):
         #given the actioons send the traffic
         for i in range(len(self.adv_agents)):
-            self.adv_agents[i].sendTraffic(actions[i], step)
+            self.adv_agents[i].sendTraffic(actions[i], is_active_attack)
 
     def calc_reward(self, network_reward):
         # convert the network reward to the adversarial reward
@@ -121,7 +121,7 @@ class dumbMaster():
 
 
 
-    def get_state(self, net, e, step):
+    def get_state(self, net, e, is_active_attack):
         return []
 
 

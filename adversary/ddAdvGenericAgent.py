@@ -52,9 +52,10 @@ class ddGenAgent():
 
 
         
-    def predict(self, state, e, step):
-        if not self.leaves[0].isAttackActive(step) or step < ATTACK_START:
+    def predict(self, state, e, current_second):
+        if not self.leaves[0].isAttackActive(current_second) or current_second < ATTACK_START:
             # if the attack is off return 0
+            assert(1==2) #  TODO why are we chcking twice if we have an active attack?
             return 0
         assert(len(self.leaves)!=0)
         randomChoice = self.isRandomGuess(e)
@@ -66,11 +67,11 @@ class ddGenAgent():
             action = self.sess.run(mainQN.predict,feed_dict={mainQN.input:[state]})[0]
         return action
 
-    def update(self, last_state, last_action, current_state, d, r, step, next_action=None):
+    def update(self, last_state, last_action, current_state, d, r, current_second, next_action=None):
         # Stores an update to the buffer, actual Qlearning is done in action replay
-        if not self.leaves[0].isAttackActive(step-1):
-            # if the prior step was not an active attack we are to ignore it.
-            print("skipping update SHOULDNT HAPPEN {0}".format(step))
+        if not self.leaves[0].isAttackActive(current_second-1):
+            # if the prior current_second was not an active attack we are to ignore it.
+            print("skipping update SHOULDNT HAPPEN {0}".format(current_second))
             assert(1==2)
             return
         
@@ -142,17 +143,17 @@ class ddGenAgent():
             assert(not leaf in self.leaves)
             self.leaves.append(leaf)
 
-    def sendTraffic(self, action, time_step):
+    def sendTraffic(self, action, current_second):
         # we distribute all the legitimate traffic + adversarial traffic
         # legitimate traffic is constant, adversarial traffic is dependent ono action
 
 
-        if not self.leaves[0].isAttackActive(time_step):
+        if not self.leaves[0].isAttackActive(current_second):
             assert(action==0)
 
         percent_emit = action/10
         for leaf in self.leaves:
-            leaf.sendTraffic(percent_emit,time_step)
+            leaf.sendTraffic(percent_emit,current_second)
 
 
 

@@ -37,6 +37,7 @@ class Bucket():
     # for buckets associated to a switch
 
     def __init__(self, iterations_between_action, bucket_capacity ):
+        # to fix error make it call from the defender settings
         self.iterations_between_action = iterations_between_action
         self.bucket_capacity = bucket_capacity / iterations_between_action
         self.reset()
@@ -177,35 +178,26 @@ class Bucket():
 
 
 class Switch():
-    def __init__(self, switch_id, is_filter, representation, defender_settings, iterations_between_action, bucket_capacity, server_capacity):
+    def __init__(self, switch_id, is_filter, representation, defender_settings, iteration_between_second, bucket_capacity):
+        """
+        history_size: The number of things to remember
+
+        """
+
+
         self.id = switch_id # id
         self.source_links = [] # places sending traffic to switch
         self.destination_links = [] # where traffic is getting sent
         self.attatched_hosts = [] # used for network_quick, quick access for hosts attatched to this 
         self.throttle_rate = None # the throttling rate for the specific switch
-        
-        self.legal_window = 0 # over the last window, how much legal traffic has passed
-        self.illegal_window = 0 # over the last window, how much illegal traffic has passed
-        self.dropped_legal_window = 0 # how much legal traffic have we dropped over the last window
-        self.dropped_illegal_window = 0 # over last window, how much illegal traffic has passed
+        self.memory = iteration_between_second * 2 # how much to remember. 2 seconds worth of data
 
-        self.legal_traffic = 0
-        self.dropped_legal = 0
-        self.illegal_traffic = 0
-        self.dropped_illegal = 0
-
-        self.new_legal = 0
-        self.new_dropped_legal = 0
-        self.new_illegal = 0
-        self.new_dropped_illegal = 0
 
         self.stateSwitches = [] # list of objects we use for state. If just self it shows only load at self
 
-        self.associated_throttlers = [] ### only used by network_quick
         self.representation = representation
 
         self.is_filter = is_filter
-        self.server_capacity = server_capacity
         if defender_settings.has_bucket and is_filter:
             # initiate a bucket
             self.bucket = Bucket(iterations_between_action, bucket_capacity)
@@ -219,15 +211,16 @@ class Switch():
 
 
         if self.is_filter:
-            if self.iterations_since_throttle == self.delay:
+            if self.iterations_since_throttle == self.delay and self.next_throttle:
                 self.throttle_rate = self.next_throttle
+                self.next_throttle = None
             # print("delay {0} throttle {1}".format(self.delay - self.iterations_since_throttle, self.throttle_rate))
         else:
             assert(self.throttle_rate == None)
 
 
         num_dests = len(self.destination_links)
-        assert(num_dests == 1 or (self.id == 0 and num_dests ==0))
+        assert(num_dests == 1 or (self.id == 0 and num_dests ==0 ))
 
         if self.is_filter and self.bucket:
             # print("\n\n about to bucket")
@@ -244,7 +237,7 @@ class Switch():
 
             illegal_dropped = roundNumber(self.illegal_traffic * throttle_rate)
             illegal_pass = self.illegal_traffic - illegal_dropped
-            #assert(abs(illegal_pass + illegal_dropped - self.illegal_traffic) < DELTA)
+            assert(abs(illegal_pass + illegal_dropped - self.illegal_traffic) < DELTA)
 
         # update all other switches with new traffic values
 
@@ -252,13 +245,14 @@ class Switch():
         self.recorded_drop += (legal_dropped + illegal_dropped)
 
         for dest in self.destination_links:
-            dest.destination_switch.new_legal += (legal_pass/num_dests)
+            dest.destination_switch.new_legal += (legal_pass)
             dest.destination_switch.new_dropped_legal += ((legal_dropped + self.dropped_legal))
 
-            dest.destination_switch.new_illegal += (illegal_pass/num_dests)
+            dest.destination_switch.new_illegal += (illegal_pass)
             dest.destination_switch.new_dropped_illegal += ((illegal_dropped+ self.dropped_illegal))
             
         self.iterations_since_throttle += 1
+    
     def updateSwitch(self):
         # update the traffic values
         self.legal_traffic = self.new_legal
@@ -267,11 +261,18 @@ class Switch():
         self.dropped_illegal = self.new_dropped_illegal
 
         # register switches interested in
-        self.legal_window += self.legal_traffic
-        self.illegal_window += self.illegal_traffic
+        self.legal_segment.append(self.legal_traffic)
+        self.illegal_segment.append(self.illegal_traffic)
+        self.dropped_legal_segment.append(self.dropped_legal)
+        self.dropped_illegal_segment.append(self.dropped_illegal)
+        
+        # remove the oldest memory
+        self.legal_segment.pop(0)
+        self.illegal_segment.pop(0)
+        self.dropped_legal_segment.pop(0)
+        self.dropped_illegal_segment.pop(0)
 
-        self.dropped_legal_window += self.dropped_legal
-        self.dropped_illegal_window += self.dropped_illegal
+
         # reset new traffic values
         self.new_legal = 0
         self.new_illegal = 0
@@ -279,31 +280,20 @@ class Switch():
         self.new_dropped_illegal = 0
 
 
-    def resetWindow(self):
-
-
-        self.legal_window=0
-        self.illegal_window = 0
-        self.dropped_legal_window = 0
-        self.dropped_illegal_window = 0
-
-        self.recorded_pass = 0 # we use this to calculate the average throttle in each step
-        self.recorded_drop = 0
-
-    def getWindow(self):
-        return KbToMb(self.legal_window + self.illegal_window)
-
-    def getImmediateState(self):
-        assert(1==2)
-        # does not use kbToMb
-        # why does this exist?
-        return self.legal_traffic + self.illegal_traffic
+        # reset the cache
+        self.legal_window_cache = None
+        self.illegal_window_cache = None
+        self.legal_dropped_window_cache = None
 
     def setThrottle(self, throttle_rate):
 
-        assert(self.is_filter)
-        self.next_throttle = throttle_rate
-        self.iterations_since_throttle = 0 # we keep track of number iterations. This is for the delay of throttle
+        assert(self.is_filter and self.next_throttle == None)
+        if throttle_rate == self.next_throttle:
+            # if it's the same don't do anything
+            self.next_throttle = None
+        else:
+            self.next_throttle = throttle_rate
+            self.iterations_since_throttle = 0 # we keep track of number iterations. This is for the delay of throttle
 
 
     def reset(self):
@@ -315,16 +305,26 @@ class Switch():
         self.new_dropped_legal = 0
         self.new_illegal = 0
         self.new_dropped_illegal = 0
-        self.resetWindow()
         self.throttle_rate = None # represents not set
         self.iterations_since_throttle = 0
-        self.past_windows = [0]*20
-        self.past_server_percentages = [0]*20
+        #self.past_windows = [0]*20 obsolete
+
+        # We keep track of the traffic that arrives at the switch over each step
+        self.legal_segment = [0] * self.memory # over the last window, how much legal traffic has passed
+        self.illegal_segment = [0] * self.memory # over the last window, how much illegal traffic has passed
+        self.dropped_legal_segment = [0] * self.memory# how much legal traffic have we dropped over the last window
+        self.dropped_illegal_segment = [0] * self.memory # over last window, how much illegal traffic has passed
+
+
         if self.bucket:
             self.bucket.reset()
 
+
+
+
     def update_past_server_load(self):
-        # NB: We assume this is only for the server
+        # NB: Move this logic to the adversary or whatever needs to know it
+        assert(1==2)
         self.past_windows.pop(0)
         self.past_server_percentages.pop(0)
         load = min(self.getWindow(), self.server_capacity*1.5)
@@ -335,9 +335,45 @@ class Switch():
     def printSwitch(self):
        print("switch_id {0} | load {1} | window {2}".format(self.id, self.legal_traffic + self.illegal_traffic, self.getWindow()))
 
+    def get_illegal_window(self):
+        if self.illegal_window_cache != None:
+            return self.illegal_window_cache
+        self.illegal_window_cache = 0
+        for segment in self.illegal_segment:
+            self.illegal_window_cache += segment
+        return self.illegal_window_cache
 
-    def getPastWindows(self, history_size):
-        return self.past_windows[-history_size:]
+    def get_legal_window(self):
+        if self.legal_window_cache != None:
+            return self.legal_window_cache        
+        self.legal_window_cache = 0
+        for segment in self.legal_segment:
+            self.legal_window_cache += segment
+        return self.legal_window_cache    
+
+    def get_legal_dropped_window(self):
+        if self.legal_dropped_window_cache != None:
+            return self.legal_dropped_window_cache
+        self.legal_dropped_window_cache = 0
+
+
+    def get_load(self):
+        illegal_window = self.get_illegal_window()
+        legal_window = self.get_legal_window()
+        return(KbToMb(illegal_window + legal_window))
+
+
+    # def getPastWindow(self, num_windows, step_size):
+    #     answer = []
+    #     for i in range(0, num_windows*step_size):
+    #         if i%step_size==0:
+    #             answer[-1] = KbToMb(answer[-1]) # convert to mb
+    #             answer.append(0)
+    #         j = i+1 
+    #         answer[-1] += (self.legal_window[-j] + self.illegal_window[-j])
+
+    #     answer[-1] = KbToMb(answer[-1]) # convert to mb
+    #     return answer
 
 
     def setRepresentation(self, allThrottlers):
@@ -378,7 +414,7 @@ class Switch():
         # get the state for the agent associated with the throttler
         response = []
         for switch in self.stateSwitches:
-            response.extend(switch.getPastWindows(history_size))
+            response.extend(switch.get_load())
         return response
 
 class link(object):
@@ -560,24 +596,38 @@ class network_full(object):
         return response
 
         
-    def move_traffic(self, time_step, adv_action):
-        # update the network
-        if adv_action:
-            assert( self.adversaryMaster!=None)
+    # def move_traffic(self, time_step, adv_action):
+          # obsolete     
+    #     # update the network
+    #     if adv_action:
+    #         assert( self.adversaryMaster!=None)
 
-            self.adversaryMaster.sendTraffic(adv_action, time_step)
-        else:
-            for host in self.hosts:
-                host.sendTraffic(time_step)
+    #         self.adversaryMaster.sendTraffic(adv_action, time_step)
+    #     else:
+    #         for host in self.hosts:
+    #             host.sendTraffic(time_step)
+
+    #     for switch in self.switches:
+    #         # ensure all traffic sent before we update
+    #         #print(defender_agent)
+    #         switch.sendTraffic()
+
+    #     for switch in self.switches:
+    #         # simulates adding new traffic to the hosts
+    #         switch.updateSwitch()
+
+    def simulate_traffic(self, defender_action, adversary_action):
+        # our defender action
+        self.set_drop_probability(defender_action)
+        self.adversaryMaster.sendTraffic(adversary_action)
 
         for switch in self.switches:
-            # ensure all traffic sent before we update
-            #print(defender_agent)
+            # move the traffic one spot
             switch.sendTraffic()
 
         for switch in self.switches:
-            # simulates adding new traffic to the hosts
             switch.updateSwitch()
+
 
     def set_drop_probability(self, actions):
 
@@ -655,54 +705,39 @@ class network_full(object):
 
     def calculate_reward(self):
         
-        if self.cache_reward != None:
-            return self.cache_reward
+
 
         # currently if we're 1.1 times over we receive a punishment of -0.1, seems rather low. Maybe -1.5?        
         reward = 0.0
 
-        legitimate_served = self.switches[0].legal_window
-        legitimate_sent = legitimate_served + self.switches[0].dropped_legal_window
-        attacker_served = self.switches[0].illegal_window
+
+        legitimate_served = self.switches[0].get_legal_window()
+        legitimate_sent = legitimate_served + self.switches[0].get_legal_dropped_window()
+        server_load = self.switches[0].get_load()
         #assert((legitimate_served+attacker_served)==self.switches[0].getWindow())
 
-        if legitimate_served + attacker_served > self.upper_boundary:
-            #used to set the reward to "reward_overload" in this case, but didn't work well
-           
-            # print("\n\n\n negative reward")
-            # print(self.upper_boundary)
+        if server_load > self.upper_boundary:
+
             if self.reward_overload:
                 reward = self.reward_overload
             else:
-                reward -= ((legitimate_served + attacker_served)/self.upper_boundary - 1.0)
+                reward -= (server_load/self.upper_boundary - 1.0)
             
             self.server_failures +=1
-
-            # throttle the traffic at the server down to capacity
-            # the negative is you're having to throttle at the server as opposed to at the enemy
-            # I deactivated it as the results (apart from gradually increasing) all were closer without
-            if False:
-                traffic_level = legitimate_served + attacker_served
-                overload_amount = traffic_level - self.upper_boundary
-                overload_percent = overload_amount/traffic_level
-                server_throttle_level = 1-overload_percent
-                assert(abs(server_throttle_level * traffic_level - self.upper_boundary )< DELTA) 
-                new_legit_rate = legitimate_served * server_throttle_level
-                self.legitimate_served_ep += new_legit_rate
 
         else:
 
             if legitimate_sent != 0:
                 reward += legitimate_served/legitimate_sent
         
-            self.legitimate_served_ep += legitimate_served
+            self.legitimate_served_ep += KbToMb(legitimate_served)
         
-        self.legitimate_sent_ep += legitimate_sent
-        self.illegal_served_ep += self.switches[0].illegal_window
-        self.illegal_sent_ep += (self.switches[0].illegal_window + self.switches[0].dropped_illegal_window)
+        self.legitimate_sent_ep += KbToMb(legitimate_sent)
+        self.illegal_served_ep += KbToMb(self.switches[0].get_illegal_window())
+        
+        #self.illegal_sent_ep += (self.switches[0].illegal_window + self.switches[0].dropped_illegal_window)
         reward = clip(-1, 1, reward)
 
-        self.cache_reward = reward
         return reward
 
     def getStepPacketStatistics(self):
@@ -713,6 +748,7 @@ class network_full(object):
         Do note there is an accumulative effect so this is very imprecise
 
         """
+        assert(1==2) #might be useful. who knows?
         legitimate_served = self.switches[0].legal_window
         legitimate_sent = self.switches[0].legal_window + self.switches[0].dropped_legal_window
         illegal_served = self.switches[0].illegal_window
@@ -739,33 +775,11 @@ class network_full(object):
         combined = legal_traffic+ illegal_traffic
         return (legal_traffic, illegal_traffic, combined)
 
-    def step(self, action, step_count, adv_action = None):
-        # input the actions. Just sets drop probabilities at the moment
-        # ideally i would move calculations here
-        # adv action is action by adversary
-        self.cache_reward = None 
-        for switch in self.switches:
-            switch.resetWindow()
-        
-        self.set_drop_probability(action)
-        
-
-        # reset_throttle_count and record_average_throttle seek to determine what the true throttle percentage actually was
-        for i in range(self.iterations_between_action): # each time delay is 10 ms, 10*200 = 2000 ms = 2 seconds
-           self.move_traffic(step_count, adv_action)
-           #self.rewards_per_step.append(self.calculate_reward())
-        for switch in self.switches:
-            switch.update_past_server_load()
-        #self.record_average_throttle()
-
-        #self.adversary.takeStep()
-        # should pass the data along nodes
-
-        # this is where we would update attack rates for NON-CONSTANT attacks
 
     def getLegitStats(self):
         # returns % of packets served in an episode
         # meant to be used at end of an epsisode
+        assert(1==2) # might be useful
         if self.legitimate_sent_ep == 0:
             legal_per = 0
         else:
@@ -815,15 +829,6 @@ class network_full(object):
         print(capacities)
         print("attack {0} legal {1}".format(attackCap, legCap))
 
-
-    # def record_average_throttle(self):
-    #     for switch in self.switches:
-    #         if (switch.recorded_drop + switch.recorded_pass) == 0:
-    #             new_throttle = 0
-    #         else:
-    #             new_throttle = switch.recorded_drop / (switch.recorded_drop + switch.recorded_pass)
-    #         switch.past_throttles.append(new_throttle*10) # convert to a whole number
-    #         switch.past_throttles.pop(0)
 
 
 

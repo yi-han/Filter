@@ -32,6 +32,7 @@ class LinearSarsaSingular(object):
     reward_overload = -1
     stateRepresentation = stateRepresentationEnum.throttler  
     has_bucket = False
+    actions_per_second = 0.5 # make an decision every 2 seconds
 
 class LinSingularExploration(LinearSarsaSingular):
     name = "linSingExp"
@@ -127,16 +128,16 @@ class LinTest(object):
 
 
 # The class of the adversary to implement
-conAttack = hostClass.ConstantAttack
-shortPulse = hostClass.ShortPulse
-mediumPulse = hostClass.MediumPulse
-largePulse = hostClass.LargePulse
-gradualIncrease = hostClass.GradualIncrease
-coordAttack = hostClass.CoordinatedRandom
+# conAttack = hostClass.ConstantAttack
+# shortPulse = hostClass.ShortPulse
+# mediumPulse = hostClass.MediumPulse
+# largePulse = hostClass.LargePulse
+# gradualIncrease = hostClass.GradualIncrease
+# coordAttack = hostClass.CoordinatedRandom
 adversarialLeaf = hostClass.adversarialLeaf
 
-attackClasses = [conAttack, shortPulse, mediumPulse,
-    largePulse, gradualIncrease] 
+# attackClasses = [conAttack, shortPulse, mediumPulse,
+#     largePulse, gradualIncrease] 
 
 """
 Settings to change
