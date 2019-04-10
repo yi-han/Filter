@@ -73,4 +73,14 @@ class Agent():
             actions.append(individualAction)
         return actions
 
+    def reset_state(self, throttler, num_remember):
+        self.agent_state = [throttler.get_state()] * num_remember
+
+
+    def calculate_state(self, throttler):
+        self.agent_state.pop(0)
+        self.agent_state.append(throttler.get_state())
+
+
+
             

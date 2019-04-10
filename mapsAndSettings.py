@@ -547,7 +547,7 @@ def create_generic_dec(def_settings, ns):
     #print("\nTest {0} \n".format(sub_agent_list[0].N_action))
     master = genericDecentralised.AgentOfAgents(
         ns.N_action, ns.action_per_throttler, ns.N_state,
-            sub_agent_list, def_settings.tau, def_settings.discount_factor
+            sub_agent_list, def_settings.tau, def_settings.discount_factor, def_settings.history_size
         )
     return master
 

@@ -40,8 +40,8 @@ class AIMDagent():
     def __exit__(self, type, value, tb):
         print("exit the AIMD")
 
-    def reset(self):
-        self.reset_episode()
+    # def reset(self):
+    #     self.reset_episode()
 
     def reset_episode(self):
         self.rs = None

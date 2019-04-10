@@ -186,7 +186,7 @@ This is the encoder for the sarsa, this might be better positioned somewhere els
 encoders = []
 level = 0 # level 0 is throttlers, level 1 is intermeditary etc
 for max_hosts in assignedNetwork.max_hosts_per_level:
-    maxThrottlerBandwidth = assignedNetwork.rate_attack_high * max_hosts # a throttler doesn't face more than X
+    maxThrottlerBandwidth = 2 * assignedNetwork.rate_attack_high * max_hosts # a throttler doesn't face more than X
     if level == 0:
         numTiles = 6 * max_hosts
     elif assignedAgent.stateRepresentation == stateRepresentationEnum.throttler:

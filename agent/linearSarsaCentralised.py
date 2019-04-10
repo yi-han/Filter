@@ -60,7 +60,7 @@ class Agent(aBase.Agent):
 
 
 
-    def update(self, last_state, last_action, current_state, is_finished, reward, next_action = 0):
+    def update(self, last_state, last_action, current_state, is_finished, reward, next_action):
         # Note by having delta as 0, the whole point of sarsa is gone?
         # Simply a case of what has the best reward
 
@@ -69,7 +69,6 @@ class Agent(aBase.Agent):
 
         Then state and action of planned next?
         """
-
         self.score += reward
 
 

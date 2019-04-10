@@ -56,7 +56,7 @@ class dumbMaster():
 
 
         self.all_leaves = [] # list of lists of leaves. Eventually grouped so each inner list corresponds to an adversarial agent
-        self.episode_length = episode_length
+        self.num_actions = episode_length * adv_settings.actions_per_second
 
         self.name = adv_settings.name
 
@@ -74,15 +74,16 @@ class dumbMaster():
         for agent in self.adv_agents:
             agent.__exit__(type, value, tb)
 
-    def attackStrategyToAction(self, attack_strategy, step):
+    def attackStrategyToAction(self, attack_strategy, step, can_attack):
         """
             Choose the moves for the agents based on algorithm
 
         """
 
-        if not self.adv_agents[0].leaves[0].isAttackActive(step):
-            # action is 0 if it's not an active attack
+        if not can_attack:
             return 0
+
+
 
         if attack_strategy == advAttackEnum.constant:
 
@@ -94,23 +95,23 @@ class dumbMaster():
         elif attack_strategy == advAttackEnum.pulse_large:
             action = predict_pulse_large(step)
         elif attack_strategy == advAttackEnum.gradual:
-            action = predict_gradual_attack(step, self.episode_length)            
+            action = predict_gradual_attack(step, self.num_actions)            
         else:
             print("attack strategy was {0}".format(attack_strategy))
             assert(1==2)
         return action
  
-    def predict(self, state, e, step):
+    def predict(self, state, e, step, can_attack):
         (strategy1, strategy2) = self.current_strategy
-        action1 = self.attackStrategyToAction(strategy1, step)
-        action2 = self.attackStrategyToAction(strategy2, step)
+        action1 = self.attackStrategyToAction(strategy1, step, can_attack)
+        action2 = self.attackStrategyToAction(strategy2, step, can_attack)
         return [action1, action2]
 
 
-    def sendTraffic(self, actions, is_active_attack):
+    def sendTraffic(self, actions):
         #given the actioons send the traffic
         for i in range(len(self.adv_agents)):
-            self.adv_agents[i].sendTraffic(actions[i], is_active_attack)
+            self.adv_agents[i].sendTraffic(actions[i])
 
     def calc_reward(self, network_reward):
         # convert the network reward to the adversarial reward

@@ -13,14 +13,14 @@ the calculations are done by many agents
 
 """
 
-import agent.agentBase as aBase
+#import agent.agentBase as aBase
 import math
 
 
-class AgentOfAgents(aBase.Agent):
+class AgentOfAgents():
 
     def __init__(self, N_action, action_per_throttler, N_state, sub_agent_list,
-        tau, discountFactor):
+        tau, discountFactor, history_size):
 
         self.num_agents = len(sub_agent_list)
         self.action_per_throttler = action_per_throttler
@@ -29,6 +29,7 @@ class AgentOfAgents(aBase.Agent):
         self.agents = sub_agent_list
         self.score = 0
         self.num_predictions = self.num_agents
+        self.history_size = history_size
         #self.getStatelet = getStateletFunction
     def __enter__(self):
         print("__enter__ generic decentralised")
@@ -65,7 +66,7 @@ class AgentOfAgents(aBase.Agent):
         self.past_predictions.append(prediction_as_list)
         return prediction_as_list
 
-    def update(self, last_state, network_action, current_state, is_done, reward, next_action=None):
+    def update(self, last_state, network_action, current_state, is_done, reward, next_action):
         # provide the update function to each individual state
 
         actions = network_action
@@ -88,7 +89,7 @@ class AgentOfAgents(aBase.Agent):
 
             # print("for {0} we have a state of {1} and performed {2}".format(N_state, last_statelet, action))
             #print("do the actions line up?")
-            agent.update(last_statelet, action, current_statelet, is_done, reward)
+            agent.update(last_statelet, action, current_statelet, is_done, reward, next_action[i])
         self.score += reward
 
     def actionReplay(self, current_state, batch_size):
@@ -126,10 +127,25 @@ class AgentOfAgents(aBase.Agent):
 
 
 
-    def reset_episode(self):
+    def reset_episode(self, net):
         # for agent in self.agents:
         #     agent.reset()
         self.past_predictions = [[0]*self.num_predictions]*10
+        
+        for i in range(len(self.agents)):
+            self.agents[i].reset_state(net.throttlers[i], 10)
+
+    def calculate_state(self, net):
+        for i in range(len(self.agents)):
+            self.agents[i].calculate_state(net.throttlers[i])
+
+    def get_state(self):
+        state = []
+        for i in range(len(self.agents)):
+            state.extend(self.agents[i].agent_state[-self.history_size:])
+        return state
+
+
 
     def genericActionToactions(network_action, N_action_list):
         
@@ -159,3 +175,5 @@ class AgentOfAgents(aBase.Agent):
         max_agent_value = 10
         agent_tilings = 1
         return max_agent_value, max_agent_value, agent_tilings
+
+

@@ -14,7 +14,7 @@ class Host():
     # ideally you want to merge host with switch somewhat
 
     def __init__(self, destination_switch, rate_attack_low, rate_attack_high, rate_legal_low, rate_legal_high,
-        max_epLength, adversarialMaster, iterations_per_action,  appendToSwitch = True ):
+        adversarialMaster, iterations_between_second,  appendToSwitch = True ):
 
         if appendToSwitch:
             destination_switch.attatched_hosts.append(self)
@@ -23,8 +23,7 @@ class Host():
         self.rate_attack_high = rate_attack_high
         self.rate_legal_low = rate_legal_low
         self.rate_legal_high = rate_legal_high
-        self.max_epLength = max_epLength
-        self.iterations_per_action = iterations_per_action
+        self.iterations_between_second = iterations_between_second
 
         self.reset(False) # initates all values
         # unless we loading the attack, we constantly attack
@@ -38,10 +37,10 @@ class Host():
     def reset(self, is_attacker, traffic_rate):
         self.is_attacker = is_attacker
         self.traffic_rate = traffic_rate
-        self.traffic_per_iteration = self.traffic_rate/self.iterations_per_action
+        self.traffic_per_iteration = self.traffic_rate/self.iterations_between_second
 
-    def sendTraffic(self, is_active_attack, packet_size):
-        if self.is_attacker and is_active_attack == True:
+    def sendTraffic(self, packet_size):
+        if self.is_attacker:
             self.destination_switch.new_illegal += packet_size
         if not self.is_attacker:
             self.destination_switch.new_legal += packet_size
@@ -66,30 +65,6 @@ class Host():
 
 
 
-# class DriftAttack(Host):
-#     # pretty much like a constant attack except a small amount of the traffic will be considred legitimate traffic
-#     # as this is experimental we'll assume 5% of all traffic is set as legit
-
-
-#     def reset(self, is_attacker):
-
-#         if is_attacker:
-#             self.traffic_rate = self.rate_attack_low + np.random.rand()*(self.rate_attack_high - self.rate_attack_low)
-#         else:
-#             self.traffic_rate = self.rate_legal_low + np.random.rand()*(self.rate_legal_high - self.rate_legal_low)
-#         super().reset(is_attacker, self.traffic_rate)
-
-#     def sendTraffic(self, time_second):
-#         # set the drift initially to 20% illegal -> legal, 5% legal to illegal
-#         if self.is_attacker:
-#             self.destination_switch.new_illegal += self.traffic_rate*0.8
-#             self.destination_switch.new_legal += self.traffic_rate*0.2
-#         else:
-#             self.destination_switch.new_legal += self.traffic_rate * 0.95
-#             self.destination_switch.new_illegal += self.traffic_rate * 0.05
-    
-#     def getName():
-#         return "Drift-Attack"
 
 
 class ConstantAttack(Host):
@@ -112,7 +87,7 @@ class ConstantAttack(Host):
 
 class adversarialLeaf(Host):
     def __init__(self, destination_switch, rate_attack_low, rate_attack_high, rate_legal_low, rate_legal_high,
-        max_epLength, adversarialMaster, iterations_per_action, appendToSwitch=True):
+        adversarialMaster, iterations_between_second, appendToSwitch=True):
         
         # self.destination_switch = destination_switch
 
@@ -125,17 +100,17 @@ class adversarialLeaf(Host):
         # self.rate_attack_high = rate_attack_high
         # self.rate_legal_low = rate_legal_low
         # self.rate_legal_high = rate_legal_high
-        # self.iterations_per_action = iterations_per_action
+        # self.iterations_between_second = iterations_between_second
         # if max_epLength != -1: 
         #     assert(adversarialMaster != None)
         super().__init__(destination_switch, rate_attack_low, rate_attack_high, rate_legal_low, rate_legal_high,
-        max_epLength, None, iterations_per_action, appendToSwitch)
+        None, iterations_between_second, appendToSwitch)
         
-        if max_epLength != -1:
-            self.adversarialMaster = adversarialMaster
-            self.adversarialMaster.addLeaf(self)
-        else:
-            self.adversarialMaster = None
+        #if max_epLength != -1:
+        self.adversarialMaster = adversarialMaster
+        self.adversarialMaster.addLeaf(self)
+        #else:
+        #    self.adversarialMaster = None
 
 
     def getName():
@@ -154,69 +129,14 @@ class adversarialLeaf(Host):
         self.agent = assignedAgent
 
 
-    def sendTraffic(self, percent_emit, is_active_attack):
+    def sendTraffic(self, percent_emit):
         assert(percent_emit<=1)
 
         rate_traffic = self.traffic_per_iteration * percent_emit
         
         if self.is_attacker:
-            super().sendTraffic(is_active_attack, rate_traffic)
+            super().sendTraffic(rate_traffic)
         else:
-            super().sendTraffic(is_active_attack, self.traffic_per_iteration)
+            super().sendTraffic(self.traffic_per_iteration)
 
 
-"""
-
-class Pulse():
-    # aim to have a super class for pulses
-    def __init__(self, N_host, attackers, rate_attack_low, rate_attack_high, rate_legal_low, rate_legal_high,
-        max_epLength, swap_at):
-        self.pulse_host = []
-        self.standard_host = []
-        self.max_epLength = max_epLength
-        
-        self.swap_at=swap_at
-        self.counter = 0
-        self.pulse_on = False
-        for i in range(N_host):
-            if i in attackers:
-                self.pulse_host.append(rate_attack_low + np.random.rand()*(rate_attack_high - rate_attack_low))
-                self.standard_host.append(0)
-            else:
-                self.pulse_host.append(rate_legal_low + np.random.rand()*(rate_legal_high - rate_legal_low))
-                self.standard_host.append(rate_legal_low + np.random.rand()*(rate_legal_high - rate_legal_low))
-        self.host_rate = self.standard_host
-
-    def takeStep(self):
-        self.counter +=1
-
-        if self.counter % self.swap_at == 0:
-            if self.pulse_on:
-                self.pulse_on = False
-                self.host_rate = self.standard_host
-            else:
-                self.pulse_on = True
-                self.host_rate = self.pulse_host
-
-
-
-    def getHostRate(self):
-        return self.host_rate
-
-
-class PulseQuick(Pulse):
-
-    def __init__(self, N_host, attackers, rate_attack_low, rate_attack_high, rate_legal_low, rate_legal_high,
-        max_epLength):
-        super().__init__(N_host, attackers, rate_attack_low, rate_attack_high, rate_legal_low, rate_legal_high,
-        max_epLength, 2)
-
-
-class PulseMedium(Pulse):
-    def __init__(self, N_host, attackers, rate_attack_low, rate_attack_high, rate_legal_low, rate_legal_high,
-        max_epLength):
-        super().__init__(N_host, attackers, rate_attack_low, rate_attack_high, rate_legal_low, rate_legal_high,
-        max_epLength, 4)
-
-
-"""
