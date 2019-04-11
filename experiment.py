@@ -45,6 +45,7 @@ import os#, sys, logging
 from enum import Enum
 #import network.network_new as network
 import network.hosts as hosts
+import network.utility as utility
 import mapsAndSettings
 import errno
 
@@ -188,12 +189,12 @@ class Experiment:
         print("Advesary is {0}".format(self.opposition_settings.name))
         print("There are {0} episodes this simulation".format(num_episodes))
         reward_lines.append("Episode,TotalReward,LastReward,LengthEpisode,e,AdvTotalReward,AdvLastReward\n")
-        packet_served_lines.append("Episode,LegalReceived,LegalSent,PercentageReceived,ServerFailures,IllegalServed,IllegalSent\n")
+        packet_served_lines.append("Episode,LegalReceived,LegalSent,PercentageReceived,IllegalServed,IllegalSent\n")
         loss_lines.append("Episode,Loss,Exploration,EpDefLoss\n")
         #self.episode_rewards = []
         if self.opposition_settings.is_intelligent and self.opposition_settings.save_model_mode in self.agentSaveModes:
             adv_loss_lines.append("Episode,Loss,Exploration,EpDefLoss\n")
-        server_actions_line = "Episode,LegalReceived,LegalSent,LegalPercentage,IllegalServed,IllegalSent,TotalSent,LegalCap,IllegalCap,TotalCap,NumAdvesary"
+        server_actions_line = "Episode,DefMoves,LegalReceived,LegalSent,LegalPercentage,IllegalServed,IllegalSent,TotalSent,LegalCap,IllegalCap,TotalCap,NumAdvesary"
 
 
         ep_init = 0
@@ -218,7 +219,7 @@ class Experiment:
                 if self.opposition_settings.save_model_mode == mapsAndSettings.defender_mode_enum.load_continue:
                     ep_init = episode
 
-            #adv_last_action = None
+            #adv_past_action = None
             reward_per_print = 0
 
             
@@ -248,7 +249,7 @@ class Experiment:
             adversary_reward = None
             print("\n\n Starting at episode {0}".format(ep_init))
             for ep_num in range(ep_init, num_episodes):
-                #print(ep_num)
+                # print(ep_num)
                 agent.reset_episode(net)
                 ep_adv_loss = 0
                 ep_def_loss = 0
@@ -265,14 +266,21 @@ class Experiment:
                 if self.network_settings.save_per_step_stats:
                     (legal_capacity, illegal_capacity, total_capacity) = net.getHostCapacity()
 
+                legit_served_ep = 0
+                legit_sent_ep = 0
+                illegal_served_ep = 0
+                illegal_sent_ep = 0
 
-                defender_state = None
+                adv_next_state = None
+                adv_next_action = None
                 
+                def_next_state = None
+                def_next_action = None
                 # episode_steps = ep_length * self.network_settings.iterations_between_second
              
                 step = -1
                 for second in range(ep_length):
-
+                    # print(second)
                     for iteration in range(self.network_settings.iterations_between_second):
                         step += 1
 
@@ -280,8 +288,12 @@ class Experiment:
                         # agent moves
                         if step % adversary_move == 0:
                             adv_step = step/adversary_move # the step for the adversary
-                            adv_state = self.adversarialMaster.get_state(net, adv_e, adv_step)
-                            adv_action = self.adversarialMaster.predict(adv_state, adv_e, adv_step, self.can_attack(second))
+                            
+                            adv_past_state = adv_next_state
+                            adv_past_action = adv_next_action
+
+                            adv_next_state = self.adversarialMaster.get_state(net, adv_e, adv_step)
+                            adv_next_action = self.adversarialMaster.predict(adv_next_state, adv_e, adv_step, self.can_attack(second))
                             num_adversary_moves += 1
                             
 
@@ -293,17 +305,16 @@ class Experiment:
                                     adversary_done = (adversary_move-1) == adversary_last_move
                                     if num_adversary_moves > 1 and self.can_attack(second-1):
                                         # if the adversary couldn't attack last turn we don't want to update
-                                        self.adversarialMaster.update(adv_last_state, adv_last_action, adv_state, d, adversary_reward, adv_action) # num_adversary_moves ?
+                                        self.adversarialMaster.update(adv_past_state, adv_past_action, adv_next_state, d, adversary_reward, adv_next_action) # num_adversary_moves ?
                                 
                                 
                                         if num_adversary_moves % self.opposition_settings.update_freq == 0:
-                                            adv_l = self.adversarialMaster.actionReplay(adv_state, self.opposition_settings.batch_size)
+                                            adv_l = self.adversarialMaster.actionReplay(adv_next_state, self.opposition_settings.batch_size)
                                             adv_loss.append(adv_l)
                                             ep_adv_loss += abs(adv_l)
 
-                                adv_last_state = adv_state
-                                adv_last_action = adv_action
-                                self.adversarialMaster.update_past_state(adv_action)
+
+                                self.adversarialMaster.update_past_state(adv_next_action)
 
 
 
@@ -314,10 +325,12 @@ class Experiment:
                             #print("made move {0}".format(num_defender_moves))
                             def_step = step/defender_move
                             
-                            last_defender_state = defender_state
+                            def_last_state = def_next_state
+                            def_past_action = def_next_action
+
                             agent.calculate_state(net)
-                            defender_state = agent.get_state()
-                            defender_action = agent.predict(defender_state, e) # generate an action
+                            def_next_state = agent.get_state()
+                            def_next_action = agent.predict(def_next_state, e) # generate an action
                             num_defender_moves += 1
 
                             defender_reward = net.calculate_reward()
@@ -329,18 +342,49 @@ class Experiment:
                                 We also assume that during training our reward is calculated over last 2 seconds
                                 """
                                 if num_defender_moves > 1:
-                                    agent_done = defender_move == agent_last_move # only useful for training
-                                    agent.update(last_defender_state, defender_last_action, defender_state, agent_done, defender_reward, defender_action)
+                                    # print("p_state {0} p_action {1} reward {2} n_state {3} n_action {4}".format(def_last_state, def_past_action, defender_reward,def_next_state, def_next_action))
+                                    agent_done = False
+                                    agent.update(def_last_state, def_past_action, def_next_state, agent_done, defender_reward, def_next_action)
 
 
                                     if num_defender_moves % update_freq == 0:
-                                        l = agent.actionReplay(defender_state, batch_size)
+                                        l = agent.actionReplay(def_next_state, batch_size)
                                         if l:
                                             loss.append(l)
                                             ep_def_loss += abs(l)
 
-                            last_defender_state = defender_state
-                            defender_last_action = defender_action
+
+                            """
+                            This needs to change location or something
+
+                            """
+                            
+                            (legit_served, legit_sent, legal_per, illegal_served, illegal_sent) = net.getStepPacketStatistics()
+                            legit_served_ep += legit_served
+                            legit_sent_ep += legit_sent
+                            illegal_served_ep += illegal_served
+                            illegal_sent_ep += illegal_sent
+                            # if num_defender_moves > 1:
+                            #     total_sent = legit_sent+illegal_sent
+                            #     print("\nState was {0}".format(def_last_state))
+                            #     print("ep_num-move {0}-{1} | def_action {2} | adv_action {3} | per {4}".format(ep_num, num_defender_moves, def_current_action, adv_current_action, legal_per))
+                            #     print("ServerState is {0} | Overflow = {1}".format(total_sent, total_sent>16))
+                            if self.network_settings.save_per_step_stats and num_defender_moves > 1:
+                                total_sent = legit_sent+illegal_sent
+
+
+                                server_actions_line = "{0},{1},{2},{3},{4},{5},{6},{7},{8},{9},{10},{11}".format(ep_num, num_defender_moves, legit_served, legit_sent, legal_per, illegal_served, illegal_sent, total_sent, legal_capacity, illegal_capacity, total_capacity, self.opposition_settings.num_adv_agents)
+
+                                if isinstance(def_current_action, list):
+                                    for i in range(self.network_settings.N_state):
+                                        server_actions_line += ",{0}".format(def_current_action[i])
+                                else:
+                                    server_actions_line += ",{0}".format(def_current_action)
+                                for i in range(self.opposition_settings.num_adv_agents):
+                                    server_actions_line += ",{0}".format(adv_current_action[i])
+
+                                server_actions_line+= "\n"
+                                server_actions_lines.append(server_actions_line)                                
 
                             
                             
@@ -350,19 +394,26 @@ class Experiment:
 
 
                         # network makes moves
-                        #print("step {0} defender {1} adversary {2}".format(step, defender_action, adv_action))
-                        net.simulate_traffic(defender_action, adv_action, step)
+                        #print("step {0} defender {1} adversary {2}".format(step, def_next_action, adv_next_action))
+                        net.simulate_traffic(def_next_action, adv_next_action, step)
+                        def_current_action = def_next_action
+                        adv_current_action = adv_next_action
 
                 
 
 
 
 
+                """
+                This is where you would do the 'isDone logic'
+
+                if self.defender_settings.save_model_mode in self.agentSaveModes:
+                    print("p_state {0} p_action {1} reward {2} n_state {3} n_action {4}".format(def_last_state, def_past_action, defender_reward,def_next_state, def_next_action))
+                    agent_done = True
+                    agent.update(def_last_state, def_past_action, def_next_state, agent_done, defender_reward, def_next_action)
 
 
-
-
-
+                """
 
 
 
@@ -372,15 +423,15 @@ class Experiment:
                 reward_per_print += rAll
 
                 if ep_num % 1000 == 0:
-                    print("Completed Episode - {0}".format(ep_num))
+                    print("\n\nCompleted Episode - {0}".format(ep_num))
                     print("average reward = {0}".format(reward_per_print/1000/ep_length*100))
                     #print("average Per = {0}".format(t_packet_received/t_packet_sent))
                     reward_per_print = 0
                     #t_packet_received = 0
                     #t_packet_sent = 0
-                    print("def | step {0} | action {1} | reward {2} | e {3}".format(step-1, defender_last_action, defender_reward, e))
-                    print("prio state was {0}".format(last_defender_state))
-                    print("this state was {0}".format(defender_state))
+                    print("def | step {0} | action {1} | reward {2} | e {3}".format(step-1, def_past_action, defender_reward, e))
+                    print("prio state was {0}".format(def_last_state))
+                    print("this state was {0}".format(def_next_state))
 
 
 
@@ -426,28 +477,17 @@ class Experiment:
 
                 
                 
-                if self.network_settings.save_per_step_stats:
-                    (legit_served, legit_sent, legal_per, illegal_served, illegal_sent) = net.getStepPacketStatistics()
-                    total_sent = legit_sent+illegal_sent
-                    server_actions_line = "{0},{1},{2},{3},{4},{5},{6},{7},{8},{9},{10},{11}".format(ep_num, step, legit_served, legit_sent, legal_per, illegal_served, illegal_sent, total_sent, legal_capacity, illegal_capacity, total_capacity, self.opposition_settings.num_adv_agents)
-                    if isinstance(a, list):
-                        for i in range(self.network_settings.N_state):
-                            server_actions_line += ",{0}".format(a[i])
-                    else:
-                        server_actions_line += ",{0}".format(a)
-                    for i in range(self.opposition_settings.num_adv_agents):
-                        server_actions_line += ",{0}".format(adv_action[i])
+
                     
                     
-                    server_actions_line+= "\n"
-                    server_actions_lines.append(server_actions_line)
+
 
 
 
 
                 #(legit_served, legit_sent, legal_per, illegal_served, illegal_sent) = net.getStepPacketStatistics()
-
-                #packet_served_lines.append("{0},{1},{2},{3},{4},{5},{6}\n".format(ep_num, legit_served, legit_all, legit_per, server_failures, illegal_served, illegal_all))
+                legit_per = legit_served_ep / legit_sent_ep
+                packet_served_lines.append("{0},{1},{2},{3},{4},{5}\n".format(ep_num, legit_served_ep, legit_sent_ep, legit_per, illegal_served_ep, illegal_sent_ep))
                 reward_lines.append("{0},{1},{2},{3},{4},{5},{6}\n".format(ep_num, rList[-1], defender_reward, second, e, advRList[-1], adversary_reward))
                 if len(loss) > 0:
                     last_loss = loss[-1]
@@ -501,9 +541,9 @@ class Experiment:
 
     def can_attack(self, current_second):
         if self.delay_attacks:
-            if current_second<network.ATTACK_START:
+            if current_second<utility.ATTACK_START:
                 return False
-            if current_second>=120- network.ATTACK_START:
+            if current_second>=(120- utility.ATTACK_START):
                 # sort of cheating with putting the 120 right there
                 return False
         return True

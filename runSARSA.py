@@ -19,7 +19,7 @@ class LinearSarsaSingular(object):
     tau = 0.1
     update_freq = 4
     batch_size = None
-    num_episodes = 200000#62500
+    num_episodes = 62500#62500
     pre_train_episodes = 0#2000
     annealing_episodes = 50000
     startE = 0.4 #0.4
@@ -58,6 +58,7 @@ class LinearSarsaSingularDDQNCopy(object):
     reward_overload = None
     group_size = 1 # number of filters each agent controls
     has_bucket = False
+    actions_per_second = 0.5 # make an decision every 2 seconds
 
 class LinSinDDMemory(LinearSarsaSingularDDQNCopy):
     name = "LinSinDDMemory"

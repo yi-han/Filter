@@ -99,6 +99,7 @@ class AIMDsettings(object):
     reward_overload = None
     has_bucket = True
     history_size = 1
+    actions_per_second = 0.5 # make an decision every 2 seconds
 
 # class AIMDvariant(AIMDsettings):
 #     name = "AIMDvariant"
@@ -155,11 +156,11 @@ class NetworkSingleTeamMalialisMedium(object):
     upper_boundary = 14 #12.5 # Mal would have used 14
     lower_boundary = 10 # for AIMD
 
-    iterations_between_action = 200#30 #30 # 200
+    iterations_between_second = 100 # at 100 we are dealing wiht centiseconds
 
     max_hosts_per_level = [2, 6, 12]
     bucket_capacity = 12.1
-    max_epLength = 30
+    ep_length = 60 # Training is an episode of 60 seconds
 
     is_sig_attack = False
     save_per_step_stats = False
@@ -206,7 +207,7 @@ class NetworkMalialisTeamFull(object):
     legal_probability = 0.6 # probability that is a good guys
     upper_boundary = 62
     lower_boundary = 56
-    iterations_between_action = 20
+    iterations_between_second = 100 # at 100 we are dealing wiht centiseconds
     max_hosts_per_level = [2, 6, 12, 60]    
     bucket_capacity = 12
     is_sig_attack = False
@@ -555,7 +556,7 @@ def create_generic_dec(def_settings, ns):
 
 def getSummary(adversary_classes, load_path, agent, prefix):
     summary = open("{0}/attackSummary-{1}.csv".format(load_path,prefix), "w")
-    summary.write("AttackType,Agent,LegalPacketsReceived,LegalPacketsServed,Percentage,ServerFailures,Tau,Pretraining,Annealing,TotalEpisodes,start_e,overload,illegalSent,adv_tau,adv_discount,adv_pretrain,adv_annealing_episodes,adv_episodes,adv_start_e,delta,beta,epsilon,bucket_capacity, iteration\n")
+    summary.write("AttackType,Agent,LegalPacketsReceived,LegalPacketsServed,Percentage,Tau,Pretraining,Annealing,TotalEpisodes,start_e,overload,illegalSent,adv_tau,adv_discount,adv_pretrain,adv_annealing_episodes,adv_episodes,adv_start_e,delta,beta,epsilon,bucket_capacity, iteration\n")
     agentName = agent.name
     for adversary_class in adversary_classes:
         attack_name = adversary_class.name
@@ -565,7 +566,7 @@ def getSummary(adversary_classes, load_path, agent, prefix):
         #print(packet_file)
         sum_legal_received = sum(packet_file.LegalReceived)
         sum_legal_sent = sum(packet_file.LegalSent)
-        sum_server_failures = sum(packet_file.ServerFailures)
+        #sum_server_failures = sum(packet_file.ServerFailures)
         adv_packets_sent = sum(packet_file.IllegalSent)
         percentage_received = sum_legal_received/sum_legal_sent*100
         tau = agent.tau
@@ -580,8 +581,8 @@ def getSummary(adversary_classes, load_path, agent, prefix):
         else:
             overload = 'misc'
 
-        summary.write("{0},{1},{2},{3},{4},{5},{6},{7},{8},{9},{10},{11},{12},".format(attack_name, agent.name,
-            sum_legal_received, sum_legal_sent, percentage_received, sum_server_failures,
+        summary.write("{0},{1},{2},{3},{4},{5},{6},{7},{8},{9},{10},{11},".format(attack_name, agent.name,
+            sum_legal_received, sum_legal_sent, percentage_received,
             tau, pretraining, annealing, total_episodes, start_e, overload, adv_packets_sent))
         if adversary_class.is_intelligent:
             summary.write("{0},{1},{2},{3},{4},{5},".format(adversary_class.tau, adversary_class.discount_factor,

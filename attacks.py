@@ -34,7 +34,7 @@ def generateAttacks(networkSettings, attackClasses, max_epLength = -1, num_episo
     with open(attack_path, "wb") as f:
         
         # run all the simulations
-        net = netModule.network_full(networkSettings, reward_overload, conAttack, max_epLength, netModule.stateRepresentationEnum.throttler, AIMDstandard, None, None, True)
+        net = netModule.network_full(networkSettings, reward_overload, conAttack, netModule.stateRepresentationEnum.throttler, AIMDsettings, None, None, True)
         for _ in range(num_episodes):
             net.reset()
 
@@ -46,15 +46,10 @@ def generateAttacks(networkSettings, attackClasses, max_epLength = -1, num_episo
 
 # The class of the adversary to implement
 conAttack = hostClass.ConstantAttack
-shortPulse = hostClass.ShortPulse
-mediumPulse = hostClass.MediumPulse
-largePulse = hostClass.LargePulse
-gradualIncrease = hostClass.GradualIncrease
 
 adversarialLeaf = hostClass.adversarialLeaf
 
-attackClasses = [conAttack, shortPulse, mediumPulse,
-    largePulse, gradualIncrease, adversarialLeaf] 
+attackClasses = [conAttack] 
 
 commonMaps = [NetworkMalialisSmall, NetworkSingleTeamMalialisMedium, NetworkSixFour, NetworkMalialisTeamFull]
 for common_map in commonMaps:

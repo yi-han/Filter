@@ -31,8 +31,8 @@ DEFAULT_NUMBER_ATTACKS = 200
 #     # save_attack = SaveAttackEnum.neither
 #     save_model = SaveModelEnum.load
 
-def run_attacks(assignedNetwork, assignedAgent, file_path, smart_attacker, prefix, custom_iterations_between_action = DEFAULT_NUMBER_ATTACKS):
-    assert(custom_iterations_between_action == DEFAULT_NUMBER_ATTACKS)
+def run_attacks(assignedNetwork, assignedAgent, file_path, smart_attacker, prefix, custom_iterations_between_second = DEFAULT_NUMBER_ATTACKS):
+    assert(custom_iterations_between_second == DEFAULT_NUMBER_ATTACKS)
 
 
 
@@ -46,7 +46,7 @@ def run_attacks(assignedNetwork, assignedAgent, file_path, smart_attacker, prefi
     assignedNetwork.drift = 0 # we don't use drift in testing
     assignedAgent.save_model_mode = mapsAndSettings.defender_mode_enum.test_short
     
-    original_iterations = assignedNetwork.iterations_between_action
+    original_iterations = assignedNetwork.iterations_between_second
 
     attack_location = load_attack_path+"onePerAttack.apkl"
     print(attack_location)
@@ -56,7 +56,8 @@ def run_attacks(assignedNetwork, assignedAgent, file_path, smart_attacker, prefi
 
 
     for attacker in attackers:
-        assignedNetwork.iterations_between_action = custom_iterations_between_action
+
+        assignedNetwork.iterations_between_second = custom_iterations_between_second
         print(attacker.name)
         print("\n\n\n")
         genericAgent = mapsAndSettings.create_generic_dec(assignedAgent, assignedNetwork)
@@ -66,7 +67,7 @@ def run_attacks(assignedNetwork, assignedAgent, file_path, smart_attacker, prefi
 
 
         exp.run(prefix, genericAgent, file_path)
-        assignedNetwork.iterations_between_action = original_iterations
+        assignedNetwork.iterations_between_second = original_iterations
     if smart_attacker and smart_attacker.is_intelligent:
         init_adv_save_model = smart_attacker.save_model_mode
         smart_attacker.save_model_mode = mapsAndSettings.defender_mode_enum.test_short
@@ -74,7 +75,7 @@ def run_attacks(assignedNetwork, assignedAgent, file_path, smart_attacker, prefi
         # we've intentionally left the actions at standard rate to reflect training for advesary
         # attackClasses.insert(adversarialLeaf, 0)
         print("doing smart_attacker")
-        assignedNetwork.iterations_between_action = custom_iterations_between_action
+        assignedNetwork.iterations_between_second = custom_iterations_between_second
         genericAgent = mapsAndSettings.create_generic_dec(assignedAgent, assignedNetwork)
         #attack_location = load_attack_path+attackClass.getName()+".apkl"
         exp = experiment.Experiment(attackClass, assignedNetwork, 
@@ -84,7 +85,7 @@ def run_attacks(assignedNetwork, assignedAgent, file_path, smart_attacker, prefi
         smart_attacker.save_model_mode = init_adv_save_model
         attackers.append(smart_attacker)
 
-        assignedNetwork.iterations_between_action = original_iterations
+        assignedNetwork.iterations_between_second = original_iterations
     
     mapsAndSettings.getSummary(attackers, file_path, assignedAgent, prefix)
     if smart_attacker and smart_attacker.is_intelligent:

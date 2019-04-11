@@ -19,7 +19,7 @@ class LinearSarsaSingular(object):
     tau = 0.1
     update_freq = 4
     batch_size = None
-    num_episodes = 200000#62500
+    num_episodes = 62500#62500
     pre_train_episodes = 0#2000
     annealing_episodes = 50000
     startE = 0.4 #0.4
@@ -32,6 +32,7 @@ class LinearSarsaSingular(object):
     reward_overload = -1
     stateRepresentation = stateRepresentationEnum.throttler  
     has_bucket = False
+    actions_per_second = 0.5 # make an decision every 2 seconds
 
 class LinSingularExploration(LinearSarsaSingular):
     name = "linSingExp"
@@ -57,6 +58,7 @@ class LinearSarsaSingularDDQNCopy(object):
     reward_overload = None
     group_size = 1 # number of filters each agent controls
     has_bucket = False
+    actions_per_second = 0.5 # make an decision every 2 seconds
 
 class LinSinDDMemory(LinearSarsaSingularDDQNCopy):
     name = "LinSinDDMemory"
@@ -127,26 +129,26 @@ class LinTest(object):
 
 
 # The class of the adversary to implement
-conAttack = hostClass.ConstantAttack
-shortPulse = hostClass.ShortPulse
-mediumPulse = hostClass.MediumPulse
-largePulse = hostClass.LargePulse
-gradualIncrease = hostClass.GradualIncrease
-coordAttack = hostClass.CoordinatedRandom
+# conAttack = hostClass.ConstantAttack
+# shortPulse = hostClass.ShortPulse
+# mediumPulse = hostClass.MediumPulse
+# largePulse = hostClass.LargePulse
+# gradualIncrease = hostClass.GradualIncrease
+# coordAttack = hostClass.CoordinatedRandom
 adversarialLeaf = hostClass.adversarialLeaf
 
-attackClasses = [conAttack, shortPulse, mediumPulse,
-    largePulse, gradualIncrease] 
+# attackClasses = [conAttack, shortPulse, mediumPulse,
+#     largePulse, gradualIncrease] 
 
 """
 Settings to change
 """
 
-assignedNetwork = NetworkMalialisSmall
-assignedAgent = AIMDsettings
+assignedNetwork = NetworkSingleTeamMalialisMedium
+assignedAgent = LinearSarsaSingular
 load_attack_path = "attackSimulations/{0}/".format(assignedNetwork.name)
 network_emulator = network.network_new.network_full # network_quick # network_full
-loadAttacks = True
+loadAttacks = False
 
 
 
@@ -185,7 +187,7 @@ This is the encoder for the sarsa, this might be better positioned somewhere els
 encoders = []
 level = 0 # level 0 is throttlers, level 1 is intermeditary etc
 for max_hosts in assignedNetwork.max_hosts_per_level:
-    maxThrottlerBandwidth = assignedNetwork.rate_attack_high * max_hosts # a throttler doesn't face more than X
+    maxThrottlerBandwidth = 2 * assignedNetwork.rate_attack_high * max_hosts # a throttler doesn't face more than X
     if level == 0:
         numTiles = 6 * max_hosts
     elif assignedAgent.stateRepresentation == stateRepresentationEnum.throttler:

@@ -178,7 +178,7 @@ class Bucket():
 
 
 class Switch():
-    def __init__(self, switch_id, is_filter, representation, defender_settings, iteration_between_second, bucket_capacity):
+    def __init__(self, switch_id, is_filter, representation, defender_settings, iterations_between_second, bucket_capacity):
         """
         history_size: The number of things to remember
 
@@ -190,7 +190,7 @@ class Switch():
         self.destination_links = [] # where traffic is getting sent
         self.attatched_hosts = [] # used for network_quick, quick access for hosts attatched to this 
         self.throttle_rate = None # the throttling rate for the specific switch
-        self.memory = iteration_between_second * 2 # how much to remember. 2 seconds worth of data
+        self.memory = iterations_between_second * 2 # how much to remember. 2 seconds worth of data
 
 
         self.stateSwitches = [] # list of objects we use for state. If just self it shows only load at self
@@ -203,6 +203,11 @@ class Switch():
             self.bucket = Bucket(iterations_between_second, bucket_capacity)
         else:
             self.bucket = None
+        self.legal_segment = [0] * self.memory # over the last window, how much legal traffic has passed
+        self.illegal_segment = [0] * self.memory # over the last window, how much illegal traffic has passed
+        self.dropped_legal_segment = [0] * self.memory# how much legal traffic have we dropped over the last window
+        self.dropped_illegal_segment = [0] * self.memory # over last window, how much illegal traffic has passed
+     
         self.reset()
 
         self.delay = 0 # the delay for implementing a throttle based on maximum communication
@@ -281,7 +286,7 @@ class Switch():
         self.legal_window_cache = None
         self.illegal_window_cache = None
         self.legal_dropped_window_cache = None
-
+        self.illegal_dropped_window_cache = None
     def setThrottle(self, throttle_rate):
 
         if not (self.is_filter and (self.next_throttle == None or throttle_rate==self.next_throttle)):
@@ -314,15 +319,17 @@ class Switch():
         #self.past_windows = [0]*20 obsolete
 
         # We keep track of the traffic that arrives at the switch over each step
-        self.legal_segment = [0] * self.memory # over the last window, how much legal traffic has passed
-        self.illegal_segment = [0] * self.memory # over the last window, how much illegal traffic has passed
-        self.dropped_legal_segment = [0] * self.memory# how much legal traffic have we dropped over the last window
-        self.dropped_illegal_segment = [0] * self.memory # over last window, how much illegal traffic has passed
+        for i in range(self.memory):
+
+            self.legal_segment[i] = 0  # over the last window, how much legal traffic has passed
+            self.illegal_segment[i] = 0  # over the last window, how much illegal traffic has passed
+            self.dropped_legal_segment[i] = 0 # how much legal traffic have we dropped over the last window
+            self.dropped_illegal_segment[i] = 0  # over last window, how much illegal traffic has passed
 
         self.legal_window_cache = None
         self.illegal_window_cache = None
         self.legal_dropped_window_cache = None
-
+        self.illegal_dropped_window_cache = None
         if self.bucket:
             self.bucket.reset()
 
@@ -367,6 +374,14 @@ class Switch():
 
         return self.legal_dropped_window_cache
 
+    def get_illegal_dropped_window(self):
+        if self.illegal_dropped_window_cache != None:
+            return self.illegal_dropped_window_cache
+        self.illegal_dropped_window_cache = 0
+        for segment in self.dropped_illegal_segment:
+            self.illegal_dropped_window_cache += segment
+
+        return self.illegal_dropped_window_cache
 
     def get_load(self):
         illegal_window = self.get_illegal_window()
@@ -675,10 +690,13 @@ class network_full(object):
 
 
         legitimate_served = self.switches[0].get_legal_window()
+        illegal_served = self.switches[0].get_illegal_window()
         legitimate_sent = legitimate_served + self.switches[0].get_legal_dropped_window()
-        server_load = self.switches[0].get_load()
+        
+        server_load = legitimate_served + illegal_served
         #assert((legitimate_served+attacker_served)==self.switches[0].getWindow())
 
+        #print("server_load = {0} | upper_boundary = {1}".format(server_load, self.upper_boundary))
         if server_load > self.upper_boundary:
 
             if self.reward_overload:
@@ -706,19 +724,30 @@ class network_full(object):
     def getStepPacketStatistics(self):
         """
         Experimental statistic. 
-        Calculate the load at the server. If it is above the capacity/steps report 0. 
+        Calculate the load at the server. If it is above the capacity/steps we do a final throttle to get it down safely. 
         Otherwise the % of legitimate packets taht should have arrived.
         Do note there is an accumulative effect so this is very imprecise
 
         """
-        assert(1==2) #might be useful. who knows?
-        legitimate_served = self.switches[0].legal_window
-        legitimate_sent = self.switches[0].legal_window + self.switches[0].dropped_legal_window
-        illegal_served = self.switches[0].illegal_window
-        illegal_sent = self.switches[0].illegal_window + self.switches[0].dropped_illegal_window
+        #assert(1==2) #might be useful. who knows?
+        # legitimate_served = self.switches[0].legal_window
+        # legitimate_sent = self.switches[0].legal_window + self.switches[0].dropped_legal_window
+        # illegal_served = self.switches[0].illegal_window
+        # illegal_sent = self.switches[0].illegal_window + self.switches[0].dropped_illegal_window
         
-        if legitimate_served + illegal_served > self.upper_boundary or legitimate_served == 0:
+        legitimate_served = self.switches[0].get_legal_window()
+        legitimate_sent = legitimate_served + self.switches[0].get_legal_dropped_window()
+        illegal_served = self.switches[0].get_illegal_window()
+        illegal_sent = illegal_served + self.switches[0].get_illegal_dropped_window()
+
+        server_load = legitimate_served + illegal_served
+
+        if legitimate_served == 0 or legitimate_sent== 0:
             legal_received_per = 0
+        elif server_load > self.upper_boundary:
+            overflowPer = self.upper_boundary/server_load
+            legitimate_served *= overflowPer
+            legal_received_per = legitimate_served/legitimate_sent
         else:
             legal_received_per = legitimate_served/legitimate_sent
 

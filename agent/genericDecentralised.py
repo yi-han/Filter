@@ -61,35 +61,35 @@ class AgentOfAgents():
             #print(statelet)
             agentAction = agent.predict(statelet, e)
             prediction_as_list.append(agentAction)
-
+            # print("Agent {2} | State - {0} | Action - {1}".format(statelet, agentAction, i))
         self.past_predictions.pop(0)
         self.past_predictions.append(prediction_as_list)
         return prediction_as_list
 
-    def update(self, last_state, network_action, current_state, is_done, reward, next_action):
+    def update(self, last_state, last_network_action, next_state, is_done, reward, next_action):
         # provide the update function to each individual state
 
-        actions = network_action
+        last_actions = last_network_action
 
 
-        if network_action == None:
-            network_action = [0]*self.N_state
-
+        if last_network_action == None:
+            last_network_action = [0]*self.N_state
+        # print("\n Updates")
         for i in range(len(self.agents)):
             agent = self.agents[i]
-            action = actions[i]
+            last_action = last_actions[i]
             N_state = agent.N_state
             #(last_statelet, last_state) = self.getStatelet(last_state, N_state)
             last_statelet = last_state[i]
             # print("action was {0}".format(action))
             # print("statelet for {0} is {1}".format(i, last_statelet))
-            #(current_statelet, current_state) = self.getStatelet(current_state, N_state)
-            current_statelet = current_state[i]
-            #print("future statelet is {0}".format(current_statelet))
-
+            #(next_statelet, next_state) = self.getStatelet(next_state, N_state)
+            next_statelet = next_state[i]
+            #print("future statelet is {0}".format(next_statelet))
+            # print("Agent {0} | PriorState {1} | PriorAction {2} | Reward {3}".format(i, last_statelet, last_action, reward))
             # print("for {0} we have a state of {1} and performed {2}".format(N_state, last_statelet, action))
-            #print("do the actions line up?")
-            agent.update(last_statelet, action, current_statelet, is_done, reward, next_action[i])
+            #print("do the last_actions line up?")
+            agent.update(last_statelet, last_action, next_statelet, is_done, reward, next_action[i])
         self.score += reward
 
     def actionReplay(self, current_state, batch_size):
