@@ -493,7 +493,8 @@ class network_full(object):
 
         self.representationType = representationType
         self.legal_probability = network_settings.legal_probability # odds of host being an attacker
-        self.upper_boundary = MbToKb(network_settings.upper_boundary) * 2 # for 2 seconds
+        self.upper_bound = MbToKb(network_settings.upper_boundary) # for one second
+        self.upper_boundary_two = self.upper_bound * 2 # for 2 seconds
         self.hostClass = host_class
         self.topology = []
 
@@ -533,6 +534,7 @@ class network_full(object):
         self.illegal_served_ep = 0
         self.rewards_per_step = [] # keep track of the rewards at every step
         self.server_failures = 0
+
 
         # reset the switches)
         for i in range(self.N_switch):
@@ -582,7 +584,7 @@ class network_full(object):
             max_bandwidth = 0 # maximum bandwidth that can be generated per turn
             for i in attackers:
                 max_bandwidth += self.hosts[i].traffic_rate
-            if max_bandwidth < self.upper_boundary:
+            if max_bandwidth < self.upper_boundary_two:
                 return self.generate_attackers()
      
     def record_attackers(self):
@@ -679,7 +681,7 @@ class network_full(object):
         self.reset()
 
 
-    def calculate_reward(self):
+    def get_reward(self):
         #print('calc reward')
         if self.cache_reward != None:
             print("saved some tiem")
@@ -696,13 +698,13 @@ class network_full(object):
         server_load = legitimate_served + illegal_served
         #assert((legitimate_served+attacker_served)==self.switches[0].getWindow())
 
-        #print("server_load = {0} | upper_boundary = {1}".format(server_load, self.upper_boundary))
-        if server_load > self.upper_boundary:
+        #print("server_load = {0} | upper_boundary = {1}".format(server_load, self.upper_boundary_two))
+        if server_load > self.upper_boundary_two:
 
             if self.reward_overload:
                 reward = self.reward_overload
             else:
-                reward -= (server_load/self.upper_boundary - 1.0)
+                reward -= (server_load/self.upper_boundary_two - 1.0)
             
             self.server_failures +=1
 
@@ -711,47 +713,43 @@ class network_full(object):
             if legitimate_sent != 0:
                 reward += legitimate_served/legitimate_sent
         
-            self.legitimate_served_ep += KbToMb(legitimate_served)
-        
-        self.legitimate_sent_ep += KbToMb(legitimate_sent)
-        self.illegal_served_ep += KbToMb(self.switches[0].get_illegal_window())
-        
-        #self.illegal_sent_ep += (self.switches[0].illegal_window + self.switches[0].dropped_illegal_window)
         reward = clip(-1, 1, reward)
         self.cache_reward = reward
         return reward
 
-    def getStepPacketStatistics(self):
-        """
-        Experimental statistic. 
-        Calculate the load at the server. If it is above the capacity/steps we do a final throttle to get it down safely. 
-        Otherwise the % of legitimate packets taht should have arrived.
-        Do note there is an accumulative effect so this is very imprecise
+    # def getStepPacketStatistics(self):
 
-        """
-        #assert(1==2) #might be useful. who knows?
-        # legitimate_served = self.switches[0].legal_window
-        # legitimate_sent = self.switches[0].legal_window + self.switches[0].dropped_legal_window
-        # illegal_served = self.switches[0].illegal_window
-        # illegal_sent = self.switches[0].illegal_window + self.switches[0].dropped_illegal_window
+    #     assert(1==2) # update this to a bit by bit section
+    #     """
+    #     Experimental statistic. 
+    #     Calculate the load at the server. If it is above the capacity/steps we do a final throttle to get it down safely. 
+    #     Otherwise the % of legitimate packets taht should have arrived.
+    #     Do note there is an accumulative effect so this is very imprecise
+
+    #     """
+    #     #assert(1==2) #might be useful. who knows?
+    #     # legitimate_served = self.switches[0].legal_window
+    #     # legitimate_sent = self.switches[0].legal_window + self.switches[0].dropped_legal_window
+    #     # illegal_served = self.switches[0].illegal_window
+    #     # illegal_sent = self.switches[0].illegal_window + self.switches[0].dropped_illegal_window
         
-        legitimate_served = self.switches[0].get_legal_window()
-        legitimate_sent = legitimate_served + self.switches[0].get_legal_dropped_window()
-        illegal_served = self.switches[0].get_illegal_window()
-        illegal_sent = illegal_served + self.switches[0].get_illegal_dropped_window()
+    #     legitimate_served = self.switches[0].get_legal_window()
+    #     legitimate_sent = legitimate_served + self.switches[0].get_legal_dropped_window()
+    #     illegal_served = self.switches[0].get_illegal_window()
+    #     illegal_sent = illegal_served + self.switches[0].get_illegal_dropped_window()
 
-        server_load = legitimate_served + illegal_served
+    #     server_load = legitimate_served + illegal_served
 
-        if legitimate_served == 0 or legitimate_sent== 0:
-            legal_received_per = 0
-        elif server_load > self.upper_boundary:
-            overflowPer = self.upper_boundary/server_load
-            legitimate_served *= overflowPer
-            legal_received_per = legitimate_served/legitimate_sent
-        else:
-            legal_received_per = legitimate_served/legitimate_sent
+    #     if legitimate_served == 0 or legitimate_sent== 0:
+    #         legal_received_per = 0
+    #     elif server_load > self.upper_boundary_two:
+    #         overflowPer = self.upper_boundary_two/server_load
+    #         legitimate_served *= overflowPer
+    #         legal_received_per = legitimate_served/legitimate_sent
+    #     else:
+    #         legal_received_per = legitimate_served/legitimate_sent
 
-        return (KbToMb(legitimate_served), KbToMb(legitimate_sent), legal_received_per, KbToMb(illegal_served), KbToMb(illegal_sent))
+    #     return (KbToMb(legitimate_served), KbToMb(legitimate_sent), legal_received_per, KbToMb(illegal_served), KbToMb(illegal_sent))
 
     def getHostCapacity(self):
         # return the packet capacity for attacker and legal traffic
@@ -768,12 +766,51 @@ class network_full(object):
         return (legal_traffic, illegal_traffic, combined)
 
 
-    def getLegitStats(self):
+    def updateEpisodeStatistics(self, second):
+        # to avoid a tonne of calculations. We're going to calculate this every second
+        # note second is the second that has just passed
+
+        time_start = (second%2) * self.iterations_between_second
+        time_end = time_start + self.iterations_between_second
+
+        legal_arrived = sum(self.switches[0].legal_segment[time_start:time_end])
+        illegal_arrived = sum(self.switches[0].illegal_segment[time_start:time_end])
+        legal_dropped = sum(self.switches[0].dropped_legal_segment[time_start:time_end])
+        illegal_dropped = sum(self.switches[0].dropped_illegal_segment[time_start:time_end])
+        
+        # here we assume Malialis' evaluation technique
+        server_load = legal_arrived + legal_dropped
+        
+        legal_sent = (legal_arrived + legal_dropped)
+        illegal_sent = ((illegal_arrived + illegal_dropped))
+
+        if server_load > self.upper_bound:
+            ratio = self.server_capacity_by_step/server_load
+            legal_over = ratio*legal_arrived
+            illegal_over = ratio*illegal_arrived
+            legal_arrived -= legal_over
+            illegal_arrived -= illegal_over
+
+
+
+
+        self.legitimate_served_ep += legal_arrived
+        self.legitimate_sent_ep += legal_sent
+        self.illegal_served_ep += illegal_arrived
+        self.illegal_sent_ep += illegal_sent
+
+        per_served = legal_arrived / legal_sent
+        return (legal_arrived, legal_sent, per_served, illegal_arrived, illegal_sent)
+        # make sure not to update anything on the switch itself
+
+
+    def getEpisodeStatisitcs(self):
         # returns % of packets served in an episode
         # meant to be used at end of an epsisode
-        assert(1==2) # might be useful
+        
         if self.legitimate_sent_ep == 0:
             legal_per = 0
+            assert(1==2) # should never have sent 0
         else:
             legal_per = self.legitimate_served_ep / self.legitimate_sent_ep
         
@@ -781,7 +818,7 @@ class network_full(object):
         legit_sent_ep = KbToMb(self.legitimate_sent_ep)
         illegal_served_ep = KbToMb(self.illegal_served_ep)
         illegal_sent_ep =  KbToMb(self.illegal_sent_ep)
-        return (legit_serve_ep, legit_sent_ep, legal_per, self.server_failures, illegal_served_ep, illegal_sent_ep)
+        return (legit_serve_ep, legit_sent_ep, legal_per, illegal_served_ep, illegal_sent_ep)
     # def save_attacks(self):
     #     with open(self.load_attack_path, "wb") as f:
     #         print("saving the attack")

@@ -24,7 +24,7 @@ and shouldn't it be including both the last state and the prior state?
 2) Made SARSA decentralised
 3) Made ddqn decentralised
 4) Saved SARSA
-5) REMOVED D FROM ACTION LEARNING DDQN, NOT SURE IF THIS HAS GRAVE CONSEQUENCES
+5) REMOVED D fromOM ACTION LEARNING DDQN, NOT SURE IF THIS HAS GRAVE CONSEQUENCES
 6) Ensure the saving and reloading works properly for ALL agents
 7) Create script to capture reward per episode as we train
 8) Use script for testing purposes. Compare
@@ -194,7 +194,7 @@ class Experiment:
         #self.episode_rewards = []
         if self.opposition_settings.is_intelligent and self.opposition_settings.save_model_mode in self.agentSaveModes:
             adv_loss_lines.append("Episode,Loss,Exploration,EpDefLoss\n")
-        server_actions_line = "Episode,DefMoves,LegalReceived,LegalSent,LegalPercentage,IllegalServed,IllegalSent,TotalSent,LegalCap,IllegalCap,TotalCap,NumAdvesary"
+        server_actions_line = "Episode,Second,LegalReceived,LegalSent,LegalPercentage,IllegalServed,IllegalSent,TotalSent,LegalCap,IllegalCap,TotalCap,NumAdvesary"
 
 
         ep_init = 0
@@ -265,11 +265,11 @@ class Experiment:
                 
                 if self.network_settings.save_per_step_stats:
                     (legal_capacity, illegal_capacity, total_capacity) = net.getHostCapacity()
-
-                legit_served_ep = 0
-                legit_sent_ep = 0
-                illegal_served_ep = 0
-                illegal_sent_ep = 0
+                # Using the network for this
+                # legit_served_ep = 0
+                # legit_sent_ep = 0
+                # illegal_served_ep = 0
+                # illegal_sent_ep = 0
 
                 adv_next_state = None
                 adv_next_action = None
@@ -299,7 +299,7 @@ class Experiment:
 
                         
                             if self.opposition_settings.is_intelligent:
-                                adversary_reward = self.adversarialMaster.convert_reward(net.calculate_reward)
+                                adversary_reward = self.adversarialMaster.calculate_reward()
                                 advRAll += adversary_reward  
                                 if self.opposition_settings.save_model_mode in self.agentSaveModes:
                                     adversary_done = (adversary_move-1) == adversary_last_move
@@ -333,7 +333,7 @@ class Experiment:
                             def_next_action = agent.predict(def_next_state, e) # generate an action
                             num_defender_moves += 1
 
-                            defender_reward = net.calculate_reward()
+                            defender_reward = net.get_reward()
                             rAll += defender_reward
 
                             if self.defender_settings.save_model_mode in self.agentSaveModes:
@@ -354,37 +354,7 @@ class Experiment:
                                             ep_def_loss += abs(l)
 
 
-                            """
-                            This needs to change location or something
-
-                            """
-                            
-                            (legit_served, legit_sent, legal_per, illegal_served, illegal_sent) = net.getStepPacketStatistics()
-                            legit_served_ep += legit_served
-                            legit_sent_ep += legit_sent
-                            illegal_served_ep += illegal_served
-                            illegal_sent_ep += illegal_sent
-                            # if num_defender_moves > 1:
-                            #     total_sent = legit_sent+illegal_sent
-                            #     print("\nState was {0}".format(def_last_state))
-                            #     print("ep_num-move {0}-{1} | def_action {2} | adv_action {3} | per {4}".format(ep_num, num_defender_moves, def_current_action, adv_current_action, legal_per))
-                            #     print("ServerState is {0} | Overflow = {1}".format(total_sent, total_sent>16))
-                            if self.network_settings.save_per_step_stats and num_defender_moves > 1:
-                                total_sent = legit_sent+illegal_sent
-
-
-                                server_actions_line = "{0},{1},{2},{3},{4},{5},{6},{7},{8},{9},{10},{11}".format(ep_num, num_defender_moves, legit_served, legit_sent, legal_per, illegal_served, illegal_sent, total_sent, legal_capacity, illegal_capacity, total_capacity, self.opposition_settings.num_adv_agents)
-
-                                if isinstance(def_current_action, list):
-                                    for i in range(self.network_settings.N_state):
-                                        server_actions_line += ",{0}".format(def_current_action[i])
-                                else:
-                                    server_actions_line += ",{0}".format(def_current_action)
-                                for i in range(self.opposition_settings.num_adv_agents):
-                                    server_actions_line += ",{0}".format(adv_current_action[i])
-
-                                server_actions_line+= "\n"
-                                server_actions_lines.append(server_actions_line)                                
+                                
 
                             
                             
@@ -400,8 +370,33 @@ class Experiment:
                         adv_current_action = adv_next_action
 
                 
+                    """
+                    At the end of every second we record the percentage of traffic that was serviced by the server 
+
+                    """
+                    (legit_served, legit_sent, legal_per, illegal_served, illegal_sent) = net.updateEpisodeStatistics(second)
+                    adversarialMaster.update_reward(second, legit_served, legit_sent)
+                    # if num_defender_moves > 1:
+                    #     total_sent = legit_sent+illegal_sent
+                    #     print("\nState was {0}".format(def_last_state))
+                    #     print("ep_num-move {0}-{1} | def_action {2} | adv_action {3} | per {4}".format(ep_num, num_defender_moves, def_current_action, adv_current_action, legal_per))
+                    #     print("ServerState is {0} | Overflow = {1}".format(total_sent, total_sent>16))
+                    if self.network_settings.save_per_step_stats:
+                        total_sent = legit_sent+illegal_sent
 
 
+                        server_actions_line = "{0},{1},{2},{3},{4},{5},{6},{7},{8},{9},{10},{11}".format(ep_num, second, legit_served, legit_sent, legal_per, illegal_served, illegal_sent, total_sent, legal_capacity, illegal_capacity, total_capacity, self.opposition_settings.num_adv_agents)
+
+                        if isinstance(def_current_action, list):
+                            for i in range(self.network_settings.N_state):
+                                server_actions_line += ",{0}".format(def_current_action[i])
+                        else:
+                            server_actions_line += ",{0}".format(def_current_action)
+                        for i in range(self.opposition_settings.num_adv_agents):
+                            server_actions_line += ",{0}".format(adv_current_action[i])
+
+                        server_actions_line+= "\n"
+                        server_actions_lines.append(server_actions_line)
 
 
                 """
@@ -478,15 +473,8 @@ class Experiment:
                 
                 
 
-                    
-                    
-
-
-
-
-
                 #(legit_served, legit_sent, legal_per, illegal_served, illegal_sent) = net.getStepPacketStatistics()
-                legit_per = legit_served_ep / legit_sent_ep
+                (legit_served_ep, legit_sent_ep, legit_per, illegal_served_ep, illegal_sent_ep) = net.getEpisodeStatisitcs()
                 packet_served_lines.append("{0},{1},{2},{3},{4},{5}\n".format(ep_num, legit_served_ep, legit_sent_ep, legit_per, illegal_served_ep, illegal_sent_ep))
                 reward_lines.append("{0},{1},{2},{3},{4},{5},{6}\n".format(ep_num, rList[-1], defender_reward, second, e, advRList[-1], adversary_reward))
                 if len(loss) > 0:

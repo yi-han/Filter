@@ -174,15 +174,18 @@ class GenericAdvMaster():
         for i in range(len(self.adv_agents)):
             self.adv_agents[i].sendTraffic(actions[i], current_second)
 
-    def calc_reward(self, network_reward):
-        # convert the network reward to the adversarial reward
-        assert(network_reward<=1)
-        if network_reward<0:
-            return 1
-        else:
-            return 1-network_reward
+    def calc_reward(self):
+        # our reward should be the opposite of the packets served
+        per_served = sum(self.legit_served_hist)/sum(self.legit_sent_hist)
+        return 1 - per_served
 
-
+    def update_reward(second, legit_served, legit_sent):
+        """
+        We assume we're calculating every 1 second, but our reward is over 2 seconds
+        """
+        index = second % 2 
+        self.legit_served_hist[index] = legit_served
+        self.legit_sent_hist[index] = legit_sent
 
     def get_state(self, net, e, current_second):
         """ 
@@ -267,7 +270,8 @@ class GenericAdvMaster():
         # the normal version. This would be the closest mimic to the training.
         # Another idea is to use an alternate probablity distribution
         
-
+        self.legit_served_hist = [0]*2
+        self.legit_sent_hist = [0]*2
 
 
         self.step_count = 0
