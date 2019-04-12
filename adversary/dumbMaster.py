@@ -10,6 +10,7 @@ Comprised of many DDQN networks with one per adversarial agent
 
 from network.utility import advesaryStandardAttackEnum as advAttackEnum
 import random
+import adversary.genericMaster as genericMaster
 
 """
 Algorithms to determine attacks
@@ -43,7 +44,7 @@ def predict_gradual_attack(step, max_epLength):
     action = percentageAttack*10
     return action
 
-class dumbMaster():
+class dumbMaster(genericMaster.GenericAdvMaster):
 
     def __init__(self, adv_settings, episode_length):
         self.adv_settings = adv_settings
@@ -108,17 +109,8 @@ class dumbMaster():
         return [action1, action2]
 
 
-    def sendTraffic(self, actions):
-        #given the actioons send the traffic
-        for i in range(len(self.adv_agents)):
-            self.adv_agents[i].sendTraffic(actions[i])
 
-    def calc_reward(self, network_reward):
-        # convert the network reward to the adversarial reward
-        if network_reward<0:
-            return 1
-        else:
-            return 1-network_reward
+
 
 
 
@@ -134,7 +126,7 @@ class dumbMaster():
         # the normal version. This would be the closest mimic to the training.
         # Another idea is to use an alternate probablity distribution
         
-
+        super().initiate_episode()
         splitStrategies = [advAttackEnum.constant, advAttackEnum.pulse_short, advAttackEnum.pulse_large]
         # note we left out pulse medium
         random_strategies = [advAttackEnum.constant, advAttackEnum.constant, advAttackEnum.pulse_short, advAttackEnum.pulse_medium, advAttackEnum.pulse_large, advAttackEnum.gradual, advAttackEnum.gradual, advAttackEnum.split]

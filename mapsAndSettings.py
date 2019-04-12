@@ -127,7 +127,7 @@ class NetworkMalialisSmall(object):
     legal_probability = 0.6 # probability that is a good guys
     upper_boundary = 8
     lower_boundary = 6 # for AIMD
-    iterations_between_second = 100 # at 100 we are dealing wiht centiseconds
+    iterations_between_second = 10#100 # at 100 we are dealing wiht centiseconds
 
     max_hosts_per_level = [3] # no communication therefore just one
     bucket_capacity = 18.1#15#0.8
@@ -246,6 +246,7 @@ class DdGenericDec(object):
     action_per_agent = 11
     include_other_attackers = False
     include_encoder = False
+    actions_per_second = 0.5 # make an decision every 2 seconds
 
 class ddTest(DdGenericDec):
     name = "ddTest"
@@ -437,6 +438,7 @@ class sarGenericDec(object):
     action_per_agent = 11
     include_other_attackers = False    
     include_encoder = True
+    actions_per_second = 0.5 # make an decision every 2 seconds
 
 class sarGenericCen(sarGenericDec):
     name = "sarsaGenericCen"

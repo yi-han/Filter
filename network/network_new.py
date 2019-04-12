@@ -684,7 +684,6 @@ class network_full(object):
     def get_reward(self):
         #print('calc reward')
         if self.cache_reward != None:
-            print("saved some tiem")
             return self.cache_reward
 
         # currently if we're 1.1 times over we receive a punishment of -0.1, seems rather low. Maybe -1.5?        
@@ -700,7 +699,6 @@ class network_full(object):
 
         #print("server_load = {0} | upper_boundary = {1}".format(server_load, self.upper_boundary_two))
         if server_load > self.upper_boundary_two:
-
             if self.reward_overload:
                 reward = self.reward_overload
             else:
@@ -779,20 +777,24 @@ class network_full(object):
         illegal_dropped = sum(self.switches[0].dropped_illegal_segment[time_start:time_end])
         
         # here we assume Malialis' evaluation technique
-        server_load = legal_arrived + legal_dropped
+        server_load = legal_arrived + illegal_arrived
         
         legal_sent = (legal_arrived + legal_dropped)
         illegal_sent = ((illegal_arrived + illegal_dropped))
 
         if server_load > self.upper_bound:
-            ratio = self.server_capacity_by_step/server_load
-            legal_over = ratio*legal_arrived
-            illegal_over = ratio*illegal_arrived
-            legal_arrived -= legal_over
-            illegal_arrived -= illegal_over
+            # print(server_load)
+            ratio = self.upper_bound/server_load
 
-
-
+            legal_arrived *= ratio
+            illegal_arrived *= ratio
+            assert(abs(legal_arrived+illegal_arrived - self.upper_bound) < 0.1)
+        # else:
+        #     print("{0} < {1}".format(server_load, self.upper_bound))
+        #     print(len(self.switches[0].illegal_segment[time_start:time_end]))
+        #     print(len(self.switches[0].illegal_segment))
+        #     print(self.iterations_between_second)
+        #     print(self.getHostCapacity())
 
         self.legitimate_served_ep += legal_arrived
         self.legitimate_sent_ep += legal_sent

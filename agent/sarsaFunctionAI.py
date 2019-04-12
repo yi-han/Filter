@@ -184,6 +184,7 @@ class SarsaFunctionAI:
     def learn(self, state1, action1, reward, state2, action2):
         # we do the sarsa step and then feed it to a generalised td learner
         if self.discount_factor != 0:
+            print("thinking in the future")
             qnext = self.getQ(state2, action2)
         else:
             qnext = 0

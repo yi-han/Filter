@@ -194,7 +194,7 @@ class Experiment:
         #self.episode_rewards = []
         if self.opposition_settings.is_intelligent and self.opposition_settings.save_model_mode in self.agentSaveModes:
             adv_loss_lines.append("Episode,Loss,Exploration,EpDefLoss\n")
-        server_actions_line = "Episode,Second,LegalReceived,LegalSent,LegalPercentage,IllegalServed,IllegalSent,TotalSent,LegalCap,IllegalCap,TotalCap,NumAdvesary"
+        server_actions_line = "Episode,Second,LegalReceived,LegalSent,LegalPercentage,IllegalServed,IllegalSent,TotalServed,TotalSent,AssociatedReward,LegalCap,IllegalCap,TotalCap,NumAdvesary"
 
 
         ep_init = 0
@@ -221,7 +221,7 @@ class Experiment:
 
             #adv_past_action = None
             reward_per_print = 0
-
+            reward_print_count = 0
             
 
 
@@ -248,6 +248,7 @@ class Experiment:
             #assert(defender_move == 200 and adversary_move == 200) # we can get rid of this later
             adversary_reward = None
             print("\n\n Starting at episode {0}".format(ep_init))
+            print("num_episodes {0} episode length {1} iterations between each second {2}".format(num_episodes, ep_length, self.network_settings.iterations_between_second))
             for ep_num in range(ep_init, num_episodes):
                 # print(ep_num)
                 agent.reset_episode(net)
@@ -261,6 +262,7 @@ class Experiment:
                     self.adversarialMaster.initiate_episode()
 
                 rAll = 0 # accumulative reward for system in the episode. #TODO shouldn't contribute in pretraining
+                
                 advRAll = 0 # total reward for episode
                 
                 if self.network_settings.save_per_step_stats:
@@ -298,14 +300,14 @@ class Experiment:
                             
 
                         
-                            if self.opposition_settings.is_intelligent:
+                            if self.opposition_settings.is_intelligent and num_adversary_moves > 1:
                                 adversary_reward = self.adversarialMaster.calculate_reward()
                                 advRAll += adversary_reward  
                                 if self.opposition_settings.save_model_mode in self.agentSaveModes:
-                                    adversary_done = (adversary_move-1) == adversary_last_move
-                                    if num_adversary_moves > 1 and self.can_attack(second-1):
+                                    adversary_done = False
+                                    if self.can_attack(second-1):
                                         # if the adversary couldn't attack last turn we don't want to update
-                                        self.adversarialMaster.update(adv_past_state, adv_past_action, adv_next_state, d, adversary_reward, adv_next_action) # num_adversary_moves ?
+                                        self.adversarialMaster.update(adv_past_state, adv_past_action, adv_next_state, adversary_done, adversary_reward, adv_next_action) # num_adversary_moves ?
                                 
                                 
                                         if num_adversary_moves % self.opposition_settings.update_freq == 0:
@@ -332,16 +334,24 @@ class Experiment:
                             def_next_state = agent.get_state()
                             def_next_action = agent.predict(def_next_state, e) # generate an action
                             num_defender_moves += 1
+                            
+                            # print("made prediction {0}".format(def_next_action))
+                            if num_defender_moves > 1:
 
-                            defender_reward = net.get_reward()
-                            rAll += defender_reward
-
-                            if self.defender_settings.save_model_mode in self.agentSaveModes:
                                 """
                                 We assume this is only for training.
                                 We also assume that during training our reward is calculated over last 2 seconds
                                 """
-                                if num_defender_moves > 1:
+                                defender_reward = net.get_reward()
+
+                                # print("\nlast_state {0} last_prediction {1} current_action {2}".format(def_last_state, def_past_action, def_current_action))
+                                # print("New State {1} AssociatedReward {0} ".format(defender_reward, def_next_state))
+                                rAll += defender_reward
+                                reward_print_count += 1
+                                if self.defender_settings.save_model_mode in self.agentSaveModes:
+
+
+
                                     # print("p_state {0} p_action {1} reward {2} n_state {3} n_action {4}".format(def_last_state, def_past_action, defender_reward,def_next_state, def_next_action))
                                     agent_done = False
                                     agent.update(def_last_state, def_past_action, def_next_state, agent_done, defender_reward, def_next_action)
@@ -368,14 +378,15 @@ class Experiment:
                         net.simulate_traffic(def_next_action, adv_next_action, step)
                         def_current_action = def_next_action
                         adv_current_action = adv_next_action
-
+                        # print("simulated the move")
                 
                     """
                     At the end of every second we record the percentage of traffic that was serviced by the server 
 
                     """
+                    # print("testing actions {0}".format(def_current_action))
                     (legit_served, legit_sent, legal_per, illegal_served, illegal_sent) = net.updateEpisodeStatistics(second)
-                    adversarialMaster.update_reward(second, legit_served, legit_sent)
+                    self.adversarialMaster.update_reward(second, legit_served, legit_sent)
                     # if num_defender_moves > 1:
                     #     total_sent = legit_sent+illegal_sent
                     #     print("\nState was {0}".format(def_last_state))
@@ -384,8 +395,9 @@ class Experiment:
                     if self.network_settings.save_per_step_stats:
                         total_sent = legit_sent+illegal_sent
 
-
-                        server_actions_line = "{0},{1},{2},{3},{4},{5},{6},{7},{8},{9},{10},{11}".format(ep_num, second, legit_served, legit_sent, legal_per, illegal_served, illegal_sent, total_sent, legal_capacity, illegal_capacity, total_capacity, self.opposition_settings.num_adv_agents)
+                        total_served = legit_served+illegal_served
+                        reward_window = net.get_reward()
+                        server_actions_line = "{0},{1},{2},{3},{4},{5},{6},{7},{8},{9},{10},{11},{12},{13}".format(ep_num, second, legit_served, legit_sent, legal_per, illegal_served, illegal_sent, total_served, total_sent, reward_window,legal_capacity, illegal_capacity, total_capacity, self.opposition_settings.num_adv_agents)
 
                         if isinstance(def_current_action, list):
                             for i in range(self.network_settings.N_state):
@@ -419,9 +431,10 @@ class Experiment:
 
                 if ep_num % 1000 == 0:
                     print("\n\nCompleted Episode - {0}".format(ep_num))
-                    print("average reward = {0}".format(reward_per_print/1000/ep_length*100))
+                    print("average reward = {0}".format((reward_per_print/reward_print_count)*100))
                     #print("average Per = {0}".format(t_packet_received/t_packet_sent))
                     reward_per_print = 0
+                    reward_print_count = 0
                     #t_packet_received = 0
                     #t_packet_sent = 0
                     print("def | step {0} | action {1} | reward {2} | e {3}".format(step-1, def_past_action, defender_reward, e))

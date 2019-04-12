@@ -129,16 +129,10 @@ class LinTest(object):
 
 
 # The class of the adversary to implement
-# conAttack = hostClass.ConstantAttack
-# shortPulse = hostClass.ShortPulse
-# mediumPulse = hostClass.MediumPulse
-# largePulse = hostClass.LargePulse
-# gradualIncrease = hostClass.GradualIncrease
-# coordAttack = hostClass.CoordinatedRandom
+conAttack = hostClass.ConstantAttack
+
 adversarialLeaf = hostClass.adversarialLeaf
 
-# attackClasses = [conAttack, shortPulse, mediumPulse,
-#     largePulse, gradualIncrease] 
 
 """
 Settings to change

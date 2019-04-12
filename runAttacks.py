@@ -22,7 +22,7 @@ adversarialLeaf = hostClass.adversarialLeaf
 attackers = [mapsAndSettings.adv_constant, mapsAndSettings.adv_pulse_short, mapsAndSettings.adv_pulse_medium, mapsAndSettings.adv_pulse_large,
     mapsAndSettings.adv_gradual, mapsAndSettings.adv_split] 
 
-DEFAULT_NUMBER_ATTACKS = 200
+DEFAULT_NUMBER_ATTACKS = 100 # 100
 
 # class GeneralSettingsObject(object):
 #     # SaveAttackEnum = Enum('SaveAttack', 'neither save load')
@@ -49,14 +49,15 @@ def run_attacks(assignedNetwork, assignedAgent, file_path, smart_attacker, prefi
     original_iterations = assignedNetwork.iterations_between_second
 
     attack_location = load_attack_path+"onePerAttack.apkl"
-    print(attack_location)
+    # print(attack_location)
     
     attackClass = adversarialLeaf
     assignedNetwork.save_per_step_stats = True
 
 
     for attacker in attackers:
-
+        # if attacker != mapsAndSettings.adv_pulse_short:
+        #     continue
         assignedNetwork.iterations_between_second = custom_iterations_between_second
         print(attacker.name)
         print("\n\n\n")
