@@ -14,8 +14,8 @@ import numpy as np
 import copy 
 import agent.tileCoding as tileCoding
 from network.utility import *
-
-class GenericAdvMaster():
+import adversary.genericMaster as genericMaster
+class GenericAdvMaster(genericMaster.GenericAdvMaster):
 
     def __init__(self, adv_settings, network_setting, defender_path, defender):
 
@@ -145,7 +145,7 @@ class GenericAdvMaster():
         for agent in self.adv_agents:
             agent.__exit__(type, value, tb)
 
-    def predict(self, state, e, current_second):
+    def predict(self, state, e, step, can_attack):
         """
             only provide each agent with its corresponding state
             instead of combining the actions into a single action 
@@ -154,6 +154,7 @@ class GenericAdvMaster():
             Here we just calculate the % of traffic from capacity each agent produces
 
         """
+
         if self.adv_settings.include_other_attackers:
             # we've already calculated the moves in this case
             return state[-1]
@@ -163,28 +164,15 @@ class GenericAdvMaster():
         # print("\n\npredictions")
         for i in range(len(self.adv_agents)):
 
-            agentAction = self.adv_agents[i].predict(state, e, current_second)
+            agentAction = self.adv_agents[i].predict(state, e, can_attack)
             actions.append(agentAction)
 
 
         return actions
 
-    def sendTraffic(self, actions, current_second):
-        #given the actioons send the traffic
-        for i in range(len(self.adv_agents)):
-            self.adv_agents[i].sendTraffic(actions[i], current_second)
-
-    def calc_reward(self, network_reward):
-        # convert the network reward to the adversarial reward
-        assert(network_reward<=1)
-        if network_reward<0:
-            return 1
-        else:
-            return 1-network_reward
 
 
-
-    def get_state(self, net, e, current_second):
+    def get_state(self, net, e, can_attack):
         """ 
         Provide the ill_bandwidth capacity for each agent,
         and ill_bandwidth emmitted by each agent over last 3 steps
@@ -217,12 +205,12 @@ class GenericAdvMaster():
 
         # sort of a hack. Do the prediction here as the move is done simultaneously 
         if self.adv_settings.include_other_attackers:
-
+            assert(1==2)
             combined_state = []
             associated_actions = []
             for i in range(len(self.adv_agents)):
                 combined_state.append(copy.deepcopy(state))
-                associated_action = self.adv_agents[i].predict(state, e, current_second)
+                associated_action = self.adv_agents[i].predict(state, e, can_attack)
                 state.append(associated_action)
                 associated_actions.append(associated_action)
             # record the actions in the state variable
@@ -269,6 +257,7 @@ class GenericAdvMaster():
         
 
 
+        super().initiate_episode()
 
         self.step_count = 0
         self.prior_actions = []
@@ -293,12 +282,8 @@ class GenericAdvMaster():
         self.prior_actions.pop(0)
         self.prior_actions.append(actions)
 
-    def update(self, last_state, last_actions, current_state, is_done, reward, step, next_actions):
-        assert(1==2) # i think we have step and current second.
-        # provide the update function to each individual state
-        # reward = self.calc_reward(network_reward)
-        if step < ATTACK_START:
-            return # we don't want to update when we are manually doing action 0
+    def update(self, last_state, last_actions, current_state, is_done, reward, next_actions):
+
         for i in range(len(self.adv_agents)):
             agent = self.adv_agents[i]
             last_action = last_actions[i]
@@ -306,7 +291,7 @@ class GenericAdvMaster():
             t_last_state = self.extract_state(last_state, i)
             t_current_state = self.extract_state(current_state, i)
 
-            agent.update(t_last_state, last_action, t_current_state, is_done, reward, step, next_action)
+            agent.update(t_last_state, last_action, t_current_state, is_done, reward, next_action)
         
 
         # self.update_past_state(last_actions)

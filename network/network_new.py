@@ -667,7 +667,6 @@ class network_full(object):
     def calculate_reward(self):
         #print('calc reward')
         if self.cache_reward != None:
-            print("saved some tiem")
             return self.cache_reward
 
         # currently if we're 1.1 times over we receive a punishment of -0.1, seems rather low. Maybe -1.5?        
@@ -679,8 +678,9 @@ class network_full(object):
         server_load = self.switches[0].get_load()
         #assert((legitimate_served+attacker_served)==self.switches[0].getWindow())
 
-        if server_load > self.upper_boundary:
 
+        #print("server_load = {0} | upper_boundary = {1}".format(server_load, self.upper_boundary_two))
+        if server_load > self.upper_boundary_two:
             if self.reward_overload:
                 reward = self.reward_overload
             else:
@@ -739,7 +739,50 @@ class network_full(object):
         return (legal_traffic, illegal_traffic, combined)
 
 
-    def getLegitStats(self):
+
+    def updateEpisodeStatistics(self, second):
+        # to avoid a tonne of calculations. We're going to calculate this every second
+        # note second is the second that has just passed
+
+        time_start = (second%2) * self.iterations_between_second
+        time_end = time_start + self.iterations_between_second
+
+        legal_arrived = sum(self.switches[0].legal_segment[time_start:time_end])
+        illegal_arrived = sum(self.switches[0].illegal_segment[time_start:time_end])
+        legal_dropped = sum(self.switches[0].dropped_legal_segment[time_start:time_end])
+        illegal_dropped = sum(self.switches[0].dropped_illegal_segment[time_start:time_end])
+        
+        # here we assume Malialis' evaluation technique
+        server_load = legal_arrived + illegal_arrived
+        
+        legal_sent = (legal_arrived + legal_dropped)
+        illegal_sent = ((illegal_arrived + illegal_dropped))
+
+        if server_load > self.upper_bound:
+            # print(server_load)
+            ratio = self.upper_bound/server_load
+
+            legal_arrived *= ratio
+            illegal_arrived *= ratio
+            assert(abs(legal_arrived+illegal_arrived - self.upper_bound) < 0.1)
+        # else:
+        #     print("{0} < {1}".format(server_load, self.upper_bound))
+        #     print(len(self.switches[0].illegal_segment[time_start:time_end]))
+        #     print(len(self.switches[0].illegal_segment))
+        #     print(self.iterations_between_second)
+        #     print(self.getHostCapacity())
+
+        self.legitimate_served_ep += legal_arrived
+        self.legitimate_sent_ep += legal_sent
+        self.illegal_served_ep += illegal_arrived
+        self.illegal_sent_ep += illegal_sent
+
+        per_served = legal_arrived / legal_sent
+        return (legal_arrived, legal_sent, per_served, illegal_arrived, illegal_sent)
+        # make sure not to update anything on the switch itself
+
+
+    def getEpisodeStatisitcs(self):
         # returns % of packets served in an episode
         # meant to be used at end of an epsisode
         assert(1==2) # might be useful
