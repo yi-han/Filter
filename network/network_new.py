@@ -569,7 +569,7 @@ class network_full(object):
             if np.random.rand() >= self.legal_probability:
                 attackers.append(i)
         
-        if len(attackers) == 0 or len(attackers) == self.N_host:
+        if len(attackers) == 0 or len(attackers) >= (self.N_host-1):
             # requirements not satisfied
             return self.generate_attackers()
 
@@ -584,7 +584,7 @@ class network_full(object):
             max_bandwidth = 0 # maximum bandwidth that can be generated per turn
             for i in attackers:
                 max_bandwidth += self.hosts[i].traffic_rate
-            if max_bandwidth < self.upper_boundary_two:
+            if max_bandwidth < 1.2*self.upper_boundary:
                 return self.generate_attackers()
      
     def record_attackers(self):
