@@ -715,39 +715,6 @@ class network_full(object):
         self.cache_reward = reward
         return reward
 
-    # def getStepPacketStatistics(self):
-
-    #     assert(1==2) # update this to a bit by bit section
-    #     """
-    #     Experimental statistic. 
-    #     Calculate the load at the server. If it is above the capacity/steps we do a final throttle to get it down safely. 
-    #     Otherwise the % of legitimate packets taht should have arrived.
-    #     Do note there is an accumulative effect so this is very imprecise
-
-    #     """
-    #     #assert(1==2) #might be useful. who knows?
-    #     # legitimate_served = self.switches[0].legal_window
-    #     # legitimate_sent = self.switches[0].legal_window + self.switches[0].dropped_legal_window
-    #     # illegal_served = self.switches[0].illegal_window
-    #     # illegal_sent = self.switches[0].illegal_window + self.switches[0].dropped_illegal_window
-        
-    #     legitimate_served = self.switches[0].get_legal_window()
-    #     legitimate_sent = legitimate_served + self.switches[0].get_legal_dropped_window()
-    #     illegal_served = self.switches[0].get_illegal_window()
-    #     illegal_sent = illegal_served + self.switches[0].get_illegal_dropped_window()
-
-    #     server_load = legitimate_served + illegal_served
-
-    #     if legitimate_served == 0 or legitimate_sent== 0:
-    #         legal_received_per = 0
-    #     elif server_load > self.upper_boundary_two:
-    #         overflowPer = self.upper_boundary_two/server_load
-    #         legitimate_served *= overflowPer
-    #         legal_received_per = legitimate_served/legitimate_sent
-    #     else:
-    #         legal_received_per = legitimate_served/legitimate_sent
-
-    #     return (KbToMb(legitimate_served), KbToMb(legitimate_sent), legal_received_per, KbToMb(illegal_served), KbToMb(illegal_sent))
 
     def getHostCapacity(self):
         # return the packet capacity for attacker and legal traffic
@@ -783,12 +750,17 @@ class network_full(object):
         illegal_sent = ((illegal_arrived + illegal_dropped))
 
         if server_load > self.upper_bound:
-            # print(server_load)
-            ratio = self.upper_bound/server_load
+            if self.network_settings.functionPastCapacity == True:
 
-            legal_arrived *= ratio
-            illegal_arrived *= ratio
-            assert(abs(legal_arrived+illegal_arrived - self.upper_bound) < 0.1)
+                # print(server_load)
+                ratio = self.upper_bound/server_load
+
+                legal_arrived *= ratio
+                illegal_arrived *= ratio
+                assert(abs(legal_arrived+illegal_arrived - self.upper_bound) < 0.1)
+            else:
+                legal_arrived = 0
+                illegal_arrived = 0
         # else:
         #     print("{0} < {1}".format(server_load, self.upper_bound))
         #     print(len(self.switches[0].illegal_segment[time_start:time_end]))

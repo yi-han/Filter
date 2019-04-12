@@ -38,6 +38,10 @@ class LinSingularExploration(LinearSarsaSingular):
     name = "linSingExp"
     endE = 0.1
 
+class LinearSliding(LinearSarsaSingular):
+    name = "SlidingMal"
+    actions_per_second = 2
+    # num_episodes = 200000
 
 class LinearSarsaSingularDDQNCopy(object):
     # copy from ddqnSingleNoCommunicate
@@ -142,8 +146,12 @@ assignedNetwork = NetworkMalialisSmall
 assignedAgent = LinearSarsaSingular
 load_attack_path = "attackSimulations/{0}/".format(assignedNetwork.name)
 network_emulator = network.network_new.network_full # network_quick # network_full
-loadAttacks = False
+loadAttacks = True
 
+
+
+# print("\n\nSETTING TO JEREMY MODE\n\n\n")
+# assignedNetwork.functionPastCapacity = False
 
 
 assignedAgent.save_model_mode = defender_mode_enum.save

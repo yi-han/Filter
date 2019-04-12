@@ -221,8 +221,8 @@ class SarsaFunctionAI:
             print("actions {0} | {1}".format(dataDict['actions'], self.actions))
             print("n_features {0} | {1}".format(dataDict['n_features'], self.n_features))
             raise ValueError('Experiments parameters do not match saved file')
-        if dataDict['name'] != self.agent_settings.name \
-        or dataDict['num_episodes'] != self.agent_settings.num_episodes \
+        # if dataDict['name'] != self.agent_settings.name \
+        if dataDict['num_episodes'] != self.agent_settings.num_episodes \
         or dataDict['startE'] != self.agent_settings.startE \
         or dataDict['reward_overload'] != self.agent_settings.reward_overload \
         or dataDict['pre_train_episodes'] != self.agent_settings.pre_train_episodes \

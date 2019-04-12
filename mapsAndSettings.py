@@ -127,7 +127,7 @@ class NetworkMalialisSmall(object):
     legal_probability = 0.6 # probability that is a good guys
     upper_boundary = 8
     lower_boundary = 6 # for AIMD
-    iterations_between_second = 10#100 # at 100 we are dealing wiht centiseconds
+    iterations_between_second = 100#100 # at 100 we are dealing wiht centiseconds
 
     max_hosts_per_level = [3] # no communication therefore just one
     bucket_capacity = 18.1#15#0.8
@@ -135,6 +135,7 @@ class NetworkMalialisSmall(object):
     ep_length = 60 # Training is an episode of 60 seconds
     is_sig_attack = False
     save_per_step_stats = False
+    functionPastCapacity = True # make it Malialis mode
 
 class NetworkSingleTeamMalialisMedium(object):
     name = "single_team_malialis_medium"
@@ -164,7 +165,7 @@ class NetworkSingleTeamMalialisMedium(object):
 
     is_sig_attack = False
     save_per_step_stats = False
-
+    functionPastCapacity = True # make it Malialis mode
 
 class NetworkSixFour(NetworkSingleTeamMalialisMedium):
     # 4 attackers per throttler.

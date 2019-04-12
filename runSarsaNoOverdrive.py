@@ -129,26 +129,20 @@ class LinTest(object):
 
 
 # The class of the adversary to implement
-# conAttack = hostClass.ConstantAttack
-# shortPulse = hostClass.ShortPulse
-# mediumPulse = hostClass.MediumPulse
-# largePulse = hostClass.LargePulse
-# gradualIncrease = hostClass.GradualIncrease
-# coordAttack = hostClass.CoordinatedRandom
+conAttack = hostClass.ConstantAttack
+
 adversarialLeaf = hostClass.adversarialLeaf
 
-# attackClasses = [conAttack, shortPulse, mediumPulse,
-#     largePulse, gradualIncrease] 
 
 """
 Settings to change
 """
 
-assignedNetwork = NetworkMalialisSmall
+assignedNetwork = NetworkSingleTeamMalialisMedium
 assignedAgent = LinearSarsaSingularDDQNCopy
 load_attack_path = "attackSimulations/{0}/".format(assignedNetwork.name)
 network_emulator = network.network_new.network_full # network_quick # network_full
-loadAttacks = False
+loadAttacks = True
 
 
 
