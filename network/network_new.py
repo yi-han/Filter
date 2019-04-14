@@ -288,16 +288,18 @@ class Switch():
         self.legal_dropped_window_cache = None
         self.illegal_dropped_window_cache = None
     def setThrottle(self, throttle_rate):
-
+        # print(self.next_throttle)
+        # print("next one is {0} at delay {1} move {2}".format(self.next_throttle, self.delay, self.iterations_since_throttle))
         if not (self.is_filter and (self.next_throttle == None or throttle_rate==self.next_throttle)):
             print(self.is_filter)
             print(self.next_throttle)
             print(throttle_rate)
+            print(self.delay)
             print(self.throttle_rate)
             assert(1==2)
-        if throttle_rate == self.throttle_rate:
+        if throttle_rate == self.next_throttle or throttle_rate==self.throttle_rate:
             # if it's the same don't do anything
-            self.next_throttle = None
+            #self.next_throttle = None
             return
         else:
             self.next_throttle = throttle_rate
@@ -584,7 +586,7 @@ class network_full(object):
             max_bandwidth = 0 # maximum bandwidth that can be generated per turn
             for i in attackers:
                 max_bandwidth += self.hosts[i].traffic_rate
-            if max_bandwidth < 1.2*self.upper_boundary:
+            if max_bandwidth < 1.2*self.upper_bound:
                 return self.generate_attackers()
      
     def record_attackers(self):

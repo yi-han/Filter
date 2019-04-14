@@ -34,37 +34,11 @@ class ddqnSingleNoCommunicate(object):
     stateRepresentation = stateRepresentationEnum.throttler
     reward_overload = None
     has_bucket = False
+    actions_per_second = 0.5 # make an decision every 2 seconds
 
 class ddqnSingleMemory(ddqnSingleNoCommunicate):
     name = "ddqnSingleMemory"
     history_size = 5
-
-class ddqnMalialisTrue(object):
-    """
-    Looked through results and this has clearly not converged. We are getting 
-    variations of up to 10% on constant traffic
-
-    """
-    name = "DDQNDecGenMalialisTrue"
-    discount_factor = 0
-    tau = 0.1
-    update_freq = 4
-    batch_size = 32
-    num_episodes = 200001#82501
-    pre_train_episodes = 2000 
-    annealing_episodes = 50000  #1000*max_epLength #60000  
-    startE = 0.4 #0.4
-    endE = 0.0
-    history_size = 1 # number of past iterations to look at
-    agent = None
-    sub_agent = ddCen.Agent
-    group_size = 1 # number of filters each agent controls
-    # stateletFunction = getStateletNoCommunication
-    isCommunication = False
-    reward_overload = -1
-    stateRepresentation = stateRepresentationEnum.throttler
-    has_bucket = False
-
 
 
 class ddqn100MediumHierarchical(object):
@@ -86,6 +60,9 @@ class ddqn100MediumHierarchical(object):
     reward_overload = None   
     has_bucket = False
 
+    actions_per_second = 0.5 # make an decision every 2 seconds
+
+
 class ddqnHierMemory(ddqn100MediumHierarchical):
     name = "ddqnHierMemory"
     history_size = 5
@@ -106,35 +83,26 @@ class ddTest(ddqnHierMemory):
     annealing_episodes = 4
 # The class of the adversary to implement
 conAttack = hostClass.ConstantAttack
-shortPulse = hostClass.ShortPulse
-mediumPulse = hostClass.MediumPulse
-largePulse = hostClass.LargePulse
-gradualIncrease = hostClass.GradualIncrease
-# driftAttack = hostClass.DriftAttack
-coordAttack = hostClass.CoordinatedRandom
+
 adversarialLeaf = hostClass.adversarialLeaf
 
 
-
-attackClasses = [conAttack, shortPulse, mediumPulse,
-    largePulse, gradualIncrease] 
-
 ###
 # Settings NetworkMalialisSmall
-assignedNetwork =   NetworkSixFour
-assignedAgent =  ddqnSingleMemory #ddqnSingleNoCommunicate #ddqn100MediumHierarchical
+assignedNetwork =   NetworkSixHard
+assignedAgent =  ddqn100MediumHierarchical #ddqnSingleNoCommunicate #ddqn100MediumHierarchical
 load_attack_path = "attackSimulations/{0}/".format(assignedNetwork.name)
 loadAttacks = False
 assignedAgent.encoders = None
 
-assignedAgent.save_model_mode = defender_mode_enum.load_save
+assignedAgent.save_model_mode = defender_mode_enum.save
 trainHost = adversarialLeaf #coordAttack # conAttack #driftAttack #adversarialLeaf
 assignedNetwork.drift = 0
 
 opposition = adv_constant #adv_random #adv_constant
 intelligentOpposition = DdGenericSplit #ddAdvAntiAimd #DdCoordinatedLowlongDlowSettings #DdCoordinatedMasterSettings #DdRandomMasterSettings
 intelligentOpposition.save_model_mode = defender_mode_enum.save
-# intelligentOpposition = None
+intelligentOpposition = None
 
 
 assert(trainHost==adversarialLeaf)

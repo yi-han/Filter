@@ -177,6 +177,13 @@ class NetworkSixFour(NetworkSingleTeamMalialisMedium):
     max_hosts_per_level = [4, 12, 24]
     bucket_capacity = 24.1
 
+class NetworkSixHard(NetworkSixFour):
+    # We've doubled the attacker strength
+    name = "six_hard"
+    rate_attack_low = 5
+    rate_attack_high = 12
+    bucket_capacity = 48.1
+
 class NetTest(NetworkSingleTeamMalialisMedium):
     iterations_between_action = 2
     

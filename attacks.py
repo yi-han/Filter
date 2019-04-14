@@ -29,7 +29,7 @@ def generateAttacks(networkSettings, attackClasses, max_epLength = -1, num_episo
         os.makedirs(path)
     # for attackClass in attackClasses:
         # print(attackClass)
-    attack_path = path+"onePerAttack.apkl"
+    attack_path = path+"OneAndAQuarterAttack.apkl"
     # just do it once 
     with open(attack_path, "wb") as f:
         
@@ -51,7 +51,8 @@ adversarialLeaf = hostClass.adversarialLeaf
 
 attackClasses = [conAttack] 
 
-commonMaps = [NetworkMalialisSmall, NetworkSingleTeamMalialisMedium, NetworkSixFour, NetworkMalialisTeamFull]
+commonMaps = [NetworkMalialisSmall, NetworkSingleTeamMalialisMedium, NetworkSixFour, NetworkMalialisTeamFull, NetworkSixHard]
+# commonMaps = [NetworkSixHard]
 for common_map in commonMaps:
     common_map.drift = 0
     print(common_map)

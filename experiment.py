@@ -62,6 +62,14 @@ def calculate_e(current_episode, pretraining_episodes, startE, endE, annealing_e
         e = endE + ((startE - endE)*percentRemaining)
         return e
 
+class attack_delay_mode(Enum):
+    no_delay = 0 # used for training defender
+    delay_start = 1 # used for training adversary
+    delay_both_sides = 2 # used for evaluation
+
+    
+
+
 class Experiment:
 
     def __init__(self, adversary_class, NetworkClass, AgentSettings, oppositionSettings, load_attack_path= None):
@@ -374,7 +382,7 @@ class Experiment:
 
 
                         # network makes moves
-                        #print("step {0} defender {1} adversary {2}".format(step, def_next_action, adv_next_action))
+                        # print("step {0} defender {1} adversary {2}".format(step, def_next_action, adv_next_action))
                         net.simulate_traffic(def_next_action, adv_next_action, step)
                         def_current_action = def_next_action
                         adv_current_action = adv_next_action
@@ -540,7 +548,9 @@ class Experiment:
         print("{0} is:".format(self.defender_settings.name))
 
 
+
     def can_attack(self, current_second):
+
         if self.delay_attacks:
             if current_second<utility.ATTACK_START:
                 return False
@@ -551,8 +561,12 @@ class Experiment:
 
 
 
+# def can_attack(self, current_second):
+#     if self.delay_attacks in [attack_delay_mode.delay_start, delay_both_sides] and current_second<utility.ATTACK_START:
+#         return False
+#     elif self.delay_attacks == attack_delay_mode.delay_both_sides and current_second >
 
-
+    
 
  
 

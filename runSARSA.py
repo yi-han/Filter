@@ -33,7 +33,7 @@ class LinearSarsaSingular(object):
     stateRepresentation = stateRepresentationEnum.throttler  
     has_bucket = False
     actions_per_second = 0.5 # make an decision every 2 seconds
-
+    
 class LinSingularExploration(LinearSarsaSingular):
     name = "linSingExp"
     endE = 0.1
@@ -104,6 +104,7 @@ class LinearSarsaLAIDDQN350(LinearSarsaLAI):
     endE = 0.0
     episodeDrop = (startE - endE)/annealing_episodes
     reward_overload = None  
+    actions_per_second = 0.5
 
 class LinHierMemory(LinearSarsaLAIDDQN350):
     name = "LinHierMemory"
@@ -130,7 +131,7 @@ class LinTest(object):
     reward_overload = -1
     stateRepresentation = stateRepresentationEnum.throttler  
     has_bucket = False
-
+    actions_per_second = 0.5
 
 # The class of the adversary to implement
 conAttack = hostClass.ConstantAttack
@@ -146,7 +147,7 @@ assignedNetwork = NetworkMalialisSmall
 assignedAgent = LinearSarsaSingular
 load_attack_path = "attackSimulations/{0}/".format(assignedNetwork.name)
 network_emulator = network.network_new.network_full # network_quick # network_full
-loadAttacks = True
+loadAttacks = False
 
 
 
@@ -154,14 +155,14 @@ loadAttacks = True
 # assignedNetwork.functionPastCapacity = False
 
 
-assignedAgent.save_model_mode = defender_mode_enum.save
+assignedAgent.save_model_mode = defender_mode_enum.load
 trainHost = adversarialLeaf #coordAttack # conAttack #driftAttack #adversarialLeaf
 assignedNetwork.drift = 0
 
 opposition = adv_constant #adv_random # adv_constant
 intelligentOpposition =  DdGenericSplit #
 intelligentOpposition.save_model_mode = defender_mode_enum.save
-intelligentOpposition = None
+# intelligentOpposition = None
 
 
 assert(trainHost==adversarialLeaf)
