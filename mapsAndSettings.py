@@ -277,6 +277,14 @@ class DdGenericSplit(DdGenericDec):
     include_other_attackers = False
     num_episodes = 600000
 
+class DdGenericSplitShort(DdGenericSplit):
+    name = "ddGenSplitShort"
+    num_adv_agents = 2
+    include_other_attackers = False
+    pre_train_episodes = 50000
+    annealing_episodes = 150000
+    num_episodes = 400000
+    
 class ddExpThree(DdGenericDec):
     name = "ddExpThree"
     num_adv_agents = 2

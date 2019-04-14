@@ -255,6 +255,10 @@ class Experiment:
             
             #assert(defender_move == 200 and adversary_move == 200) # we can get rid of this later
             adversary_reward = None
+
+            adv_print_reward = 0
+            adv_print_count = 0
+
             print("\n\n Starting at episode {0}".format(ep_init))
             print("num_episodes {0} episode length {1} iterations between each second {2}".format(num_episodes, ep_length, self.network_settings.iterations_between_second))
             for ep_num in range(ep_init, num_episodes):
@@ -305,26 +309,26 @@ class Experiment:
                             adv_next_state = self.adversarialMaster.get_state(net, adv_e, adv_step)
                             adv_next_action = self.adversarialMaster.predict(adv_next_state, adv_e, adv_step, self.can_attack(second))
                             num_adversary_moves += 1
-                            
 
-                        
-                            if self.opposition_settings.is_intelligent and num_adversary_moves > 1:
-                                adversary_reward = self.adversarialMaster.calculate_reward()
-                                advRAll += adversary_reward  
-                                if self.opposition_settings.save_model_mode in self.agentSaveModes:
-                                    adversary_done = False
-                                    if self.can_attack(second-1):
-                                        # if the adversary couldn't attack last turn we don't want to update
-                                        self.adversarialMaster.update(adv_past_state, adv_past_action, adv_next_state, adversary_done, adversary_reward, adv_next_action) # num_adversary_moves ?
-                                
-                                
-                                        if num_adversary_moves % self.opposition_settings.update_freq == 0:
-                                            adv_l = self.adversarialMaster.actionReplay(adv_next_state, self.opposition_settings.batch_size)
-                                            adv_loss.append(adv_l)
-                                            ep_adv_loss += abs(adv_l)
+                            if num_adversary_moves > 1:
+                                adv_print_count += 1
+                                if self.opposition_settings.is_intelligent: 
+                                    adversary_reward = self.adversarialMaster.calculate_reward()
+                                    advRAll += adversary_reward  
+                                    if self.opposition_settings.save_model_mode in self.agentSaveModes:
+                                        adversary_done = False
+                                        if self.can_attack(second-1):
+                                            # if the adversary couldn't attack last turn we don't want to update
+                                            self.adversarialMaster.update(adv_past_state, adv_past_action, adv_next_state, adversary_done, adversary_reward, adv_next_action) # num_adversary_moves ?
+                                    
+                                    
+                                            if num_adversary_moves % self.opposition_settings.update_freq == 0:
+                                                adv_l = self.adversarialMaster.actionReplay(adv_next_state, self.opposition_settings.batch_size)
+                                                adv_loss.append(adv_l)
+                                                ep_adv_loss += abs(adv_l)
 
 
-                                self.adversarialMaster.update_past_state(adv_next_action)
+                                    self.adversarialMaster.update_past_state(adv_next_action)
 
 
 
@@ -436,13 +440,18 @@ class Experiment:
                 rList.append(rAll)
                 advRList.append(advRAll)
                 reward_per_print += rAll
+                adv_print_reward += advRAll
 
                 if ep_num % 1000 == 0:
                     print("\n\nCompleted Episode - {0}".format(ep_num))
                     print("average reward = {0}".format((reward_per_print/reward_print_count)*100))
+                    print("adversary reward = {0}".format((adv_print_reward/adv_print_count)*100))
                     #print("average Per = {0}".format(t_packet_received/t_packet_sent))
                     reward_per_print = 0
                     reward_print_count = 0
+
+                    adv_print_reward = 0
+                    adv_print_count = 0
                     #t_packet_received = 0
                     #t_packet_sent = 0
                     print("def | step {0} | action {1} | reward {2} | e {3}".format(step-1, def_past_action, defender_reward, e))
