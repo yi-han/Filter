@@ -28,8 +28,10 @@ class GenericAdvMaster(genericMaster.GenericAdvMaster):
             self.num_adv_agents = -1 * self.num_adv_agents
             self.num_adv_agents = math.ceil(self.num_agents / self.num_adv_agents)        
 
-
-        self.prior_agent_actions = adv_settings.prior_agent_actions # number of actions by the defender we use in state
+        print("looking for last {0} seconds and {1} actions".format(adv_settings.prior_agent_seconds, adv_settings.prior_agent_seconds * defender.agent_settings.actions_per_second))
+        assert(adv_settings.prior_agent_seconds % defender.agent_settings.actions_per_second == 0)
+        self.prior_agent_actions = int(adv_settings.prior_agent_seconds * defender.agent_settings.actions_per_second) # number of actions by the defender we use in state
+        
         self.prior_adversary_actions = adv_settings.prior_adversary_actions # number of actions by advesary we use in state
         
         N_adv_state = defender.num_predictions*self.prior_agent_actions + (self.num_adv_agents * 1) + (self.num_adv_agents * self.prior_adversary_actions)# plus one due to bandwiths

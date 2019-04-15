@@ -31,6 +31,7 @@ class AIMDagent():
         self.seconds_per_window = 2 ### UPDATE: probably shouldn't assume
         self.iterations_per_window = network_settings.iterations_between_action
         self.num_predictions = 1
+        self.agent_settings = agent_settings
 
         self.max_rate =  network_settings.rate_attack_high * (len(network_settings.host_sources) - 1 ) + (2 * self.delta)
     def __enter__(self):

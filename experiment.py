@@ -457,6 +457,10 @@ class Experiment:
                     print("def | step {0} | action {1} | reward {2} | e {3}".format(step-1, def_past_action, defender_reward, e))
                     print("prio state was {0}".format(def_last_state))
                     print("this state was {0}".format(def_next_state))
+                    if self.opposition_settings.is_intelligent:
+
+                        print("adv_state = {0}".format(adv_past_state))
+                    print("adv_action = {0}, adv_e = {1}".format(adv_current_action, adv_e))
 
 
 
