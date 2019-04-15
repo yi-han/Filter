@@ -263,13 +263,13 @@ class Experiment:
             print("num_episodes {0} episode length {1} iterations between each second {2}".format(num_episodes, ep_length, self.network_settings.iterations_between_second))
             for ep_num in range(ep_init, num_episodes):
                 # print(ep_num)
+                net.reset() # reset the network
                 agent.reset_episode(net)
                 ep_adv_loss = 0
                 ep_def_loss = 0
                 # print("\n\n\n\nloading ep {0} out of {1}".format(ep_num, num_episodes))
                 num_defender_moves = 0
                 num_adversary_moves = 0                
-                net.reset() # reset the network
                 if self.opposition_settings:
                     self.adversarialMaster.initiate_episode()
 

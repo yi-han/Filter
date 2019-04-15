@@ -173,7 +173,7 @@ class NetworkSixFour(NetworkSingleTeamMalialisMedium):
     host_sources = [3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5,
     7, 7, 7, 7, 8, 8, 8, 8, 9, 9, 9, 9]
     upper_boundary = 26 # malialis would have used 26
-    lower_boundary = 18 # malialis would have used 20
+    lower_boundary = 20 # malialis would have used 20
     max_hosts_per_level = [4, 12, 24]
     bucket_capacity = 24.1
 
@@ -239,7 +239,7 @@ class DdGenericDec(object):
     
     packets_last_step = False
     prior_server_loads = 0
-    prior_agent_actions = 5
+    prior_agent_seconds = 10 #
     prior_adversary_actions = 5
     include_indiv_hosts = False    
     prior_agent_delta_moves = 0
@@ -284,7 +284,7 @@ class DdGenericSplitShort(DdGenericSplit):
     pre_train_episodes = 50000
     annealing_episodes = 150000
     num_episodes = 400000
-    
+
 class ddExpThree(DdGenericDec):
     name = "ddExpThree"
     num_adv_agents = 2
@@ -299,7 +299,7 @@ class ddAimd(DdGenericDec):
     name = "ddAimd"
     prior_adversary_actions = 6
     
-    prior_agent_actions = 0
+    prior_agent_seconds = 0
     prior_agent_delta_moves = 6
     prior_server_loads = 0 
     prior_server_percentages = 0
@@ -336,7 +336,7 @@ class ddAimdAlt1(DdGenericDec):
     name = "ddAimdAlt1"
     prior_adversary_actions = 6
     
-    prior_agent_actions = 0
+    prior_agent_seconds = 0
     prior_agent_delta_moves = 6
     prior_server_loads = 0 
     prior_server_percentages = 6
@@ -373,7 +373,7 @@ class ddAimdLarge(DdGenericDec):
     prior_adversary_actions = 6
     include_legal_traffic = True
     
-    prior_agent_actions = 6
+    prior_agent_seconds = 12
     prior_agent_delta_moves = 6
     prior_server_loads = 6
     prior_server_percentages = 6
@@ -408,7 +408,7 @@ class ddAimdExtreme(DdGenericDec):
     prior_adversary_actions = 6
     include_legal_traffic = True
     
-    prior_agent_actions = 6
+    prior_agent_seconds = 12
     prior_agent_delta_moves = 6
     prior_server_loads = 6
     prior_server_percentages = 6
@@ -434,7 +434,7 @@ class sarGenericDec(object):
     startE = 1
     endE = 0.0
     
-    prior_agent_actions = 5
+    prior_agent_seconds = 10
     prior_adversary_actions = 5   
     packets_last_step = False
     include_indiv_hosts = False    
@@ -475,7 +475,7 @@ class sarAimd(sarGenericDec):
     num_adv_agents = 1
     name = "sarAimd"
     prior_agent_delta_moves = 5
-    prior_agent_actions = 0
+    prior_agent_seconds = 0
     packets_last_step = False
     discount_factor = 0.6
 
@@ -497,7 +497,7 @@ class sarAimdAlt1(sarGenericDec):
     num_adv_agents = 1
     name = "sarAimdAlt1"
     prior_agent_delta_moves = 5
-    prior_agent_actions = 0
+    prior_agent_seconds = 0
     prior_adversary_actions = 5
     prior_server_loads = 0    
     prior_server_percentages = 5
@@ -518,7 +518,7 @@ class sarAimdLarge(sarGenericDec):
     num_adv_agents = 1
     name = "sarAimdLarge"
     prior_agent_delta_moves = 5
-    prior_agent_actions = 5
+    prior_agent_seconds = 10
     prior_adversary_actions = 5
     prior_server_loads = 5   
     prior_server_percentages = 5
@@ -566,7 +566,7 @@ def create_generic_dec(def_settings, ns):
     #print("\nTest {0} \n".format(sub_agent_list[0].N_action))
     master = genericDecentralised.AgentOfAgents(
         ns.N_action, ns.action_per_throttler, ns.N_state,
-            sub_agent_list, def_settings.tau, def_settings.discount_factor, def_settings.history_size
+            sub_agent_list, def_settings.tau, def_settings.discount_factor, def_settings.history_size, def_settings
         )
     return master
 

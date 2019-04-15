@@ -229,10 +229,12 @@ class GenericAdvMaster(genericMaster.GenericAdvMaster):
                 state.extend(change) 
 
         if self.adv_settings.prior_server_loads:
+            assert(1==2) # no longer works
             prior_loads = net.switches[0].getPastWindows(self.adv_settings.prior_server_loads)
             state.extend(prior_loads)
 
         if self.adv_settings.prior_server_percentages:
+            assert(1==2) # no longer works
             prior_percentages = net.switches[0].past_server_percentages[-self.adv_settings.prior_server_percentages:]
             state.extend(prior_percentages)
         if self.adv_settings.include_legal_traffic:

@@ -37,6 +37,7 @@ for dest in jpattison; do
 	slurms_gpgpu_v3.sh \
 	slurms_physical_v2.sh \
 	slurms_ddqn_physical.sh \
+	move_files.sh \
 	runDDQNNetQuick.py \
 	runDDQNMalialis.py \
 	runDDQNHundred.py \

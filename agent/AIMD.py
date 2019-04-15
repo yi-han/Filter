@@ -28,15 +28,15 @@ class AIMDagent():
         self.epsilon = agent_settings.epsilon
         self.upper = network_settings.upper_boundary
         self.lower = network_settings.lower_boundary
-        self.seconds_per_window = 2 ### UPDATE: probably shouldn't assume
-        self.iterations_per_window = network_settings.iterations_between_action
+        # self.seconds_per_window = 2 ### UPDATE: probably shouldn't assume
+        # self.iterations_per_window = network_settings.iterations_between_second
         self.num_predictions = 1
         self.agent_settings = agent_settings
 
         self.max_rate =  network_settings.rate_attack_high * (len(network_settings.host_sources) - 1 ) + (2 * self.delta)
     def __enter__(self):
         print("enter the AIMD")
-        self.reset()
+        self.reset_aimd()
 
     def __exit__(self, type, value, tb):
         print("exit the AIMD")
@@ -44,12 +44,15 @@ class AIMDagent():
     # def reset(self):
     #     self.reset_episode()
 
-    def reset_episode(self):
+    def reset_episode(self, net):
+        self.reset_aimd()
+    
+    def reset_aimd(self):
         self.rs = None
         self.pLast = (-2 * self.epsilon)     
         self.past_predictions = [[self.max_rate]*self.num_predictions]*10
         self.past_moves = [[AimdMovesEnum.none.value]*self.num_predictions]*10
-
+        self.latest_state = None
     def belowEpsilon(self, load, epsilon):
         # bit dubious whether this is meant to be below or above epsilon
         #return abs(load)<epsilon
@@ -59,7 +62,7 @@ class AIMDagent():
         # treat this as set the rate
         # p is server load
         # we calculate the maximum amount of traffic we allow pass through in a 
-        p = p[0][0]
+        p = p[0]
         # init_rs = self.rs
         # old_p = self.pLast
         if p > self.upper:
@@ -115,6 +118,12 @@ class AIMDagent():
     
     def getPath(self=None):
         return "AIMD"
+
+    def calculate_state(self, net):
+        self.latest_state = net.switches[0].get_load()
+
+    def get_state(self):
+        return [self.latest_state]
 
     def get_max_agent_value(self):
         max_agent_value = self.max_rate + self.epsilon # add an epsilon so we never hit the absolute max
