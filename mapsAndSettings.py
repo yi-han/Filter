@@ -101,6 +101,9 @@ class AIMDsettings(object):
     history_size = 1
     actions_per_second = 0.5 # make an decision every 2 seconds
 
+class AIMDAlternative(AIMDsettings):
+    name = "AIMDalternative"
+    delta = 0.1
 # class AIMDvariant(AIMDsettings):
 #     name = "AIMDvariant"
 #     sub_agent = agent.AIMD.AIMDvariant

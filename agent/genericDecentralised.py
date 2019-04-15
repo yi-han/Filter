@@ -32,6 +32,7 @@ class AgentOfAgents():
         self.history_size = history_size
         #self.getStatelet = getStateletFunction
         self.agent_settings = agent_settings
+        self.N_state = N_state
     def __enter__(self):
         print("__enter__ generic decentralised")
         for agent in self.agents:

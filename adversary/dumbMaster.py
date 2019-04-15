@@ -114,8 +114,13 @@ class dumbMaster(genericMaster.GenericAdvMaster):
 
 
 
-    def get_state(self, net, e, is_active_attack):
-        return []
+    def calculate_state(self, net):
+        return
+
+    def get_state(self):
+        return 
+
+
 
 
 

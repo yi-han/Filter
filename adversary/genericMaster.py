@@ -20,6 +20,7 @@ class GenericAdvMaster():
 
 
     def initiate_episode(self):
+        # we assume we update the state every second. We keep track of legal traffic sent/served per window
         self.legit_served_hist = [0]*2
         self.legit_sent_hist = [0]*2
 

@@ -178,7 +178,7 @@ class GenericAdvMaster(genericMaster.GenericAdvMaster):
 
 
 
-    def get_state(self, net, e, can_attack):
+    def calculate_state(self, net):
         """ 
         Provide the ill_bandwidth capacity for each agent,
         and ill_bandwidth emmitted by each agent over last 3 steps
@@ -212,16 +212,16 @@ class GenericAdvMaster(genericMaster.GenericAdvMaster):
         # sort of a hack. Do the prediction here as the move is done simultaneously 
         if self.adv_settings.include_other_attackers:
             assert(1==2)
-            combined_state = []
-            associated_actions = []
-            for i in range(len(self.adv_agents)):
-                combined_state.append(copy.deepcopy(state))
-                associated_action = self.adv_agents[i].predict(state, e, can_attack)
-                state.append(associated_action)
-                associated_actions.append(associated_action)
-            # record the actions in the state variable
-            combined_state.append(associated_actions)
-            return combined_state
+            # combined_state = []
+            # associated_actions = []
+            # for i in range(len(self.adv_agents)):
+            #     combined_state.append(copy.deepcopy(state))
+            #     associated_action = self.adv_agents[i].predict(state, e, can_attack)
+            #     state.append(associated_action)
+            #     associated_actions.append(associated_action)
+            # # record the actions in the state variable
+            # combined_state.append(associated_actions)
+            # return combined_state
 
         if self.adv_settings.prior_agent_delta_moves:
             last_changes = self.defender.past_moves[(-1*self.adv_settings.prior_agent_delta_moves):]
@@ -229,9 +229,10 @@ class GenericAdvMaster(genericMaster.GenericAdvMaster):
                 state.extend(change) 
 
         if self.adv_settings.prior_server_loads:
-            assert(1==2) # no longer works
-            prior_loads = net.switches[0].getPastWindows(self.adv_settings.prior_server_loads)
-            state.extend(prior_loads)
+            latest_load = net.switches[0].get_state()
+            self.server_loads.pop(0)
+            self.server_loads.append(latest_load)
+            state.extend(self.server_loads)
 
         if self.adv_settings.prior_server_percentages:
             assert(1==2) # no longer works
@@ -246,11 +247,14 @@ class GenericAdvMaster(genericMaster.GenericAdvMaster):
 
             assert(1==2)
 
-        return np.array(state)
+        self.current_state = np.array(state)
 
+    def get_state(self):
+        return self.current_state
 
     def extract_state(self, combined_state, i):
         if self.adv_settings.include_other_attackers:
+            assert(1==2)
             return combined_state[i]
         else:
             # normal

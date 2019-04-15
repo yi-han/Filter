@@ -60,14 +60,7 @@ class Bucket():
         All data must add to the bucket first. Only then can we take it out
         Rationale: We're breaking it down to 10ms steps anyway. The memory would include the ram
         
-        Initial idea:
-        Case 1: Bucket load is less than rs
 
-        Case 2:
-        Bucket + traffic in exceeds bucket_load
-
-        Case 3 (easy):
-        rs < Bucket < Bucket + rs < bucket_load
 
 
         First calculate out from the bucket.
@@ -76,6 +69,7 @@ class Bucket():
 
         if rs_per_action == None:
             # No throttle set
+            # print("setting throttle is as")
             rs_per_iteration = INF
         else:
             rs_per_iteration = roundNumber(MbToKb(rs_per_action/self.iterations_between_second))
@@ -84,27 +78,41 @@ class Bucket():
         #print("legal {0} illegal {1} rs {2}".format(legal_traffic_in, illegal_traffic_in, rs_per_iteration))
         legal_traffic_in = roundNumber(legal_traffic_in)
         illegal_traffic_in = roundNumber(illegal_traffic_in)
-        remaining_capacity = self.bucket_capacity - self.bucket_load
         # print("load {0} total capacity {1} remaining {2}".format(self.bucket_load, self.bucket_capacity, remaining_capacity))
         # print("capacity is {1} whilst incoming load is {0}".format((illegal_traffic_in+legal_traffic_in),remaining_capacity))
-        if remaining_capacity < DELTA:
-            # already full? shouldn't ever be case
-            assert(1==2)
-            (legal_dropped, illegal_dropped) = (legal_traffic_in, illegal_traffic_in)
-        else:
-            (legal_added, legal_dropped, illegal_added, illegal_dropped) = self.add_to_capacity(legal_traffic_in, illegal_traffic_in, remaining_capacity)
-            # print((legal_added, legal_dropped, illegal_added, illegal_dropped))
-            #assert(abs(legal_added+legal_dropped-legal_traffic_in)<DELTA)
-            #assert(abs(illegal_added+illegal_dropped-illegal_traffic_in)<DELTA)
+        
+        """
+        1. Always empty the bucket as much as possible.
+        2. If there is still capacity allow as much traffic through from incoming
+        3. Fill the bucket up
+
+        """
 
 
-            self.add_bucket(legal_added, illegal_added)
-             
 
-        # empty bucket
+        # 1. Get as much out of the bucket as we can
         legal_out, illegal_out = self.empty_bucket(rs_per_iteration)
-        # print("illegal into bucket {0} and illegal out {1} with rate {2}".format(illegal_added, illegal_out, rs_per_iteration))
 
+        rs_remaining = rs_per_iteration - (legal_out + illegal_out)
+        
+        if rs_remaining > DELTA:
+            # we still have some more we can let out, use it from the incoming traffic
+            
+            (t_legal_out, t_illegal_out, legal_remaining, illegal_remaining) = self.calc_traffic_through(legal_traffic_in, illegal_traffic_in, rs_remaining)
+            legal_out += t_legal_out
+            illegal_out += t_illegal_out
+        else:
+            #print("rs was {0} and delta is {1}".format(rs_remaining, DELTA))
+            legal_remaining = 0
+            illegal_remaining = 0
+        
+        if (legal_remaining + illegal_remaining > DELTA):
+            (legal_dropped, illegal_dropped) = self.add_to_capacity(legal_remaining, illegal_remaining)
+        else:
+            (legal_dropped, illegal_dropped) = (0,0)
+
+             
+        # print("letting through {0} {1} {2} {3}".format(legal_out, legal_dropped, illegal_out, illegal_dropped))
         return (legal_out, legal_dropped, illegal_out, illegal_dropped)
 
 
@@ -122,7 +130,6 @@ class Bucket():
         if self.bucket_load-self.bucket_capacity>DELTA:
             print("we're over by {0}".format(self.bucket_load-self.bucket_capacity))
             assert(1==2)
-        assert(self.bucket_load-self.bucket_capacity < DELTA)
 
     def empty_bucket(self, current_rs):
         # empty bucket to amount of rs or until empty
@@ -137,44 +144,65 @@ class Bucket():
             assert(legal_stopped<DELTA and illegal_stopped < DELTA)
 
             (f_legal, f_illegal) = self.bucket_list.pop(0)
-            (legal_added, legal_stopped, illegal_added, illegal_stopped) = self.add_to_capacity(f_legal, f_illegal, remaining_rs)
+            #(legal_added, legal_stopped, illegal_added, illegal_stopped) = self.add_to_capacity(f_legal, f_illegal, remaining_rs)
+            
+
             remaining_rs -= (f_legal + f_illegal) # note this will go negative once we hit our limit
             legal_out += legal_added
             illegal_out += illegal_added
             self.updateBucketLoad((f_legal + f_illegal), False)
-        #if((legal_stopped + illegal_stopped) > DELTA):
-            # put back to bucket any that didn't get through
-            # print("put back in ")
-            # print("out {0} {1} | stopped {2} {3} | remaining_capacity {4} | f {5} {6}".format(legal_added, illegal_added, legal_stopped, illegal_stopped, (self.bucket_capacity - self.bucket_load), f_legal, f_illegal))
-            # print("remaining once added {0} | load {1}".format((self.bucket_capacity - self.bucket_load- (legal_stopped + illegal_stopped)), self.bucket_load))
-        # add bucket will ensure we aren't adding stupid stuff
-        self.add_bucket(legal_stopped, illegal_stopped, at_front=True)
+
+
+        (legal_out, illegal_out, legal_bucket, illegal_bucket) = self.calc_traffic_through(legal_out, illegal_out, current_rs)
+
+        self.add_bucket(legal_bucket, illegal_bucket, at_front=True)
         return (legal_out, illegal_out)
 
-    def add_to_capacity(self, legal_in, illegal_in, capacity):
-        # print("in {0} {1} capacity {2}".format(legal_in, illegal_in, capacity))
+    def calc_traffic_through(self, legal_in, illegal_in, capacity):
+        
+        legal_in = max(0, legal_in)
+        illegal_in = max(0, illegal_in)
+        combined_load = legal_in + illegal_in
+        
+        if combined_load > (capacity + DELTA):
+            percentage_dropped = 1 - (capacity/combined_load)
+            legal_dropped = legal_in * percentage_dropped
+            illegal_dropped = illegal_in * percentage_dropped
+            legal_through = legal_in - legal_dropped
+            illegal_through = illegal_in - illegal_dropped
+        else:
+            (legal_through, illegal_through, legal_dropped, illegal_dropped) = (legal_in, illegal_in, 0, 0)
+        return (legal_through, illegal_through, legal_dropped, illegal_dropped)
+
+    def add_to_capacity(self, legal_in, illegal_in):
+        # we add as much as we can to the bucket and drop the rest.
+        # NO TRAFFIC SHOULD COME OUT
 
         traffic_in = legal_in + illegal_in
-
-        assert(capacity>0 and traffic_in >= 0)
+        remaining_capacity = self.bucket_capacity - self.bucket_load
+        assert(remaining_capacity>0 and traffic_in >= 0)
 
         if(traffic_in<DELTA):
-            return (0, 0, 0, 0)
+            return (0, 0)
 
-        percentage_through = min((capacity/traffic_in),1)
+
+        percentage_through = min((remaining_capacity/traffic_in),1)
         # print("percentage was {0}".format(percentage_through))
         # print("leg {0} ill {1} cap {2}".format(legal_in, illegal_in, capacity))
 
-        legal_added = round_half_down(percentage_through*legal_in)
-        illegal_added = round_half_down(percentage_through*illegal_in)
 
-        legal_stopped = round_half_down(legal_in - legal_added)
-        illegal_stopped = round_half_down(illegal_in - illegal_added)
+        legal_added = max(percentage_through*legal_in, 0)
+        illegal_added = max(percentage_through*illegal_in, 0)
 
-        if((legal_added + illegal_added-capacity)>DELTA):
+        legal_dropped = (legal_in - legal_added)
+        illegal_dropped = (illegal_in - illegal_added)
+
+        if((legal_added + illegal_added-remaining_capacity)>DELTA):
             print("legal_added {0} illegal_added {1} capacity {2} combined {3}".format(legal_added, illegal_added, capacity, legal_added+illegal_added))
             assert(1==2)
-        return (legal_added, legal_stopped, illegal_added, illegal_stopped)
+        
+        self.add_bucket(legal_added, illegal_added)
+        return (legal_dropped, illegal_dropped)
 
 
 class Switch():

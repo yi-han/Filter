@@ -306,9 +306,16 @@ class Experiment:
                             adv_past_state = adv_next_state
                             adv_past_action = adv_next_action
 
-                            adv_next_state = self.adversarialMaster.get_state(net, adv_e, adv_step)
-                            adv_next_action = self.adversarialMaster.predict(adv_next_state, adv_e, adv_step, self.can_attack(second))
+
+                            self.adversarialMaster.calculate_state(net)
+                            adv_next_state = self.adversarialMaster.get_state()
+                            adv_next_action = self.adversarialMaster.predict(adv_next_state, adv_e, adv_step, self.can_attack(second)) # generate an action
                             num_adversary_moves += 1
+
+
+                            # adv_next_state = self.adversarialMaster.get_state(net, adv_e, adv_step)
+                            # adv_next_action = self.adversarialMaster.predict(adv_next_state, adv_e, adv_step, self.can_attack(second))
+                            # num_adversary_moves += 1
 
                             if num_adversary_moves > 1:
                                 adv_print_count += 1
