@@ -5,6 +5,7 @@ import network.network_new
 import agent.tileCoding as tileCoding
 import agent.linearSarsaCentralised as linCen
 import agent.randomAgent as ranAg
+import agent.noThrottle as noThrot
 from mapsAndSettings import *
 import runAttacks
 assert(len(sys.argv)>=3)
@@ -133,6 +134,30 @@ class LinTest(object):
     has_bucket = False
     actions_per_second = 0.5
 
+class NoThrottleBaseline(object):
+    # note we have two dependencies
+    name = "NoThrottle"
+    discount_factor = 0
+    tau = 0.0
+    update_freq = 4
+    batch_size = None
+    num_episodes = 1#62500
+    pre_train_episodes = 0#2000
+    annealing_episodes = 1
+    startE = 0 #0.4
+    endE = 0.0
+    agent = None
+    sub_agent = noThrot.Agent
+    group_size = 1 # number of filters each agent controls
+    #stateletFunction = getStateletNoCommunication
+    history_size = 1 # number of past iterations to look at
+    reward_overload = None
+    stateRepresentation = stateRepresentationEnum.throttler  
+    has_bucket = False
+    actions_per_second = 0.5 # make an decision every 2 seconds
+
+
+
 # The class of the adversary to implement
 conAttack = hostClass.ConstantAttack
 
@@ -144,7 +169,7 @@ Settings to change
 """
 
 assignedNetwork = NetworkMalialisSmall
-assignedAgent = AIMDAlternative
+assignedAgent = NoThrottleBaseline
 load_attack_path = "attackSimulations/{0}/".format(assignedNetwork.name)
 network_emulator = network.network_new.network_full # network_quick # network_full
 loadAttacks = True

@@ -125,6 +125,7 @@ def reward_graph(directory, reward_type, max_num = None, title=None, PerLegitTra
     else:
         plt.ylim(-0.8, 1.2)
     plt.plot(ep,ep_reward, 'o-')
+    plt.ylim(-0.2, 1)
     if title:
         plt.title(title)
     plt.show()

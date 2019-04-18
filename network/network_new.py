@@ -202,7 +202,7 @@ class Bucket():
 
         (legal_added, illegal_added, legal_dropped, illegal_dropped) = self.calc_traffic_through(legal_in, illegal_in, remaining_capacity)
 
-        percentage_through = min((remaining_capacity/traffic_in),1)
+        # percentage_through = min((remaining_capacity/traffic_in),1)
         # print("percentage was {0}".format(percentage_through))
         # print("leg {0} ill {1} cap {2}".format(legal_in, illegal_in, capacity))
 

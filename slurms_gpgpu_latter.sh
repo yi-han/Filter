@@ -1,4 +1,4 @@
-# mucking
+# mucking exp 2
 
 sed 's/runDDQN/runSARSA/g' exp_cloud.slurm > output.slurm
 sed 's/sampleDDQNText/ddOver_sarOrig/g' output.slurm -i 

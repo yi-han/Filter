@@ -23,6 +23,8 @@ for dest in jpattison; do
 	exp_gpgpu_heavy.slurm \
 	exp_physical.slurm \
 	exp_physical_ddqn.slurm \
+	exp_cloud.slurm \
+	exp_temp.slurm \
 	phys_attempt.slurm \
 	cloud_copy.slurm \
 	helloWorld.py \

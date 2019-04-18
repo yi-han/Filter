@@ -140,6 +140,12 @@ class NetworkMalialisSmall(object):
     save_per_step_stats = False
     functionPastCapacity = True # make it Malialis mode
 
+class NetworkSmallHard(NetworkMalialisSmall):
+    name = "small_hard"
+    rate_attack_low = 5
+    rate_attack_high = 12
+    bucket_capacity = 48.1
+
 class NetworkSingleTeamMalialisMedium(object):
     name = "single_team_malialis_medium"
     N_state = 6
@@ -186,6 +192,7 @@ class NetworkSixHard(NetworkSixFour):
     rate_attack_low = 5
     rate_attack_high = 12
     bucket_capacity = 48.1
+
 
 class NetTest(NetworkSingleTeamMalialisMedium):
     iterations_between_action = 2

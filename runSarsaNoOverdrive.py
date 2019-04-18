@@ -143,11 +143,11 @@ adversarialLeaf = hostClass.adversarialLeaf
 Settings to change
 """
 
-assignedNetwork = NetworkSixHard
-assignedAgent = AIMDsettings
+assignedNetwork = NetworkSixFour
+assignedAgent = LinearSarsaLAIDDQN350
 load_attack_path = "attackSimulations/{0}/".format(assignedNetwork.name)
 network_emulator = network.network_new.network_full # network_quick # network_full
-loadAttacks = False
+loadAttacks = True
 
 
 
@@ -160,9 +160,9 @@ trainHost = adversarialLeaf #coordAttack # conAttack #driftAttack #adversarialLe
 assignedNetwork.drift = 0
 
 opposition = adv_constant #adv_random # adv_constant
-intelligentOpposition =  ddAimdLarge2 #
+intelligentOpposition =  DdGenericSplitShort #
 intelligentOpposition.save_model_mode = defender_mode_enum.save
-intelligentOpposition = None
+# intelligentOpposition = None
 
 
 assert(trainHost==adversarialLeaf)

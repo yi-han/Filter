@@ -212,16 +212,7 @@ class GenericAdvMaster(genericMaster.GenericAdvMaster):
         # sort of a hack. Do the prediction here as the move is done simultaneously 
         if self.adv_settings.include_other_attackers:
             assert(1==2)
-            # combined_state = []
-            # associated_actions = []
-            # for i in range(len(self.adv_agents)):
-            #     combined_state.append(copy.deepcopy(state))
-            #     associated_action = self.adv_agents[i].predict(state, e, can_attack)
-            #     state.append(associated_action)
-            #     associated_actions.append(associated_action)
-            # # record the actions in the state variable
-            # combined_state.append(associated_actions)
-            # return combined_state
+
 
         if self.adv_settings.prior_agent_delta_moves:
             last_changes = self.defender.past_moves[(-1*self.adv_settings.prior_agent_delta_moves):]

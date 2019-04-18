@@ -92,7 +92,7 @@ adversarialLeaf = hostClass.adversarialLeaf
 assignedNetwork =   NetworkSixFour
 assignedAgent =  ddqnSingleNoCommunicate #ddqnSingleNoCommunicate #ddqn100MediumHierarchical
 load_attack_path = "attackSimulations/{0}/".format(assignedNetwork.name)
-loadAttacks = False
+loadAttacks = True
 assignedAgent.encoders = None
 
 # print("\n\nSETTING TO JEREMY MODE\n\n\n")
