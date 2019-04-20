@@ -33,10 +33,9 @@ class defender_mode_enum(Enum):
     
 class stateRepresentationEnum(Enum):
     throttler = 0 #always
-    leaderAndIntermediate = 1 
-    server = 2  # all the way to the server
-    allThrottlers = 3
-    only_server = 4
+    up_to_server = 1  # all the way to the server
+    allThrottlers = 2
+    only_server = 3
 
 
 
@@ -113,8 +112,6 @@ class AIMDAlternative(AIMDsettings):
 class NetworkMalialisSmall(object):
     name = "malialis_small"
     N_state = 3 #The number of state, i.e., the number of filters
-    N_action = 1000 #In the current implementation, each filter has 10 possible actions, so altogether there are 10^N_state actions, 
-                    #e.g., action 123 means the drop rates at the three filters are set to 0.1, 0.2 and 0.3, respectively
     action_per_throttler = 10 # each filter can do 10 actions
     N_switch = 13 # number of routers in the system
     host_sources = [5, 10, 12, 6, 9, 9] #ID of the switch that the host is connected to  
@@ -135,6 +132,7 @@ class NetworkMalialisSmall(object):
     max_hosts_per_level = [3] # no communication therefore just one
     bucket_capacity = 18.1#15#0.8
 
+    max_depth = 1
     ep_length = 60 # Training is an episode of 60 seconds
     is_sig_attack = False
     save_per_step_stats = False
@@ -149,13 +147,11 @@ class NetworkSmallHard(NetworkMalialisSmall):
 class NetworkSingleTeamMalialisMedium(object):
     name = "single_team_malialis_medium"
     N_state = 6
-    N_action = 1000000
-
     action_per_throttler = 10
     N_switch = 10
-    host_sources = [3, 3, 4, 4, 5, 5, 7, 7, 8, 8, 9, 9]
+    host_sources = [3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8]
     servers = [0]
-    filters = [3, 4, 5, 7, 8, 9]
+    filters = [3, 4, 5, 6, 7, 8]
     
     topologyFile = 'topologies/single_team_malialis.txt'
     rate_legal_low = 0.05 
@@ -172,6 +168,7 @@ class NetworkSingleTeamMalialisMedium(object):
     bucket_capacity = 12.1
     ep_length = 60 # Training is an episode of 60 seconds
 
+    max_depth = 3
     is_sig_attack = False
     save_per_step_stats = False
     functionPastCapacity = True # make it Malialis mode
@@ -180,7 +177,7 @@ class NetworkSixFour(NetworkSingleTeamMalialisMedium):
     # 4 attackers per throttler.
     name = "six_four"
     host_sources = [3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5,
-    7, 7, 7, 7, 8, 8, 8, 8, 9, 9, 9, 9]
+    6, 6, 6, 6, 7, 7, 7, 7, 8, 8, 8, 8]
     upper_boundary = 26 # malialis would have used 26
     lower_boundary = 20 # malialis would have used 20
     max_hosts_per_level = [4, 12, 24]
@@ -196,6 +193,40 @@ class NetworkSixHard(NetworkSixFour):
 
 class NetTest(NetworkSingleTeamMalialisMedium):
     iterations_between_action = 2
+
+class NetworkNineAgent(object):
+    name = "nine_agent"
+    N_state = 9
+    action_per_throttler = 10
+    N_switch = 15
+
+    host_sources = [3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5,
+        7, 7, 7, 7, 8, 8, 8, 8, 9, 9, 9, 9,
+        12, 12, 12, 12, 13, 13, 13, 13, 14, 14, 14, 14]
+
+    servers = [0]
+    filters = [3, 4, 5, 7, 8, 9, 12, 13, 14]
+    
+    topologyFile = 'topologies/nine_agent.txt'
+    rate_legal_low = 0.05 
+    rate_legal_high = 1 
+    rate_attack_low = 2.5 
+    rate_attack_high = 6
+    legal_probability = 0.6 # probability that is a good guys
+    upper_boundary = 38 
+    lower_boundary = 35 # guess
+
+    iterations_between_second = 100 # at 100 we are dealing wiht centiseconds
+
+    max_hosts_per_level = [4, 12, 24, 36]
+    bucket_capacity = 12.1
+    ep_length = 60 # Training is an episode of 60 seconds
+
+    max_depth = 4
+    is_sig_attack = False
+    save_per_step_stats = False
+    functionPastCapacity = True # make it Malialis mode
+
     
 
 class NetworkMalialisTeamFull(object):
@@ -545,22 +576,22 @@ class sarAimdLarge3(sarAimdLarge2):
     name = "sarAimdLarge3"
     discount_factor = 0.3
 
-def create_generic_dec(def_settings, ns):
+def create_generic_dec(def_settings, net_settings):
     """
-    def_settings = defender_settings, ns = network_settings
+    def_settings = defender_settings, net_settings = network_settings
 
     We can make agents into groups.
 
     """
 
     if "AIMD" in def_settings.name:
-        return def_settings.sub_agent(ns, def_settings)
+        return def_settings.sub_agent(net_settings, def_settings)
 
-    throttlers_not_allocated = ns.N_state
+    throttlers_not_allocated = net_settings.N_state
 
     group_size = def_settings.group_size
     sub_agent = def_settings.sub_agent
-    #num_teams = math.ceil(ns.N_state/group_size)
+    #num_teams = math.ceil(net_settings.N_state/group_size)
     #stateletFunction = def_settings.stateletFunction
     sub_agent_list = []
 
@@ -568,16 +599,13 @@ def create_generic_dec(def_settings, ns):
     while throttlers_not_allocated > 0:
         print("currently {0} throttlers_not_allocated".format(throttlers_not_allocated))
         agent_to_allocate = min(throttlers_not_allocated, group_size)
-        state_size = calcStateSize(ns.N_state, def_settings.stateRepresentation, def_settings.history_size)
+        state_size = calcStateSize(def_settings.stateRepresentation, def_settings.history_size, net_settings)
         print(agent_to_allocate)
-        sub_agent_list.append(sub_agent(ns.action_per_throttler**agent_to_allocate, state_size, def_settings.encoders, def_settings))
+        sub_agent_list.append(sub_agent(net_settings.action_per_throttler**agent_to_allocate, state_size, def_settings.encoders, def_settings))
         throttlers_not_allocated -= agent_to_allocate
 
     #print("\nTest {0} \n".format(sub_agent_list[0].N_action))
-    master = genericDecentralised.AgentOfAgents(
-        ns.N_action, ns.action_per_throttler, ns.N_state,
-            sub_agent_list, def_settings.tau, def_settings.discount_factor, def_settings.history_size, def_settings
-        )
+    master = genericDecentralised.AgentOfAgents(sub_agent_list, def_settings, net_settings)
     return master
 
 
@@ -644,15 +672,13 @@ def getPathName(network_settings, agent_settings, commStrategy, twist, train_opp
 
 
 
-def calcStateSize(total_throttlers, stateRepresentation, history_size):
+def calcStateSize(stateRepresentation, history_size, net_settings):
     if stateRepresentation == stateRepresentationEnum.throttler:
         num_routers = 1
-    elif stateRepresentation == stateRepresentationEnum.leaderAndIntermediate:
-        num_routers = 3
-    elif stateRepresentation == stateRepresentationEnum.server:
-        num_routers = 4
+    elif stateRepresentation == stateRepresentationEnum.up_to_server:
+        num_routers = min(4, net_settings.max_depth)
     elif stateRepresentation == stateRepresentationEnum.allThrottlers:
-        num_routers = total_throttlers
+        num_routers = len(net_settings.N_state)
     else:
         assert(1==2)
 
@@ -660,16 +686,7 @@ def calcStateSize(total_throttlers, stateRepresentation, history_size):
 
 
 def calc_comm_strategy(stateRepresentation):
-    if stateRepresentation == stateRepresentationEnum.throttler:
-        return "Single"
-    elif stateRepresentation == stateRepresentationEnum.leaderAndIntermediate:
-        return "LeadAndInt"
-    elif stateRepresentation == stateRepresentationEnum.server:
-        return "IncludeServer"
-    elif stateRepresentation == stateRepresentationEnum.allThrottlers:
-        return "CommAll"
-    else:
-        return stateRepresentation.name
+    return stateRepresentation.name
 
 
 def merge_summaries(file_path):

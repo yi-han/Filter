@@ -90,7 +90,7 @@ class LinearSarsaLAI(object):
     group_size = 1 # number of filters each agent controls
     #stateletFunction = getStateletNoCommunication
     reward_overload = -1
-    stateRepresentation = stateRepresentationEnum.leaderAndIntermediate  
+    #stateRepresentation = stateRepresentationEnum.leaderAndIntermediate  
     has_bucket = False
 
 
@@ -105,8 +105,9 @@ class LinearSarsaLAIDDQN350(LinearSarsaLAI):
     startE = 1
     endE = 0.0
     episodeDrop = (startE - endE)/annealing_episodes
-    reward_function = AGENT_REWARD_ENUM.sliding_negative
+    reward_function = AGENT_REWARD_ENUM.packet_logic
     actions_per_second = 0.5
+    stateRepresentation = stateRepresentationEnum.up_to_server
 
 class LinHierMemory(LinearSarsaLAIDDQN350):
     name = "LinHierMemory"
@@ -169,7 +170,7 @@ adversarialLeaf = hostClass.adversarialLeaf
 Settings to change
 """
 
-assignedNetwork = NetworkSixFour
+assignedNetwork = NetworkNineAgent
 assignedAgent = LinearSarsaLAIDDQN350
 load_attack_path = "attackSimulations/{0}/".format(assignedNetwork.name)
 network_emulator = network.network_new.network_full # network_quick # network_full

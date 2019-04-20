@@ -77,11 +77,8 @@ class Experiment:
         self.adversary_class = adversary_class
         self.network_settings = NetworkClass
         self.defender_settings = AgentSettings
-        self.representationType = AgentSettings.stateRepresentation
         print(NetworkClass.N_state)
         print(NetworkClass.action_per_throttler**NetworkClass.N_state)
-        print(NetworkClass.N_action)
-        assert(NetworkClass.action_per_throttler**NetworkClass.N_state == NetworkClass.N_action)
 
         self.opposition_settings = oppositionSettings
 
@@ -94,7 +91,6 @@ class Experiment:
         assert AgentSettings.trained_drift != -1 # ensure we have it set, dont ever use in experiment
 
     def run(self, prefix, agent, file_path):
-        N_action = self.network_settings.N_action
         N_state = self.network_settings.N_state
         action_per_throttler = self.network_settings.action_per_throttler 
         self.file_path = file_path
@@ -174,7 +170,7 @@ class Experiment:
             self.adversarialMaster =  self.opposition_settings.adversary_class(self.opposition_settings, ep_length)
             adv_e = 0
 
-        net = self.network_settings.emulator(self.network_settings, self.adversary_class, self.representationType, self.defender_settings, self.adversarialMaster, load_attack_path=self.load_attack_path)
+        net = self.network_settings.emulator(self.network_settings, self.adversary_class, self.defender_settings, self.adversarialMaster, load_attack_path=self.load_attack_path)
 
         print("Experiment has {0} episodes".format(num_episodes))
         print("\n Prefix {0}".format(prefix))
@@ -210,7 +206,7 @@ class Experiment:
 
         with agent:
             # different number of predicitons depending if aimd or rt
-            for i in range(agent.num_predictions):
+            for i in range(agent.num_agents):
                 server_actions_line += ",DefAction{0}".format(i)
             for i in range(self.opposition_settings.num_adv_agents):
                 server_actions_line += ",AdvAction{0}".format(i)

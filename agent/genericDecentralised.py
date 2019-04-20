@@ -19,20 +19,15 @@ import math
 
 class AgentOfAgents():
 
-    def __init__(self, N_action, action_per_throttler, N_state, sub_agent_list,
-        tau, discountFactor, history_size, agent_settings):
+    def __init__(self, sub_agent_list, agent_settings, network_settings):
 
         self.num_agents = len(sub_agent_list)
-        self.action_per_throttler = action_per_throttler
-        #self.N_action = N_action # number of actions by each subAgent
-        #assert action_per_throttler**self.num_agents==N_action # confirm the numbers add up
+        self.action_per_throttler = network_settings.action_per_throttler
         self.agents = sub_agent_list
         self.score = 0
-        self.num_predictions = self.num_agents
-        self.history_size = history_size
-        #self.getStatelet = getStateletFunction
+        self.history_size = agent_settings.history_size
         self.agent_settings = agent_settings
-        self.N_state = N_state
+        self.N_state = network_settings.N_state
     def __enter__(self):
         print("__enter__ generic decentralised")
         for agent in self.agents:
@@ -135,7 +130,7 @@ class AgentOfAgents():
     def reset_episode(self, net):
         # for agent in self.agents:
         #     agent.reset()
-        self.past_predictions = [[0]*self.num_predictions]*20
+        self.past_predictions = [[0]*self.num_agents]*20
         for i in range(len(self.agents)):
             self.agents[i].reset_state(net.throttlers[i], 10)
 

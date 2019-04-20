@@ -459,21 +459,19 @@ class Switch():
         elif self.representation == stateRepresentationEnum.allThrottlers:
             self.stateSwitches = allThrottlers
             assert(1==2) # haven't done delay for this yet!
-        elif self.representation == stateRepresentationEnum.leaderAndIntermediate:
-            for i in range(2):
-                currentNode = currentNode.destination_links[0].destination_switch
-                assert currentNode.id!=0 #we shouldn't be getting server
-                #print(currentNode.id)
-                self.stateSwitches.append(currentNode)
-                self.delay += 1
 
-        elif self.representation == stateRepresentationEnum.server:
+
+        elif self.representation == stateRepresentationEnum.up_to_server:
             for i in range(3):
+                print(currentNode.id)
+                if currentNode.id==0:
+                    break
                 currentNode = currentNode.destination_links[0].destination_switch
-                assert currentNode.id!=0 #we shouldn't be getting server
-                #print(currentNode.id)
                 self.stateSwitches.append(currentNode)
-                self.delay += 1            
+                self.delay += 1                
+
+
+           
         elif self.representation == stateRepresentationEnum.only_server:
             while currentNode.id != 0:
                 currentNode = currentNode.destination_links[0].destination_switch
@@ -509,16 +507,9 @@ class link(object):
 
 class network_full(object):
     # a network simulator where we try simulate the traffic moving through the system
-
-    # def __init__(self, N_switch, N_action, N_state, action_per_throttler, host_sources, servers, filter_list, reward_overload, 
-    #           rate_legal_low, rate_legal_high, rate_attack_low, rate_attack_high, 
-    #           legal_probability, upper_boundary, hostClass, max_epLength, f_link, SaveAttackEnum,
-    #           save_attack, load_attack_path):
-
-    #self.ITERATIONSBETEENACTION = 200 # with 10 ms delay, and throttle agent every 2 seconds, we see 200 messages passed in between
     name = "Network_Full"
 
-    def __init__(self, network_settings, host_class, representationType, defender_settings, adversaryMaster, load_attack_path = None, save_attack=False):
+    def __init__(self, network_settings, host_class, defender_settings, adversaryMaster, load_attack_path = None, save_attack=False):
         self.network_settings = network_settings
         self.iterations_between_second = network_settings.iterations_between_second# ideally set at 200
         self.host_sources = np.empty_like(network_settings.host_sources)
@@ -528,8 +519,6 @@ class network_full(object):
         self.filter_list = network_settings.filters
         self.N_state = network_settings.N_state
         self.N_switch = network_settings.N_switch # number of nodes?
-        self.N_action = network_settings.N_action
-        self.N_server = len(self.servers)
         self.N_host = len(self.host_sources)
         self.action_per_throttler = network_settings.action_per_throttler # actions each host can take
         #self.reward_overload = reward_overload
@@ -538,7 +527,7 @@ class network_full(object):
         self.rate_attack_low = MbToKb(network_settings.rate_attack_low)  #/ self.iterations_between_second)
         self.rate_attack_high = MbToKb(network_settings.rate_attack_high)  #/ self.iterations_between_second)
 
-        self.representationType = representationType
+        self.representationType = defender_settings.stateRepresentation
         self.legal_probability = network_settings.legal_probability # odds of host being an attacker
         self.upper_bound = MbToKb(network_settings.upper_boundary) # for one second
         self.upper_boundary_two = self.upper_bound * 2 # for 2 seconds
@@ -564,7 +553,7 @@ class network_full(object):
         self.load_attack_path = load_attack_path
         self.hostClass.classReset()
         bucket_capacity = MbToKb(network_settings.bucket_capacity)
-        self.initialise(network_settings.topologyFile, representationType, defender_settings, network_settings.iterations_between_second, bucket_capacity)
+        self.initialise(defender_settings, bucket_capacity)
         #self.last_state = np.empty_like(self.get_state())
 
     def reset(self):
@@ -589,8 +578,8 @@ class network_full(object):
         self.cache_reward = None
 
 
-    def get_link(self, topology, f_link, v):
-        with open(f_link) as f:
+    def get_link(self, v):
+        with open(self.network_settings.topologyFile) as f:
             count = 0
             for line in f:
                 line = line.strip('\n')
@@ -599,8 +588,8 @@ class network_full(object):
                 dest_nd_id = int(line.split('-')[0])
                 source_nd_id = int(line.split('-')[1])
 
-                topology[source_nd_id][dest_nd_id] = v
-                topology[dest_nd_id][source_nd_id] = v
+                self.topology[source_nd_id][dest_nd_id] = v
+                self.topology[dest_nd_id][source_nd_id] = v
 
             return count
 
@@ -681,18 +670,18 @@ class network_full(object):
                 self.switches[switch_id].setThrottle(drop_prob)
 
 
-    def initialise(self, f_link, representationType, defender_settings, iterations_between_second, bucket_capacity):
+    def initialise(self, defender_settings, bucket_capacity):
         for i in range(self.N_switch):
             l = []
             for j in range(self.N_switch):
                 l.append(-1)
             self.topology.append(l)
 
-        n_lk = self.get_link(self.topology, f_link, 1)
+        n_lk = self.get_link(1)
         
         for i in range(self.N_switch):
             is_filter = i in self.filter_list
-            self.switches.append(Switch(i, is_filter, representationType, defender_settings, iterations_between_second, bucket_capacity))
+            self.switches.append(Switch(i, is_filter, self.representationType, defender_settings, self.iterations_between_second, bucket_capacity))
 
         
         for i in range(0, self.N_switch-1):
@@ -876,10 +865,6 @@ class network_full(object):
         illegal_served_ep = KbToMb(self.illegal_served_ep)
         illegal_sent_ep =  KbToMb(self.illegal_sent_ep)
         return (legit_serve_ep, legit_sent_ep, legal_per, illegal_served_ep, illegal_sent_ep)
-    # def save_attacks(self):
-    #     with open(self.load_attack_path, "wb") as f:
-    #         print("saving the attack")
-    #         pickle.dump(self.attack_record, f, pickle.HIGHEST_PROTOCOL)
 
 
     def load_attacker_file(self):
