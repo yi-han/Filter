@@ -46,6 +46,9 @@ class AgentOfAgents():
         for agent in self.agents:
             agent.__exit__(type, value, tb)
 
+
+
+
     def predict(self, state, e):
         # only provide each agent with its corresponding state
         # combine the actions as if it was a unified response
@@ -133,13 +136,14 @@ class AgentOfAgents():
         # for agent in self.agents:
         #     agent.reset()
         self.past_predictions = [[0]*self.num_predictions]*20
-        
         for i in range(len(self.agents)):
             self.agents[i].reset_state(net.throttlers[i], 10)
 
-    def calculate_state(self, net):
+    def update_state(self, net):
         for i in range(len(self.agents)):
             self.agents[i].calculate_state(net.throttlers[i])
+
+
 
     def get_state(self):
         state = []

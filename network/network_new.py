@@ -5,6 +5,7 @@ import math
 #import copy
 import pickle
 from mapsAndSettings import stateRepresentationEnum
+from mapsAndSettings import AGENT_REWARD_ENUM
 from network.utility import *
 #import agent # i think this is the other folder but I dont think it would have access to this?
 
@@ -517,7 +518,7 @@ class network_full(object):
     #self.ITERATIONSBETEENACTION = 200 # with 10 ms delay, and throttle agent every 2 seconds, we see 200 messages passed in between
     name = "Network_Full"
 
-    def __init__(self, network_settings, reward_overload, host_class, representationType, defender_settings, adversaryMaster, load_attack_path = None, save_attack=False):
+    def __init__(self, network_settings, host_class, representationType, defender_settings, adversaryMaster, load_attack_path = None, save_attack=False):
         self.network_settings = network_settings
         self.iterations_between_second = network_settings.iterations_between_second# ideally set at 200
         self.host_sources = np.empty_like(network_settings.host_sources)
@@ -531,7 +532,7 @@ class network_full(object):
         self.N_server = len(self.servers)
         self.N_host = len(self.host_sources)
         self.action_per_throttler = network_settings.action_per_throttler # actions each host can take
-        self.reward_overload = reward_overload
+        #self.reward_overload = reward_overload
         self.rate_legal_low = MbToKb(network_settings.rate_legal_low)  #/ self.iterations_between_second)
         self.rate_legal_high = MbToKb(network_settings.rate_legal_high)  #/ self.iterations_between_second)
         self.rate_attack_low = MbToKb(network_settings.rate_attack_low)  #/ self.iterations_between_second)
@@ -727,39 +728,59 @@ class network_full(object):
         self.reset()
 
 
-    def get_reward(self):
-        #print('calc reward')
+    def get_reward(self, reward_mode):
+        """
+        Used for calculating the reward.
+        Return packets at the server, legal packets sent, legal packets served and Us (per second)
+        """
+        """
+        3 Possible rewards:
+        1) With overload: Return -1 if server is over capacity
+        2) Sliding Negative: Return up to -1, the % over the server capacity
+        3) We use the same metric as for evaluation, albeit over a 2 second period instead of 1
+        """
+
+
         if self.cache_reward != None:
             return self.cache_reward
 
-        # currently if we're 1.1 times over we receive a punishment of -0.1, seems rather low. Maybe -1.5?        
-        reward = 0.0
-
-
-        legitimate_served = self.switches[0].get_legal_window()
-        illegal_served = self.switches[0].get_illegal_window()
-        legitimate_sent = legitimate_served + self.switches[0].get_legal_dropped_window()
+        legitimate_arrived = self.switches[0].get_legal_window()
+        illegal_arrived = self.switches[0].get_illegal_window()
+        legitimate_sent = legitimate_arrived + self.switches[0].get_legal_dropped_window()
         
-        server_load = legitimate_served + illegal_served
-        #assert((legitimate_served+attacker_served)==self.switches[0].getWindow())
+        server_load = legitimate_arrived + illegal_arrived
 
-        #print("server_load = {0} | upper_boundary = {1}".format(server_load, self.upper_boundary_two))
-        if server_load > self.upper_boundary_two:
-            if self.reward_overload:
-                reward = self.reward_overload
+
+        if server_load > (self.upper_boundary_two + DELTA):
+            # the three methods diverge how to respond to negative
+
+
+            if reward_mode == AGENT_REWARD_ENUM.overload:
+                # The only difference between sliding and overload is what happens when it's negative
+                self.cache_reward = -1
+                return self.cache_reward
+
+            elif reward_mode == AGENT_REWARD_ENUM.sliding_negative:
+                self.cache_reward = clip(-1, 1, -1 * server_load / self.upper_boundary_two)
+                return self.cache_reward
+
+            elif reward_mode == AGENT_REWARD_ENUM.packet_logic:
+                (legimate_served, illegal_served) = network_full.throttle_at_server(server_load, legitimate_arrived, illegal_arrived, self.upper_boundary_two)
+
             else:
-                reward -= (server_load/self.upper_boundary_two - 1.0)
-            
-            self.server_failures +=1
-
+                assert(1==2)
         else:
-
-            if legitimate_sent != 0:
-                reward += legitimate_served/legitimate_sent
+            # we assume all traffic arriving is severd by the server
+            legimate_served = legitimate_arrived
         
-        reward = clip(-1, 1, reward)
-        self.cache_reward = reward
-        return reward
+
+        self.cache_reward = clip(-1, 1, legimate_served / legitimate_sent) 
+        
+        return self.cache_reward
+
+
+
+
 
 
     def getHostCapacity(self):
@@ -799,14 +820,16 @@ class network_full(object):
             if self.network_settings.functionPastCapacity == True:
 
                 # print(server_load)
-                ratio = self.upper_bound/server_load
+                
+                (legal_served, illegal_served) = network_full.throttle_at_server(server_load, legal_arrived, illegal_arrived, self.upper_bound)
 
-                legal_arrived *= ratio
-                illegal_arrived *= ratio
-                assert(abs(legal_arrived+illegal_arrived - self.upper_bound) < 0.1)
+                assert(abs(legal_served+illegal_served - self.upper_bound) < 0.1)
             else:
-                legal_arrived = 0
-                illegal_arrived = 0
+                legal_served = 0
+                illegal_served = 0
+        else:
+            legal_served = legal_arrived
+            illegal_served = illegal_arrived
         # else:
         #     print("{0} < {1}".format(server_load, self.upper_bound))
         #     print(len(self.switches[0].illegal_segment[time_start:time_end]))
@@ -814,15 +837,29 @@ class network_full(object):
         #     print(self.iterations_between_second)
         #     print(self.getHostCapacity())
 
-        self.legitimate_served_ep += legal_arrived
+        self.legitimate_served_ep += legal_served
         self.legitimate_sent_ep += legal_sent
-        self.illegal_served_ep += illegal_arrived
+        self.illegal_served_ep += illegal_served
         self.illegal_sent_ep += illegal_sent
 
-        per_served = legal_arrived / legal_sent
-        return (legal_arrived, legal_sent, per_served, illegal_arrived, illegal_sent)
+        per_served = legal_served / legal_sent
+        return (legal_served, legal_sent, per_served, illegal_served, illegal_sent)
         # make sure not to update anything on the switch itself
 
+    def throttle_at_server(server_load, legal_arrived, illegal_arrived, capacity):
+        """
+        Assumes we can do a final throttle at a location
+        """
+
+        if (server_load+DELTA)<= capacity:
+            return (legal_arrived, illegal_arrived)
+
+        ratio = capacity/server_load
+
+        legal_served = legal_arrived * ratio
+        illegal_served = illegal_arrived * ratio
+
+        return(legal_served, illegal_served)
 
     def getEpisodeStatisitcs(self):
         # returns % of packets served in an episode

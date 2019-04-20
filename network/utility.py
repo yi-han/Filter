@@ -47,3 +47,8 @@ class advesaryStandardAttackEnum(Enum):
     split = 5
     random = 6
 
+
+class AGENT_REWARD_ENUM(Enum):
+    overload = 0
+    sliding_negative = 1
+    packet_logic = 2

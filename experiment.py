@@ -174,7 +174,7 @@ class Experiment:
             self.adversarialMaster =  self.opposition_settings.adversary_class(self.opposition_settings, ep_length)
             adv_e = 0
 
-        net = self.network_settings.emulator(self.network_settings, self.defender_settings.reward_overload, self.adversary_class, self.representationType, self.defender_settings, self.adversarialMaster, load_attack_path=self.load_attack_path)
+        net = self.network_settings.emulator(self.network_settings, self.adversary_class, self.representationType, self.defender_settings, self.adversarialMaster, load_attack_path=self.load_attack_path)
 
         print("Experiment has {0} episodes".format(num_episodes))
         print("\n Prefix {0}".format(prefix))
@@ -349,7 +349,7 @@ class Experiment:
                             def_last_state = def_next_state
                             def_past_action = def_next_action
 
-                            agent.calculate_state(net)
+                            agent.update_state(net)
                             def_next_state = agent.get_state()
                             def_next_action = agent.predict(def_next_state, e) # generate an action
                             num_defender_moves += 1
@@ -361,13 +361,13 @@ class Experiment:
                                 We assume this is only for training.
                                 We also assume that during training our reward is calculated over last 2 seconds
                                 """
-                                defender_reward = net.get_reward()
 
                                 # print("\nlast_state {0} last_prediction {1} current_action {2}".format(def_last_state, def_past_action, def_current_action))
                                 # print("New State {1} AssociatedReward {0} ".format(defender_reward, def_next_state))
-                                rAll += defender_reward
-                                reward_print_count += 1
+
                                 if self.defender_settings.save_model_mode in self.agentSaveModes:
+                                    defender_reward = net.get_reward(self.defender_settings.reward_function)
+
 
 
 
@@ -386,8 +386,14 @@ class Experiment:
                                 
 
                             
-                            
+                        # we've intentionally calculated the defender_reward twice. 
+                        # If action is every 2 seconds it'll use the cache.
+                        # But if action is ever 0.5 seconds and we not training ... no need to calculate reward tonnes 
+                        if second % 2:
+                            defender_reward = net.get_reward(self.defender_settings.reward_function)
 
+                            rAll += defender_reward
+                            reward_print_count += 1
                         
                         
 
