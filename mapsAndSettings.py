@@ -227,6 +227,39 @@ class NetworkNineAgent(object):
     save_per_step_stats = False
     functionPastCapacity = True # make it Malialis mode
 
+class NetworkTwelveAgent(object):
+    name = "twelve_agent"
+    N_state = 12
+    action_per_throttler = 10
+    N_switch = 19
+
+    host_sources = [3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5,
+        7, 7, 7, 7, 8, 8, 8, 8, 9, 9, 9, 9,
+        12, 12, 12, 12, 13, 13, 13, 13, 14, 14, 14, 14,
+        16, 16, 16, 16, 17, 17, 17, 17, 18, 18, 18 ,18]
+
+    servers = [0]
+    filters = [3, 4, 5, 7, 8, 9, 12, 13, 14, 16, 17, 18]
+    
+    topologyFile = 'topologies/nine_agent.txt'
+    rate_legal_low = 0.05 
+    rate_legal_high = 1 
+    rate_attack_low = 2.5 
+    rate_attack_high = 6
+    legal_probability = 0.6 # probability that is a good guys
+    upper_boundary = 50 
+    lower_boundary = 45 # guess
+
+    iterations_between_second = 100 # at 100 we are dealing wiht centiseconds
+
+    max_hosts_per_level = [4, 12, 24, 36]
+    bucket_capacity = 12.1
+    ep_length = 60 # Training is an episode of 60 seconds
+
+    max_depth = 4
+    is_sig_attack = False
+    save_per_step_stats = False
+    functionPastCapacity = True # make it Malialis mode
     
 
 class NetworkMalialisTeamFull(object):
