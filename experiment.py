@@ -364,9 +364,6 @@ class Experiment:
                                 if self.defender_settings.save_model_mode in self.agentSaveModes:
                                     defender_reward = net.get_reward(self.defender_settings.reward_function)
 
-
-
-
                                     # print("p_state {0} p_action {1} reward {2} n_state {3} n_action {4}".format(def_last_state, def_past_action, defender_reward,def_next_state, def_next_action))
                                     agent_done = False
                                     agent.update(def_last_state, def_past_action, def_next_state, agent_done, defender_reward, def_next_action)
@@ -385,7 +382,7 @@ class Experiment:
                         # we've intentionally calculated the defender_reward twice. 
                         # If action is every 2 seconds it'll use the cache.
                         # But if action is ever 0.5 seconds and we not training ... no need to calculate reward tonnes 
-                        if second % 2:
+                        if second % 2 == 0 and num_defender_moves>1:
                             defender_reward = net.get_reward(self.defender_settings.reward_function)
 
                             rAll += defender_reward
@@ -417,7 +414,7 @@ class Experiment:
                         total_sent = legit_sent+illegal_sent
 
                         total_served = legit_served+illegal_served
-                        reward_window = net.get_reward()
+                        reward_window = net.get_reward(self.defender_settings.reward_function)
                         server_actions_line = "{0},{1},{2},{3},{4},{5},{6},{7},{8},{9},{10},{11},{12},{13}".format(ep_num, second, legit_served, legit_sent, legal_per, illegal_served, illegal_sent, total_served, total_sent, reward_window,legal_capacity, illegal_capacity, total_capacity, self.opposition_settings.num_adv_agents)
 
                         if isinstance(def_current_action, list):

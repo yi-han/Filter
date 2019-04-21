@@ -270,7 +270,10 @@ class Switch():
 
 
         num_dests = len(self.destination_links)
-        assert(num_dests == 1 or (self.id == 0 and num_dests ==0 ))
+        if not (num_dests == 1 or (self.id == 0 and num_dests ==0 )):
+            print("{0} has an issue".format(self.id))
+            assert(1==2)
+
 
         if self.is_filter and self.bucket:
             # print("\n\n about to bucket")
@@ -743,14 +746,13 @@ class network_full(object):
         if server_load > (self.upper_boundary_two + DELTA):
             # the three methods diverge how to respond to negative
 
-
             if reward_mode == AGENT_REWARD_ENUM.overload:
                 # The only difference between sliding and overload is what happens when it's negative
                 self.cache_reward = -1
                 return self.cache_reward
 
             elif reward_mode == AGENT_REWARD_ENUM.sliding_negative:
-                self.cache_reward = clip(-1, 1, -1 * server_load / self.upper_boundary_two)
+                self.cache_reward = clip(-1, 1, -1*((server_load / self.upper_boundary_two)-1))
                 return self.cache_reward
 
             elif reward_mode == AGENT_REWARD_ENUM.packet_logic:
@@ -764,7 +766,6 @@ class network_full(object):
         
 
         self.cache_reward = clip(-1, 1, legimate_served / legitimate_sent) 
-        
         return self.cache_reward
 
 

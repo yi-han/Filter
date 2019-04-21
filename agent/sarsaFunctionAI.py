@@ -202,12 +202,11 @@ class SarsaFunctionAI:
         data['n_features'] = self.n_features
        
         data['name'] = self.agent_settings.name
-
+        data['rewardFunction'] = self.agent_settings.reward_function
         data['num_episodes'] = self.agent_settings.num_episodes
         data['pre_train_episodes'] = self.agent_settings.pre_train_episodes
         data['annealing_episodes'] = self.agent_settings.annealing_episodes
         data['startE'] = self.agent_settings.startE
-        data['reward_overload'] = self.agent_settings.reward_overload
         return data
 
     def loadData(self, dataDict):
@@ -224,16 +223,15 @@ class SarsaFunctionAI:
         # if dataDict['name'] != self.agent_settings.name \
         if dataDict['num_episodes'] != self.agent_settings.num_episodes \
         or dataDict['startE'] != self.agent_settings.startE \
-        or dataDict['reward_overload'] != self.agent_settings.reward_overload \
+        or dataDict['rewardFunction'] != self.agent_settings.reward_function \
         or dataDict['pre_train_episodes'] != self.agent_settings.pre_train_episodes \
         or dataDict['annealing_episodes'] != self.agent_settings.annealing_episodes:
             print("name {0} | {1}".format(dataDict['name'], self.agent_settings.name))
             print("num_episodes {0} | {1}".format(dataDict['num_episodes'], self.agent_settings.num_episodes))
             print("startE {0} | {1}".format(dataDict['startE'], self.agent_settings.startE))
-            print("reward_overload {0} | {1}".format(dataDict['reward_overload'], self.agent_settings.reward_overload))
             print("pre_train_episodes {0} | {1}".format(dataDict["pre_train_episodes"], self.agent_settings.pre_train_episodes))
             print("annealing_episodes {0} | {1}".format(dataDict["annealing_episodes"], self.agent_settings.annealing_episodes))
-
+            print("reward_function was {0} | now {1}".format(dataDict["rewardFunction"], self.agent_settings.reward_function))
             raise ValueError("Class settings do not match")
         else:
             self.q_tables = dataDict['q_tables']

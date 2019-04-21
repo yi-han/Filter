@@ -148,7 +148,7 @@ class NetworkSingleTeamMalialisMedium(object):
     name = "single_team_malialis_medium"
     N_state = 6
     action_per_throttler = 10
-    N_switch = 10
+    N_switch = 9
     host_sources = [3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8]
     servers = [0]
     filters = [3, 4, 5, 6, 7, 8]
@@ -663,12 +663,8 @@ def getSummary(adversary_classes, load_path, agent, prefix):
         annealing = agent.annealing_episodes
         total_episodes = agent.num_episodes
         start_e = agent.startE
-        if agent.reward_overload==-1:
-            overload = '-1'
-        elif agent.reward_overload == None:
-            overload = 'None'
-        else:
-            overload = 'misc'
+        overload = agent.reward_function.name
+
 
         summary.write("{0},{1},{2},{3},{4},{5},{6},{7},{8},{9},{10},{11},".format(attack_name, agent.name,
             sum_legal_received, sum_legal_sent, percentage_received,
