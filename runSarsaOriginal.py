@@ -5,6 +5,7 @@ import network.network_new
 import agent.tileCoding as tileCoding
 import agent.linearSarsaCentralised as linCen
 import agent.randomAgent as ranAg
+import agent.noThrottle as noThrot
 from mapsAndSettings import *
 import runAttacks
 assert(len(sys.argv)>=3)
@@ -19,7 +20,7 @@ class LinearSarsaSingular(object):
     tau = 0.1
     update_freq = 4
     batch_size = None
-    num_episodes = 200000#62500
+    num_episodes = 62500#62500
     pre_train_episodes = 0#2000
     annealing_episodes = 50000
     startE = 0.4 #0.4
@@ -29,14 +30,19 @@ class LinearSarsaSingular(object):
     group_size = 1 # number of filters each agent controls
     #stateletFunction = getStateletNoCommunication
     history_size = 1 # number of past iterations to look at
-    reward_overload = -1
+    reward_function = AGENT_REWARD_ENUM.overload
     stateRepresentation = stateRepresentationEnum.throttler  
     has_bucket = False
-
+    actions_per_second = 0.5 # make an decision every 2 seconds
+    
 class LinSingularExploration(LinearSarsaSingular):
     name = "linSingExp"
     endE = 0.1
 
+class LinearSliding(LinearSarsaSingular):
+    name = "SlidingMal"
+    actions_per_second = 2
+    # num_episodes = 200000
 
 class LinearSarsaSingularDDQNCopy(object):
     # copy from ddqnSingleNoCommunicate
@@ -54,9 +60,16 @@ class LinearSarsaSingularDDQNCopy(object):
     agent = None
     sub_agent = linCen.Agent
     stateRepresentation = stateRepresentationEnum.throttler
-    reward_overload = None
+    reward_function = AGENT_REWARD_ENUM.sliding_negative
+
     group_size = 1 # number of filters each agent controls
     has_bucket = False
+    actions_per_second = 0.5 # make an decision every 2 seconds
+
+class LinSinPackets(LinearSarsaSingularDDQNCopy):
+    name = "LinSinPackets"
+    reward_function = AGENT_REWARD_ENUM.packet_logic
+
 
 class LinSinDDMemory(LinearSarsaSingularDDQNCopy):
     name = "LinSinDDMemory"
@@ -81,8 +94,7 @@ class LinearSarsaLAI(object):
     sub_agent = linCen.Agent
     group_size = 1 # number of filters each agent controls
     #stateletFunction = getStateletNoCommunication
-    reward_overload = -1
-    stateRepresentation = stateRepresentationEnum.leaderAndIntermediate  
+    #stateRepresentation = stateRepresentationEnum.leaderAndIntermediate  
     has_bucket = False
 
 
@@ -97,7 +109,14 @@ class LinearSarsaLAIDDQN350(LinearSarsaLAI):
     startE = 1
     endE = 0.0
     episodeDrop = (startE - endE)/annealing_episodes
-    reward_overload = None  
+    reward_function = AGENT_REWARD_ENUM.sliding_negative
+    actions_per_second = 0.5
+    stateRepresentation = stateRepresentationEnum.up_to_server
+
+class LinHierPackets(LinearSarsaLAIDDQN350):
+    name = "LinHierPackets"
+    reward_function = AGENT_REWARD_ENUM.packet_logic
+
 
 class LinHierMemory(LinearSarsaLAIDDQN350):
     name = "LinHierMemory"
@@ -121,43 +140,65 @@ class LinTest(object):
     sub_agent = linCen.Agent
     group_size = 1 # number of filters each agent controls
     #stateletFunction = getStateletNoCommunication
-    reward_overload = -1
     stateRepresentation = stateRepresentationEnum.throttler  
     has_bucket = False
+    actions_per_second = 0.5
+
+class NoThrottleBaseline(object):
+    # note we have two dependencies
+    name = "NoThrottle"
+    discount_factor = 0
+    tau = 0.0
+    update_freq = 4
+    batch_size = None
+    num_episodes = 1#62500
+    pre_train_episodes = 0#2000
+    annealing_episodes = 1
+    startE = 0 #0.4
+    endE = 0.0
+    agent = None
+    sub_agent = noThrot.Agent
+    group_size = 1 # number of filters each agent controls
+    #stateletFunction = getStateletNoCommunication
+    history_size = 1 # number of past iterations to look at
+    stateRepresentation = stateRepresentationEnum.throttler  
+    has_bucket = False
+    actions_per_second = 0.5 # make an decision every 2 seconds
+
 
 
 # The class of the adversary to implement
 conAttack = hostClass.ConstantAttack
-shortPulse = hostClass.ShortPulse
-mediumPulse = hostClass.MediumPulse
-largePulse = hostClass.LargePulse
-gradualIncrease = hostClass.GradualIncrease
-coordAttack = hostClass.CoordinatedRandom
+
 adversarialLeaf = hostClass.adversarialLeaf
 
-attackClasses = [conAttack, shortPulse, mediumPulse,
-    largePulse, gradualIncrease] 
 
 """
 Settings to change
 """
 
-assignedNetwork = NetworkSixFour
-assignedAgent = LinHierMemory
+assignedNetwork = NetworkNineAgent
+assignedAgent = LinHierPackets
 load_attack_path = "attackSimulations/{0}/".format(assignedNetwork.name)
 network_emulator = network.network_new.network_full # network_quick # network_full
 loadAttacks = False
 
 
 
-assignedAgent.save_model_mode = defender_mode_enum.load
+# print("\n\nSETTING TO JEREMY MODE\n\n\n")
+# assignedNetwork.functionPastCapacity = False
+
+print("\n\nOVERWRITE_ITERATIONS_PER_SECOND")
+assignedNetwork.iterations_per_second = 30
+
+assignedAgent.save_model_mode = defender_mode_enum.save
 trainHost = adversarialLeaf #coordAttack # conAttack #driftAttack #adversarialLeaf
 assignedNetwork.drift = 0
 
-opposition = adv_constant #adv_random # adv_constant
-intelligentOpposition =  DdGenericSplit #
+opposition = adv_random #adv_random # adv_constant
+intelligentOpposition =  DdGenericSplitShort #
 intelligentOpposition.save_model_mode = defender_mode_enum.save
-# intelligentOpposition = None
+intelligentOpposition = None
 
 
 assert(trainHost==adversarialLeaf)
@@ -185,7 +226,7 @@ This is the encoder for the sarsa, this might be better positioned somewhere els
 encoders = []
 level = 0 # level 0 is throttlers, level 1 is intermeditary etc
 for max_hosts in assignedNetwork.max_hosts_per_level:
-    maxThrottlerBandwidth = assignedNetwork.rate_attack_high * max_hosts # a throttler doesn't face more than X
+    maxThrottlerBandwidth = 2 * assignedNetwork.rate_attack_high * max_hosts # a throttler doesn't face more than X
     if level == 0:
         numTiles = 6 * max_hosts
     elif assignedAgent.stateRepresentation == stateRepresentationEnum.throttler:
