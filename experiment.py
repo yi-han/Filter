@@ -439,7 +439,19 @@ class Experiment:
 
 
                 """
+                if self.defender_settings.save_model_mode in self.agentSaveModes:
+                    agent_done = True
+                    final_state = agent.get_state()
+                    defender_reward = net.get_reward(self.defender_settings.reward_function)
+                    empty_set = [None] * len(def_next_state) # a row of Nones for next state/action
+                    agent.update(def_next_state, def_next_action, final_state, agent_done, defender_reward, empty_set) 
 
+                if self.opposition_settings.is_intelligent and self.opposition_settings.save_model_mode in self.agentSaveModes:
+                    assert(self.can_attack(second-1))
+                    adversary_done = True
+                    adversary_reward = self.adversarialMaster.calculate_reward()
+                    empty_set = [None] * len(adv_next_state)
+                    self.adversarialMaster.update(adv_next_state, adv_next_action, empty_set, adversary_done, adversary_reward, empty_set) # num_adversary_moves ?
 
 
                 # end of an episode we record some statistics

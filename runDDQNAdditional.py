@@ -32,7 +32,7 @@ class ddqnSingleNoCommunicate(object):
     agent = None
     sub_agent = ddCen.Agent
     stateRepresentation = stateRepresentationEnum.throttler
-    reward_overload = None
+    reward_function = AGENT_REWARD_ENUM.sliding_negative
     has_bucket = False
     actions_per_second = 0.5 # make an decision every 2 seconds
 
@@ -40,6 +40,9 @@ class ddqnSingleMemory(ddqnSingleNoCommunicate):
     name = "ddqnSingleMemory"
     history_size = 5
 
+class ddSinPackets(ddqnSingleNoCommunicate):
+    name = "ddSinPackets"
+    reward_function = AGENT_REWARD_ENUM.packet_logic
 
 class ddqn100MediumHierarchical(object):
     group_size = 1
@@ -56,8 +59,8 @@ class ddqn100MediumHierarchical(object):
     history_size = 1 # number of past iterations to look at
     agent = None
     sub_agent = ddCen.Agent
-    stateRepresentation = stateRepresentationEnum.leaderAndIntermediate
-    reward_overload = None   
+    stateRepresentation = stateRepresentationEnum.up_to_server
+    reward_function = AGENT_REWARD_ENUM.sliding_negative   
     has_bucket = False
 
     actions_per_second = 0.5 # make an decision every 2 seconds
@@ -66,7 +69,11 @@ class ddqn100MediumHierarchical(object):
 class ddqnHierMemory(ddqn100MediumHierarchical):
     name = "ddqnHierMemory"
     history_size = 5
+    reward_function = AGENT_REWARD_ENUM.packet_logic
 
+class ddHierPackets(ddqn100MediumHierarchical):
+    name = "ddHierPackets"
+    
 
 class ddqnHierExploration(ddqn100MediumHierarchical):
     name = "ddqnHierExp"
@@ -89,23 +96,23 @@ adversarialLeaf = hostClass.adversarialLeaf
 
 ###
 # Settings NetworkMalialisSmall
-assignedNetwork =   NetworkSixFour
-assignedAgent =  ddqn100MediumHierarchical #ddqnSingleNoCommunicate #ddqn100MediumHierarchical
+assignedNetwork =   NetworkTwelveAgent
+assignedAgent =  ddSinPackets #ddqnSingleNoCommunicate #ddqn100MediumHierarchical
 load_attack_path = "attackSimulations/{0}/".format(assignedNetwork.name)
 loadAttacks = False
 assignedAgent.encoders = None
 
-assignedAgent.save_model_mode = defender_mode_enum.load
+# print("\n\nSETTING TO JEREMY MODE\n\n\n")
+# assignedNetwork.functionPastCapacity = False
+
+assignedAgent.save_model_mode = defender_mode_enum.save
 trainHost = adversarialLeaf #coordAttack # conAttack #driftAttack #adversarialLeaf
 assignedNetwork.drift = 0
-
-print("\n\nSETTING TO JEREMY MODE\n\n\n")
-assignedNetwork.functionPastCapacity = False
 
 opposition = adv_constant #adv_random #adv_constant
 intelligentOpposition = DdGenericSplitShort #ddAdvAntiAimd #DdCoordinatedLowlongDlowSettings #DdCoordinatedMasterSettings #DdRandomMasterSettings
 intelligentOpposition.save_model_mode = defender_mode_enum.save
-# intelligentOpposition = None
+intelligentOpposition = None
 
 
 assert(trainHost==adversarialLeaf)

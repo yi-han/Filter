@@ -241,7 +241,7 @@ class NetworkTwelveAgent(object):
     servers = [0]
     filters = [3, 4, 5, 7, 8, 9, 12, 13, 14, 16, 17, 18]
     
-    topologyFile = 'topologies/nine_agent.txt'
+    topologyFile = 'topologies/twelve_agent.txt'
     rate_legal_low = 0.05 
     rate_legal_high = 1 
     rate_attack_low = 2.5 

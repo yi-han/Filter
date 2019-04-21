@@ -243,6 +243,7 @@ class dumbMaster(genericMaster.GenericAdvMaster):
                 switches_seen[leader.current_position]=current_set
                 if leader.current_position.id !=0:
                     # skip as at server
+                    #print(current_set[0].current_position.id)
                     leader.current_position = current_set[0].current_position.destination_links[0].destination_switch
                 k += 1                
         # sanity check

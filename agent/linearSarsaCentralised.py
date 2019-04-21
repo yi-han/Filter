@@ -72,7 +72,7 @@ class Agent(aBase.Agent):
         self.score += reward
 
 
-        self.ai.learn(last_state, last_action, reward, current_state, next_action)
+        self.ai.learn(last_state, last_action, reward, current_state, next_action, is_finished)
 
 
     def actionReplay(self, current_state, batch_size):

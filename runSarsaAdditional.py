@@ -177,7 +177,7 @@ adversarialLeaf = hostClass.adversarialLeaf
 Settings to change
 """
 
-assignedNetwork = NetworkNineAgent
+assignedNetwork = NetworkSixFour
 assignedAgent = LinearSarsaSingularDDQNCopy
 load_attack_path = "attackSimulations/{0}/".format(assignedNetwork.name)
 network_emulator = network.network_new.network_full # network_quick # network_full
@@ -188,14 +188,14 @@ loadAttacks = False
 # print("\n\nSETTING TO JEREMY MODE\n\n\n")
 # assignedNetwork.functionPastCapacity = False
 
-print("\n\nOVERWRITE_ITERATIONS_PER_SECOND")
-assignedNetwork.iterations_per_second = 30
+# print("\n\nOVERWRITE_ITERATIONS_PER_SECOND")
+# assignedNetwork.iterations_per_second = 30
 
 assignedAgent.save_model_mode = defender_mode_enum.save
 trainHost = adversarialLeaf #coordAttack # conAttack #driftAttack #adversarialLeaf
 assignedNetwork.drift = 0
 
-opposition = adv_random #adv_random # adv_constant
+opposition = adv_constant #adv_random # adv_constant
 intelligentOpposition =  DdGenericSplitShort #
 intelligentOpposition.save_model_mode = defender_mode_enum.save
 intelligentOpposition = None
