@@ -114,7 +114,7 @@ class dumbMaster(genericMaster.GenericAdvMaster):
 
 
 
-    def calculate_state(self, net):
+    def update_state(self, net):
         return
 
     def get_state(self):

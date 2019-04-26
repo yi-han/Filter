@@ -73,7 +73,7 @@ class ddqnHierMemory(ddqn100MediumHierarchical):
 class ddHierPackets(ddqn100MediumHierarchical):
     name = "ddHierPackets"
     reward_function = AGENT_REWARD_ENUM.packet_logic
-    
+
 
 class ddqnHierExploration(ddqn100MediumHierarchical):
     name = "ddqnHierExp"
@@ -96,8 +96,8 @@ adversarialLeaf = hostClass.adversarialLeaf
 
 ###
 # Settings NetworkMalialisSmall
-assignedNetwork =   NetworkTwelveAgent
-assignedAgent =  ddqnSingleNoCommunicate #ddqnSingleNoCommunicate #ddqn100MediumHierarchical
+assignedNetwork =   NetworkMalialisSmall
+assignedAgent =  ddHierPackets #ddqnSingleNoCommunicate #ddqn100MediumHierarchical
 load_attack_path = "attackSimulations/{0}/".format(assignedNetwork.name)
 loadAttacks = False
 assignedAgent.encoders = None
@@ -105,14 +105,14 @@ assignedAgent.encoders = None
 # print("\n\nSETTING TO JEREMY MODE\n\n\n")
 # assignedNetwork.functionPastCapacity = False
 
-assignedAgent.save_model_mode = defender_mode_enum.save
+assignedAgent.save_model_mode = defender_mode_enum.load
 trainHost = adversarialLeaf #coordAttack # conAttack #driftAttack #adversarialLeaf
 assignedNetwork.drift = 0
 
 opposition = adv_constant #adv_random #adv_constant
 intelligentOpposition = DdGenericSplitShort #ddAdvAntiAimd #DdCoordinatedLowlongDlowSettings #DdCoordinatedMasterSettings #DdRandomMasterSettings
 intelligentOpposition.save_model_mode = defender_mode_enum.save
-intelligentOpposition = None
+# intelligentOpposition = None
 
 
 assert(trainHost==adversarialLeaf)

@@ -5,6 +5,7 @@ import network.network_new
 import agent.tileCoding as tileCoding
 import agent.linearSarsaCentralised as linCen
 import agent.randomAgent as ranAg
+import agent.noThrottle as noThrot
 from mapsAndSettings import *
 import runAttacks
 assert(len(sys.argv)>=3)
@@ -19,7 +20,7 @@ class LinearSarsaSingular(object):
     tau = 0.1
     update_freq = 4
     batch_size = None
-    num_episodes = 200000#62500
+    num_episodes = 62500#62500
     pre_train_episodes = 0#2000
     annealing_episodes = 50000
     startE = 0.4 #0.4
@@ -28,34 +29,20 @@ class LinearSarsaSingular(object):
     sub_agent = linCen.Agent
     group_size = 1 # number of filters each agent controls
     #stateletFunction = getStateletNoCommunication
-    reward_overload = -1
+    history_size = 1 # number of past iterations to look at
+    reward_function = AGENT_REWARD_ENUM.overload
     stateRepresentation = stateRepresentationEnum.throttler  
     has_bucket = False
-
+    actions_per_second = 0.5 # make an decision every 2 seconds
+    
 class LinSingularExploration(LinearSarsaSingular):
     name = "linSingExp"
     endE = 0.1
 
-class LinearSarsaLAI(object):
-    name = "LinearSarsaLAI"
-    #max_epLength = 500
-    discount_factor = 0
-    tau = 0.01
-    update_freq = 4
-    batch_size = None
-    num_episodes = 100001#82501
-    pre_train_episodes = 0#2000 * max_epLength
-    annealing_episodes = 80000 #10 #60000 
-    startE = 0.3 #0.4
-    endE = 0.0
-    agent = None
-    sub_agent = linCen.Agent
-    group_size = 1 # number of filters each agent controls
-    #stateletFunction = getStateletNoCommunication
-    reward_overload = -1
-    stateRepresentation = stateRepresentationEnum.leaderAndIntermediate  
-    has_bucket = False
-
+class linSinOrigSliding(LinearSarsaSingular):
+    name = "linSinOrigSliding"
+    actions_per_second = 2
+    # num_episodes = 200000
 
 class LinearSarsaSingularDDQNCopy(object):
     # copy from ddqnSingleNoCommunicate
@@ -69,11 +56,53 @@ class LinearSarsaSingularDDQNCopy(object):
     annealing_episodes = 60000  #120000  #
     startE = 1
     endE = 0.0
+    history_size = 1 # number of past iterations to look at
     agent = None
     sub_agent = linCen.Agent
     stateRepresentation = stateRepresentationEnum.throttler
-    reward_overload = None
+    reward_function = AGENT_REWARD_ENUM.sliding_negative
+
     group_size = 1 # number of filters each agent controls
+    has_bucket = False
+    actions_per_second = 0.5 # make an decision every 2 seconds
+
+class linSinNormSliding(LinearSarsaSingularDDQNCopy):
+    name = "linSinNormSliding"
+    actions_per_second = 2
+
+
+class LinSinPackets(LinearSarsaSingularDDQNCopy):
+    name = "LinSinPackets"
+    reward_function = AGENT_REWARD_ENUM.packet_logic
+
+class linSinPacketsSliding(LinSinPackets):
+    name = "linSinPacketsSliding"
+    actions_per_second = 2
+
+class LinSinDDMemory(LinearSarsaSingularDDQNCopy):
+    name = "LinSinDDMemory"
+    tau = 0.005
+    history_size = 5
+
+class LinearSarsaLAI(object):
+    name = "LinearSarsaLAI"
+    #max_epLength = 500
+    discount_factor = 0
+    tau = 0.01
+    update_freq = 4
+    batch_size = None
+    num_episodes = 100001#82501
+    pre_train_episodes = 0#2000 * max_epLength
+    annealing_episodes = 80000 #10 #60000 
+    startE = 0.3 #0.4
+    endE = 0.0
+    history_size = 1 # number of past iterations to look at
+
+    agent = None
+    sub_agent = linCen.Agent
+    group_size = 1 # number of filters each agent controls
+    #stateletFunction = getStateletNoCommunication
+    #stateRepresentation = stateRepresentationEnum.leaderAndIntermediate  
     has_bucket = False
 
 
@@ -81,14 +110,26 @@ class LinearSarsaSingularDDQNCopy(object):
 class LinearSarsaLAIDDQN350(LinearSarsaLAI):
     # Idea (without using a ridiculous number of epLength, set the learning rate even lower and give proper exploration)
     name = "LinearDDQN350"
-    tau = 0.05
+    tau = 0.005
     num_episodes = 350001 #200001#    
     pre_train_episodes = 40000 #40000 #
     annealing_episodes = 160000  #120000  #
     startE = 1
     endE = 0.0
     episodeDrop = (startE - endE)/annealing_episodes
-    reward_overload = None  
+    reward_function = AGENT_REWARD_ENUM.sliding_negative
+    actions_per_second = 0.5
+    stateRepresentation = stateRepresentationEnum.up_to_server
+
+class LinHierPackets(LinearSarsaLAIDDQN350):
+    name = "LinHierPackets"
+    reward_function = AGENT_REWARD_ENUM.packet_logic
+
+
+class LinHierMemory(LinearSarsaLAIDDQN350):
+    name = "LinHierMemory"
+    tau = 0.001
+    history_size = 5
 
 class LinTest(object):
     # note we have two dependencies
@@ -102,46 +143,69 @@ class LinTest(object):
     annealing_episodes = 5 #10 #60000 
     startE = 0.4 #0.4
     endE = 0.0
+    history_size = 1 # number of past iterations to look at
     agent = None
     sub_agent = linCen.Agent
     group_size = 1 # number of filters each agent controls
     #stateletFunction = getStateletNoCommunication
-    reward_overload = -1
     stateRepresentation = stateRepresentationEnum.throttler  
     has_bucket = False
+    actions_per_second = 0.5
+
+class NoThrottleBaseline(object):
+    # note we have two dependencies
+    name = "NoThrottle"
+    discount_factor = 0
+    tau = 0.0
+    update_freq = 4
+    batch_size = None
+    num_episodes = 1#62500
+    pre_train_episodes = 0#2000
+    annealing_episodes = 1
+    startE = 0 #0.4
+    endE = 0.0
+    agent = None
+    sub_agent = noThrot.Agent
+    group_size = 1 # number of filters each agent controls
+    #stateletFunction = getStateletNoCommunication
+    history_size = 1 # number of past iterations to look at
+    stateRepresentation = stateRepresentationEnum.throttler  
+    has_bucket = False
+    actions_per_second = 0.5 # make an decision every 2 seconds
+
 
 
 # The class of the adversary to implement
 conAttack = hostClass.ConstantAttack
-shortPulse = hostClass.ShortPulse
-mediumPulse = hostClass.MediumPulse
-largePulse = hostClass.LargePulse
-gradualIncrease = hostClass.GradualIncrease
-coordAttack = hostClass.CoordinatedRandom
+
 adversarialLeaf = hostClass.adversarialLeaf
 
-attackClasses = [conAttack, shortPulse, mediumPulse,
-    largePulse, gradualIncrease] 
 
 """
 Settings to change
 """
 
-assignedNetwork = NetworkSingleTeamMalialisMedium
-assignedAgent = LinearSarsaLAIDDQN350
+assignedNetwork = NetworkMalialisSmall
+assignedAgent = linSinPacketsSliding
 load_attack_path = "attackSimulations/{0}/".format(assignedNetwork.name)
 network_emulator = network.network_new.network_full # network_quick # network_full
 loadAttacks = False
 
 
 
+# print("\n\nSETTING TO JEREMY MODE\n\n\n")
+# assignedNetwork.functionPastCapacity = False
+
+# print("\n\nOVERWRITE_ITERATIONS_PER_SECOND")
+# assignedNetwork.iterations_per_second = 30
+
 assignedAgent.save_model_mode = defender_mode_enum.load
 trainHost = adversarialLeaf #coordAttack # conAttack #driftAttack #adversarialLeaf
 assignedNetwork.drift = 0
 
 opposition = adv_random #adv_random # adv_constant
-intelligentOpposition =  sarAdvSplit #
-intelligentOpposition.save_model_mode = defender_mode_enum.load_continue
+intelligentOpposition =  DdGenericSplitShort #
+intelligentOpposition.save_model_mode = defender_mode_enum.save
 # intelligentOpposition = None
 
 
@@ -170,7 +234,7 @@ This is the encoder for the sarsa, this might be better positioned somewhere els
 encoders = []
 level = 0 # level 0 is throttlers, level 1 is intermeditary etc
 for max_hosts in assignedNetwork.max_hosts_per_level:
-    maxThrottlerBandwidth = assignedNetwork.rate_attack_high * max_hosts # a throttler doesn't face more than X
+    maxThrottlerBandwidth = 2 * assignedNetwork.rate_attack_high * max_hosts # a throttler doesn't face more than X
     if level == 0:
         numTiles = 6 * max_hosts
     elif assignedAgent.stateRepresentation == stateRepresentationEnum.throttler:
@@ -179,7 +243,7 @@ for max_hosts in assignedNetwork.max_hosts_per_level:
         numTiles = 6 # just set at 6.
     numTilings = 8
     tileCoder = tileCoding.myTileInterface(maxThrottlerBandwidth, numTiles, numTilings)
-    encoders.append(tileCoder)
+    encoders.extend([tileCoder]*assignedAgent.history_size)
     level += 1
 assignedAgent.encoders = encoders
 

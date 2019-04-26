@@ -4,7 +4,7 @@
 #SBATCH --cpus-per-task=1
 #SBATCH --time=7-00:00:00
 #SBATCH --account=punim0636
-#SBATCH --partition=physical
+#SBATCH --partition=cloud,physical
 #SBATCH --job-name=sampleDDQNText
 #SBATCH --mem=43000
 # Send yourself an email when the job:
@@ -24,8 +24,10 @@ module load Tensorflow/1.3.0-intel-2017.u2-Python-3.5.2
 
 # Launch multiple process python code
 
-echo "Starting physical throttle"
+echo "Starting cloud throttle"
 time mpiexec -n 1 python3 runDDQN.py 0 2 "samplePath"
+# time mpiexec -n 1 python3 runDDQN.py 2 1 "samplePath"
+# time mpiexec -n 1 python3 runDDQN.py 4 1 "samplePath"
 
 echo "done"
 

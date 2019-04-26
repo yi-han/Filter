@@ -3,30 +3,47 @@
 # We assume $1 is the name of the folder we are copying from
 
 # sarsaOrig
-EV_MODE="Over_"
 
 DEFENDER="sarOrig"
-echo ../$1/$DEFENDER "dd$EV_MODE$DEFENDER"
+SLIDING_DEF="sliding"
 
-cp -R ../$1/$DEFENDER "dd$EV_MODE$DEFENDER"
-rm "dd$EV_MODE$DEFENDER"/*.csv
 
-# sliding
-TEMP_DEF="sliding"
-cp -R "dd$EV_MODE$DEFENDER" "dd$EV_MODE$TEMP_DEF"
+echo ../$1/$DEFENDER "adv_$DEFENDER"
+cp -R ../$1/$DEFENDER "adv_$DEFENDER"
+rm "adv_$DEFENDER"/*.csv
+cp -R "adv_$DEFENDER" "adv_Sliding_$DEFENDER" # sliding
 
-DEFENDER="sarSinDD"
-cp -R ../$1/$DEFENDER "dd$EV_MODE$DEFENDER"
 
-# DEFENDER="sarHier"
-# cp -R ../$1/$DEFENDER "dd$EV_MODE$DEFENDER"
-# # cp -R ../expTwo64ConOverflow/sarHier ddOver_sarHier
+DEFENDER="sarSinNor"
+cp -R ../$1/$DEFENDER "adv_$DEFENDER"
+rm "adv_$DEFENDER"/*.csv
+cp -R "adv_$DEFENDER" "adv_Sliding_$DEFENDER" # sliding
 
-# DEFENDER="ddSin"
-# cp -R ../$1/$DEFENDER "dd$EV_MODE$DEFENDER"
+DEFENDER="sarSinPackets"
+cp -R ../$1/$DEFENDER "adv_$DEFENDER"
+rm "adv_$DEFENDER"/*.csv
+cp -R "adv_$DEFENDER" "adv_Sliding_$DEFENDER" # sliding
 
-# DEFENDER="ddHier"
-# cp -R ../$1/$DEFENDER "dd$EV_MODE$DEFENDER"
+# DEFENDER="sarHierNorm"
+# cp -R ../$1/$DEFENDER "adv_$DEFENDER"
+
+# DEFENDER="sarHierPackets"
+# cp -R ../$1/$DEFENDER "adv_$DEFENDER"
+
+DEFENDER="ddSinNorm"
+cp -R ../$1/$DEFENDER "adv_$DEFENDER"
+
+
+DEFENDER="ddSinPackets"
+cp -R ../$1/$DEFENDER "adv_$DEFENDER"
+
+# DEFENDER="ddHierNorm"
+# cp -R ../$1/$DEFENDER "adv_$DEFENDER"
+
+# Do this later.
+# DEFENDER="ddHierPackets"
+# cp -R ../$1/$DEFENDER "adv_$DEFENDER"
+
 
 
 rm */*.csv

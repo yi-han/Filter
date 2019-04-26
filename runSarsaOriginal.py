@@ -5,7 +5,6 @@ import network.network_new
 import agent.tileCoding as tileCoding
 import agent.linearSarsaCentralised as linCen
 import agent.randomAgent as ranAg
-import agent.noThrottle as noThrot
 from mapsAndSettings import *
 import runAttacks
 assert(len(sys.argv)>=3)
@@ -39,8 +38,8 @@ class LinSingularExploration(LinearSarsaSingular):
     name = "linSingExp"
     endE = 0.1
 
-class LinearSliding(LinearSarsaSingular):
-    name = "SlidingMal"
+class linSinOrigSliding(LinearSarsaSingular):
+    name = "linSinOrigSliding"
     actions_per_second = 2
     # num_episodes = 200000
 
@@ -66,10 +65,18 @@ class LinearSarsaSingularDDQNCopy(object):
     has_bucket = False
     actions_per_second = 0.5 # make an decision every 2 seconds
 
+class linSinNormSliding(LinearSarsaSingularDDQNCopy):
+    name = "linSinNormSliding"
+    actions_per_second = 2
+
+
 class LinSinPackets(LinearSarsaSingularDDQNCopy):
     name = "LinSinPackets"
     reward_function = AGENT_REWARD_ENUM.packet_logic
 
+class linSinPacketsSliding(LinSinPackets):
+    name = "linSinPacketsSliding"
+    actions_per_second = 2
 
 class LinSinDDMemory(LinearSarsaSingularDDQNCopy):
     name = "LinSinDDMemory"
@@ -144,27 +151,6 @@ class LinTest(object):
     has_bucket = False
     actions_per_second = 0.5
 
-class NoThrottleBaseline(object):
-    # note we have two dependencies
-    name = "NoThrottle"
-    discount_factor = 0
-    tau = 0.0
-    update_freq = 4
-    batch_size = None
-    num_episodes = 1#62500
-    pre_train_episodes = 0#2000
-    annealing_episodes = 1
-    startE = 0 #0.4
-    endE = 0.0
-    agent = None
-    sub_agent = noThrot.Agent
-    group_size = 1 # number of filters each agent controls
-    #stateletFunction = getStateletNoCommunication
-    history_size = 1 # number of past iterations to look at
-    stateRepresentation = stateRepresentationEnum.throttler  
-    has_bucket = False
-    actions_per_second = 0.5 # make an decision every 2 seconds
-
 
 
 # The class of the adversary to implement
@@ -191,7 +177,7 @@ loadAttacks = False
 # print("\n\nOVERWRITE_ITERATIONS_PER_SECOND")
 # assignedNetwork.iterations_per_second = 30
 
-assignedAgent.save_model_mode = defender_mode_enum.save
+assignedAgent.save_model_mode = defender_mode_enum.load_continue
 trainHost = adversarialLeaf #coordAttack # conAttack #driftAttack #adversarialLeaf
 assignedNetwork.drift = 0
 

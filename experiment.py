@@ -217,7 +217,9 @@ class Experiment:
             if self.defender_settings.save_model_mode in self.agentLoadModes : #mapsAndSettings.defender_mode_enum.test
                 episode = agent.loadModel(self.file_path, prefix)
                 if self.defender_settings.save_model_mode == mapsAndSettings.defender_mode_enum.load_continue:
-                    ep_init = episode
+                    ep_init = max(episode, ep_init) # edge case: Return -1 if folder doesn't exist
+                else:
+                    assert(ep_init != -1) # used to flag doesnt exist
             if self.opposition_settings.is_intelligent and self.opposition_settings.save_model_mode in self.agentLoadModes:              
                 episode = self.adversarialMaster.loadModel(self.file_path, prefix)
                 if self.opposition_settings.save_model_mode == mapsAndSettings.defender_mode_enum.load_continue:
@@ -258,7 +260,6 @@ class Experiment:
             print("\n\n Starting at episode {0}".format(ep_init))
             print("num_episodes {0} episode length {1} iterations between each second {2}".format(num_episodes, ep_length, self.network_settings.iterations_between_second))
             for ep_num in range(ep_init, num_episodes):
-                # print(ep_num)
                 net.reset() # reset the network
                 agent.reset_episode(net)
                 ep_adv_loss = 0
@@ -303,10 +304,13 @@ class Experiment:
                             adv_past_action = adv_next_action
 
 
-                            self.adversarialMaster.calculate_state(net)
+                            self.adversarialMaster.update_state(net)
                             adv_next_state = self.adversarialMaster.get_state()
                             adv_next_action = self.adversarialMaster.predict(adv_next_state, adv_e, adv_step, self.can_attack(second)) # generate an action
                             num_adversary_moves += 1
+
+
+
 
 
                             # adv_next_state = self.adversarialMaster.get_state(net, adv_e, adv_step)
@@ -321,7 +325,7 @@ class Experiment:
                                     if self.opposition_settings.save_model_mode in self.agentSaveModes:
                                         adversary_done = False
                                         if self.can_attack(second-1):
-                                            # if the adversary couldn't attack last turn we don't want to update
+                                            
                                             self.adversarialMaster.update(adv_past_state, adv_past_action, adv_next_state, adversary_done, adversary_reward, adv_next_action) # num_adversary_moves ?
                                     
                                     
@@ -449,9 +453,10 @@ class Experiment:
                 if self.opposition_settings.is_intelligent and self.opposition_settings.save_model_mode in self.agentSaveModes:
                     assert(self.can_attack(second-1))
                     adversary_done = True
+                    final_state = self.adversarialMaster.get_state()
                     adversary_reward = self.adversarialMaster.calculate_reward()
                     empty_set = [None] * len(adv_next_state)
-                    self.adversarialMaster.update(adv_next_state, adv_next_action, empty_set, adversary_done, adversary_reward, empty_set) # num_adversary_moves ?
+                    self.adversarialMaster.update(adv_next_state, adv_next_action, final_state, adversary_done, adversary_reward, empty_set) # num_adversary_moves ?
 
 
                 # end of an episode we record some statistics

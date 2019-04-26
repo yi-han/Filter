@@ -20,6 +20,8 @@ import agent.AIMD
 import os
 import numpy as np
 import pandas
+import agent.noThrottle as noThrot
+
 
 # defender_mode_enum = Enum('SaveModel', 'neither save load test_short')
 
@@ -107,6 +109,28 @@ class AIMDAlternative(AIMDsettings):
 #     name = "AIMDvariant"
 #     sub_agent = agent.AIMD.AIMDvariant
 
+
+class NoThrottleBaseline(object):
+    # note we have two dependencies
+    name = "NoThrottle"
+    discount_factor = 0
+    tau = 0.0
+    update_freq = 4
+    batch_size = None
+    num_episodes = 1#62500
+    pre_train_episodes = 0#2000
+    annealing_episodes = 1
+    startE = 0 #0.4
+    endE = 0.0
+    agent = None
+    sub_agent = noThrot.Agent
+    group_size = 1 # number of filters each agent controls
+    #stateletFunction = getStateletNoCommunication
+    history_size = 1 # number of past iterations to look at
+    stateRepresentation = stateRepresentationEnum.throttler  
+    has_bucket = False
+    actions_per_second = 0.5 # make an decision every 2 seconds
+    reward_function = AGENT_REWARD_ENUM.packet_logic
 
 
 class NetworkMalialisSmall(object):

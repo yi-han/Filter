@@ -34,7 +34,7 @@ def generateAttacks(networkSettings, attackClasses, max_epLength = -1, num_episo
     with open(attack_path, "wb") as f:
         
         # run all the simulations
-        net = netModule.network_full(networkSettings, reward_overload, conAttack, netModule.stateRepresentationEnum.throttler, AIMDsettings, None, None, True)
+        net = netModule.network_full(networkSettings, conAttack, AIMDsettings, None, None, True)
         for _ in range(num_episodes):
             net.reset()
 
@@ -51,8 +51,8 @@ adversarialLeaf = hostClass.adversarialLeaf
 
 attackClasses = [conAttack] 
 
-commonMaps = [NetworkMalialisSmall, NetworkSingleTeamMalialisMedium, NetworkSixFour, NetworkMalialisTeamFull, NetworkSixHard]
-# commonMaps = [NetworkSixHard]
+commonMaps = [NetworkMalialisSmall, NetworkSingleTeamMalialisMedium, NetworkSixFour, NetworkMalialisTeamFull, NetworkSixHard, NetworkNineAgent, NetworkTwelveAgent]
+# commonMaps = [NetworkNineAgent, NetworkTwelveAgent]
 for common_map in commonMaps:
     common_map.drift = 0
     print(common_map)

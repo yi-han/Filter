@@ -69,11 +69,11 @@ class ddqn100MediumHierarchical(object):
 class ddqnHierMemory(ddqn100MediumHierarchical):
     name = "ddqnHierMemory"
     history_size = 5
-    reward_function = AGENT_REWARD_ENUM.packet_logic
 
 class ddHierPackets(ddqn100MediumHierarchical):
     name = "ddHierPackets"
-    
+    reward_function = AGENT_REWARD_ENUM.packet_logic
+
 
 class ddqnHierExploration(ddqn100MediumHierarchical):
     name = "ddqnHierExp"
@@ -105,7 +105,7 @@ assignedAgent.encoders = None
 # print("\n\nSETTING TO JEREMY MODE\n\n\n")
 # assignedNetwork.functionPastCapacity = False
 
-assignedAgent.save_model_mode = defender_mode_enum.save
+assignedAgent.save_model_mode = defender_mode_enum.load_continue
 trainHost = adversarialLeaf #coordAttack # conAttack #driftAttack #adversarialLeaf
 assignedNetwork.drift = 0
 

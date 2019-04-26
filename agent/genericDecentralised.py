@@ -15,7 +15,7 @@ the calculations are done by many agents
 
 #import agent.agentBase as aBase
 import math
-
+import os
 
 class AgentOfAgents():
 
@@ -28,6 +28,8 @@ class AgentOfAgents():
         self.history_size = agent_settings.history_size
         self.agent_settings = agent_settings
         self.N_state = network_settings.N_state
+
+    
     def __enter__(self):
         print("__enter__ generic decentralised")
         for agent in self.agents:
@@ -110,6 +112,8 @@ class AgentOfAgents():
         print("loading all models")
         for i in range(len(self.agents)):
             individual_path = load_path+'/{0}-{1}'.format(i, prefix)
+            if not os.path.exists(individual_path):
+                return - 1
             last_checkpoint = self.agents[i].loadModel(individual_path)
         return last_checkpoint # note all should have returned same value
 
