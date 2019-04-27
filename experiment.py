@@ -58,7 +58,7 @@ def calculate_e(current_episode, pretraining_episodes, startE, endE, annealing_e
         return startE
     else:
         percentRemaining = 1 - ((current_episode- pretraining_episodes)/annealing_episodes)
-        assert(percentComplete > 0 and percentComplete < 1)
+        assert(percentRemaining > 0 and percentRemaining < 1)
         e = endE + ((startE - endE)*percentRemaining)
         return e
 
