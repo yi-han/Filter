@@ -32,7 +32,7 @@ DEFAULT_NUMBER_ATTACKS = 100 # 100
 #     save_model = SaveModelEnum.load
 
 def run_attacks(assignedNetwork, assignedAgent, file_path, smart_attacker, prefix, custom_iterations_between_second = DEFAULT_NUMBER_ATTACKS):
-    assert(custom_iterations_between_second == DEFAULT_NUMBER_ATTACKS)
+    #assert(custom_iterations_between_second == DEFAULT_NUMBER_ATTACKS)
 
 
 
@@ -41,9 +41,7 @@ def run_attacks(assignedNetwork, assignedAgent, file_path, smart_attacker, prefi
     assignedNetwork.emulator = network_emulator
 
     initial_save_mode = assignedAgent.save_model_mode
-    initial_drift = assignedNetwork.drift
 
-    assignedNetwork.drift = 0 # we don't use drift in testing
     assignedAgent.save_model_mode = mapsAndSettings.defender_mode_enum.test_short
     
     original_iterations = assignedNetwork.iterations_between_second
@@ -93,7 +91,6 @@ def run_attacks(assignedNetwork, assignedAgent, file_path, smart_attacker, prefi
         attackers.remove(smart_attacker)
     #undo changes
 
-    assignedNetwork.drift = initial_drift
     assignedAgent.save_model_mode = initial_save_mode
     assignedNetwork.save_per_step_stats = False
 

@@ -1,10 +1,10 @@
 from enum import Enum
 
-DELTA = 0.001
+EPSILON = 0.0001
 INF = 9999999
 MbTKb = 1000 # ratio for converting Mb to Kb
 KbTMb = 0.001 # ratio for converting Kb to Mb
-
+SECONDS_STANDARD_INTERVAL = 2
 ATTACK_START = 10 # the number of seconds before an attack can start in evaluation
 
 ROUND_SPOT = 6

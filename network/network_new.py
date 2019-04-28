@@ -47,13 +47,16 @@ class Bucket():
         self.bucket_load = 0
 
     def updateBucketLoad(self, traffic_changed, is_incoming):
-        if is_incoming:
-            assert(traffic_changed>0)
+        assert(traffic_changed>0)
+        if is_incoming:            
             self.bucket_load += traffic_changed
         else:
-            assert(traffic_changed > 0)
             self.bucket_load -= traffic_changed
-            self.bucket_load = max(0, self.bucket_load)
+            if self.bucket_load <0:
+                assert(abs(self.bucket_load)<EPSILON)
+                self.bucket_load = 0
+        assert((self.bucket_capacity + EPSILON) > self.bucket_load ) # ensure we never overfilled bucket
+    
     def bucket_flow(self, legal_traffic_in, illegal_traffic_in, rs_per_action):
         """
         Bucket logic
@@ -75,10 +78,9 @@ class Bucket():
             # print("setting throttle is as")
             rs_per_iteration = INF
         else:
-            rs_per_iteration = roundNumber(MbToKb(rs_per_action/self.iterations_between_second))
+            rs_per_iteration = MbToKb(rs_per_action/self.iterations_between_second)
 
-        legal_traffic_in = roundNumber(legal_traffic_in)
-        illegal_traffic_in = roundNumber(illegal_traffic_in)
+
         # print("load {0} total capacity {1} remaining {2}".format(self.bucket_load, self.bucket_capacity, remaining_capacity))
         # print("capacity is {1} whilst incoming load is {0}".format((illegal_traffic_in+legal_traffic_in),remaining_capacity))
         
@@ -96,18 +98,18 @@ class Bucket():
 
         rs_remaining = rs_per_iteration - (legal_out + illegal_out)
         
-        if rs_remaining > DELTA:
+        if rs_remaining > EPSILON:
             # we still have some more we can let out, use it from the incoming traffic
             # print("letting traffic right through")
             (t_legal_out, t_illegal_out, legal_remaining, illegal_remaining) = self.calc_traffic_through(legal_traffic_in, illegal_traffic_in, rs_remaining)
             legal_out += t_legal_out
             illegal_out += t_illegal_out
         else:
-            # print("Exhausted remaining rs was {0} and delta is {1}".format(rs_remaining, DELTA))
+            # print("Exhausted remaining rs was {0} and delta is {1}".format(rs_remaining, EPSILON))
             legal_remaining = legal_traffic_in
             illegal_remaining = illegal_traffic_in
         
-        if (legal_remaining + illegal_remaining > DELTA):
+        if (legal_remaining + illegal_remaining > EPSILON):
             # print("Now adding to bucket")
             (legal_dropped, illegal_dropped) = self.add_to_capacity(legal_remaining, illegal_remaining)
         else:
@@ -117,7 +119,7 @@ class Bucket():
              
         # print("letting through {0} {1} {2} {3}".format(legal_out, legal_dropped, illegal_out, illegal_dropped))
         final_load = legal_out + illegal_out
-        if(not ((init_load <= final_load + DELTA) or abs(final_load - rs_per_iteration) < DELTA)):
+        if(not ((init_load <= final_load + EPSILON) or abs(final_load - rs_per_iteration) < EPSILON)):
             print("init_load = {0} final_load = {1} rs = {2}".format(init_load, final_load, rs_per_iteration))
             assert(1==2)
         # else:
@@ -129,64 +131,58 @@ class Bucket():
 
     def add_bucket(self, legal_in, illegal_in, at_front=False):
         # add to bucket
-        legal_in = max(legal_in, 0)
-        illegal_in = max(illegal_in, 0)
+        assert(legal_in >=0)
+        assert(illegal_in >= 0)
+
         load = (legal_in + illegal_in)
-        if load < DELTA:
+        if load < EPSILON:
             return #ignore
+
         if at_front:
+            # only used if we emptied too much
             self.bucket_list.insert(0, (legal_in, illegal_in))
         else:
             self.bucket_list.append((legal_in, illegal_in))
+        
         self.updateBucketLoad(load, True)
-        if self.bucket_load-self.bucket_capacity>DELTA:
+        if (self.bucket_load-self.bucket_capacity)>EPSILON:
             print("we're over by {0}".format(self.bucket_load-self.bucket_capacity))
             assert(1==2)
 
     def empty_bucket(self, current_rs):
         # empty bucket to amount of rs or until empty
         
-        assert(self.bucket_load - self.bucket_capacity < DELTA)
-        emptied = 0
+        assert(self.bucket_load - self.bucket_capacity < EPSILON)
         legal_out = 0
         illegal_out = 0
         remaining_rs = current_rs
-        (legal_added, legal_stopped, illegal_added, illegal_stopped) = (0, 0, 0, 0) # this is for santify checking assetts
-        while(self.bucket_list and remaining_rs>DELTA):
-            assert(legal_stopped<DELTA and illegal_stopped < DELTA)
+        
+        while(self.bucket_list and remaining_rs>EPSILON):
 
-            (f_legal, f_illegal) = self.bucket_list.pop(0)
-            #(legal_added, legal_stopped, illegal_added, illegal_stopped) = self.add_to_capacity(f_legal, f_illegal, remaining_rs)
-            
+            # get first item of list
+            (f_legal, f_illegal) = self.bucket_list.pop(0)            
             f_load = (f_legal + f_illegal)
             remaining_rs -= f_load # note this will go negative once we hit our limit
-            legal_out += legal_added
-            illegal_out += illegal_added
+            
+            legal_out += f_legal
+            illegal_out += f_illegal
             self.updateBucketLoad(f_load, False)
 
 
-        (legal_out, illegal_out, legal_bucket, illegal_bucket) = self.calc_traffic_through(legal_out, illegal_out, current_rs)
+        (legal_out, illegal_out, legal_overflow, illegal_overflow) = self.calc_traffic_through(legal_out, illegal_out, current_rs)
 
-        self.add_bucket(legal_bucket, illegal_bucket, at_front=True)
+        self.add_bucket(legal_overflow, illegal_overflow, at_front=True)
         return (legal_out, illegal_out)
 
     def calc_traffic_through(self, legal_in, illegal_in, capacity):
+        # When we want to pass through a bottle neck and want to know how much didn't make it as well
+        # used to be an own function. Now its just calcBottleNeck + didn't make it
         
-        legal_in = max(0, legal_in)
-        illegal_in = max(0, illegal_in)
-        combined_load = legal_in + illegal_in
-        assert(capacity>0)
-        if combined_load > (capacity + DELTA):
-            percentage_dropped = 1 - (capacity/combined_load)
-            # print("percentage dropped was {0}".format(percentage_dropped))
-            legal_dropped = legal_in * percentage_dropped
-            illegal_dropped = illegal_in * percentage_dropped
-            legal_through = legal_in - legal_dropped
-            illegal_through = illegal_in - illegal_dropped
-        else:
-            # print("combined load was less than capacity")
-            (legal_through, illegal_through, legal_dropped, illegal_dropped) = (legal_in, illegal_in, 0, 0)
-        # print("in leg/illeg {0}/{1} out leg/illeg {2}/{3}".format(legal_in, illegal_in, legal_through, illegal_through))
+        incoming_load = legal_in + illegal_in
+        (legal_through, illegal_through) = network_full.calcBottleNeck(incoming_load, legal_in, illegal_in, capacity)
+        legal_dropped = legal_in - legal_through
+        illegal_dropped = illegal_in - illegal_through
+        
         return (legal_through, illegal_through, legal_dropped, illegal_dropped)
 
     def add_to_capacity(self, legal_in, illegal_in):
@@ -195,26 +191,16 @@ class Bucket():
 
         traffic_in = legal_in + illegal_in
         remaining_capacity = self.bucket_capacity - self.bucket_load
-        assert(remaining_capacity>0 and traffic_in >= 0)
+        assert(remaining_capacity>=0 and traffic_in >= 0)
 
-        if(traffic_in<DELTA):
+        if(traffic_in<EPSILON):
             return (0, 0)
 
 
         (legal_added, illegal_added, legal_dropped, illegal_dropped) = self.calc_traffic_through(legal_in, illegal_in, remaining_capacity)
 
-        # percentage_through = min((remaining_capacity/traffic_in),1)
-        # print("percentage was {0}".format(percentage_through))
-        # print("leg {0} ill {1} cap {2}".format(legal_in, illegal_in, capacity))
 
-
-        # legal_added = max(percentage_through*legal_in, 0)
-        # illegal_added = max(percentage_through*illegal_in, 0)
-
-        # legal_dropped = (legal_in - legal_added)
-        # illegal_dropped = (illegal_in - illegal_added)
-
-        if((legal_added + illegal_added-remaining_capacity)>DELTA):
+        if((legal_added + illegal_added-remaining_capacity)>EPSILON):
             print("legal_added {0} illegal_added {1} capacity {2} combined {3}".format(legal_added, illegal_added, capacity, legal_added+illegal_added))
             assert(1==2)
         
@@ -284,13 +270,13 @@ class Switch():
                 throttle_rate = 0
             else:
                 throttle_rate = self.throttle_rate
-            legal_dropped = roundNumber(self.legal_traffic * throttle_rate)      
+            legal_dropped = self.legal_traffic * throttle_rate   
             legal_pass = self.legal_traffic - legal_dropped
-            assert(abs(legal_pass + legal_dropped - self.legal_traffic) < DELTA)
+            assert(abs(legal_pass + legal_dropped - self.legal_traffic) < EPSILON)
 
-            illegal_dropped = roundNumber(self.illegal_traffic * throttle_rate)
+            illegal_dropped = self.illegal_traffic * throttle_rate
             illegal_pass = self.illegal_traffic - illegal_dropped
-            assert(abs(illegal_pass + illegal_dropped - self.illegal_traffic) < DELTA)
+            assert(abs(illegal_pass + illegal_dropped - self.illegal_traffic) < EPSILON)
 
         # update all other switches with new traffic values
 
@@ -546,9 +532,6 @@ class network_full(object):
 
         self.adversaryMaster = adversaryMaster
         self.is_sig_attack = network_settings.is_sig_attack
-        self.drift = network_settings.drift / 100
-        # drift is the measure of inaccurecy of discretising legitimate from illegite traffic
-        # represents the % of illegal traffic set as legal.
 
         # self.SaveAttackEnum = SaveAttackEnum
 
@@ -743,7 +726,7 @@ class network_full(object):
         server_load = legitimate_arrived + illegal_arrived
 
 
-        if server_load > (self.upper_boundary_two + DELTA):
+        if server_load > (self.upper_boundary_two + EPSILON):
             # the three methods diverge how to respond to negative
 
             if reward_mode == AGENT_REWARD_ENUM.overload:
@@ -756,7 +739,7 @@ class network_full(object):
                 return self.cache_reward
 
             elif reward_mode == AGENT_REWARD_ENUM.packet_logic:
-                (legimate_served, illegal_served) = network_full.throttle_at_server(server_load, legitimate_arrived, illegal_arrived, self.upper_boundary_two)
+                (legimate_served, illegal_served) = network_full.calcBottleNeck(server_load, legitimate_arrived, illegal_arrived, self.upper_boundary_two)
 
             else:
                 assert(1==2)
@@ -811,7 +794,7 @@ class network_full(object):
 
                 # print(server_load)
                 
-                (legal_served, illegal_served) = network_full.throttle_at_server(server_load, legal_arrived, illegal_arrived, self.upper_bound)
+                (legal_served, illegal_served) = network_full.calcBottleNeck(server_load, legal_arrived, illegal_arrived, self.upper_bound)
 
                 assert(abs(legal_served+illegal_served - self.upper_bound) < 0.1)
             else:
@@ -836,15 +819,23 @@ class network_full(object):
         return (legal_served, legal_sent, per_served, illegal_served, illegal_sent)
         # make sure not to update anything on the switch itself
 
-    def throttle_at_server(server_load, legal_arrived, illegal_arrived, capacity):
+    def calcBottleNeck(incoming_load, legal_arrived, illegal_arrived, capacity):
         """
-        Assumes we can do a final throttle at a location
+        Used for server and buckets
+        Assume we have a bottle neck on how much can pass (or be served).
+        
+        We have an incoming load which equals legal_arrived + illegal_arrived
+        and if the incoming load exceeds the capacity then we need to only let some pass
         """
+        #TODO: Remove the assert clauses to speed this up
+        assert(legal_arrived >= 0)
+        assert(illegal_arrived >= 0)
+        assert(incoming_load == (legal_arrived+illegal_arrived))
 
-        if (server_load+DELTA)<= capacity:
+        if (incoming_load+EPSILON)<= capacity:
             return (legal_arrived, illegal_arrived)
 
-        ratio = capacity/server_load
+        ratio = capacity/incoming_load
 
         legal_served = legal_arrived * ratio
         illegal_served = illegal_arrived * ratio

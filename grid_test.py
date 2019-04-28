@@ -47,10 +47,8 @@ import runAttacks
 
 adversarialLeaf = hostClass.adversarialLeaf
 
+opposition = adv_constant
 
-
-attackClasses = [conAttack, shortPulse, mediumPulse,
-    largePulse, gradualIncrease] 
 
 ###
 # Settings
@@ -70,7 +68,6 @@ network_emulator = network.network_new.network_full #network_quick # network_ful
 ###
 
 
-assignedAgent.trained_drift = assignedNetwork.drift # we use this a copy of what the trained drift value is. We dont use this for the experiment
 assignedNetwork.emulator = network_emulator
 
 
@@ -89,12 +86,12 @@ delta (bottom)
 
 """
 # epsilon_values = np.arange(0.001, 0.05, 0.01).tolist()
-epsilon = 0.01
+# epsilon = 0.0001
 beta_values = np.arange(1.25, 4, 0.25).tolist()
 beta_values.remove(2)
 beta_values.insert(0,2)
-buck_values = np.arange(0.8, 4, 0.2).tolist()
-delta_values = np.arange(0.05, 0.8, 0.05).tolist()
+buck_values = np.arange(0.0, 2, 0.5).tolist()
+delta_values = np.arange(0.05, 0.5, 0.05).tolist()
 
 repeats = len(delta_values) * len(beta_values) * len(buck_values)
 print("repeats = {0}".format(repeats))
@@ -104,7 +101,7 @@ print(len(buck_values))
 # print(len(epsilon_values))
 
 
-iterations_per_action = 35
+steps_per_second = 25
 
 if parameter_tune:
     i = 0
@@ -113,20 +110,20 @@ if parameter_tune:
         for buck_value in buck_values:
             for delta in delta_values:
                 assignedAgent.buck_value = buck_value
-                print("testing for {0} {1} {2} {3}".format(delta, beta, buck_value, epsilon))
+                print("testing for {0} {1} {2}".format(delta, beta, buck_value))
                 assignedNetwork.bucket_capacity = assignedNetwork.upper_boundary*buck_value
                 print("bucket is = {0}".format(assignedNetwork.bucket_capacity))
                 assignedAgent.delta = delta
                 assignedAgent.beta = beta
-                assignedAgent.epsilon = epsilon
-                runAttacks.run_attacks(assignedNetwork, assignedAgent, file_path, intelligentOpposition, i, iterations_per_action)
+                #assignedAgent.epsilon = epsilon
+                runAttacks.run_attacks(assignedNetwork, assignedAgent, file_path, opposition, i, steps_per_second)
                 i+=1
 
     merge_summaries(file_path, i)
 else:
     #experiment = experiment.Experiment(conAttack, GeneralSettings, assignedNetwork, assignedAgent, twist="{2}{0}Alias{1}".format(numTiles, partition, network_emulator.name))
 
-    experiment = experiment.Experiment(trainHost, assignedNetwork, assignedAgent, intelligentOpposition)
+    experiment = experiment.Experiment(trainHost, assignedNetwork, assignedAgent, opposition)
 
     genericAgent = create_generic_dec(assignedAgent, assignedNetwork)
-    runAttacks.run_attacks(assignedNetwork, assignedAgent, file_path, intelligentOpposition, 0)
+    runAttacks.run_attacks(assignedNetwork, assignedAgent, file_path, opposition, 0)

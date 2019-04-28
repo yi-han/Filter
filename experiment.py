@@ -88,7 +88,6 @@ class Experiment:
         self.agentInitialiseMode = [mapsAndSettings.defender_mode_enum.save, mapsAndSettings.defender_mode_enum.load_continue]
         self.agentTestModes = [mapsAndSettings.defender_mode_enum.test_short]
 
-        assert AgentSettings.trained_drift != -1 # ensure we have it set, dont ever use in experiment
 
     def run(self, prefix, agent, file_path):
         N_state = self.network_settings.N_state
@@ -386,7 +385,7 @@ class Experiment:
                         # we've intentionally calculated the defender_reward twice. 
                         # If action is every 2 seconds it'll use the cache.
                         # But if action is ever 0.5 seconds and we not training ... no need to calculate reward tonnes 
-                        if second % 2 == 0 and num_defender_moves>1:
+                        if second % mapsAndSettings.SECONDS_STANDARD_INTERVAL == 0 and num_defender_moves>1:
                             defender_reward = net.get_reward(self.defender_settings.reward_function)
 
                             rAll += defender_reward

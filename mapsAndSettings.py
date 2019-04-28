@@ -83,9 +83,10 @@ class AIMDsettings(object):
     group_size = 1
     delta = 0.35 # additive increase
     beta = 2 # multiplicative decrease
-    epsilon = 0.001
+    epsilon = EPSILON
     stateRepresentation = stateRepresentationEnum.only_server # WRONG
     sub_agent = agent.AIMD.AIMDagent
+    reward_function = AGENT_REWARD_ENUM.packet_logic
 
     num_episodes = 1
     y = delta
@@ -161,6 +162,11 @@ class NetworkMalialisSmall(object):
     is_sig_attack = False
     save_per_step_stats = False
     functionPastCapacity = True # make it Malialis mode
+
+class NetworkMalialisShort(NetworkMalialisSmall):
+    name = "mallias_short"
+    iterations_between_second = 20
+
 
 class NetworkSmallHard(NetworkMalialisSmall):
     name = "small_hard"
@@ -715,12 +721,8 @@ def getSummary(adversary_classes, load_path, agent, prefix):
 def getPathName(network_settings, agent_settings, commStrategy, twist, train_opposition):
     # host train is the type of host the agent was trained on. 
 
-    drift = network_settings.drift
-    if drift > 0:
-        drift_text = "Drift_{0}".format(drift)
-    else:
-        drift_text = ""
-    return drift_text + train_opposition.name +"_" + network_settings.name + agent_settings.name + commStrategy  + twist
+
+    return train_opposition.name +"_" + network_settings.name + agent_settings.name + commStrategy  + twist
 
 
 

@@ -13,6 +13,7 @@ TODO
 3) What throttle rate do i simulate for smart adversary? 
 """
 from enum import Enum
+from network.utility import SECONDS_STANDARD_INTERVAL
 
 class AimdMovesEnum(Enum):
     none = 0
@@ -26,11 +27,10 @@ class AIMDagent():
         self.delta = agent_settings.delta # for rate increase
         self.beta = agent_settings.beta # for rate decrease
         self.epsilon = agent_settings.epsilon
-        self.upper = network_settings.upper_boundary
-        self.lower = network_settings.lower_boundary
-        # self.seconds_per_window = 2 ### UPDATE: probably shouldn't assume
-        # self.iterations_per_window = network_settings.iterations_between_second
-        self.num_predictions = 1
+        self.upper = network_settings.upper_boundary * SECONDS_STANDARD_INTERVAL
+        self.lower = network_settings.lower_boundary * SECONDS_STANDARD_INTERVAL
+        self.reward_function = agent_settings.reward_function
+        self.num_agents = 1
         self.agent_settings = agent_settings
 
         self.max_rate =  network_settings.rate_attack_high * (len(network_settings.host_sources) - 1 ) + (2 * self.delta)
@@ -48,15 +48,11 @@ class AIMDagent():
         self.reset_aimd()
     
     def reset_aimd(self):
-        self.rs = None
-        self.pLast = (-2 * self.epsilon)     
-        self.past_predictions = [[self.max_rate]*self.num_predictions]*10
-        self.past_moves = [[AimdMovesEnum.none.value]*self.num_predictions]*10
+        self.rs = None # AIMD off
+        self.pLast = 0 # 0 indicates that we aren't tracking as AIMD is off
+        self.past_predictions = [[self.max_rate]*self.num_agents]*10
+        self.past_moves = [[AimdMovesEnum.none.value]*self.num_agents]*10
         self.latest_state = None
-    def belowEpsilon(self, load, epsilon):
-        # bit dubious whether this is meant to be below or above epsilon
-        #return abs(load)<epsilon
-        return load < epsilon
 
     def predict(self, p, _):
         # treat this as set the rate
@@ -64,7 +60,6 @@ class AIMDagent():
         # we calculate the maximum amount of traffic we allow pass through in a 
         p = p[0]
         # init_rs = self.rs
-        # old_p = self.pLast
         if p > self.upper:
             if self.rs == None:
                 self.rs  = (self.upper + self.lower)/self.num_throttles
@@ -72,9 +67,10 @@ class AIMDagent():
                 self.rs /= self.beta
             recorded_move = AimdMovesEnum.decrease.value
         elif p < self.lower:
-            if self.rs == None or self.belowEpsilon((p - self.pLast), self.epsilon):
+            if self.rs == None or (p-self.pLast) < self.epsilon:
+                # turn AIMD off
                 self.rs = None
-                self.pLast = (-2 * self.epsilon)
+                self.pLast = 0
                 recorded_move = AimdMovesEnum.none.value
             else:
                 self.pLast = p
@@ -119,7 +115,7 @@ class AIMDagent():
     def getPath(self=None):
         return "AIMD"
 
-    def calculate_state(self, net):
+    def update_state(self, net):
         self.latest_state = net.switches[0].get_load()
 
     def get_state(self):
