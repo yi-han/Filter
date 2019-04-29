@@ -103,12 +103,19 @@ print(len(buck_values))
 
 steps_per_second = 25
 
+if(len(sys.argv)> 1):
+    starting_point = int(sys.argv[1])
+
+
 if parameter_tune:
     i = 0
 
     for beta in beta_values:
         for buck_value in buck_values:
             for delta in delta_values:
+                if i < starting_point:
+                    i += 1
+                    continue
                 assignedAgent.buck_value = buck_value
                 print("testing for {0} {1} {2}".format(delta, beta, buck_value))
                 assignedNetwork.bucket_capacity = assignedNetwork.upper_boundary*buck_value

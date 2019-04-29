@@ -832,14 +832,14 @@ class network_full(object):
         assert(illegal_arrived >= 0)
         assert(incoming_load == (legal_arrived+illegal_arrived))
 
-        if (incoming_load+EPSILON)<= capacity:
+        if incoming_load <= (capacity + EPSILON):
             return (legal_arrived, illegal_arrived)
 
         ratio = capacity/incoming_load
 
         legal_served = legal_arrived * ratio
         illegal_served = illegal_arrived * ratio
-
+        assert(legal_served<=legal_arrived)
         return(legal_served, illegal_served)
 
     def getEpisodeStatisitcs(self):
