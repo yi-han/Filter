@@ -162,7 +162,7 @@ class NetworkMalialisSmall(object):
     iterations_between_second = 100#100 # at 100 we are dealing wiht centiseconds
 
     max_hosts_per_level = [3] # no communication therefore just one
-    bucket_capacity = 18.1#15#0.8
+    bucket_capacity = 0#15#15#0.8
 
     max_depth = 1
     ep_length = 60 # Training is an episode of 60 seconds

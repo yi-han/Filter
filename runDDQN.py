@@ -96,7 +96,7 @@ adversarialLeaf = hostClass.adversarialLeaf
 
 ###
 # Settings NetworkMalialisSmall
-assignedNetwork =   NetworkMalialisNoBucket
+assignedNetwork =   NetworkMalialisSmall
 assignedAgent =  AIMDMalialis #ddqnSingleNoCommunicate #ddqn100MediumHierarchical
 load_attack_path = "attackSimulations/{0}/".format(assignedNetwork.name)
 loadAttacks = True

@@ -31,20 +31,43 @@ eated flexible adversary
 """
 
 
-# class AltBucket():
-#     # this is an alternative bucket based on how I think Malialis did it
+class AltBucket():
+    # this is an alternative bucket based on how I think Malialis did it
 
-#     def __init__(self, iterations_between_second, bucket_capacity):
-#         assert(bucket_capacity == 0)
-#         self.reset()
+    def __init__(self, iterations_between_second, bucket_capacity):
+        assert(bucket_capacity == 0)
+        self.reset()
 
-#     def reset(self):
-#         return
+    def reset(self):
+        return
 
-#     def bucket_flow(self, legal_traffic_in, illegal_traffic_in, rs_per_action, past_node_load):
-#         # Idea we use past_node_load to calculate a fair throttle under assumption it stays same
+    def bucket_flow(self, legal_traffic_in, illegal_traffic_in, rs_per_action, past_node_load):
+        # Idea we use past_node_load to calculate a fair throttle under assumption it stays same
+        # lazy we times rs_per_action by two to reflect 2 seconds
+        # note we're undoing the action in AIMD algorithm
+        
+        if rs_per_action == -1:
+            rs_per_action = INF
+        else:
+            rs_per_action *= 2 # if this works remove later
 
-#         if 
+        rs_per_action = MbToKb(rs_per_action)
+
+        if rs_per_action >= past_node_load:
+            through_rate = 1
+        else:
+            through_rate = rs_per_action / past_node_load
+            # print("rs = {0} pastNode = {1} through_rate = {2}".format(rs_per_action, past_node_load, through_rate))
+
+        legal_through = legal_traffic_in * through_rate
+        legal_dropped = legal_traffic_in - legal_through
+
+        illegal_through = illegal_traffic_in * through_rate
+        illegal_dropped = illegal_traffic_in - illegal_through
+
+        
+        return (legal_through, legal_dropped, illegal_through, illegal_dropped)
+
 
 
 
@@ -247,7 +270,7 @@ class Switch():
         self.is_filter = is_filter
         if defender_settings.has_bucket and is_filter:
             # initiate a bucket
-            self.bucket = Bucket(iterations_between_second, bucket_capacity)
+            self.bucket = AltBucket(iterations_between_second, bucket_capacity) #Bucket(iterations_between_second, bucket_capacity)
         else:
             self.bucket = None
         self.legal_segment = [0] * self.memory # over the last window, how much legal traffic has passed
@@ -279,7 +302,7 @@ class Switch():
 
         if self.is_filter and self.bucket:
             # print("\n\n about to bucket")
-            (legal_pass, legal_dropped, illegal_pass, illegal_dropped) = self.bucket.bucket_flow(self.legal_traffic, self.illegal_traffic, self.throttle_rate)
+            (legal_pass, legal_dropped, illegal_pass, illegal_dropped) = self.bucket.bucket_flow(self.legal_traffic, self.illegal_traffic, self.throttle_rate, self.load_window_estimate)
         else:
             if self.throttle_rate == -1:
                 # if not set assume it's 0
@@ -316,7 +339,13 @@ class Switch():
         self.dropped_illegal = self.new_dropped_illegal
 
         # register switches interested in
+        
         time_index = step%self.memory # the index of where to store the packet
+        
+        traffic_forgotten = (self.legal_segment[time_index] + self.illegal_segment[time_index]) #+ self.dropped_legal_segment[time_index] + self.dropped_illegal_segment[time_index])
+        self.load_window_estimate -= traffic_forgotten
+        self.load_window_estimate += (self.legal_traffic + self.illegal_traffic)
+
         self.legal_segment[time_index] = self.legal_traffic
         self.illegal_segment[time_index] = self.illegal_traffic
         self.dropped_legal_segment[time_index] = self.dropped_legal
@@ -386,6 +415,7 @@ class Switch():
             self.bucket.reset()
 
 
+        self.load_window_estimate = 0 # we use this for an estimate of the load at any time
 
 
     def update_past_server_load(self):
@@ -438,7 +468,9 @@ class Switch():
     def get_load(self):
         illegal_window = self.get_illegal_window()
         legal_window = self.get_legal_window()
-        return(KbToMb(illegal_window + legal_window))
+        load = illegal_window + legal_window
+        assert(abs(self.load_window_estimate - load)<EPSILON)
+        return(KbToMb(load))
 
 
     # def getPastWindow(self, num_windows, step_size):

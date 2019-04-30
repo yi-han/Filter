@@ -22,6 +22,7 @@ adversarialLeaf = hostClass.adversarialLeaf
 attackers = [mapsAndSettings.adv_constant, mapsAndSettings.adv_pulse_short, mapsAndSettings.adv_pulse_medium, mapsAndSettings.adv_pulse_large,
     mapsAndSettings.adv_gradual, mapsAndSettings.adv_split] 
 
+# attackers = [mapsAndSettings.adv_pulse_short]
 DEFAULT_NUMBER_ATTACKS = 100 # 100
 
 # class GeneralSettingsObject(object):
