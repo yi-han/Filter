@@ -34,6 +34,12 @@ class AIMDagent():
         self.agent_settings = agent_settings
 
         self.max_rate =  network_settings.rate_attack_high * (len(network_settings.host_sources) - 1 ) + (2 * self.delta)
+        self.activate_rate = (self.upper + self.lower)/4 # 4 is to compensate for 2 second interval where typically would be two
+        print("delta = {0}".format(self.delta))
+        print("beta = {0}".format(self.beta))
+        print("epsilon = {0}".format(self.epsilon))
+        print("Upper/lower = {0}/{1}".format(self.upper, self.lower))
+        print("max rate = {0} activate_rate rate = {1}".format(self.max_rate, self.activate_rate))
     def __enter__(self):
         print("enter the AIMD")
         self.reset_aimd()
@@ -48,7 +54,7 @@ class AIMDagent():
         self.reset_aimd()
     
     def reset_aimd(self):
-        self.rs = None # AIMD off
+        self.rs = -1 # AIMD off
         self.pLast = 0 # 0 indicates that we aren't tracking as AIMD is off
         self.past_predictions = [[self.max_rate]*self.num_agents]*10
         self.past_moves = [[AimdMovesEnum.none.value]*self.num_agents]*10
@@ -61,15 +67,15 @@ class AIMDagent():
         p = p[0]
         # init_rs = self.rs
         if p > self.upper:
-            if self.rs == None:
-                self.rs  = (self.upper + self.lower)/self.num_throttles
+            if self.rs == -1:
+                self.rs  = self.activate_rate # used to be upper+lower / self.num_throttles
             else:
                 self.rs /= self.beta
             recorded_move = AimdMovesEnum.decrease.value
         elif p < self.lower:
-            if self.rs == None or (p-self.pLast) < self.epsilon:
+            if self.rs == -1 or abs(p-self.pLast) < self.epsilon:
                 # turn AIMD off
-                self.rs = None
+                self.rs = -1
                 self.pLast = 0
                 recorded_move = AimdMovesEnum.none.value
             else:
@@ -77,13 +83,13 @@ class AIMDagent():
                 self.rs += self.delta
                 recorded_move = AimdMovesEnum.increase.value
         else:
-            if self.rs == None:
+            if self.rs == -1:
                 recorded_move = AimdMovesEnum.none.value
             else:
                 recorded_move = AimdMovesEnum.constant.value
         
         # print("\n\n\nserver load is {0}, p_last is {3} we had {2} and suggesting {1}".format(p, self.rs, init_rs, old_p))
-        if self.rs == None:
+        if self.rs == -1:
             recorded_rs = self.max_rate
         elif self.rs > self.max_rate:
             print("how did it get that high?")

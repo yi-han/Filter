@@ -31,6 +31,21 @@ eated flexible adversary
 """
 
 
+# class AltBucket():
+#     # this is an alternative bucket based on how I think Malialis did it
+
+#     def __init__(self, iterations_between_second, bucket_capacity):
+#         assert(bucket_capacity == 0)
+#         self.reset()
+
+#     def reset(self):
+#         return
+
+#     def bucket_flow(self, legal_traffic_in, illegal_traffic_in, rs_per_action, past_node_load):
+#         # Idea we use past_node_load to calculate a fair throttle under assumption it stays same
+
+#         if 
+
 
 
 
@@ -73,7 +88,7 @@ class Bucket():
 
         init_load = legal_traffic_in + illegal_traffic_in
 
-        if rs_per_action == None:
+        if rs_per_action == -1:
             # No throttle set
             # print("setting throttle is as")
             rs_per_iteration = INF
@@ -95,7 +110,8 @@ class Bucket():
 
         # 1. Get as much out of the bucket as we can
         legal_out, illegal_out = self.empty_bucket(rs_per_iteration)
-
+        # assert(legal_out ==0) 
+        # assert(illegal_out == 0) # bucket not used
         rs_remaining = rs_per_iteration - (legal_out + illegal_out)
         
         if rs_remaining > EPSILON:
@@ -220,7 +236,7 @@ class Switch():
         self.source_links = [] # places sending traffic to switch
         self.destination_links = [] # where traffic is getting sent
         self.attatched_hosts = [] # used for network_quick, quick access for hosts attatched to this 
-        self.throttle_rate = None # the throttling rate for the specific switch
+        self.throttle_rate = -1 # the throttling rate for the specific switch
         self.memory = iterations_between_second * 2 # how much to remember. 2 seconds worth of data
 
 
@@ -252,7 +268,7 @@ class Switch():
                 self.next_throttle = None
             # print("delay {0} throttle {1}".format(self.delay - self.iterations_since_throttle, self.throttle_rate))
         else:
-            assert(self.throttle_rate == None)
+            assert(self.throttle_rate == -1)
 
 
         num_dests = len(self.destination_links)
@@ -265,7 +281,7 @@ class Switch():
             # print("\n\n about to bucket")
             (legal_pass, legal_dropped, illegal_pass, illegal_dropped) = self.bucket.bucket_flow(self.legal_traffic, self.illegal_traffic, self.throttle_rate)
         else:
-            if self.throttle_rate == None:
+            if self.throttle_rate == -1:
                 # if not set assume it's 0
                 throttle_rate = 0
             else:
@@ -349,7 +365,7 @@ class Switch():
         self.new_dropped_legal = 0
         self.new_illegal = 0
         self.new_dropped_illegal = 0
-        self.throttle_rate = None # represents not set
+        self.throttle_rate = -1 # represents not set
         self.next_throttle = None
         self.iterations_since_throttle = 0
         #self.past_windows = [0]*20 obsolete

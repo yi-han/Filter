@@ -119,7 +119,7 @@ class Experiment:
         """
 
         if self.defender_settings.save_model_mode in self.agentTestModes:
-            num_episodes = 500 #500
+            num_episodes = 500
             ep_length = self.network_settings.ep_length*2
             self.delay_attacks = True
         else:
@@ -351,6 +351,7 @@ class Experiment:
                             agent.update_state(net)
                             def_next_state = agent.get_state()
                             def_next_action = agent.predict(def_next_state, e) # generate an action
+                            # print("\n\n\n\nmade move {0}".format(def_next_action))
                             num_defender_moves += 1
                             
                             # print("made prediction {0}".format(def_next_action))
@@ -382,16 +383,7 @@ class Experiment:
                                 
 
                             
-                        # we've intentionally calculated the defender_reward twice. 
-                        # If action is every 2 seconds it'll use the cache.
-                        # But if action is ever 0.5 seconds and we not training ... no need to calculate reward tonnes 
-                        if second % mapsAndSettings.SECONDS_STANDARD_INTERVAL == 0 and num_defender_moves>1:
-                            defender_reward = net.get_reward(self.defender_settings.reward_function)
 
-                            rAll += defender_reward
-                            reward_print_count += 1
-                        
-                        
 
 
                         # network makes moves
@@ -401,6 +393,21 @@ class Experiment:
                         adv_current_action = adv_next_action
                         # print("simulated the move")
                 
+                    # we've intentionally calculated the defender_reward twice. 
+                    # If action is every 2 seconds it'll use the cache.
+                    # But if action is ever 0.5 seconds and we not training ... no need to calculate reward tonnes 
+                    if second % mapsAndSettings.SECONDS_STANDARD_INTERVAL == 0 and num_defender_moves>1:
+                        defender_reward = net.get_reward(self.defender_settings.reward_function)
+
+                        rAll += defender_reward
+                        reward_print_count += 1
+                    
+                        #print("\n\n\nSecond {0} Move = {1} State = {2}".format(second, def_past_action, def_last_state))
+                    
+
+
+
+
                     """
                     At the end of every second we record the percentage of traffic that was serviced by the server 
 
