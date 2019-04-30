@@ -47,7 +47,7 @@ def run_attacks(assignedNetwork, assignedAgent, file_path, smart_attacker, prefi
     original_iterations = assignedNetwork.iterations_between_second
 
     attack_location = load_attack_path+"OneAndAQuarterAttack.apkl"
-    # print(attack_location)
+    print(attack_location)
     
     attackClass = adversarialLeaf
     assignedNetwork.save_per_step_stats = True

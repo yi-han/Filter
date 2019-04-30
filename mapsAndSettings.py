@@ -110,6 +110,13 @@ class AIMDAlternative(AIMDsettings):
 #     name = "AIMDvariant"
 #     sub_agent = agent.AIMD.AIMDvariant
 
+class AIMDMalialis(AIMDsettings):
+    name = "AIMDmalialis"
+    delta = 0.2
+    beta = 2
+    epsilon = 0.01
+    y = delta
+    tau = beta
 
 class NoThrottleBaseline(object):
     # note we have two dependencies
@@ -163,9 +170,9 @@ class NetworkMalialisSmall(object):
     save_per_step_stats = False
     functionPastCapacity = True # make it Malialis mode
 
-class NetworkMalialisShort(NetworkMalialisSmall):
-    name = "mallias_short"
-    iterations_between_second = 20
+class NetworkMalialisNoBucket(NetworkMalialisSmall):
+    name = "mallias_no_bucket"
+    bucket_capacity = 0
 
 
 class NetworkSmallHard(NetworkMalialisSmall):
