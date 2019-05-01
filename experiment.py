@@ -258,6 +258,8 @@ class Experiment:
 
             print("\n\n Starting at episode {0}".format(ep_init))
             print("num_episodes {0} episode length {1} iterations between each second {2}".format(num_episodes, ep_length, self.network_settings.iterations_between_second))
+            print("defender exploration = {0}".format(e))
+            print("adversary exploration = {0}".format(adv_e))
             for ep_num in range(ep_init, num_episodes):
                 net.reset() # reset the network
                 agent.reset_episode(net)
@@ -341,8 +343,8 @@ class Experiment:
 
 
                         if step % defender_move == 0:
-                            #print("step {0} defender_cut {1} move {2}".format(step, defender_move, num_defender_moves))
-                            #print("made move {0}".format(num_defender_moves))
+                            # print("\n\nstep {0} defender_cut {1} move {2}".format(step, defender_move, num_defender_moves))
+                            # print("made move {0}".format(num_defender_moves))
                             def_step = step/defender_move
                             
                             def_last_state = def_next_state
@@ -351,6 +353,7 @@ class Experiment:
                             agent.update_state(net)
                             def_next_state = agent.get_state()
                             def_next_action = agent.predict(def_next_state, e) # generate an action
+                            newDefAction = True
                             # print("\n\n\n\nmade move {0}".format(def_next_action))
                             num_defender_moves += 1
                             
@@ -388,7 +391,8 @@ class Experiment:
 
                         # network makes moves
                         # print("step {0} defender {1} adversary {2}".format(step, def_next_action, adv_next_action))
-                        net.simulate_traffic(def_next_action, adv_next_action, step)
+                        net.simulate_traffic(def_next_action, adv_next_action, step, newDefAction)
+                        newDefAction = False # set this as false if it's not a new action
                         def_current_action = def_next_action
                         adv_current_action = adv_next_action
                         # print("simulated the move")

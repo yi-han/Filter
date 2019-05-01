@@ -179,11 +179,10 @@ loadAttacks = False
 
 assignedAgent.save_model_mode = defender_mode_enum.load
 trainHost = adversarialLeaf #coordAttack # conAttack #driftAttack #adversarialLeaf
-assignedNetwork.drift = 0
 
 opposition = adv_constant #adv_random # adv_constant
 intelligentOpposition =  DdGenericSplitShort #
-intelligentOpposition.save_model_mode = defender_mode_enum.save
+intelligentOpposition.save_model_mode = defender_mode_enum.load_continue
 # intelligentOpposition = None
 
 
@@ -202,7 +201,6 @@ else:
 
 
 ###
-assignedAgent.trained_drift = assignedNetwork.drift # we use this a copy of what the trained drift value is. We dont use this for the experiment
 assignedNetwork.emulator = network_emulator
 commStrategy = calc_comm_strategy(assignedAgent.stateRepresentation)
 

@@ -163,8 +163,8 @@ adversarialLeaf = hostClass.adversarialLeaf
 Settings to change
 """
 
-assignedNetwork = NetworkTwelveAgent
-assignedAgent = LinHierPackets
+assignedNetwork = NetworkNineAgent
+assignedAgent = LinSinPackets
 load_attack_path = "attackSimulations/{0}/".format(assignedNetwork.name)
 network_emulator = network.network_new.network_full # network_quick # network_full
 loadAttacks = False
@@ -177,14 +177,13 @@ loadAttacks = False
 # print("\n\nOVERWRITE_ITERATIONS_PER_SECOND")
 # assignedNetwork.iterations_per_second = 30
 
-assignedAgent.save_model_mode = defender_mode_enum.load_continue
+assignedAgent.save_model_mode = defender_mode_enum.load
 trainHost = adversarialLeaf #coordAttack # conAttack #driftAttack #adversarialLeaf
-assignedNetwork.drift = 0
 
 opposition = adv_constant #adv_random # adv_constant
 intelligentOpposition =  DdGenericSplitShort #
-intelligentOpposition.save_model_mode = defender_mode_enum.save
-intelligentOpposition = None
+intelligentOpposition.save_model_mode = defender_mode_enum.load_continue
+# intelligentOpposition = None
 
 
 assert(trainHost==adversarialLeaf)
@@ -202,7 +201,6 @@ else:
 
 
 ###
-assignedAgent.trained_drift = assignedNetwork.drift # we use this a copy of what the trained drift value is. We dont use this for the experiment
 assignedNetwork.emulator = network_emulator
 commStrategy = calc_comm_strategy(assignedAgent.stateRepresentation)
 

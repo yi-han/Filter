@@ -39,25 +39,39 @@ class AltBucket():
         self.reset()
 
     def reset(self):
+        self.through_rate = 1 # default through rate
+        self.rs = -1 # means not set
         return
 
-    def bucket_flow(self, legal_traffic_in, illegal_traffic_in, rs_per_action, past_node_load):
+    def update_throttle_rate(self, rs, past_node_load):
+        self.rs = rs # used for assert checking only
+        self.through_rate = self.calcThroughRate(past_node_load, rs)
+        # print("updating the throttle rate")
+
+    def calcThroughRate(self, past_node_load, rs):
+        # given the load how much to throttle based on Mal Way
+        if rs == -1:
+            rs = INF
+
+        past_node_load = past_node_load/2 # reduce the load from 2 second to 1 second average
+
+        #rs = MbToKb(rs)
+
+        if rs >= past_node_load:
+            through_rate = 1
+        else:
+            through_rate = rs / past_node_load
+            # print("rs = {0} pastNode = {1} through_rate = {2}".format(rs, past_node_load, through_rate))
+        return through_rate
+
+    def bucket_flow(self, legal_traffic_in, illegal_traffic_in, rs, past_node_load):
         # Idea we use past_node_load to calculate a fair throttle under assumption it stays same
         # lazy we times rs_per_action by two to reflect 2 seconds
         # note we're undoing the action in AIMD algorithm
         
-        if rs_per_action == -1:
-            rs_per_action = INF
-        else:
-            rs_per_action *= 2 # if this works remove later
-
-        rs_per_action = MbToKb(rs_per_action)
-
-        if rs_per_action >= past_node_load:
-            through_rate = 1
-        else:
-            through_rate = rs_per_action / past_node_load
-            # print("rs = {0} pastNode = {1} through_rate = {2}".format(rs_per_action, past_node_load, through_rate))
+        #through_rate = self.calcThroughRate(rs_per_action)
+        through_rate = self.through_rate
+        assert(rs == self.rs)
 
         legal_through = legal_traffic_in * through_rate
         legal_dropped = legal_traffic_in - legal_through
@@ -83,6 +97,9 @@ class Bucket():
     def reset(self):
         self.bucket_list = [] # to ensure FIFO
         self.bucket_load = 0
+
+    def update_throttle_rate(self, rs, past_node_load):
+        return
 
     def updateBucketLoad(self, traffic_changed, is_incoming):
         assert(traffic_changed>0)
@@ -288,6 +305,9 @@ class Switch():
         if self.is_filter:
             if self.iterations_since_throttle == self.delay and self.next_throttle != None:
                 self.throttle_rate = self.next_throttle
+                if self.bucket and self.is_filter:
+                    # testing out new bucket approach
+                    self.bucket.update_throttle_rate(self.throttle_rate, self.get_load())
                 self.next_throttle = None
             # print("delay {0} throttle {1}".format(self.delay - self.iterations_since_throttle, self.throttle_rate))
         else:
@@ -366,7 +386,7 @@ class Switch():
         self.illegal_window_cache = None
         self.legal_dropped_window_cache = None
         self.illegal_dropped_window_cache = None
-    def setThrottle(self, throttle_rate):
+    def setThrottle(self, throttle_rate, is_new_def_action):
         # print(self.next_throttle)
         # print("next one is {0} at delay {1} move {2}".format(self.next_throttle, self.delay, self.iterations_since_throttle))
         if not (self.is_filter and (self.next_throttle == None or throttle_rate==self.next_throttle)):
@@ -376,7 +396,7 @@ class Switch():
             print(self.delay)
             print(self.throttle_rate)
             assert(1==2)
-        if throttle_rate == self.next_throttle or throttle_rate==self.throttle_rate:
+        if not is_new_def_action: #or throttle_rate==self.throttle_rate:
             # if it's the same don't do anything
             #self.next_throttle = None
             return
@@ -675,9 +695,9 @@ class network_full(object):
 
 
 
-    def simulate_traffic(self, defender_action, adversary_action, step):
+    def simulate_traffic(self, defender_action, adversary_action, step, is_new_def_action):
         # our defender action
-        self.set_drop_probability(defender_action)
+        self.set_drop_probability(defender_action, is_new_def_action)
         self.adversaryMaster.sendTraffic(adversary_action)
         self.cache_reward = None
         for switch in self.switches:
@@ -688,20 +708,20 @@ class network_full(object):
             switch.updateSwitch(step)
 
 
-    def set_drop_probability(self, actions):
+    def set_drop_probability(self, actions, is_new_def_action):
 
         if self.representationType == stateRepresentationEnum.only_server:
             # if its only server then the actions is actually meant to be a throttle rate
 
             for switch_id in self.filter_list:
-                self.switches[switch_id].setThrottle(actions)
+                self.switches[switch_id].setThrottle(actions, is_new_def_action)
         else:
             assert(self.N_state == len(actions))
             for i in range(self.N_state):
                 action = actions[i]
                 drop_prob = action/ self.action_per_throttler # to turn into a percentage
                 switch_id = self.filter_list[i]
-                self.switches[switch_id].setThrottle(drop_prob)
+                self.switches[switch_id].setThrottle(drop_prob, is_new_def_action)
 
 
     def initialise(self, defender_settings, bucket_capacity):
