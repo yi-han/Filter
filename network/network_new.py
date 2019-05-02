@@ -138,6 +138,10 @@ class Switch():
         self.illegal_window_estimate -= self.illegal_segment[time_index]
         self.illegal_window_estimate += self.illegal_traffic
 
+        # dealing with floatign point errors.
+        self.legal_window_estimate = max(0, self.legal_window_estimate)
+        self.illegal_window_estimate = max(0, self.illegal_window_estimate)
+
         self.legal_segment[time_index] = self.legal_traffic
         self.illegal_segment[time_index] = self.illegal_traffic
         self.dropped_legal_segment[time_index] = self.dropped_legal
