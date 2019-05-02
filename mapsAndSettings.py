@@ -245,7 +245,7 @@ class NetworkNineAgent(object):
     rate_attack_high = 6
     legal_probability = 0.6 # probability that is a good guys
     upper_boundary = 38 
-    lower_boundary = 35 # guess
+    lower_boundary = 30 # guess
 
     iterations_between_second = 100 # at 100 we are dealing wiht centiseconds
 
@@ -279,7 +279,7 @@ class NetworkTwelveAgent(object):
     rate_attack_high = 6
     legal_probability = 0.6 # probability that is a good guys
     upper_boundary = 50 
-    lower_boundary = 45 # guess
+    lower_boundary = 42 # guess
 
     iterations_between_second = 100 # at 100 we are dealing wiht centiseconds
 
@@ -347,7 +347,7 @@ class DdGenericDec(object):
     prior_agent_seconds = 10 #
     prior_adversary_actions = 5
     include_indiv_hosts = False    
-    prior_agent_delta_moves = 0
+    prior_agent_delta_seconds = 0
     include_legal_traffic = False
     prior_server_percentages = 0
 
@@ -368,11 +368,11 @@ class ddTest(DdGenericDec):
     annealing_episodes = 4
     num_episodes = 20
 
-class DdGenericCentral(DdGenericDec):
-    name = "ddGenCentral"
-    num_adv_agents = 1
-    pre_train_episodes = 50000
-    include_other_attackers = False
+# class DdGenericCentral(DdGenericDec):
+#     name = "ddGenCentral"
+#     num_adv_agents = 1
+#     pre_train_episodes = 50000
+#     include_other_attackers = False
 
 
 
@@ -390,19 +390,52 @@ class DdGenericSplitShort(DdGenericSplit):
     annealing_episodes = 150000
     num_episodes = 400000
 
-class ddExpThree(DdGenericDec):
-    name = "ddExpThree"
+class DdGenericFinal(DdGenericSplit):
+    name = "ddGenericFinal"
     num_adv_agents = 2
     include_other_attackers = False
+    include_legal_traffic = True
+
     pre_train_episodes = 50000
-    annealing_episodes = 300000
-    num_episodes = 600000 
+    annealing_episodes = 150000
+    num_episodes = 400000
+
+
+class ddAimd(DdGenericFinal):
+    name = "ddAimd"
+   
+    prior_adversary_actions = 5
+    
+    prior_agent_seconds = 0
+    prior_agent_delta_seconds = 5
+    prior_server_loads = 5
+
+    pre_train_episodes = 50000
+    annealing_episodes = 150000
+    num_episodes = 400000
+
+
+
+class ddAimdSingle(ddAimd):
+    name = "ddAimdSingle"
+    num_adv_agents = 1
+
+# class ddExpThree(DdGenericDec):
+#     name = "ddExpThree"
+#     num_adv_agents = 2
+#     include_other_attackers = False
+#     pre_train_episodes = 50000
+#     annealing_episodes = 300000
+#     num_episodes = 600000 
+
+
+"""
 
 
 class ddAimd(DdGenericDec):
     num_adv_agents = 1
     name = "ddAimd"
-    prior_adversary_actions = 6
+    prior_adversary_actions = 5
     
     prior_agent_seconds = 0
     prior_agent_delta_moves = 6
@@ -415,67 +448,12 @@ class ddAimd(DdGenericDec):
     annealing_episodes = 150000
     num_episodes = 350000
 
-class ddAimd2(ddAimd):
-    num_adv_agents = 1
-    name = "ddAimd2"
-    prior_adversary_actions = 6
 
-    pre_train_episodes = 100000
-    annealing_episodes = 300000
-    num_episodes = 500000
-
-class ddAimd3(ddAimd2):
-    name = "ddAimd3"
-    discount_factor = 0.3
-
-class ddAim4(ddAimd2):
-    name = "ddAimd4"
-    discount_factor = 0.9
-
-class ddAim5(ddAimd2):
-    name = "ddAimd5"
-    discount_factor = 0.8   
-
-class ddAimdAlt1(DdGenericDec):
-    num_adv_agents = 1
-    name = "ddAimdAlt1"
-    prior_adversary_actions = 6
-    
-    prior_agent_seconds = 0
-    prior_agent_delta_moves = 6
-    prior_server_loads = 0 
-    prior_server_percentages = 6
-
-
-    discount_factor = 0.6    
-    pre_train_episodes = 50000
-    annealing_episodes = 150000
-    num_episodes = 350000
-
-class ddAimdAlt2(ddAimdAlt1):
-    num_adv_agents = 1
-    name = "ddAimdAlt2"
-
-    pre_train_episodes = 100000
-    annealing_episodes = 300000
-    num_episodes = 500000
-
-class ddAimdAlt3(ddAimdAlt2):
-    name = "ddAimdAlt3"
-    discount_factor = 0.3
-
-class ddAimdAlt4(ddAimdAlt2):
-    name = "ddAimdAlt4"
-    discount_factor = 0.9
-
-class ddAimdAlt5(ddAimdAlt2):
-    name = "ddAimdAlt5"
-    discount_factor = 0.8    
 
 class ddAimdLarge(DdGenericDec):
     num_adv_agents = 1
     name = "ddAimdLarge"
-    prior_adversary_actions = 6
+    prior_adversary_actions = 5
     include_legal_traffic = True
     
     prior_agent_seconds = 12
@@ -639,7 +617,7 @@ class sarAimdLarge2(sarAimdLarge):
 class sarAimdLarge3(sarAimdLarge2):
     name = "sarAimdLarge3"
     discount_factor = 0.3
-
+"""
 def create_generic_dec(def_settings, net_settings):
     """
     def_settings = defender_settings, net_settings = network_settings

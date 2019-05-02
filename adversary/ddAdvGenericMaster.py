@@ -31,9 +31,10 @@ class GenericAdvMaster(genericMaster.GenericAdvMaster):
         print("looking for last {0} seconds and {1} actions".format(adv_settings.prior_agent_seconds, adv_settings.prior_agent_seconds * defender.agent_settings.actions_per_second))
         assert(adv_settings.prior_agent_seconds % defender.agent_settings.actions_per_second == 0)
         self.prior_agent_actions = int(adv_settings.prior_agent_seconds * defender.agent_settings.actions_per_second) # number of actions by the defender we use in state
-        
+        self.prior_agent_deltas = int(adv_settings.prior_agent_delta_seconds * defender.agent_settings.actions_per_second)
         self.prior_adversary_actions = adv_settings.prior_adversary_actions # number of actions by advesary we use in state
-        
+        if self.adv_settings.prior_server_loads:
+            self.server_loads = [0] * self.adv_settings.prior_server_loads
         N_adv_state = defender.num_agents*self.prior_agent_actions + (self.num_adv_agents * 1) + (self.num_adv_agents * self.prior_adversary_actions)# plus one due to bandwiths
         if adv_settings.packets_last_step:
             assert(1==2)
@@ -42,7 +43,7 @@ class GenericAdvMaster(genericMaster.GenericAdvMaster):
         if self.adv_settings.include_indiv_hosts:
             N_adv_state += len(network_setting.host_sources)
 
-        N_adv_state += self.adv_settings.prior_agent_delta_moves
+        N_adv_state += self.prior_agent_deltas
 
 
         if self.adv_settings.include_legal_traffic:
@@ -54,61 +55,7 @@ class GenericAdvMaster(genericMaster.GenericAdvMaster):
         self.defender = defender
         self.defender_path = defender_path
 
-        # if adv_settings.include_encoder:
-        #     maxThrottlerBandwidth = len(network_setting.host_sources)*network_setting.rate_attack_high
-        #     ill_bandwidth_tiles = min(maxThrottlerBandwidth,50) # cap off our max ill_bandwidth at 20 tiles. More than enough
-        #     ill_bandwidth_tilings = 8
 
-        #     print("my detected max ill_bandwidth is {0}".format(maxThrottlerBandwidth))
-        #     ill_bandwidth_encoding = tileCoding.myTileInterface(maxThrottlerBandwidth, ill_bandwidth_tiles, ill_bandwidth_tilings)
-
-        #     max_agent_value, agent_tiles, agent_tilings = defender.get_max_agent_value()
-        #     agent_move_encoding = tileCoding.myTileInterface(max_agent_value, agent_tiles, agent_tilings)
-        #     advesary_move_encoding = tileCoding.myTileInterface(adv_settings.action_per_agent, adv_settings.action_per_agent, agent_tilings)
-
-
-
-        #     if self.adv_settings.prior_agent_delta_moves:
-        #         max_delta_value, delta_tiles, delta_tilings = defender.get_move_delta_values()
-
-        #         prior_agent_delta_move_encoder = tileCoding.myTileInterface(max_delta_value, delta_tiles, delta_tilings)
-
-        #     encoders = [ill_bandwidth_encoding]*self.num_adv_agents # bandwidht each advAgent has
-        #     if self.prior_adversary_actions:
-        #         # move each advesary has made
-        #         encoders.extend([advesary_move_encoding]*(self.prior_adversary_actions*self.num_adv_agents)) 
-        #     if self.prior_agent_actions:
-        #         # moves the defender made
-        #         encoders.extend([agent_move_encoding]*(self.prior_agent_actions*defender.num_predictions_two)) 
-
-
-        #     if self.adv_settings.prior_agent_delta_moves:
-        #         encoders.extend(([prior_agent_delta_move_encoder]*self.adv_settings.prior_agent_delta_moves))
-            
-        #     if self.adv_settings.prior_server_loads:
-        #         prior_load_encoder = tileCoding.myTileInterface(network_setting.upper_boundary*1.6, 12, 8)
-        #         encoders.extend(([prior_load_encoder]*self.adv_settings.prior_server_loads))
-            
-        #     if self.adv_settings.prior_server_percentages:
-        #         prior_load_percentage_encoder = tileCoding.myTileInterface(1.6, 12, 8)
-        #         encoders.extend(([prior_load_percentage_encoder]*self.adv_settings.prior_server_percentages))
-            
-        #     if self.adv_settings.include_legal_traffic:
-        #         maxLegalBandwidth = len(network_setting.host_sources)*network_setting.rate_legal_high
-        #         leg_bandwidth_tiles = min(2*maxLegalBandwidth,20) # cap off our max leg_bandwidth at 20 tiles. More than enough
-        #         leg_bandwidth_tilings = 8
-
-        #         print("my detected max ill_bandwidth is {0}".format(maxLegalBandwidth))
-        #         leg_bandwidth_encoding = tileCoding.myTileInterface(maxLegalBandwidth, leg_bandwidth_tiles, leg_bandwidth_tilings)
-
-        #         encoders.extend([leg_bandwidth_encoding]*self.num_adv_agents)
-
-
-        #     print(len(encoders))
-        #     print(N_adv_state)
-
-        #     assert(len(encoders)==N_adv_state)
-        # else:
         encoders = None
 
 
@@ -130,6 +77,7 @@ class GenericAdvMaster(genericMaster.GenericAdvMaster):
 
         self.name = adv_settings.name
         self.N_adv_state = N_adv_state
+
 
     def __enter__(self):
         print("__enter__ GenericAdvMaster decentralised")
@@ -214,24 +162,21 @@ class GenericAdvMaster(genericMaster.GenericAdvMaster):
             assert(1==2)
 
 
-        if self.adv_settings.prior_agent_delta_moves:
-            last_changes = self.defender.past_moves[(-1*self.adv_settings.prior_agent_delta_moves):]
+        if self.prior_agent_deltas:
+            last_changes = self.defender.past_moves[(-1*self.prior_agent_deltas):]
             for change in last_changes:
                 state.extend(change) 
 
         if self.adv_settings.prior_server_loads:
-            latest_load = net.switches[0].get_state()
+            latest_load = net.switches[0].get_load()
             self.server_loads.pop(0)
             self.server_loads.append(latest_load)
             state.extend(self.server_loads)
 
-        if self.adv_settings.prior_server_percentages:
-            assert(1==2) # no longer works
-            prior_percentages = net.switches[0].past_server_percentages[-self.adv_settings.prior_server_percentages:]
-            state.extend(prior_percentages)
         if self.adv_settings.include_legal_traffic:
             state.extend(self.leg_bandwidths)
         
+
         if(len(state)!=self.N_adv_state):
             print(len(state))
             print(self.N_adv_state)
@@ -279,6 +224,10 @@ class GenericAdvMaster(genericMaster.GenericAdvMaster):
         #         # repeat each number of attackers
         #         self.ill_bandwidths[i] += self.min_ill_bandwidth + np.random.rand()*(self.max_ill_bandwidth - self.min_ill_bandwidth)
 
+        if self.adv_settings.prior_server_loads:
+
+            for i in range(len(self.server_loads)):
+                self.server_loads[i] = 0
 
     def update_past_state(self, actions):
         self.prior_actions.pop(0)
