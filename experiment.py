@@ -296,7 +296,6 @@ class Experiment:
                     for iteration in range(self.network_settings.iterations_between_second):
                         step += 1
 
-
                         # agent moves
                         if step % adversary_move == 0:
                             adv_step = step/adversary_move # the step for the adversary
@@ -397,6 +396,9 @@ class Experiment:
                         adv_current_action = adv_next_action
                         # print("simulated the move")
                 
+                    
+                    # At the end of a second
+
                     # we've intentionally calculated the defender_reward twice. 
                     # If action is every 2 seconds it'll use the cache.
                     # But if action is ever 0.5 seconds and we not training ... no need to calculate reward tonnes 
@@ -443,7 +445,10 @@ class Experiment:
                         server_actions_lines.append(server_actions_line)
 
 
+
                 """
+                END OF THE EPISODE
+
                 This is where you would do the 'isDone logic'
 
                 if self.defender_settings.save_model_mode in self.agentSaveModes:

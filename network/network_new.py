@@ -322,7 +322,8 @@ class Switch():
 
         if self.is_filter and self.bucket:
             # print("\n\n about to bucket")
-            (legal_pass, legal_dropped, illegal_pass, illegal_dropped) = self.bucket.bucket_flow(self.legal_traffic, self.illegal_traffic, self.throttle_rate, self.load_window_estimate)
+            current_load = (self.legal_window_estimate + self.illegal_window_estimate)
+            (legal_pass, legal_dropped, illegal_pass, illegal_dropped) = self.bucket.bucket_flow(self.legal_traffic, self.illegal_traffic, self.throttle_rate, current_load)
         else:
             if self.throttle_rate == -1:
                 # if not set assume it's 0
@@ -362,9 +363,11 @@ class Switch():
         
         time_index = step%self.memory # the index of where to store the packet
         
-        traffic_forgotten = (self.legal_segment[time_index] + self.illegal_segment[time_index]) #+ self.dropped_legal_segment[time_index] + self.dropped_illegal_segment[time_index])
-        self.load_window_estimate -= traffic_forgotten
-        self.load_window_estimate += (self.legal_traffic + self.illegal_traffic)
+
+        self.legal_window_estimate -= self.legal_segment[time_index]
+        self.legal_window_estimate += self.legal_traffic
+        self.illegal_window_estimate -= self.illegal_segment[time_index]
+        self.illegal_window_estimate += self.illegal_traffic
 
         self.legal_segment[time_index] = self.legal_traffic
         self.illegal_segment[time_index] = self.illegal_traffic
@@ -382,8 +385,7 @@ class Switch():
 
 
         # reset the cache
-        self.legal_window_cache = None
-        self.illegal_window_cache = None
+
         self.legal_dropped_window_cache = None
         self.illegal_dropped_window_cache = None
     def setThrottle(self, throttle_rate, is_new_def_action):
@@ -420,52 +422,35 @@ class Switch():
         #self.past_windows = [0]*20 obsolete
 
         # We keep track of the traffic that arrives at the switch over each step
-        for i in range(self.memory):
+        for i in range(len(self.legal_segment)):
 
             self.legal_segment[i] = 0  # over the last window, how much legal traffic has passed
             self.illegal_segment[i] = 0  # over the last window, how much illegal traffic has passed
             self.dropped_legal_segment[i] = 0 # how much legal traffic have we dropped over the last window
             self.dropped_illegal_segment[i] = 0  # over last window, how much illegal traffic has passed
 
-        self.legal_window_cache = None
-        self.illegal_window_cache = None
+
         self.legal_dropped_window_cache = None
         self.illegal_dropped_window_cache = None
         if self.bucket:
             self.bucket.reset()
 
 
-        self.load_window_estimate = 0 # we use this for an estimate of the load at any time
+        #self.load_window_estimate = 0 # we use this for an estimate of the load at any time
+
+        self.illegal_window_estimate = 0 # keep track
+        self.legal_window_estimate = 0
 
 
-    def update_past_server_load(self):
-        # NB: Move this logic to the adversary or whatever needs to know it
-        assert(1==2)
-        self.past_windows.pop(0)
-        self.past_server_percentages.pop(0)
-        load = min(self.getWindow(), self.server_capacity*1.5)
-        # Once we exceed the server capacity this information is useless
-        self.past_windows.append(load)
-        self.past_server_percentages.append(load/self.server_capacity)
 
     def printSwitch(self):
        print("switch_id {0} | load {1} | window {2}".format(self.id, self.legal_traffic + self.illegal_traffic, self.getWindow()))
 
     def get_illegal_window(self):
-        if self.illegal_window_cache != None:
-            return self.illegal_window_cache
-        self.illegal_window_cache = 0
-        for segment in self.illegal_segment:
-            self.illegal_window_cache += segment
-        return self.illegal_window_cache
+        return self.illegal_window_estimate
 
     def get_legal_window(self):
-        if self.legal_window_cache != None:
-            return self.legal_window_cache        
-        self.legal_window_cache = 0
-        for segment in self.legal_segment:
-            self.legal_window_cache += segment
-        return self.legal_window_cache    
+        return self.legal_window_estimate    
 
     def get_legal_dropped_window(self):
         if self.legal_dropped_window_cache != None:
@@ -489,7 +474,7 @@ class Switch():
         illegal_window = self.get_illegal_window()
         legal_window = self.get_legal_window()
         load = illegal_window + legal_window
-        assert(abs(self.load_window_estimate - load)<EPSILON)
+
         return(KbToMb(load))
 
 
@@ -842,6 +827,7 @@ class network_full(object):
     def updateEpisodeStatistics(self, second):
         # to avoid a tonne of calculations. We're going to calculate this every second
         # note second is the second that has just passed
+
 
         time_start = (second%2) * self.iterations_between_second
         time_end = time_start + self.iterations_between_second
