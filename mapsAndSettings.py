@@ -23,6 +23,7 @@ import pandas
 import agent.noThrottle as noThrot
 
 
+
 # defender_mode_enum = Enum('SaveModel', 'neither save load test_short')
 
 class defender_mode_enum(Enum):
@@ -78,14 +79,15 @@ class adv_random(adv_constant):
     name = "Random"
     attack_strategy = advesaryStandardAttackEnum.random
 
-class AIMDsettings(object):
-    name = "AIMD"
+class AimdMalialis(object):
+    name = "MalAimd"
     group_size = 1
-    delta = 0.35 # additive increase
+    delta = 0.2 # additive increase
     beta = 2 # multiplicative decrease
-    epsilon = EPSILON
+    epsilon = 0.01
     stateRepresentation = stateRepresentationEnum.only_server # WRONG
     sub_agent = agent.AIMD.AIMDagent
+    bucket_class = MalBucket
     reward_function = AGENT_REWARD_ENUM.packet_logic
 
     num_episodes = 1
@@ -103,20 +105,12 @@ class AIMDsettings(object):
     history_size = 1
     actions_per_second = 0.5 # make an decision every 2 seconds
 
-class AIMDAlternative(AIMDsettings):
-    name = "AIMDalternative"
-    delta = 0.1
-# class AIMDvariant(AIMDsettings):
-#     name = "AIMDvariant"
-#     sub_agent = agent.AIMD.AIMDvariant
 
-class AIMDMalialis(AIMDsettings):
-    name = "AIMDmalialis"
-    delta = 0.2
-    beta = 2
-    epsilon = 0.01
-    y = delta
-    tau = beta
+class AimdJeremy(AimdMalialis):
+    name = "AimdJeremy"
+    bucket_class = ProperBucket
+
+
 
 class NoThrottleBaseline(object):
     # note we have two dependencies
@@ -654,7 +648,7 @@ def create_generic_dec(def_settings, net_settings):
 
     """
 
-    if "AIMD" in def_settings.name:
+    if "Aimd" in def_settings.name:
         return def_settings.sub_agent(net_settings, def_settings)
 
     throttlers_not_allocated = net_settings.N_state
