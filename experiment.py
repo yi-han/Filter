@@ -269,7 +269,7 @@ class Experiment:
                 num_defender_moves = 0
                 num_adversary_moves = 0                
                 if self.opposition_settings:
-                    self.adversarialMaster.initiate_episode()
+                    self.adversarialMaster.initiate_episode(ep_num)
 
                 rAll = 0 # accumulative reward for system in the episode. #TODO shouldn't contribute in pretraining
                 

@@ -122,10 +122,18 @@ class dumbMaster(genericMaster.GenericAdvMaster):
 
 
 
+    def groupToStrategy(episode_number, splitStrategies):
+        # we use this as it's deterministic. Therefore ensure a
+        # uniform but consiststant spread of options.
+        strategy1 = splitStrategies[episode_number%len(splitStrategies)]
+        splitStrategies.remove(strategy1)
+        strategy2 = splitStrategies[episode_number % len(splitStrategies)]
+        return(strategy1, strategy2)
 
 
 
-    def initiate_episode(self, chosen_strategy = None):
+
+    def initiate_episode(self, episode_number, chosen_strategy = None):
         # here I assume that we know the number of designated attackers
         # The idea is to copy the same probabilty distribution as we had for
         # the normal version. This would be the closest mimic to the training.
@@ -138,11 +146,9 @@ class dumbMaster(genericMaster.GenericAdvMaster):
         
         if chosen_strategy == None:
             chosen_strategy = self.adv_settings.attack_strategy
+
         if chosen_strategy == advAttackEnum.split: 
-            strategy1 = random.choice(splitStrategies)
-            splitStrategies.remove(strategy1) # to ensure something different
-            strategy2 = random.choice(splitStrategies)
-            self.current_strategy = (strategy1, strategy2)
+            self.current_strategy = dumbMaster.groupToStrategy(episode_number, splitStrategies)
         elif chosen_strategy == advAttackEnum.random:
             # choose a differnt strategy
             chosen_strategy = random.choice(random_strategies)

@@ -197,12 +197,12 @@ class GenericAdvMaster(genericMaster.GenericAdvMaster):
             return combined_state
 
 
-    def initiate_episode(self):
+    def initiate_episode(self, episode_number):
         # here I assume that we know the number of designated attackers
         # The idea is to copy the same probabilty distribution as we had for
         # the normal version. This would be the closest mimic to the training.
         # Another idea is to use an alternate probablity distribution
-        
+        # ignore episode_number. Used for dumbMaster.
 
         super().initiate_episode()
 
