@@ -34,43 +34,28 @@ class LinearSarsaSingular(object):
     has_bucket = False
     actions_per_second = 0.5 # make an decision every 2 seconds
     
-class LinSingularExploration(LinearSarsaSingular):
-    name = "linSingExp"
-    endE = 0.1
 
-class linSinOrigSliding(LinearSarsaSingular):
-    name = "linSinOrigSliding"
-    actions_per_second = 2
-    # num_episodes = 200000
-
-class LinearSarsaSingularDDQNCopy(object):
-    # copy from ddqnSingleNoCommunicate
-    name = "LinearSarsaSingularDDQNCopy"
-    discount_factor = 0    
+class LinOrigLengthened(LinearSarsaSingular):
+    name = "linOrigLengthened"
+    reward_function = AGENT_REWARD_ENUM.packet_logic
     tau = 0.01 #Rate to update target network toward primary network. 
-    update_freq = 4 #How often to perform a training step.
-    batch_size = None #How many experiences to use for each training step.
-    num_episodes = 200001 #200001#    
+    num_episodes = 120000 #200001#    
     pre_train_episodes = 20000 #40000 #
     annealing_episodes = 60000  #120000  #
-    startE = 1
-    endE = 0.0
-    history_size = 1 # number of past iterations to look at
-    agent = None
+
+class LinNegative(LinOrigLengthened):
+    # copy from ddqnSingleNoCommunicate
+    name = "LinearSarsaNegative"
     sub_agent = linCen.Agent
     stateRepresentation = stateRepresentationEnum.throttler
     reward_function = AGENT_REWARD_ENUM.sliding_negative
 
-    group_size = 1 # number of filters each agent controls
-    has_bucket = False
-    actions_per_second = 0.5 # make an decision every 2 seconds
-
-class linSinNormSliding(LinearSarsaSingularDDQNCopy):
-    name = "linSinNormSliding"
+class linNegativeSliding(LinNegative):
+    name = "linSinNegSliding"
     actions_per_second = 2
 
 
-class LinSinPackets(LinearSarsaSingularDDQNCopy):
+class LinSinPackets(LinOrigLengthened):
     name = "LinSinPackets"
     reward_function = AGENT_REWARD_ENUM.packet_logic
 
@@ -78,10 +63,10 @@ class linSinPacketsSliding(LinSinPackets):
     name = "linSinPacketsSliding"
     actions_per_second = 2
 
-class LinSinDDMemory(LinearSarsaSingularDDQNCopy):
-    name = "LinSinDDMemory"
-    tau = 0.005
-    history_size = 5
+# class LinSinDDMemory(LinearSarsaSingularDDQNCopy):
+#     name = "LinSinDDMemory"
+#     tau = 0.005
+#     history_size = 5
 
 class LinearSarsaLAI(object):
     name = "LinearSarsaLAI"
@@ -163,8 +148,8 @@ adversarialLeaf = hostClass.adversarialLeaf
 Settings to change
 """
 
-assignedNetwork = NetworkNineAgent
-assignedAgent = linSinOrigSliding
+assignedNetwork = NetworkSixFour
+assignedAgent = LinOrigLengthened
 load_attack_path = "attackSimulations/{0}/".format(assignedNetwork.name)
 network_emulator = network.network_new.network_full # network_quick # network_full
 loadAttacks = False
@@ -177,13 +162,13 @@ loadAttacks = False
 # print("\n\nOVERWRITE_ITERATIONS_PER_SECOND")
 # assignedNetwork.iterations_per_second = 30
 
-assignedAgent.save_model_mode = defender_mode_enum.load
+assignedAgent.save_model_mode = defender_mode_enum.save
 trainHost = adversarialLeaf #coordAttack # conAttack #driftAttack #adversarialLeaf
 
 opposition = adv_constant #adv_random # adv_constant
-intelligentOpposition =  DdGenericSplitShort #
-intelligentOpposition.save_model_mode = defender_mode_enum.load_continue
-# intelligentOpposition = None
+intelligentOpposition =  DdGenericFinal #
+intelligentOpposition.save_model_mode = defender_mode_enum.save
+intelligentOpposition = None
 
 
 assert(trainHost==adversarialLeaf)

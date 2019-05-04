@@ -173,7 +173,7 @@ class NetworkSmallHard(NetworkMalialisSmall):
     name = "small_hard"
     rate_attack_low = 5
     rate_attack_high = 12
-    bucket_capacity = 48.1
+    bucket_capacity = 0
 
 class NetworkSingleTeamMalialisMedium(object):
     name = "single_team_malialis_medium"
@@ -196,7 +196,7 @@ class NetworkSingleTeamMalialisMedium(object):
     iterations_between_second = 100 # at 100 we are dealing wiht centiseconds
 
     max_hosts_per_level = [2, 6, 12]
-    bucket_capacity = 12.1
+    bucket_capacity = 0
     ep_length = 60 # Training is an episode of 60 seconds
 
     max_depth = 3
@@ -212,14 +212,14 @@ class NetworkSixFour(NetworkSingleTeamMalialisMedium):
     upper_boundary = 26 # malialis would have used 26
     lower_boundary = 20 # malialis would have used 20
     max_hosts_per_level = [4, 12, 24]
-    bucket_capacity = 24.1
+    bucket_capacity = 0
 
 class NetworkSixHard(NetworkSixFour):
     # We've doubled the attacker strength
     name = "six_hard"
     rate_attack_low = 5
     rate_attack_high = 12
-    bucket_capacity = 48.1
+    bucket_capacity = 0
 
 
 class NetTest(NetworkSingleTeamMalialisMedium):
@@ -250,7 +250,7 @@ class NetworkNineAgent(object):
     iterations_between_second = 100 # at 100 we are dealing wiht centiseconds
 
     max_hosts_per_level = [4, 12, 24, 36]
-    bucket_capacity = 12.1
+    bucket_capacity = 0
     ep_length = 60 # Training is an episode of 60 seconds
 
     max_depth = 4
@@ -284,7 +284,7 @@ class NetworkTwelveAgent(object):
     iterations_between_second = 100 # at 100 we are dealing wiht centiseconds
 
     max_hosts_per_level = [4, 12, 24, 36]
-    bucket_capacity = 12.1
+    bucket_capacity = 0
     ep_length = 60 # Training is an episode of 60 seconds
 
     max_depth = 4
@@ -322,7 +322,7 @@ class NetworkMalialisTeamFull(object):
     lower_boundary = 56
     iterations_between_second = 100 # at 100 we are dealing wiht centiseconds
     max_hosts_per_level = [2, 6, 12, 60]    
-    bucket_capacity = 12
+    bucket_capacity = 0
     is_sig_attack = False
     max_epLength = 30
     save_per_step_stats = False
@@ -382,13 +382,13 @@ class DdGenericSplit(DdGenericDec):
     include_other_attackers = False
     num_episodes = 600000
 
-class DdGenericSplitShort(DdGenericSplit):
-    name = "ddGenSplitShort"
-    num_adv_agents = 2
-    include_other_attackers = False
-    pre_train_episodes = 50000
-    annealing_episodes = 150000
-    num_episodes = 400000
+# class DdGenericSplitShort(DdGenericSplit):
+#     name = "ddGenSplitShort"
+#     num_adv_agents = 2
+#     include_other_attackers = False
+#     pre_train_episodes = 50000
+#     annealing_episodes = 150000
+#     num_episodes = 400000
 
 class DdGenericFinal(DdGenericSplit):
     name = "ddGenericFinal"
@@ -398,21 +398,18 @@ class DdGenericFinal(DdGenericSplit):
 
     pre_train_episodes = 50000
     annealing_episodes = 150000
-    num_episodes = 400000
+    num_episodes = 350000
 
 
 class ddAimd(DdGenericFinal):
     name = "ddAimd"
    
-    prior_adversary_actions = 5
     
     prior_agent_seconds = 0
     prior_agent_delta_seconds = 5
     prior_server_loads = 5
 
-    pre_train_episodes = 50000
-    annealing_episodes = 150000
-    num_episodes = 400000
+
 
 
 

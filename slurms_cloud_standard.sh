@@ -1,11 +1,11 @@
 # test exp One
 # Note I've skipped ddqn hier Packets 
 
-# sed 's/runDDQN/runSARSA/g' exp_either.slurm > output.slurm
-# sed 's/sampleDDQNText/sarOrig/g' output.slurm -i
-# sed "s/samplePath/sarOrig/g" output.slurm -i 
-# sed 's/0 2/0 10/g' output.slurm -i
-# sbatch output.slurm
+sed 's/runDDQN/runSARSA/g' exp_either.slurm > output.slurm
+sed 's/sampleDDQNText/sarPacketOrig/g' output.slurm -i
+sed "s/samplePath/sarPacketOrig/g" output.slurm -i 
+sed 's/0 2/0 2/g' output.slurm -i
+sbatch output.slurm
 
 
 

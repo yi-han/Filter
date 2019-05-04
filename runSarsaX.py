@@ -43,6 +43,11 @@ class linSinOrigSliding(LinearSarsaSingular):
     actions_per_second = 2
     # num_episodes = 200000
 
+class linOrigPackets(LinearSarsaSingular):
+    name = "linOrigPackets"
+    reward_function = AGENT_REWARD_ENUM.packet_logic
+
+
 class LinearSarsaSingularDDQNCopy(object):
     # copy from ddqnSingleNoCommunicate
     name = "LinearSarsaSingularDDQNCopy"
@@ -167,7 +172,7 @@ assignedNetwork = NetworkNineAgent
 assignedAgent = linSinPacketsSliding
 load_attack_path = "attackSimulations/{0}/".format(assignedNetwork.name)
 network_emulator = network.network_new.network_full # network_quick # network_full
-loadAttacks = False
+loadAttacks = True
 
 
 
@@ -181,8 +186,8 @@ assignedAgent.save_model_mode = defender_mode_enum.load
 trainHost = adversarialLeaf #coordAttack # conAttack #driftAttack #adversarialLeaf
 
 opposition = adv_constant #adv_random # adv_constant
-intelligentOpposition =  DdGenericSplitShort #
-intelligentOpposition.save_model_mode = defender_mode_enum.load_continue
+intelligentOpposition =  DdGenericSplit #
+intelligentOpposition.save_model_mode = defender_mode_enum.save
 # intelligentOpposition = None
 
 

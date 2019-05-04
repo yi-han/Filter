@@ -16,6 +16,8 @@ for dest in jpattison; do
 	experiment.py \
 	runDDQN.py \
 	runSARSA.py \
+	runAimdMal.py \
+	runAimdJeremy.py \
 	mapsAndSettings.py \
 	topologies \
 	exp_gpgpu_light.slurm \
