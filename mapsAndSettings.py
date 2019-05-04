@@ -368,13 +368,6 @@ class ddTest(DdGenericDec):
     annealing_episodes = 4
     num_episodes = 20
 
-# class DdGenericCentral(DdGenericDec):
-#     name = "ddGenCentral"
-#     num_adv_agents = 1
-#     pre_train_episodes = 50000
-#     include_other_attackers = False
-
-
 
 class DdGenericSplit(DdGenericDec):
     name = "ddGenSplit"
@@ -382,13 +375,7 @@ class DdGenericSplit(DdGenericDec):
     include_other_attackers = False
     num_episodes = 600000
 
-# class DdGenericSplitShort(DdGenericSplit):
-#     name = "ddGenSplitShort"
-#     num_adv_agents = 2
-#     include_other_attackers = False
-#     pre_train_episodes = 50000
-#     annealing_episodes = 150000
-#     num_episodes = 400000
+
 
 class DdGenericFinal(DdGenericSplit):
     name = "ddGenericFinal"
@@ -410,211 +397,11 @@ class ddAimd(DdGenericFinal):
     prior_server_loads = 5
 
 
-
-
-
 class ddAimdSingle(ddAimd):
     name = "ddAimdSingle"
     num_adv_agents = 1
 
-# class ddExpThree(DdGenericDec):
-#     name = "ddExpThree"
-#     num_adv_agents = 2
-#     include_other_attackers = False
-#     pre_train_episodes = 50000
-#     annealing_episodes = 300000
-#     num_episodes = 600000 
 
-
-"""
-
-
-class ddAimd(DdGenericDec):
-    num_adv_agents = 1
-    name = "ddAimd"
-    prior_adversary_actions = 5
-    
-    prior_agent_seconds = 0
-    prior_agent_delta_moves = 6
-    prior_server_loads = 0 
-    prior_server_percentages = 0
-
-
-    discount_factor = 0.6    
-    pre_train_episodes = 50000
-    annealing_episodes = 150000
-    num_episodes = 350000
-
-
-
-class ddAimdLarge(DdGenericDec):
-    num_adv_agents = 1
-    name = "ddAimdLarge"
-    prior_adversary_actions = 5
-    include_legal_traffic = True
-    
-    prior_agent_seconds = 12
-    prior_agent_delta_moves = 6
-    prior_server_loads = 6
-    prior_server_percentages = 6
-
-
-    discount_factor = 0.6    
-    pre_train_episodes = 50000
-    annealing_episodes = 150000
-    num_episodes = 350000
-
-class ddAimdLarge2(ddAimdLarge):
-    name = "ddAimdLarge2"
-    pre_train_episodes = 100000
-    annealing_episodes = 300000
-    num_episodes = 500000    
-   
-class ddAimdLarge3(ddAimdLarge2):
-    name = "ddAimdLarge3"
-    discount_factor = 0.3
-
-class ddAimdLarge4(ddAimdLarge2):
-    name = "ddAimdLarge4"
-    discount_factor = 0.9
-
-class ddAimdLarge5(ddAimdLarge2):
-    name = "ddAimdLarge5"
-    discount_factor = 0.8
-
-class ddAimdExtreme(DdGenericDec):
-    num_adv_agents = 1
-    name = "ddAimdExtreme"
-    prior_adversary_actions = 6
-    include_legal_traffic = True
-    
-    prior_agent_seconds = 12
-    prior_agent_delta_moves = 6
-    prior_server_loads = 6
-    prior_server_percentages = 6
-    include_indiv_hosts = True
-
-    discount_factor = 0.8    
-    pre_train_episodes = 50000
-    annealing_episodes = 150000
-    num_episodes = 350000
-
-class ddAimdExtreme2(ddAimdExtreme):
-    name = "ddAimdExtreme2"
-    discount_factor = 1
-
-class sarGenericDec(object):
-    name = "sarsaGenericDec"
-    num_adv_agents = -1
-    pre_train_episodes = 75000
-    annealing_episodes = 300000
-    num_episodes = 750000
-    tau = 0.001
-    discount_factor = 0.6
-    startE = 1
-    endE = 0.0
-    
-    prior_agent_seconds = 10
-    prior_adversary_actions = 5   
-    packets_last_step = False
-    include_indiv_hosts = False    
-    prior_agent_delta_moves = 0
-    prior_server_loads = 0
-    prior_server_percentages = 0
-
-    include_legal_traffic = False
-
-    is_intelligent = True
-    max_epLength = None
-    reward_overload = None
-    update_freq = 4
-    batch_size = 32
-    adversary_class = ddGeneric.GenericAdvMaster
-    adv_agent_class = sarsaAdvAgent.sarGenAgent
-    action_per_agent = 11
-    include_other_attackers = False    
-    include_encoder = True
-    actions_per_second = 0.5 # make an decision every 2 seconds
-
-class sarGenericCen(sarGenericDec):
-    name = "sarsaGenericCen"
-    num_adv_agents = 1
-
-class sarAdvSplit(sarGenericCen):
-    name = "sarsaAdvSplit"
-    num_adv_agents = 2 
-
-class sarAdvExpThree(sarGenericCen):
-    name = "sarsaAdvExpThree"
-    num_adv_agents = 2 
-    pre_train_episodes = 50000
-    annealing_episodes = 300000
-    num_episodes = 600000    
-
-class sarAimd(sarGenericDec):
-    num_adv_agents = 1
-    name = "sarAimd"
-    prior_agent_delta_moves = 5
-    prior_agent_seconds = 0
-    packets_last_step = False
-    discount_factor = 0.6
-
-    pre_train_episodes = 75000
-    annealing_episodes = 225000
-    num_episodes = 500000
-
-class sarAimd2(sarAimd):
-    name = "sarAimd2"
-    pre_train_episodes = 75000
-    annealing_episodes = 225000
-    num_episodes = 500000    
-
-class sarAimd3(sarAimd2):
-    name = "sarAimd3"
-    discount_factor = 0.3
-
-class sarAimdAlt1(sarGenericDec):
-    num_adv_agents = 1
-    name = "sarAimdAlt1"
-    prior_agent_delta_moves = 5
-    prior_agent_seconds = 0
-    prior_adversary_actions = 5
-    prior_server_loads = 0    
-    prior_server_percentages = 5
-    include_legal_traffic = False
-    discount_factor = 0.6
-
-class sarAimdAlt2(sarAimdAlt1):
-    name = "sarAimdAlt2"
-    pre_train_episodes = 75000
-    annealing_episodes = 225000
-    num_episodes = 500000  
-
-class sarAimdAlt3(sarAimdAlt2):
-    name = "sarAimdAlt3"
-    discount_factor = 0.3
-
-class sarAimdLarge(sarGenericDec):
-    num_adv_agents = 1
-    name = "sarAimdLarge"
-    prior_agent_delta_moves = 5
-    prior_agent_seconds = 10
-    prior_adversary_actions = 5
-    prior_server_loads = 5   
-    prior_server_percentages = 5
-    include_legal_traffic = True
-    discount_factor = 0.6
-
-class sarAimdLarge2(sarAimdLarge):
-    name = "sarAimdLarge2"
-    pre_train_episodes = 75000
-    annealing_episodes = 225000
-    num_episodes = 500000 
-
-class sarAimdLarge3(sarAimdLarge2):
-    name = "sarAimdLarge3"
-    discount_factor = 0.3
-"""
 def create_generic_dec(def_settings, net_settings):
     """
     def_settings = defender_settings, net_settings = network_settings

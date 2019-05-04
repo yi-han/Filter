@@ -10,32 +10,19 @@ Rather than using runSARSA or runDDQN, have a master file that runs attacks for 
 
 """
 
-# conAttack = hostClass.ConstantAttack
-# shortPulse = hostClass.ShortPulse
-# mediumPulse = hostClass.MediumPulse
-# largePulse = hostClass.LargePulse
-# gradualIncrease = hostClass.GradualIncrease
 
-adversarialLeaf = hostClass.adversarialLeaf
+
+adversarialLeaf = hostClass.adversarialLeafs
 
 
 attackers = [mapsAndSettings.adv_constant, mapsAndSettings.adv_pulse_short, mapsAndSettings.adv_pulse_medium, mapsAndSettings.adv_pulse_large,
     mapsAndSettings.adv_gradual, mapsAndSettings.adv_split] 
 
-# attackers = [mapsAndSettings.adv_pulse_short]
 DEFAULT_NUMBER_ATTACKS = 100 # 100
 
-# class GeneralSettingsObject(object):
-#     # SaveAttackEnum = Enum('SaveAttack', 'neither save load')
-#     SaveModelEnum = Enum('SaveModel', 'neither save load')
-#     debug = False
-#     # save_attack = SaveAttackEnum.neither
-#     save_model = SaveModelEnum.load
 
 def run_attacks(assignedNetwork, assignedAgent, file_path, smart_attacker, prefix, custom_iterations_between_second = DEFAULT_NUMBER_ATTACKS):
     #assert(custom_iterations_between_second == DEFAULT_NUMBER_ATTACKS)
-
-
 
     load_attack_path = "attackSimulations/{0}/".format(assignedNetwork.name)
     network_emulator = network_new.network_full # network_quick # network_full
