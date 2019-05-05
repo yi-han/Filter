@@ -12,7 +12,7 @@ Rather than using runSARSA or runDDQN, have a master file that runs attacks for 
 
 
 
-adversarialLeaf = hostClass.adversarialLeafs
+adversarialLeaf = hostClass.adversarialLeaf
 
 
 attackers = [mapsAndSettings.adv_constant, mapsAndSettings.adv_pulse_short, mapsAndSettings.adv_pulse_medium, mapsAndSettings.adv_pulse_large,
