@@ -607,3 +607,97 @@ def massSummary(load_path):
                 ms.write(",")
             ms.write("\n")
     ms.close()
+
+
+
+def summaryByEveryEpisode(load_path):
+    """
+    This is much more comprehensive than the other mass summary
+    I chose not to use this as the large variation of episode by episode creates such a massive S.D.
+
+    I don't think this is as useful as understanding the S.D. of the mean as the other version does
+    which shows whether it is consistant.
+    """
+    print(load_path)
+    ms = open("{0}/attack_summary_mass.csv".format(load_path), "w")
+    ms.write("AttackType,Repeats,Agent,MeanPercentage,Range,SD,Tau,Pretraining,Annealing,TotalEpisodes,start_e,overload,adv_tau,adv_discount,adv_pretrain,adv_annealing_episodes,adv_episodes,adv_start_e\n")
+    # Open up the first summary
+
+
+    init_summary_path = "{0}/attackSummary-0.csv".format(load_path)
+    init_summary = pandas.read_csv(init_summary_path)
+    num_attacks = len(init_summary['AttackType'])
+    attack_names = init_summary['AttackType']
+    agent_used = init_summary.iloc[-1]["Agent"]
+    tau = init_summary.iloc[-1]["Tau"]
+    pretraining = init_summary.iloc[-1]["Pretraining"]
+    annealing = init_summary.iloc[-1]["Annealing"]
+    totalEpisodes = init_summary.iloc[-1]["TotalEpisodes"]
+    start_e = init_summary.iloc[-1]["start_e"]
+    overload = init_summary.iloc[-1]["overload"]
+    adv_tau = init_summary.iloc[-1]["adv_tau"]
+    adv_discount = init_summary.iloc[-1]["adv_discount"]
+    adv_pretrain = init_summary.iloc[-1]["adv_pretrain"]
+    adv_annealing_episodes = init_summary.iloc[-1]["adv_annealing_episodes"]
+    adv_episodes = init_summary.iloc[-1]["adv_episodes"]
+    adv_start_e = init_summary.iloc[-1]["adv_start_e"]
+
+
+    # check number of rows to determine if advesary
+    # grab agent / advesary details
+    data_scores = {}
+    first_file = True
+
+    #attackers = [adv_constant, adv_pulse_short, adv_pulse_medium, adv_pulse_large,
+    #adv_gradual]#, adv_split] 
+
+    for attacker in attack_names:
+        data_scores[attacker] = []
+
+
+    for prefix in range(20):
+        for attacker in attack_names:
+            packet_path = "{0}/packet_served-test_short-{1}-{2}.csv".format(load_path, attacker, prefix)
+            if os.path.exists(packet_path):
+                packet_file = pandas.read_csv(packet_path)
+                legal_received = packet_file.LegalReceived
+                legal_sent = packet_file.LegalSent
+                adv_packets_sent = packet_file.IllegalSent
+                data_scores[attacker].append((legal_received, legal_sent, adv_packets_sent))
+            else:
+                print("{0} does not exist".format(packet_path))
+
+
+
+    for attacker in attack_names:
+        repetitions = len(data_scores[attacker])
+        #print(data_scores[attacker])
+        legal_sent_episode = sum(data_scores[attacker][0][1])
+        illegal_sent_episode = sum(data_scores[attacker][0][2])
+
+        percentages_overall = []
+        repetition = 0
+        print("attacker {0} repetitions {1}".format(attacker, repetitions))
+        for data in data_scores[attacker]:
+            print("repetition {0}".format(repetition))
+            repetition += 1
+
+            (legal_received, legal_sent, adv_packets_sent) = data
+            if not abs(sum(legal_sent)-legal_sent_episode)<EPSILON:
+                print("Should be {0} but is {1}".format(legal_sent_episode, sum(legal_sent)))
+                assert(1==2)
+            if not abs(sum(adv_packets_sent)-illegal_sent_episode)<EPSILON:
+                print("Should be {0} but is {1}".format(illegal_sent_episode, sum(adv_packets_sent)))
+                assert(1==2)
+            percentages_repetition = legal_received/legal_sent
+            #print(percentages_repetition)
+            percentages_overall.extend(percentages_repetition)
+
+
+        percentages_overall = np.array(percentages_overall)*100
+
+        ms.write("{0},{1},{2},".format(attacker,repetition,agent_used))
+        ms.write("{0},{1},{2},".format(percentages_overall.mean(), percentages_overall.ptp(), percentages_overall.std()))
+        ms.write("{0},{1},{2},{3},{4},{5},".format(tau, pretraining, annealing, totalEpisodes, start_e, overload))
+        ms.write("{0},{1},{2},{3},{4},{5}\n".format(adv_tau, adv_discount, adv_pretrain, adv_annealing_episodes, adv_episodes, adv_start_e))
+    ms.close()
