@@ -225,8 +225,8 @@ class NetworkSixHard(NetworkSixFour):
 class NetTest(NetworkSingleTeamMalialisMedium):
     iterations_between_action = 2
 
-class NetworkNineAgent(object):
-    name = "nine_agent"
+class NetworkNineFour(object):
+    name = "nine_four"
     N_state = 9
     action_per_throttler = 10
     N_switch = 15
@@ -257,6 +257,16 @@ class NetworkNineAgent(object):
     is_sig_attack = False
     save_per_step_stats = False
     functionPastCapacity = True # make it Malialis mode
+
+
+class NetworkNineTwo(NetworkNineFour):
+    name = "nine_two"
+    host_sources = [3, 3, 4, 4, 5, 5,
+        7, 7, 8, 8, 9, 9,
+        12, 12, 13, 13, 14, 14]
+    upper_boundary = 20
+    lower_boundary = 19 #guess  
+
 
 class NetworkTwelveAgent(object):
     name = "twelve_agent"
