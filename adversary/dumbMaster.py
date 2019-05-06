@@ -152,7 +152,7 @@ class dumbMaster(genericMaster.GenericAdvMaster):
         elif chosen_strategy == advAttackEnum.random:
             # choose a differnt strategy
             chosen_strategy = random.choice(random_strategies)
-            return self.initiate_episode(chosen_strategy)
+            return self.initiate_episode(episode_number, chosen_strategy)
         else:
             # strategy is a constant without any randomness
             self.current_strategy = (chosen_strategy, chosen_strategy)
