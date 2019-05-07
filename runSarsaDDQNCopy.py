@@ -37,7 +37,6 @@ class LinearSarsaSingular(object):
 
 class LinOrigLengthened(LinearSarsaSingular):
     name = "linOrigLengthened"
-    reward_function = AGENT_REWARD_ENUM.packet_logic
     tau = 0.01 #Rate to update target network toward primary network. 
     num_episodes = 120000 #200001#    
     pre_train_episodes = 20000 #40000 #
@@ -148,7 +147,7 @@ adversarialLeaf = hostClass.adversarialLeaf
 Settings to change
 """
 
-assignedNetwork = NetworkSixFour
+assignedNetwork = NetworkSingleTeamMalialisMedium
 assignedAgent = LinSinPackets
 load_attack_path = "attackSimulations/{0}/".format(assignedNetwork.name)
 network_emulator = network.network_new.network_full # network_quick # network_full
@@ -162,13 +161,13 @@ loadAttacks = False
 # print("\n\nOVERWRITE_ITERATIONS_PER_SECOND")
 # assignedNetwork.iterations_per_second = 30
 
-assignedAgent.save_model_mode = defender_mode_enum.save
+assignedAgent.save_model_mode = defender_mode_enum.load
 trainHost = adversarialLeaf #coordAttack # conAttack #driftAttack #adversarialLeaf
 
 opposition = adv_constant #adv_random # adv_constant
 intelligentOpposition =  DdGenericFinal #
 intelligentOpposition.save_model_mode = defender_mode_enum.save
-intelligentOpposition = None
+# intelligentOpposition = None
 
 
 assert(trainHost==adversarialLeaf)
