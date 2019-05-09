@@ -34,8 +34,8 @@ class AIMDagent():
         self.agent_settings = agent_settings
 
         self.max_rate =  network_settings.rate_attack_high * (len(network_settings.host_sources) - 1 ) + (2 * self.delta)
-        self.activate_rate = (self.upper + self.lower)/2 # 4 is to compensate for 2 second interval where typically would be two
-        # self.activate_rate = (self.upper+self.lower)/self.num_throttles
+        #self.activate_rate = (self.upper + self.lower)/2 # 4 is to compensate for 2 second interval where typically would be two
+        self.activate_rate = (self.upper+self.lower)/self.num_throttles
         print("delta = {0}".format(self.delta))
         print("beta = {0}".format(self.beta))
         print("epsilon = {0}".format(self.epsilon))
