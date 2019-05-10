@@ -84,7 +84,7 @@ class AimdMalialis(object):
     group_size = 1
     delta = 0.2 # additive increase
     beta = 2 # multiplicative decrease
-    epsilon = 0.01
+    epsilon = 0.0001
     stateRepresentation = stateRepresentationEnum.only_server # WRONG
     sub_agent = agent.AIMD.AIMDagent
     bucket_class = MalBucket
