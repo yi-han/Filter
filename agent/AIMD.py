@@ -14,7 +14,7 @@ TODO
 """
 from enum import Enum
 from network.utility import SECONDS_STANDARD_INTERVAL
-
+from network.utility import INF
 class AimdMovesEnum(Enum):
     none = 0
     decrease = 1
@@ -56,7 +56,7 @@ class AIMDagent():
     
     def reset_aimd(self):
         self.rs = -1 # AIMD off
-        self.pLast = 0 # 0 indicates that we aren't tracking as AIMD is off
+        self.pLast = -INF # 0 indicates that we aren't tracking as AIMD is off
         self.past_predictions = [[self.max_rate]*self.num_agents]*10
         self.past_moves = [[AimdMovesEnum.none.value]*self.num_agents]*10
         self.latest_state = None
@@ -78,7 +78,7 @@ class AIMDagent():
             if self.rs == -1 or abs(p-self.pLast) < self.epsilon:
                 # turn AIMD off
                 self.rs = -1
-                self.pLast = 0
+                self.pLast = -INF
                 recorded_move = AimdMovesEnum.none.value
             else:
                 self.pLast = p

@@ -164,9 +164,7 @@ class NetworkMalialisSmall(object):
     save_per_step_stats = False
     functionPastCapacity = True # make it Malialis mode
 
-class NetworkMalialisNoBucket(NetworkMalialisSmall):
-    name = "mallias_no_bucket"
-    bucket_capacity = 0
+
 
 
 class NetworkSmallHard(NetworkMalialisSmall):
