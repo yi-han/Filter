@@ -33,11 +33,7 @@ class LinearSarsaSingular(object):
     stateRepresentation = stateRepresentationEnum.throttler  
     has_bucket = False
     actions_per_second = 0.5 # make an decision every 2 seconds
-
-class LinOrigSliding(LinearSarsaSingular):
-    name = "LinOrigSliding"
-    actions_per_second = 2
-     
+    
 
 class LinOrigLengthened(LinearSarsaSingular):
     name = "linOrigLengthened"
@@ -151,8 +147,8 @@ adversarialLeaf = hostClass.adversarialLeaf
 Settings to change
 """
 
-assignedNetwork = NetworkSingleTeamMalialisMedium
-assignedAgent = LinearSarsaSingular
+assignedNetwork = NetworkNineTwo
+assignedAgent = LinOrigLengthened
 load_attack_path = "attackSimulations/{0}/".format(assignedNetwork.name)
 network_emulator = network.network_new.network_full # network_quick # network_full
 loadAttacks = False

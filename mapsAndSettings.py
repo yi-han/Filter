@@ -395,6 +395,9 @@ class DdGenericFinal(DdGenericSplit):
     annealing_episodes = 150000
     num_episodes = 350000
 
+class DdGenericThreeHost(DdGenericFinal):
+    name = "ddGenericThreeHost"
+    num_adv_agents = 3
 
 class ddAimd(DdGenericFinal):
     name = "ddAimd"
@@ -404,11 +407,13 @@ class ddAimd(DdGenericFinal):
     prior_agent_delta_seconds = 5
     prior_server_loads = 5
 
-
 class ddAimdSingle(ddAimd):
     name = "ddAimdSingle"
     num_adv_agents = 1
 
+class ddAimdThree(ddAimdSingle):
+    name = "ddAimdThree"
+    num_adv_agents = 3
 
 def create_generic_dec(def_settings, net_settings):
     """
