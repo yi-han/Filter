@@ -8,20 +8,22 @@ DEFENDER="sarOrig"
 
 
 echo ../$1/$DEFENDER "adv_$DEFENDER"
-cp -R ../$1/$DEFENDER "adv_$DEFENDER"
-rm "adv_$DEFENDER"/*.csv
-cp -R "adv_$DEFENDER" "adv_Sliding_$DEFENDER" # sliding
+rsync -avz --exclude="*.csv" --include="*" ../$1/$DEFENDER/ "adv_$DEFENDER"
 
-# DEFENDER="sarOrigLengthened"
-# cp -R ../$1/$DEFENDER "adv_$DEFENDER"
-# rm "adv_$DEFENDER"/*.csv
+#cp -R ../$1/$DEFENDER "adv_$DEFENDER"
+#rm "adv_$DEFENDER"/*.csv
+
+DEFENDER="sarOrigLengthened"
+rsync -avz --exclude="*.csv" --include="*" ../$1/$DEFENDER/ "adv_$DEFENDER"
+#rsync -avz --exclude="*.csv" --include="*" ../$1/$DEFENDER/ "adv_Sliding_$DEFENDER"
 
 
-# DEFENDER="sarSinPackets"
-# cp -R ../$1/$DEFENDER "adv_$DEFENDER"
-# rm "adv_$DEFENDER"/*.csv
-# cp -R "adv_$DEFENDER" "adv_Sliding_$DEFENDER" # sliding
-# rm "adv_Sliding_$DEFENDER"/*.csv
+
+
+DEFENDER="sarSinPackets"
+rsync -avz --exclude="*.csv" --include="*" ../$1/$DEFENDER/ "adv_$DEFENDER"
+rsync -avz --exclude="*.csv" --include="*" ../$1/$DEFENDER/ "adv_Sliding_$DEFENDER"
+
 
 # do the rest later
 

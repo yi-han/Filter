@@ -263,19 +263,19 @@ class NetworkNineTwo(NetworkNineFour):
         7, 7, 8, 8, 9, 9,
         12, 12, 13, 13, 14, 14]
     upper_boundary = 20
-    lower_boundary = 19 #guess  
+    lower_boundary = 17 #guess  
 
 
-class NetworkTwelveAgent(object):
+class NetworkTwelveTwo(object):
     name = "twelve_agent"
     N_state = 12
     action_per_throttler = 10
     N_switch = 19
 
-    host_sources = [3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5,
-        7, 7, 7, 7, 8, 8, 8, 8, 9, 9, 9, 9,
-        12, 12, 12, 12, 13, 13, 13, 13, 14, 14, 14, 14,
-        16, 16, 16, 16, 17, 17, 17, 17, 18, 18, 18 ,18]
+    host_sources = [3, 3, 4, 4, 5, 5, 
+        7, 7, 8, 8, 9, 9,
+        12, 12, 13, 13, 14, 14,
+        16, 16, 17, 17, 18, 18]
 
     servers = [0]
     filters = [3, 4, 5, 7, 8, 9, 12, 13, 14, 16, 17, 18]
@@ -286,8 +286,8 @@ class NetworkTwelveAgent(object):
     rate_attack_low = 2.5 
     rate_attack_high = 6
     legal_probability = 0.6 # probability that is a good guys
-    upper_boundary = 50 
-    lower_boundary = 42 # guess
+    upper_boundary = 26 
+    lower_boundary = 20 # guess
 
     iterations_between_second = 100 # at 100 we are dealing wiht centiseconds
 
@@ -618,7 +618,7 @@ def massSummary(load_path):
 
 
 
-def summaryByEveryEpisode(load_path):
+def extensiveSummary(load_path):
     """
     This is much more comprehensive than the other mass summary
     I chose not to use this as the large variation of episode by episode creates such a massive S.D.
@@ -626,13 +626,24 @@ def summaryByEveryEpisode(load_path):
     I don't think this is as useful as understanding the S.D. of the mean as the other version does
     which shows whether it is consistant.
     """
+
+    noFileFound = True
+
+    for prefix in range(10):
+        init_summary_path = "{0}/attackSummary-{1}.csv".format(load_path, prefix)
+        if os.path.exists(init_summary_path):
+            noFileFound = False
+            break
+    if noFileFound:
+        return
+
+
     print(load_path)
     ms = open("{0}/attack_summary_mass.csv".format(load_path), "w")
-    ms.write("AttackType,Repeats,Agent,MeanPercentage,Range,SD,Tau,Pretraining,Annealing,TotalEpisodes,start_e,overload,adv_tau,adv_discount,adv_pretrain,adv_annealing_episodes,adv_episodes,adv_start_e\n")
+    ms.write("AttackType,Repeats,Agent,MeanSeperateEvaluation,MeanSeperateEvaluationSd,MeanSeperateEvaluationRange,CombinedMean,CombinedSd,CombinedRange,Tau,Pretraining,Annealing,TotalEpisodes,start_e,overload,adv_tau,adv_discount,adv_pretrain,adv_annealing_episodes,adv_episodes,adv_start_e\n")
     # Open up the first summary
 
 
-    init_summary_path = "{0}/attackSummary-0.csv".format(load_path)
     init_summary = pandas.read_csv(init_summary_path)
     num_attacks = len(init_summary['AttackType'])
     attack_names = init_summary['AttackType']
@@ -662,50 +673,39 @@ def summaryByEveryEpisode(load_path):
     for attacker in attack_names:
         data_scores[attacker] = []
 
-
     for prefix in range(20):
         for attacker in attack_names:
             packet_path = "{0}/packet_served-test_short-{1}-{2}.csv".format(load_path, attacker, prefix)
             if os.path.exists(packet_path):
                 packet_file = pandas.read_csv(packet_path)
-                legal_received = packet_file.LegalReceived
-                legal_sent = packet_file.LegalSent
-                adv_packets_sent = packet_file.IllegalSent
-                data_scores[attacker].append((legal_received, legal_sent, adv_packets_sent))
+                percentage_received = packet_file.PercentageReceived
+                data_scores[attacker].append(percentage_received)
             else:
                 print("{0} does not exist".format(packet_path))
 
 
-
+# MeanSeperateEvaluation,MeanSeperateEvaluationSd,MeanSeperateEvaluationRange,CombinedMean,CombinedSd,CombinedRange
     for attacker in attack_names:
-        repetitions = len(data_scores[attacker])
         #print(data_scores[attacker])
-        legal_sent_episode = sum(data_scores[attacker][0][1])
-        illegal_sent_episode = sum(data_scores[attacker][0][2])
-
-        percentages_overall = []
-        repetition = 0
-        print("attacker {0} repetitions {1}".format(attacker, repetitions))
-        for data in data_scores[attacker]:
-            print("repetition {0}".format(repetition))
-            repetition += 1
-
-            (legal_received, legal_sent, adv_packets_sent) = data
-            if not abs(sum(legal_sent)-legal_sent_episode)<EPSILON:
-                print("Should be {0} but is {1}".format(legal_sent_episode, sum(legal_sent)))
-                assert(1==2)
-            if not abs(sum(adv_packets_sent)-illegal_sent_episode)<EPSILON:
-                print("Should be {0} but is {1}".format(illegal_sent_episode, sum(adv_packets_sent)))
-                assert(1==2)
-            percentages_repetition = legal_received/legal_sent
-            #print(percentages_repetition)
-            percentages_overall.extend(percentages_repetition)
+        #legal_sent_episode = sum(data_scores[attacker][0][1])
+        #illegal_sent_episode = sum(data_scores[attacker][0][2])
+        evaluations = data_scores[attacker]
+        
+        combined_evaluations = []
+        percentages_individual_evaluations = [] # we store the mean of each evaluation here
+        for individual_evaluation in data_scores[attacker]:
 
 
-        percentages_overall = np.array(percentages_overall)*100
+            combined_evaluations.extend(individual_evaluation)
+            percentages_individual_evaluations.append(individual_evaluation.mean())
 
-        ms.write("{0},{1},{2},".format(attacker,repetition,agent_used))
-        ms.write("{0},{1},{2},".format(percentages_overall.mean(), percentages_overall.ptp(), percentages_overall.std()))
+
+
+        evaluations = np.array(evaluations)
+        combined_evaluations = np.array(combined_evaluations)
+        ms.write("{0},{1},{2},".format(attacker,len(evaluations),agent_used))
+        ms.write("{0},{1},{2},".format(evaluations.mean(), evaluations.std(), evaluations.ptp()))
+        ms.write("{0},{1},{2},".format(combined_evaluations.mean(), combined_evaluations.std(), combined_evaluations.ptp()))
         ms.write("{0},{1},{2},{3},{4},{5},".format(tau, pretraining, annealing, totalEpisodes, start_e, overload))
         ms.write("{0},{1},{2},{3},{4},{5}\n".format(adv_tau, adv_discount, adv_pretrain, adv_annealing_episodes, adv_episodes, adv_start_e))
     ms.close()
