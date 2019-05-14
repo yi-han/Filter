@@ -38,7 +38,8 @@ class Agent(aBase.Agent):
         return 0
 
     def loadModel(self, load_path):
-        return
+        
+        return 0
 
 
     def saveModel(self, load_path, iteration):

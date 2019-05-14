@@ -112,8 +112,7 @@ class AgentOfAgents():
         print("loading all models")
         for i in range(len(self.agents)):
             individual_path = load_path+'/{0}-{1}'.format(i, prefix)
-            if not os.path.exists(individual_path):
-                return - 1
+
             last_checkpoint = self.agents[i].loadModel(individual_path)
         return last_checkpoint # note all should have returned same value
 

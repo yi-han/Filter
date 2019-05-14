@@ -42,6 +42,10 @@ class LinOrigLengthened(LinearSarsaSingular):
     pre_train_episodes = 20000 #40000 #
     annealing_episodes = 60000  #120000  #
 
+class LinLengthenedSliding(LinOrigLengthened):
+    name = "LinLengthenedSliding"
+    actions_per_second = 2
+
 class LinNegative(LinOrigLengthened):
     # copy from ddqnSingleNoCommunicate
     name = "LinearSarsaNegative"
@@ -49,9 +53,7 @@ class LinNegative(LinOrigLengthened):
     stateRepresentation = stateRepresentationEnum.throttler
     reward_function = AGENT_REWARD_ENUM.sliding_negative
 
-class linNegativeSliding(LinNegative):
-    name = "linSinNegSliding"
-    actions_per_second = 2
+
 
 
 class LinSinPackets(LinOrigLengthened):
@@ -147,11 +149,11 @@ adversarialLeaf = hostClass.adversarialLeaf
 Settings to change
 """
 
-assignedNetwork = NetworkNineTwo
-assignedAgent = linSinPacketsSliding
+assignedNetwork = NetworkSixFour
+assignedAgent = NoThrottleBaseline
 load_attack_path = "attackSimulations/{0}/".format(assignedNetwork.name)
 network_emulator = network.network_new.network_full # network_quick # network_full
-loadAttacks = False
+loadAttacks = True
 
 
 
@@ -160,13 +162,13 @@ loadAttacks = False
 
 
 
-assignedAgent.save_model_mode = defender_mode_enum.load
+assignedAgent.save_model_mode = defender_mode_enum.save
 trainHost = adversarialLeaf #coordAttack # conAttack #driftAttack #adversarialLeaf
 
 opposition = adv_constant #adv_random # adv_constant
-intelligentOpposition =  DdGenericFinal #
+intelligentOpposition =  DdGenericOneHost #
 intelligentOpposition.save_model_mode = defender_mode_enum.save
-# intelligentOpposition = None
+intelligentOpposition = None
 
 
 assert(trainHost==adversarialLeaf)

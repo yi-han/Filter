@@ -218,6 +218,7 @@ class Experiment:
                 if self.defender_settings.save_model_mode == mapsAndSettings.defender_mode_enum.load_continue:
                     ep_init = max(episode, ep_init) # edge case: Return -1 if folder doesn't exist
                 else:
+                    print("returned an episode of {0}".format(episode))
                     assert(episode != -1) # used to flag doesnt exist
             if self.opposition_settings.is_intelligent and self.opposition_settings.save_model_mode in self.agentLoadModes:              
                 episode = self.adversarialMaster.loadModel(self.file_path, prefix)

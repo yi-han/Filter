@@ -13,7 +13,7 @@ sed 's/0 1/1 1/g' output.slurm -i
 sbatch output.slurm
 sed 's/1 1/2 1/g' output.slurm -i
 sbatch output.slurm
-sed 's/0 2/3 1/g' output.slurm -i
+sed 's/2 1/3 1/g' output.slurm -i
 sbatch output.slurm
 sed 's/3 1/4 1/g' output.slurm -i
 sbatch output.slurm
@@ -37,7 +37,7 @@ sed 's/0 1/1 1/g' output.slurm -i
 sbatch output.slurm
 sed 's/1 1/2 1/g' output.slurm -i
 sbatch output.slurm
-sed 's/0 2/3 1/g' output.slurm -i
+sed 's/2 1/3 1/g' output.slurm -i
 sbatch output.slurm
 sed 's/3 1/4 1/g' output.slurm -i
 sbatch output.slurm
@@ -62,7 +62,7 @@ sed 's/0 1/1 1/g' output.slurm -i
 sbatch output.slurm
 sed 's/1 1/2 1/g' output.slurm -i
 sbatch output.slurm
-# sed 's/0 2/3 1/g' output.slurm -i
+# sed 's/2 1/3 1/g' output.slurm -i
 # sbatch output.slurm
 # sed 's/3 1/4 1/g' output.slurm -i
 # sbatch output.slurm
@@ -87,7 +87,7 @@ sed 's/0 1/1 1/g' output.slurm -i
 sbatch output.slurm
 sed 's/1 1/2 1/g' output.slurm -i
 sbatch output.slurm
-sed 's/0 2/3 1/g' output.slurm -i
+sed 's/2 1/3 1/g' output.slurm -i
 sbatch output.slurm
 sed 's/3 1/4 1/g' output.slurm -i
 sbatch output.slurm
@@ -113,7 +113,7 @@ sbatch output.slurm
 # sbatch output.slurm
 # sed 's/1 1/2 1/g' output.slurm -i
 # sbatch output.slurm
-# sed 's/0 2/3 1/g' output.slurm -i
+# sed 's/2 1/3 1/g' output.slurm -i
 # sbatch output.slurm
 # sed 's/3 1/4 1/g' output.slurm -i
 # sbatch output.slurm
@@ -140,7 +140,7 @@ sed 's/0 1/1 1/g' output.slurm -i
 sbatch output.slurm
 sed 's/1 1/2 1/g' output.slurm -i
 sbatch output.slurm
-sed 's/0 2/3 1/g' output.slurm -i
+sed 's/2 1/3 1/g' output.slurm -i
 sbatch output.slurm
 sed 's/3 1/4 1/g' output.slurm -i
 sbatch output.slurm
@@ -165,7 +165,7 @@ sed 's/0 1/1 1/g' output.slurm -i
 sbatch output.slurm
 sed 's/1 1/2 1/g' output.slurm -i
 sbatch output.slurm
-sed 's/0 2/3 1/g' output.slurm -i
+sed 's/2 1/3 1/g' output.slurm -i
 sbatch output.slurm
 sed 's/3 1/4 1/g' output.slurm -i
 sbatch output.slurm
@@ -287,7 +287,7 @@ sbatch output.slurm
 # sbatch output.slurm
 # sed 's/1 1/2 1/g' output.slurm -i
 # sbatch output.slurm
-# sed 's/0 2/3 1/g' output.slurm -i
+# sed 's/2 1/3 1/g' output.slurm -i
 # sbatch output.slurm
 # sed 's/3 1/4 1/g' output.slurm -i
 # sbatch output.slurm

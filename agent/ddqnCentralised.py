@@ -82,6 +82,9 @@ class Agent(aBase.Agent):
         return l
 
     def loadModel(self, load_path):
+        if not os.path.exists(load_path):
+            return -1
+
         print("Loading Model...")
         print(load_path)
         ckpt = tf.train.get_checkpoint_state(load_path)

@@ -82,6 +82,9 @@ class Agent(aBase.Agent):
 
     def loadModel(self, load_path):
         # let above work out the load_path especially with the decentralised part
+
+        if not os.path.exists(load_path):
+            return -1
         print("Loading {0}".format(load_path))
         with open(load_path+"/checkpoint", 'r') as checkpoint_file:
             last_checkpoint = checkpoint_file.readline()
