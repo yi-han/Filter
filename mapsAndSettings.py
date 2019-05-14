@@ -395,6 +395,10 @@ class DdGenericFinal(DdGenericSplit):
     annealing_episodes = 150000
     num_episodes = 350000
 
+class DdGenericOneHost(DdGenericFinal):
+    name = "ddGenericOneHost"
+    num_adv_agents = 1
+
 class DdGenericThreeHost(DdGenericFinal):
     name = "ddGenericThreeHost"
     num_adv_agents = 3
