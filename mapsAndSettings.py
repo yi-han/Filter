@@ -525,22 +525,35 @@ def calc_comm_strategy(stateRepresentation):
 
 
 def merge_summaries(file_path):
+    
+
+    noFileFound = True
+
+    for prefix in range(10):
+        init_summary_path = "{0}/attackSummary-{1}.csv".format(file_path, prefix)
+        if os.path.exists(init_summary_path):
+            noFileFound = False
+            break
+    if noFileFound:
+        return    
+
+
     summary = open("{0}/attack_merged_summary.csv".format(file_path), "w")
     # we assume it goes from 0 to max
-    first_summary = open("{0}/attackSummary-0.csv".format(file_path))
+    first_summary = open(init_summary_path)
     header = first_summary.readline()
     summary.write(header)
     first_summary.close()
 
     #for i in range(0, number_summaries):
-    i = 0
-    while os.path.isfile("{0}/attackSummary-{1}.csv".format(file_path, i)):
-        i_summary = open("{0}/attackSummary-{1}.csv".format(file_path, i))
-        i_summary.readline()
-        for line in i_summary.readlines():
-            summary.write(line)
-        i_summary.close()
-        i+=1
+    for i in range(0,20): 
+
+        if os.path.isfile("{0}/attackSummary-{1}.csv".format(file_path, i)):
+            i_summary = open("{0}/attackSummary-{1}.csv".format(file_path, i))
+            i_summary.readline()
+            for line in i_summary.readlines():
+                summary.write(line)
+            i_summary.close()
     summary.close()
 
 def massSummary(load_path):
@@ -649,7 +662,7 @@ def extensiveSummary(load_path):
 
     print(load_path)
     ms = open("{0}/attack_summary_mass.csv".format(load_path), "w")
-    ms.write("AttackType,Repeats,Agent,MeanSeperateEvaluation,MeanSeperateEvaluationSd,MeanSeperateEvaluationRange,CombinedMean,CombinedSd,CombinedRange,Tau,Pretraining,Annealing,TotalEpisodes,start_e,overload,adv_tau,adv_discount,adv_pretrain,adv_annealing_episodes,adv_episodes,adv_start_e\n")
+    ms.write("AttackType,Repeats,Agent,MeanofMean,MeanSd,MeanRange,CombinedMean,CombinedSd,CombinedRange,Tau,Pretraining,Annealing,TotalEpisodes,start_e,overload,adv_tau,adv_discount,adv_pretrain,adv_annealing_episodes,adv_episodes,adv_start_e\n")
     # Open up the first summary
 
 
@@ -689,8 +702,7 @@ def extensiveSummary(load_path):
                 packet_file = pandas.read_csv(packet_path)
                 percentage_received = packet_file.PercentageReceived
                 data_scores[attacker].append(percentage_received)
-            else:
-                print("{0} does not exist".format(packet_path))
+
 
 
 # MeanSeperateEvaluation,MeanSeperateEvaluationSd,MeanSeperateEvaluationRange,CombinedMean,CombinedSd,CombinedRange
@@ -701,20 +713,32 @@ def extensiveSummary(load_path):
         evaluations = data_scores[attacker]
         
         combined_evaluations = []
-        percentages_individual_evaluations = [] # we store the mean of each evaluation here
+        meansOfEvaluations = [] # we store the mean of each evaluation here
         for individual_evaluation in data_scores[attacker]:
 
 
             combined_evaluations.extend(individual_evaluation)
-            percentages_individual_evaluations.append(individual_evaluation.mean())
+            meansOfEvaluations.append(individual_evaluation.mean())
 
 
 
-        evaluations = np.array(evaluations)
+        means = np.array(meansOfEvaluations)
         combined_evaluations = np.array(combined_evaluations)
         ms.write("{0},{1},{2},".format(attacker,len(evaluations),agent_used))
-        ms.write("{0},{1},{2},".format(evaluations.mean(), evaluations.std(), evaluations.ptp()))
+
+        ms.write("{0},{1},{2},".format(means.mean(), means.std(), means.ptp()))
+        #ms.write("{0},{1},{2},".format(evaluations.mean(), evaluations.std(), evaluations.ptp()))
         ms.write("{0},{1},{2},".format(combined_evaluations.mean(), combined_evaluations.std(), combined_evaluations.ptp()))
         ms.write("{0},{1},{2},{3},{4},{5},".format(tau, pretraining, annealing, totalEpisodes, start_e, overload))
         ms.write("{0},{1},{2},{3},{4},{5}\n".format(adv_tau, adv_discount, adv_pretrain, adv_annealing_episodes, adv_episodes, adv_start_e))
+    
     ms.close()
+    ms = open("{0}/attack_summary_mass.csv".format(load_path), "r")
+    snippet = ms.readlines()[1:]
+    ms.close()
+    print(snippet)
+    return snippet
+
+
+
+
