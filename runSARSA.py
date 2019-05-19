@@ -69,17 +69,17 @@ class linSinPacketsSliding(LinSinPackets):
 #     tau = 0.005
 #     history_size = 5
 
-class LinearSarsaLAI(object):
-    name = "LinearSarsaLAI"
+class linMarlFH(object):
+    name = "linMarlFH"
     #max_epLength = 500
     discount_factor = 0
-    tau = 0.01
+    tau = 0.005
     update_freq = 4
     batch_size = None
-    num_episodes = 100001#82501
-    pre_train_episodes = 0#2000 * max_epLength
-    annealing_episodes = 80000 #10 #60000 
-    startE = 0.3 #0.4
+    num_episodes = 350000#82501
+    pre_train_episodes = 20000
+    annealing_episodes = 60000 
+    startE = 1 #0.4
     endE = 0.0
     history_size = 1 # number of past iterations to look at
 
@@ -89,32 +89,30 @@ class LinearSarsaLAI(object):
     #stateletFunction = getStateletNoCommunication
     #stateRepresentation = stateRepresentationEnum.leaderAndIntermediate  
     has_bucket = False
-
-
-
-class LinearSarsaLAIDDQN350(LinearSarsaLAI):
-    # Idea (without using a ridiculous number of epLength, set the learning rate even lower and give proper exploration)
-    name = "LinearDDQN350"
-    tau = 0.005
-    num_episodes = 350001 #200001#    
-    pre_train_episodes = 40000 #40000 #
-    annealing_episodes = 160000  #120000  #
-    startE = 1
-    endE = 0.0
-    episodeDrop = (startE - endE)/annealing_episodes
-    reward_function = AGENT_REWARD_ENUM.sliding_negative
     actions_per_second = 0.5
+    reward_function = AGENT_REWARD_ENUM.packet_logic
     stateRepresentation = stateRepresentationEnum.up_to_server
 
-class LinHierPackets(LinearSarsaLAIDDQN350):
-    name = "LinHierPackets"
-    reward_function = AGENT_REWARD_ENUM.packet_logic
+class linHierOrigReward(linMarlFH):
+    name = "linHierOrigReward"
+    reward_function = AGENT_REWARD_ENUM.overload
 
 
-class LinHierMemory(LinearSarsaLAIDDQN350):
-    name = "LinHierMemory"
-    tau = 0.001
-    history_size = 5
+# class LinearSarsaLAIDDQN350(LinearSarsaLAI):
+#     # Idea (without using a ridiculous number of epLength, set the learning rate even lower and give proper exploration)
+#     name = "LinearDDQN350"
+#     tau = 0.005
+#     num_episodes = 350001 #200001#    
+#     pre_train_episodes = 40000 #40000 #
+#     annealing_episodes = 160000  #120000  #
+#     startE = 1
+#     endE = 0.0
+#     episodeDrop = (startE - endE)/annealing_episodes
+#     reward_function = AGENT_REWARD_ENUM.sliding_negative
+#     actions_per_second = 0.5
+#     stateRepresentation = stateRepresentationEnum.up_to_server
+
+
 
 class LinTest(object):
     # note we have two dependencies
@@ -149,11 +147,11 @@ adversarialLeaf = hostClass.adversarialLeaf
 Settings to change
 """
 
-assignedNetwork = NetworkMalialisSmall
-assignedAgent = NoThrottleBaseline
+assignedNetwork = NetworkSingleTeamMalialisMedium
+assignedAgent = linMarlFH
 load_attack_path = "attackSimulations/{0}/".format(assignedNetwork.name)
 network_emulator = network.network_new.network_full # network_quick # network_full
-loadAttacks = True
+loadAttacks = False
 
 
 

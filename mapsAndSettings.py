@@ -202,6 +202,15 @@ class NetworkSingleTeamMalialisMedium(object):
     save_per_step_stats = False
     functionPastCapacity = True # make it Malialis mode
 
+class NetworkMediumOptimal(NetworkSingleTeamMalialisMedium):
+    name = "NetworkMediumOptimal"
+    lower_boundary = 13
+
+class NetworkMediumVeryHard(NetworkSingleTeamMalialisMedium):
+    name = "medium_very_hard"
+    rate_attack_low = 5
+    rate_attack_high = 30
+
 class NetworkSixFour(NetworkSingleTeamMalialisMedium):
     # 4 attackers per throttler.
     name = "six_four"
@@ -257,6 +266,9 @@ class NetworkNineFour(object):
     functionPastCapacity = True # make it Malialis mode
 
 
+
+
+
 class NetworkNineTwo(NetworkNineFour):
     name = "nine_two"
     host_sources = [3, 3, 4, 4, 5, 5,
@@ -304,7 +316,6 @@ class NetworkTwelveTwo(object):
 class NetworkMalialisTeamFull(object):
     name = "full_team_malialias"
     N_state = 30
-    N_action = 1000000000000000000000000000000
     action_per_throttler = 10
     N_switch = 47
     host_sources = [4, 4, 5, 5, 6, 6, 44, 44, 45, 45, 46, 46, 
@@ -334,6 +345,19 @@ class NetworkMalialisTeamFull(object):
     is_sig_attack = False
     max_epLength = 30
     save_per_step_stats = False
+
+    ep_length = 60 # Training is an episode of 60 seconds
+
+    max_depth = 3
+
+    functionPastCapacity = True # make it Malialis mode
+
+
+
+class NetworkFullTeamHard(NetworkMalialisTeamFull):
+    name = "full_team_hard"
+    rate_attack_low = 5
+    rate_attack_high = 30    
 
 
 #################
@@ -736,7 +760,6 @@ def extensiveSummary(load_path):
     ms = open("{0}/attack_summary_mass.csv".format(load_path), "r")
     snippet = ms.readlines()[1:]
     ms.close()
-    print(snippet)
     return snippet
 
 

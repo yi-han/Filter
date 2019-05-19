@@ -52,7 +52,7 @@ adversarialLeaf = hostClass.adversarialLeaf
 attackClasses = [conAttack] 
 
 # commonMaps = [NetworkMalialisSmall, NetworkSingleTeamMalialisMedium, NetworkSixFour, NetworkMalialisTeamFull, NetworkSixHard, NetworkNineAgent, NetworkTwelveAgent]
-commonMaps = [NetworkNineTwo, NetworkTwelveTwo]
+commonMaps = [NetworkMediumVeryHard, NetworkMalialisTeamFull, NetworkMediumOptimal, NetworkFullTeamHard]
 for common_map in commonMaps:
     common_map.drift = 0
     print(common_map)
