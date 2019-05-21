@@ -444,12 +444,30 @@ class ddAimdThree(ddAimdSingle):
     name = "ddAimdThree"
     num_adv_agents = 3
 
-class ddAimdSingleAlt(ddAimdSingle):
-    # intentionally lightweight
-    name = "ddSingleAlt"
-    prior_agent_delta_seconds = 6
-    prior_server_loads = 3
-    prior_adversary_actions = 3
+class ddAimdAltRoles(ddAimd):
+    name = "ddAimdAltRoles"
+    indiv_host_info = advHostInfoEnum.hostRoles
+
+class ddAimdAltRolesSingle(ddAimdAltRoles):
+    name = "ddAimdAltRolesSingle"
+    num_adv_agents = 1
+
+class ddAimdAltLoads(ddAimd):
+    name = "ddAimdAltLoads"
+    indiv_host_info = advHostInfoEnum.hostLoads
+
+class ddAimdAltLoadsSingle(ddAimdAltLoads):
+    name = "ddAimdAltLoadsSingle"
+    num_adv_agents = 1
+
+class ddAimdAltBoth(ddAimd):
+    name = "ddAimdAltBoth"
+    indiv_host_info = advHostInfoEnum.loadsAndRoles
+
+class ddAimdAltBothSingle(ddAimdAltBoth):
+    name = "ddAimdAltBothSingle"
+    num_adv_agents = 1
+
 
 def create_generic_dec(def_settings, net_settings):
     """
