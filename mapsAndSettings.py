@@ -376,12 +376,13 @@ class DdGenericDec(object):
     
     packets_last_step = False
     prior_server_loads = 0
-    prior_agent_seconds = 10 #
-    prior_adversary_actions = 5
+    prior_agent_seconds = 6 #
+    prior_adversary_actions = 3
     include_indiv_hosts = False    
     prior_agent_delta_seconds = 0
-    include_legal_traffic = False
+    include_legal_traffic = True
     prior_server_percentages = 0
+    indiv_host_info = advHostInfoEnum.omit
 
     is_intelligent = True
     update_freq = 4
@@ -432,8 +433,8 @@ class ddAimd(DdGenericFinal):
    
     
     prior_agent_seconds = 0
-    prior_agent_delta_seconds = 5
-    prior_server_loads = 5
+    prior_agent_delta_seconds = 6
+    prior_server_loads = 3
 
 class ddAimdSingle(ddAimd):
     name = "ddAimdSingle"
@@ -446,8 +447,8 @@ class ddAimdThree(ddAimdSingle):
 class ddAimdSingleAlt(ddAimdSingle):
     # intentionally lightweight
     name = "ddSingleAlt"
-    prior_agent_delta_seconds = 3
-    prior_server_loads = 2
+    prior_agent_delta_seconds = 6
+    prior_server_loads = 3
     prior_adversary_actions = 3
 
 def create_generic_dec(def_settings, net_settings):

@@ -51,6 +51,13 @@ class GenericAdvMaster(genericMaster.GenericAdvMaster):
 
         N_adv_state += self.adv_settings.prior_server_loads
         N_adv_state += self.adv_settings.prior_server_percentages
+
+        if self.adv_settings.indiv_host_info in [advHostInfoEnum.hostRoles, advHostInfoEnum.hostLoads, advHostInfoEnum.advLoads]:
+            N_adv_state += len(network_setting.host_sources)
+
+        if self.adv_settings.indiv_host_info == advHostInfoEnum.loadsAndRoles:
+            N_adv_state += 2*len(network_setting.host_sources)
+
         self.adv_agents = []
         self.defender = defender
         self.defender_path = defender_path
@@ -144,7 +151,12 @@ class GenericAdvMaster(genericMaster.GenericAdvMaster):
         #print("actions done")
         # state.extend(self.prior_actions)
         if self.adv_settings.include_indiv_hosts:
+            assert(1==2) # obsolete
             state.extend(self.ill_bandwidth_by_host)
+
+        # host information:
+        state.extend(self.host_info)
+
 
         for prior_action in self.prior_actions:
             state.extend(prior_action)
@@ -212,12 +224,14 @@ class GenericAdvMaster(genericMaster.GenericAdvMaster):
             self.prior_actions.append([0] * self.num_adv_agents)
         self.ill_bandwidths= [] # list of the traffic agent can emmit
         self.ill_bandwidth_by_host = [] # list of ill_bandwidths of every single host
+        self.host_info = [] # information about the host to include (done at the handler level)
         self.leg_bandwidths = [] # amount of legal traffic for each host
         for i in range(len(self.adv_agents)):
             self.adv_agents[i].initiate_episode() # just calculating the ill_bandwidths
             self.ill_bandwidths.append(self.adv_agents[i].illegal_traffic)
             self.leg_bandwidths.append(self.adv_agents[i].legal_traffic)
             self.ill_bandwidth_by_host.extend(self.adv_agents[i].illegal_traffic_by_host)
+            self.host_info.extend(self.adv_agents[i].get_host_info(self.adv_settings.indiv_host_info))
         # for i in range(len(attackers_per_host)):
         #     attackers = attackers_per_host[i]
         #     for _ in range(attackers):

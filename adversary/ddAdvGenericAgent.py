@@ -164,4 +164,22 @@ class ddGenAgent():
         self.legal_traffic = KbToMb(self.legal_traffic)
         self.illegal_traffic = KbToMb(self.illegal_traffic)
 
+    def get_host_info(self, host_info_enum):
+        # information about each host
+        output = []
+        for leaf in self.leaves:
+            if host_info_enum in [advHostInfoEnum.hostRoles, advHostInfoEnum.loadsAndRoles]:
+                if leaf.is_attacker:
+                    output.append(1)
+                else:
+                    output.append(0)
+            if host_info_enum in [advHostInfoEnum.hostLoads, advHostInfoEnum.loadsAndRoles]:
+                output.append(leaf.traffic_rate)
+            if host_info_enum == advHostInfoEnum.advLoads:
+                if leaf.is_attacker:
+                    output.append(leaf.traffic_rate)
+                else:
+                    output.append(0)
+        return output
+
 

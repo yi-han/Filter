@@ -53,6 +53,13 @@ class AGENT_REWARD_ENUM(Enum):
     sliding_negative = 1
     packet_logic = 2
 
+class advHostInfoEnum(Enum):
+    # how much information do i provide the advesary about individual hosts
+    omit = 0 # nothing
+    hostRoles = 1 # 1 for each legit user. 0 for adversary
+    hostLoads = 2 # all the loads of each host (both legit and adv)
+    advLoads = 3 # 0 for all legit users, adv loads for host
+    loadsAndRoles = 4 # do both hostRoles and advLoads
 
 ### BUCKET CLASSES ###
 
