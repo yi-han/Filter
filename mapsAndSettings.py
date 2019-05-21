@@ -232,15 +232,17 @@ class NetworkSixHard(NetworkSixFour):
 class NetTest(NetworkSingleTeamMalialisMedium):
     iterations_between_action = 2
 
-class NetworkNineFour(object):
-    name = "nine_four"
+class NetworkNineTwo(object):
+    name = "nine_two"
     N_state = 9
     action_per_throttler = 10
     N_switch = 15
 
-    host_sources = [3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5,
-        7, 7, 7, 7, 8, 8, 8, 8, 9, 9, 9, 9,
-        12, 12, 12, 12, 13, 13, 13, 13, 14, 14, 14, 14]
+    host_sources = [3, 3, 4, 4, 5, 5,
+        7, 7, 8, 8, 9, 9,
+        12, 12, 13, 13, 14, 14]
+    upper_boundary = 20
+    lower_boundary = 17 #guess 
 
     servers = [0]
     filters = [3, 4, 5, 7, 8, 9, 12, 13, 14]
@@ -251,8 +253,7 @@ class NetworkNineFour(object):
     rate_attack_low = 2.5 
     rate_attack_high = 6
     legal_probability = 0.6 # probability that is a good guys
-    upper_boundary = 38 
-    lower_boundary = 30 # guess
+
 
     iterations_between_second = 100 # at 100 we are dealing wiht centiseconds
 
@@ -267,15 +268,6 @@ class NetworkNineFour(object):
 
 
 
-
-
-class NetworkNineTwo(NetworkNineFour):
-    name = "nine_two"
-    host_sources = [3, 3, 4, 4, 5, 5,
-        7, 7, 8, 8, 9, 9,
-        12, 12, 13, 13, 14, 14]
-    upper_boundary = 20
-    lower_boundary = 17 #guess  
 
 
 class NetworkTwelveTwo(object):
@@ -468,7 +460,9 @@ class ddAimdAltBothSingle(ddAimdAltBoth):
     name = "ddAimdAltBothSingle"
     num_adv_agents = 1
 
-
+class ddAimdAltBothThree(ddAimdAltBoth):
+    name = "ddAimdAltBothThree"
+    num_adv_agents = 3
 def create_generic_dec(def_settings, net_settings):
     """
     def_settings = defender_settings, net_settings = network_settings

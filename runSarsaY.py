@@ -1,142 +1,20 @@
 import sys
 import experiment
 import network.hosts as hostClass
+import agent.ddqnCentralised as ddCen
 import network.network_new
-import agent.tileCoding as tileCoding
-import agent.linearSarsaCentralised as linCen
-import agent.randomAgent as ranAg
 from mapsAndSettings import *
+
+#import generic_run
+
 import runAttacks
-assert(len(sys.argv)>=3)
 
 
+import agent.ddqnCentralised as ddCen
+# import agent.ddqnDecentralised as ddDec
 
-
-class LinearSarsaSingular(object):
-    # note we have two dependencies
-    name = "LinearSarsaSingular"
-    discount_factor = 0
-    tau = 0.1
-    update_freq = 4
-    batch_size = None
-    num_episodes = 62500#62500
-    pre_train_episodes = 0#2000
-    annealing_episodes = 50000
-    startE = 0.4 #0.4
-    endE = 0.0
-    agent = None
-    sub_agent = linCen.Agent
-    group_size = 1 # number of filters each agent controls
-    #stateletFunction = getStateletNoCommunication
-    history_size = 1 # number of past iterations to look at
-    reward_function = AGENT_REWARD_ENUM.overload
-    stateRepresentation = stateRepresentationEnum.throttler  
-    has_bucket = False
-    actions_per_second = 0.5 # make an decision every 2 seconds
-    
-
-class LinOrigLengthened(LinearSarsaSingular):
-    name = "linOrigLengthened"
-    tau = 0.01 #Rate to update target network toward primary network. 
-    num_episodes = 120000 #200001#    
-    pre_train_episodes = 20000 #40000 #
-    annealing_episodes = 60000  #120000  #
-
-class LinLengthenedSliding(LinOrigLengthened):
-    name = "LinLengthenedSliding"
-    actions_per_second = 2
-
-class LinNegative(LinOrigLengthened):
-    # copy from ddqnSingleNoCommunicate
-    name = "LinearSarsaNegative"
-    sub_agent = linCen.Agent
-    stateRepresentation = stateRepresentationEnum.throttler
-    reward_function = AGENT_REWARD_ENUM.sliding_negative
-
-
-
-
-class LinSinPackets(LinOrigLengthened):
-    name = "LinSinPackets"
-    reward_function = AGENT_REWARD_ENUM.packet_logic
-
-class linSinPacketsSliding(LinSinPackets):
-    name = "linSinPacketsSliding"
-    actions_per_second = 2
-
-# class LinSinDDMemory(LinearSarsaSingularDDQNCopy):
-#     name = "LinSinDDMemory"
-#     tau = 0.005
-#     history_size = 5
-
-class LinearSarsaLAI(object):
-    name = "LinearSarsaLAI"
-    #max_epLength = 500
-    discount_factor = 0
-    tau = 0.01
-    update_freq = 4
-    batch_size = None
-    num_episodes = 100001#82501
-    pre_train_episodes = 0#2000 * max_epLength
-    annealing_episodes = 80000 #10 #60000 
-    startE = 0.3 #0.4
-    endE = 0.0
-    history_size = 1 # number of past iterations to look at
-
-    agent = None
-    sub_agent = linCen.Agent
-    group_size = 1 # number of filters each agent controls
-    #stateletFunction = getStateletNoCommunication
-    #stateRepresentation = stateRepresentationEnum.leaderAndIntermediate  
-    has_bucket = False
-
-
-
-class LinearSarsaLAIDDQN350(LinearSarsaLAI):
-    # Idea (without using a ridiculous number of epLength, set the learning rate even lower and give proper exploration)
-    name = "LinearDDQN350"
-    tau = 0.005
-    num_episodes = 350001 #200001#    
-    pre_train_episodes = 40000 #40000 #
-    annealing_episodes = 160000  #120000  #
-    startE = 1
-    endE = 0.0
-    episodeDrop = (startE - endE)/annealing_episodes
-    reward_function = AGENT_REWARD_ENUM.sliding_negative
-    actions_per_second = 0.5
-    stateRepresentation = stateRepresentationEnum.up_to_server
-
-class LinHierPackets(LinearSarsaLAIDDQN350):
-    name = "LinHierPackets"
-    reward_function = AGENT_REWARD_ENUM.packet_logic
-
-
-class LinHierMemory(LinearSarsaLAIDDQN350):
-    name = "LinHierMemory"
-    tau = 0.001
-    history_size = 5
-
-class LinTest(object):
-    # note we have two dependencies
-    name = "LinearTest"
-    discount_factor = 0
-    tau = 0.1
-    update_freq = 4
-    batch_size = None
-    num_episodes = 20#82501
-    pre_train_episodes = 1#2000
-    annealing_episodes = 5 #10 #60000 
-    startE = 0.4 #0.4
-    endE = 0.0
-    history_size = 1 # number of past iterations to look at
-    agent = None
-    sub_agent = linCen.Agent
-    group_size = 1 # number of filters each agent controls
-    #stateletFunction = getStateletNoCommunication
-    stateRepresentation = stateRepresentationEnum.throttler  
-    has_bucket = False
-    actions_per_second = 0.5
-
+#from mapsAndSettings import *
+assert(len(sys.argv)>= 3)
 
 
 # The class of the adversary to implement
@@ -145,28 +23,22 @@ conAttack = hostClass.ConstantAttack
 adversarialLeaf = hostClass.adversarialLeaf
 
 
-"""
-Settings to change
-"""
-
-assignedNetwork = NetworkSingleTeamMalialisMedium
-assignedAgent = LinearSarsaSingular
+###
+# Settings NetworkMalialisSmall
+assignedNetwork =   NetworkNineTwo
+assignedAgent =  AimdJeremy #ddqnSingleNoCommunicate #ddqn100MediumHierarchical
 load_attack_path = "attackSimulations/{0}/".format(assignedNetwork.name)
-network_emulator = network.network_new.network_full # network_quick # network_full
 loadAttacks = False
-
-
+assignedAgent.encoders = None
 
 # print("\n\nSETTING TO JEREMY MODE\n\n\n")
 # assignedNetwork.functionPastCapacity = False
 
-
-
 assignedAgent.save_model_mode = defender_mode_enum.load
 trainHost = adversarialLeaf #coordAttack # conAttack #driftAttack #adversarialLeaf
 
-opposition = adv_constant #adv_random # adv_constant
-intelligentOpposition =  DdGenericOneHost #
+opposition = adv_constant #adv_random #adv_constant
+intelligentOpposition = ddAimdAltBoth #ddAdvAntiAimd #DdCoordinatedLowlongDlowSettings #DdCoordinatedMasterSettings #DdRandomMasterSettings
 intelligentOpposition.save_model_mode = defender_mode_enum.save
 # intelligentOpposition = None
 
@@ -183,58 +55,34 @@ else:
 
 
 
-
+network_emulator = network.network_new.network_full #network_quick # network_full
 
 ###
+
+
 assignedNetwork.emulator = network_emulator
+
+
+twist="{0}".format(network_emulator.name)
 commStrategy = calc_comm_strategy(assignedAgent.stateRepresentation)
 
-"""
-This is the encoder for the sarsa, this might be better positioned somewhere else
-"""
-encoders = []
-level = 0 # level 0 is throttlers, level 1 is intermeditary etc
-for max_hosts in assignedNetwork.max_hosts_per_level:
-    maxThrottlerBandwidth = 2 * assignedNetwork.rate_attack_high * max_hosts # a throttler doesn't face more than X
-    if level == 0:
-        numTiles = 6 * max_hosts
-    elif assignedAgent.stateRepresentation == stateRepresentationEnum.throttler:
-        continue
-    else:
-        numTiles = 6 # just set at 6.
-    numTilings = 8
-    tileCoder = tileCoding.myTileInterface(maxThrottlerBandwidth, numTiles, numTilings)
-    encoders.extend([tileCoder]*assignedAgent.history_size)
-    level += 1
-assignedAgent.encoders = encoders
-
-twist = "{0}{1}".format(numTiles, network_emulator.name) #{2}{0}Alias{1}".format(numTiles, "", network_emulator.name)
-
-
-if (len(sys.argv)==4) and sys.argv[3] != "" :
+if (len(sys.argv)>=4) and sys.argv[3] != "" :
     file_path = sys.argv[3]
     proper_path = getPathName(assignedNetwork, assignedAgent, commStrategy, twist, opposition)
+
     print("file should be: {0}".format(proper_path))
 else:
     file_path = getPathName(assignedNetwork, assignedAgent, commStrategy, twist, opposition)
 
 print('the filepath is {0}'.format(file_path))
 
-# if assignedAgent.save_model_mode is defender_mode_enum.load and intelligentOpposition \
-#     and intelligentOpposition.save_model_mode is defender_mode_enum.save:
-#     # we've set the filepath, now we need to ensure that we have the right adversary
-#     assert(trainHost==conAttack)
-#     trainHost = adversarialLeaf
-#if intelligentOpposition.save_model_mode is defender_mode_enum.neither:
 
-print('the filepath is {0}'.format(file_path))
 
 start_num = int(sys.argv[1])
 length_core= int(sys.argv[2])
 
 if loadAttacks:
     for i in range(start_num, start_num+length_core):
-
         runAttacks.run_attacks(assignedNetwork, assignedAgent, file_path, intelligentOpposition, i)
 
 else:
@@ -242,9 +90,8 @@ else:
 
     experiment = experiment.Experiment(trainHost, assignedNetwork, assignedAgent, intelligentOpposition)
 
-
-
     for i in range(start_num, length_core+start_num):
+
         genericAgent = create_generic_dec(assignedAgent, assignedNetwork)
         # genericAgent = None        
         print("Im doing it for {0}".format(i))
@@ -252,7 +99,4 @@ else:
 
         genericAgent = create_generic_dec(assignedAgent, assignedNetwork)
         runAttacks.run_attacks(assignedNetwork, assignedAgent, file_path, intelligentOpposition, i)
-
-
-
 
