@@ -443,6 +443,13 @@ class ddAimdThree(ddAimdSingle):
     name = "ddAimdThree"
     num_adv_agents = 3
 
+class ddAimdSingleAlt(ddAimdSingle):
+    # intentionally lightweight
+    name = "ddSingleAlt"
+    prior_agent_delta_seconds = 3
+    prior_server_loads = 2
+    prior_adversary_actions = 3
+
 def create_generic_dec(def_settings, net_settings):
     """
     def_settings = defender_settings, net_settings = network_settings
