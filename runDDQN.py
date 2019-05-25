@@ -23,7 +23,7 @@ class ddSinPackets(object):
     tau = 0.01 #Rate to update target network toward primary network. 
     update_freq = 4 #How often to perform a training step.
     batch_size = 32 #How many experiences to use for each training step.
-    num_episodes = 150000 #200001#    
+    num_episodes = 120000 #200001#    
     pre_train_episodes = 20000
     annealing_episodes = 60000 
     startE = 1
@@ -76,7 +76,7 @@ adversarialLeaf = hostClass.adversarialLeaf
 
 ###
 # Settings NetworkMalialisSmall
-assignedNetwork =   NetworkNineTwo
+assignedNetwork =   NetworkSingleTeamMalialisMedium
 assignedAgent =  ddSinPackets #ddqnSingleNoCommunicate #ddqn100MediumHierarchical
 load_attack_path = "attackSimulations/{0}/".format(assignedNetwork.name)
 loadAttacks = False
