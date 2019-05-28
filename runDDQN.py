@@ -36,6 +36,9 @@ class ddSinPackets(object):
     has_bucket = False
     actions_per_second = 0.5 # make an decision every 2 seconds
 
+class ddSinPacketsSliding(ddSinPackets):
+    name = "ddSinPacketsSliding"
+    actions_per_second = 2
 
 class ddMarlDH(object):
     group_size = 1
@@ -76,7 +79,7 @@ adversarialLeaf = hostClass.adversarialLeaf
 
 ###
 # Settings NetworkMalialisSmall
-assignedNetwork =   NetworkSingleTeamMalialisMedium
+assignedNetwork =   NetworkMalialisSmall
 assignedAgent =  ddSinPackets #ddqnSingleNoCommunicate #ddqn100MediumHierarchical
 load_attack_path = "attackSimulations/{0}/".format(assignedNetwork.name)
 loadAttacks = False
@@ -85,13 +88,13 @@ assignedAgent.encoders = None
 # print("\n\nSETTING TO JEREMY MODE\n\n\n")
 # assignedNetwork.functionPastCapacity = False
 
-assignedAgent.save_model_mode = defender_mode_enum.save
+assignedAgent.save_model_mode = defender_mode_enum.load
 trainHost = adversarialLeaf #coordAttack # conAttack #driftAttack #adversarialLeaf
 
 opposition = adv_constant #adv_random #adv_constant
-intelligentOpposition = ddAimd #ddAdvAntiAimd #DdCoordinatedLowlongDlowSettings #DdCoordinatedMasterSettings #DdRandomMasterSettings
+intelligentOpposition = DdBackupGenSingle #ddAdvAntiAimd #DdCoordinatedLowlongDlowSettings #DdCoordinatedMasterSettings #DdRandomMasterSettings
 intelligentOpposition.save_model_mode = defender_mode_enum.save
-intelligentOpposition = None
+# intelligentOpposition = None
 
 
 assert(trainHost==adversarialLeaf)

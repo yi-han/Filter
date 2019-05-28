@@ -4,28 +4,29 @@
 
 # sarsaOrig
 
-DEFENDER="sarOrig"
+DEFENDER="sarOrigLengthened"
 
 
 echo ../$1/$DEFENDER "adv_$DEFENDER"
 rsync -avz --exclude="*.csv" --include="*" ../$1/$DEFENDER/ "adv_$DEFENDER"
+#rsync -avz --exclude="*.csv" --include="*" ../$1/$DEFENDER/ "adv_Sliding_$DEFENDER"
 
 #cp -R ../$1/$DEFENDER "adv_$DEFENDER"
 #rm "adv_$DEFENDER"/*.csv
 
-DEFENDER="sarOrigLengthened"
-rsync -avz --exclude="*.csv" --include="*" ../$1/$DEFENDER/ "adv_$DEFENDER"
-#rsync -avz --exclude="*.csv" --include="*" ../$1/$DEFENDER/ "adv_Sliding_$DEFENDER"
-
-
-
-
 DEFENDER="sarSinPackets"
+# rsync -avz --exclude="*.csv" --include="*" ../$1/$DEFENDER/ "adv_$DEFENDER"
+rsync -avz --exclude="*.csv" --include="*" ../$1/$DEFENDER/ "adv_Sliding_$DEFENDER"
+
+
+DEFENDER="ddSingleA"
 rsync -avz --exclude="*.csv" --include="*" ../$1/$DEFENDER/ "adv_$DEFENDER"
 rsync -avz --exclude="*.csv" --include="*" ../$1/$DEFENDER/ "adv_Sliding_$DEFENDER"
 
 
-# do the rest later
+# DEFENDER="ddHierPackets"
+# rsync -avz --exclude="*.csv" --include="*" ../$1/$DEFENDER/ "adv_$DEFENDER"
+
 
 # DEFENDER="sarHierNorm"
 # cp -R ../$1/$DEFENDER "adv_$DEFENDER"

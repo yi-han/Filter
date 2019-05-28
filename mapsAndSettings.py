@@ -362,7 +362,7 @@ class DdGenericDec(object):
     annealing_episodes = 200000
     num_episodes = 500000
     tau = 0.0005
-    discount_factor = 0.6
+    discount_factor = 0.8
     startE = 1
     endE = 0.0
     
@@ -374,8 +374,7 @@ class DdGenericDec(object):
     prior_agent_delta_seconds = 0
     include_legal_traffic = True
     prior_server_percentages = 0
-    indiv_host_info = advHostInfoEnum.omit
-
+    indiv_host_info = advHostInfoEnum.hostLoads
     is_intelligent = True
     update_freq = 4
     batch_size = 32
@@ -412,6 +411,8 @@ class DdGenericFinal(DdGenericSplit):
     annealing_episodes = 150000
     num_episodes = 350000
 
+
+
 class DdGenericOneHost(DdGenericFinal):
     name = "ddGenericOneHost"
     num_adv_agents = 1
@@ -419,6 +420,14 @@ class DdGenericOneHost(DdGenericFinal):
 class DdGenericThreeHost(DdGenericFinal):
     name = "ddGenericThreeHost"
     num_adv_agents = 3
+
+class DdBackupGenericFinal(DdGenericFinal):
+    name = "ddBackupGenericFinal"
+    discount_factor = 0.6
+
+class DdBackupGenSingle(DdBackupGenericFinal):
+    name = "ddBackupGenSingle"
+    num_adv_agents=1
 
 class ddAimd(DdGenericFinal):
     name = "ddAimd"
@@ -430,6 +439,14 @@ class ddAimd(DdGenericFinal):
 
 class ddAimdSingle(ddAimd):
     name = "ddAimdSingle"
+    num_adv_agents = 1
+
+class ddBackupAimd(ddAimd):
+    name = "ddBackupAimd"
+    discount_factor = 0.6
+
+class ddBackupAimdSingle(ddBackupAimd):
+    name = "ddBackupAimdSingle"
     num_adv_agents = 1
 
 class ddAimdThree(ddAimdSingle):
@@ -459,6 +476,10 @@ class ddAimdAltBoth(ddAimd):
 class ddAimdAltBothSingle(ddAimdAltBoth):
     name = "ddAimdAltBothSingle"
     num_adv_agents = 1
+
+class ddAimdAltBothSingleHighDiscount(ddAimdAltBothSingle):
+    name = "ddAimdAltBothSingleHighDiscount"
+    discount_factor = 0.9
 
 class ddAimdAltBothThree(ddAimdAltBoth):
     name = "ddAimdAltBothThree"
