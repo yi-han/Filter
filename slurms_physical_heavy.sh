@@ -11,7 +11,7 @@ python runAimdJeremy.py 0 1 aimdJeremyProper
 
 # sarsa
 
-python runSARSA.py 0 10 sarOrig
+python runSARSA.py 0 3 sarOrig
 
 python runSarsaAdditional.py 0 10 sarOrigLengthened
 

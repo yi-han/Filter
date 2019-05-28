@@ -76,22 +76,22 @@ adversarialLeaf = hostClass.adversarialLeaf
 
 ###
 # Settings NetworkMalialisSmall
-assignedNetwork =   NetworkMalialisSmall
-assignedAgent =  ddMarlDH #ddqnSingleNoCommunicate #ddqn100MediumHierarchical
+assignedNetwork =   NetworkSingleTeamMalialisMedium
+assignedAgent =  ddHierBasicReward #ddqnSingleNoCommunicate #ddqn100MediumHierarchical
 load_attack_path = "attackSimulations/{0}/".format(assignedNetwork.name)
-loadAttacks = False
+loadAttacks = True
 assignedAgent.encoders = None
 
-# print("\n\nSETTING TO JEREMY MODE\n\n\n")
-# assignedNetwork.functionPastCapacity = False
+print("\n\nSETTING TO JEREMY MODE\n\n\n")
+assignedNetwork.functionPastCapacity = False
 
-assignedAgent.save_model_mode = defender_mode_enum.load
+assignedAgent.save_model_mode = defender_mode_enum.save
 trainHost = adversarialLeaf #coordAttack # conAttack #driftAttack #adversarialLeaf
 
 opposition = adv_constant #adv_random #adv_constant
 intelligentOpposition = DdBackupGenSingle #ddAdvAntiAimd #DdCoordinatedLowlongDlowSettings #DdCoordinatedMasterSettings #DdRandomMasterSettings
 intelligentOpposition.save_model_mode = defender_mode_enum.save
-# intelligentOpposition = None
+intelligentOpposition = None
 
 
 assert(trainHost==adversarialLeaf)
