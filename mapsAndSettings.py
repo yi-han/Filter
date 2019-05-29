@@ -362,7 +362,7 @@ class DdGenericDec(object):
     annealing_episodes = 200000
     num_episodes = 500000
     tau = 0.0005
-    discount_factor = 0.8
+    discount_factor = 0.6
     startE = 1
     endE = 0.0
     

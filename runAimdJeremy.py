@@ -16,7 +16,78 @@ import agent.ddqnCentralised as ddCen
 #from mapsAndSettings import *
 assert(len(sys.argv)>= 3)
 
+class ddqnSingleNoCommunicate(object):
+    group_size = 1
+    name = "DDQN100SingleNoCommunicate"
+    discount_factor = 0    
+    tau = 0.01 #Rate to update target network toward primary network. 
+    update_freq = 4 #How often to perform a training step.
+    batch_size = 32 #How many experiences to use for each training step.
+    num_episodes = 200001 #100001#    
+    pre_train_episodes = 20000  #40000  #
+    annealing_episodes = 60000   #120000   #
+    startE = 1
+    endE = 0.0
+    history_size = 1 # number of past iterations to look at
+    agent = None
+    sub_agent = ddCen.Agent
+    stateRepresentation = stateRepresentationEnum.throttler
+    reward_function = AGENT_REWARD_ENUM.sliding_negative
+    has_bucket = False
+    actions_per_second = 0.5 # make an decision every 2 seconds
 
+class ddqnSingleMemory(ddqnSingleNoCommunicate):
+    name = "ddqnSingleMemory"
+    history_size = 5
+
+class ddSinPackets(ddqnSingleNoCommunicate):
+    name = "ddSinPackets"
+    reward_function = AGENT_REWARD_ENUM.packet_logic
+
+class ddqn100MediumHierarchical(object):
+    group_size = 1
+    name = "ddqn100MediumHierarchical"
+    discount_factor = 0    
+    tau = 0.001 #Rate to update target network toward primary network. 
+    update_freq = 4 #How often to perform a training step.
+    batch_size = 32 #How many experiences to use for each training step.
+    num_episodes = 200001 #200001#    
+    pre_train_episodes = 20000  #40000  #
+    annealing_episodes = 60000   #120000   #
+    startE = 0.3
+    endE = 0.0
+    history_size = 1 # number of past iterations to look at
+    agent = None
+    sub_agent = ddCen.Agent
+    stateRepresentation = stateRepresentationEnum.up_to_server
+    reward_function = AGENT_REWARD_ENUM.sliding_negative   
+    has_bucket = False
+
+    actions_per_second = 0.5 # make an decision every 2 seconds
+
+
+class ddqnHierMemory(ddqn100MediumHierarchical):
+    name = "ddqnHierMemory"
+    history_size = 5
+
+class ddHierPackets(ddqn100MediumHierarchical):
+    name = "ddHierPackets"
+    reward_function = AGENT_REWARD_ENUM.packet_logic
+
+
+class ddqnHierExploration(ddqn100MediumHierarchical):
+    name = "ddqnHierExp"
+    endE = 0.1
+
+class ddqnSingularExploration(ddqnSingleNoCommunicate):
+    name = "ddqnSingExp"
+    endE = 0.1
+
+class ddTest(ddqnHierMemory):
+    name = "ddTest"
+    num_episodes = 1001
+    pre_train_episodes = 2
+    annealing_episodes = 4
 # The class of the adversary to implement
 conAttack = hostClass.ConstantAttack
 
@@ -25,22 +96,22 @@ adversarialLeaf = hostClass.adversarialLeaf
 
 ###
 # Settings NetworkMalialisSmall
-assignedNetwork =   NetworkSingleTeamMalialisMedium
-assignedAgent =  AimdJeremy #ddqnSingleNoCommunicate #ddqn100MediumHierarchical
+assignedNetwork =   NetworkNineTwo
+assignedAgent =  AimdJeremy    #ddqnSingleNoCommunicate #ddqn100MediumHierarchical
 load_attack_path = "attackSimulations/{0}/".format(assignedNetwork.name)
-loadAttacks = True
+loadAttacks = False
 assignedAgent.encoders = None
 
-print("\n\nSETTING TO JEREMY MODE\n\n\n")
-assignedNetwork.functionPastCapacity = False
+# print("\n\nSETTING TO JEREMY MODE\n\n\n")
+# assignedNetwork.functionPastCapacity = False
 
 assignedAgent.save_model_mode = defender_mode_enum.load
 trainHost = adversarialLeaf #coordAttack # conAttack #driftAttack #adversarialLeaf
 
 opposition = adv_constant #adv_random #adv_constant
-intelligentOpposition = ddBackupAimdSingle #ddAdvAntiAimd #DdCoordinatedLowlongDlowSettings #DdCoordinatedMasterSettings #DdRandomMasterSettings
+intelligentOpposition = ddAimd #ddAdvAntiAimd #DdCoordinatedLowlongDlowSettings #DdCoordinatedMasterSettings #DdRandomMasterSettings
 intelligentOpposition.save_model_mode = defender_mode_enum.save
-intelligentOpposition = None
+# intelligentOpposition = None
 
 
 assert(trainHost==adversarialLeaf)

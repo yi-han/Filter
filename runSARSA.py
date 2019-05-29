@@ -147,26 +147,26 @@ adversarialLeaf = hostClass.adversarialLeaf
 Settings to change
 """
 
-assignedNetwork = NetworkSingleTeamMalialisMedium
+assignedNetwork = NetworkNineTwo
 assignedAgent = LinearSarsaSingular
 load_attack_path = "attackSimulations/{0}/".format(assignedNetwork.name)
 network_emulator = network.network_new.network_full # network_quick # network_full
-loadAttacks = True
+loadAttacks = False
 
 
 
-print("\n\nSETTING TO JEREMY MODE\n\n\n")
-assignedNetwork.functionPastCapacity = False
+# print("\n\nSETTING TO JEREMY MODE\n\n\n")
+# assignedNetwork.functionPastCapacity = False
 
 
 
-assignedAgent.save_model_mode = defender_mode_enum.save
+assignedAgent.save_model_mode = defender_mode_enum.load
 trainHost = adversarialLeaf #coordAttack # conAttack #driftAttack #adversarialLeaf
 
 opposition = adv_constant #adv_random # adv_constant
-intelligentOpposition =  DdBackupGenSingle #
+intelligentOpposition =  DdGenericFinal #
 intelligentOpposition.save_model_mode = defender_mode_enum.save
-intelligentOpposition = None
+# intelligentOpposition = None
 
 
 assert(trainHost==adversarialLeaf)

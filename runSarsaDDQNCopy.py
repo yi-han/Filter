@@ -147,7 +147,7 @@ adversarialLeaf = hostClass.adversarialLeaf
 Settings to change
 """
 
-assignedNetwork = NetworkMalialisSmall
+assignedNetwork = NetworkNineTwo
 assignedAgent = linSinPacketsSliding
 load_attack_path = "attackSimulations/{0}/".format(assignedNetwork.name)
 network_emulator = network.network_new.network_full # network_quick # network_full
@@ -164,7 +164,7 @@ assignedAgent.save_model_mode = defender_mode_enum.load
 trainHost = adversarialLeaf #coordAttack # conAttack #driftAttack #adversarialLeaf
 
 opposition = adv_constant #adv_random # adv_constant
-intelligentOpposition =  DdBackupGenSingle #
+intelligentOpposition =  DdGenericFinal #
 intelligentOpposition.save_model_mode = defender_mode_enum.save
 # intelligentOpposition = None
 
