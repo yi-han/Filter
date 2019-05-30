@@ -78,7 +78,7 @@ sed "s/samplePath/adv_sarOrig/g" output.slurm -i
 # sbatch output.slurm
 
 
-sed 's/runDDQN/runSarsaAdditional/g' exp_either.slurm > output.slurm
+sed 's/runDDQN/runSarsaAdditional/g' exp_either_heavy.slurm > output.slurm
 sed 's/sampleDDQNText/adv_sarOrigLengthened/g' output.slurm -i 
 sed "s/samplePath/adv_sarOrigLengthened/g" output.slurm -i 
 sed 's/0 2/0 1/g' output.slurm -i

@@ -110,7 +110,7 @@ trainHost = adversarialLeaf #coordAttack # conAttack #driftAttack #adversarialLe
 
 opposition = adv_constant #adv_random #adv_constant
 intelligentOpposition = ddAimd #ddAdvAntiAimd #DdCoordinatedLowlongDlowSettings #DdCoordinatedMasterSettings #DdRandomMasterSettings
-intelligentOpposition.save_model_mode = defender_mode_enum.save
+intelligentOpposition.save_model_mode = defender_mode_enum.load_continue
 # intelligentOpposition = None
 
 
