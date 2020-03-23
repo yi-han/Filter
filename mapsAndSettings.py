@@ -362,7 +362,7 @@ class DdGenericDec(object):
     annealing_episodes = 200000
     num_episodes = 500000
     tau = 0.0005
-    discount_factor = 0.6
+    discount_factor = 0.8
     startE = 1
     endE = 0.0
     
@@ -415,7 +415,9 @@ class DdGenericFinal(DdGenericSplit):
 
 class DdGenericOneHost(DdGenericFinal):
     name = "ddGenericOneHost"
-    num_adv_agents = 1
+    name = "ddGenericThreeHost"
+    
+    num_adv_agents = 3
 
 class DdGenericThreeHost(DdGenericFinal):
     name = "ddGenericThreeHost"
@@ -439,6 +441,8 @@ class ddAimd(DdGenericFinal):
 
 class ddAimdSingle(ddAimd):
     name = "ddAimdSingle"
+    # name = "ddAimdThree"
+
     num_adv_agents = 1
 
 class ddBackupAimd(ddAimd):
