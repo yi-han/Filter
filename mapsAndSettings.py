@@ -85,7 +85,7 @@ class AimdMalialis(object):
     delta = 0.2 # additive increase
     beta = 2 # multiplicative decrease
     epsilon = 0.0001
-    stateRepresentation = stateRepresentationEnum.only_server # WRONG
+    stateRepresentation = stateRepresentationEnum.only_server 
     sub_agent = agent.AIMD.AIMDagent
     bucket_class = MalBucket
     reward_function = AGENT_REWARD_ENUM.packet_logic
