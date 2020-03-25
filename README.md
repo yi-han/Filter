@@ -41,7 +41,7 @@ runFairThrottle.py - Initiates IDA evaluation against the Fair Throttle
 
 runAttacks.py - Evaluate a trained model against a network defender
 
-# Run IDA against the Fair Throttle. AKA as AIMD
+# Run IDA against the Fair Throttle (AIMD)
 
 ```bash
 
