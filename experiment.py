@@ -1,23 +1,13 @@
 """
-Replaces main_new, decouples the experiment from the learning agent.
 
-Input: A learning agent
+Input: Network, defender, path, attacker
 
-Runs network, sends state to learning agent, gets response, sends response to network.
-
-#BUGS
-1) I think my update is wrong as its using the current state not the prior state
-and shouldn't it be including both the last state and the prior state?
-3) When loading via sarsa (and tensorflow), it doesn't increment the i. Low priority
+Runs simulation, sends state to learning agent, gets response, sends response to network.
+Is compatible with both a learning defender and a learning attacker (only one should learn at a time)
 
 
 
-#TODO
 
-16) SaveModelEnum being caleled load_model_enum???
-17) Don't thing generic update (actionTo...) is compatible with differnt size agents
-18) Why is actionReplay only after pretraining???
-19) DOUBLE DOUBLE CHECK THIS IS RIGHT, I THINK THE REWARD IS WRONG
 #DONE
 
 1) Made SARSA centralised
@@ -36,20 +26,25 @@ and shouldn't it be including both the last state and the prior state?
 1)I suspect that if e <1 but step < pretrainign, it might still be not working right
 14) I think sarsa (and tensorflow) files will collide in parrelel
 15) Name dependent on topology
+16) SaveModelEnum being caleled load_model_enum???
+17) Don't thing generic update (actionTo...) is compatible with differnt size agents
+18) Investigate why is actionReplay only activating after pretraining???
 """
 
 from __future__ import division
 
 import numpy as np
-import os#, sys, logging
+import os
 from enum import Enum
-#import network.network_new as network
 import network.hosts as hosts
 import network.utility as utility
 import mapsAndSettings
 import errno
 
+
 def calculate_e(current_episode, pretraining_episodes, startE, endE, annealing_episodes):
+    # initiate the exploration coefficient.
+    # 1 means exploration of new strategies, 0 means exploitation of learnt strategies
     if current_episode < pretraining_episodes:
         return 1
     elif current_episode >= (pretraining_episodes + annealing_episodes):
@@ -90,16 +85,19 @@ class Experiment:
 
 
     def run(self, prefix, agent, file_path):
-        N_state = self.network_settings.N_state
-        action_per_throttler = self.network_settings.action_per_throttler 
+        N_state = self.network_settings.N_state # number of states for defender
+        action_per_throttler = self.network_settings.action_per_throttler # number of actions for defender
         self.file_path = file_path
-        update_freq = self.defender_settings.update_freq
+        update_freq = self.defender_settings.update_freq 
         batch_size = self.defender_settings.batch_size
         #create lists to contain total rewards and steps per episode
-        rList = []
-        advRList = []
-        loss = []
-        adv_loss = []
+        rList = [] # reward per episode for defender
+        advRList = [] # reward per episode for attacker
+        loss = [] # learning loss for defender (if reinforcement learning)
+        adv_loss = [] # learning loss for attacker ( if reinforcement Learning)
+        
+
+        # Following files are used for recording actions and rewards of defender and attacker. Exported to CSV
         # determine reward for a prediction at start of episode, we choose the second step as first step is random
         reward_lines = []
         loss_lines = []
@@ -109,9 +107,8 @@ class Experiment:
         fail = 0 # The total number of fails 
         e = 1 # always start full exploration. Gets overwritten in training
         
-        
-        self.delay_attacks = False
-
+        # During evaluation and training of attacker, the attacker starts a few seconds after simulation starts
+        self.delay_attacks = False 
 
         """
         Determine the episodes and exploration for the defender
@@ -119,14 +116,17 @@ class Experiment:
         """
 
         if self.defender_settings.save_model_mode in self.agentTestModes:
+            # evaluation
             num_episodes = 500
-            ep_length = self.network_settings.ep_length*2
-            self.delay_attacks = True
+            ep_length = self.network_settings.ep_length*2 # during evaluation simulations are twice as long as training
+            self.delay_attacks = True # 
         else:
+            #training
             num_episodes = self.defender_settings.num_episodes
             ep_length = self.network_settings.ep_length
 
-        if self.defender_settings.save_model_mode in self.agentInitialiseMode: #self.agentLoadModes:
+        # code for determining the rate exploration drops after each episode 
+        if self.defender_settings.save_model_mode in self.agentInitialiseMode: 
             pre_train_episodes = self.defender_settings.pre_train_episodes
             step_drop = (self.defender_settings.startE - self.defender_settings.endE)/(self.defender_settings.annealing_episodes)
             # work out e later
@@ -140,7 +140,7 @@ class Experiment:
         if self.opposition_settings.is_intelligent:
             # we have a smart advesary. We default to the largest of the number of episodes for defender or attacker
             self.network_settings.is_sig_attack = True # ensure we only have significant attacks when there is an advesary to mimic testing conditions
-            self.delay_attacks = True
+            self.delay_attacks = True # align attacker training with evaluation
             assert(self.adversary_class == hosts.adversarialLeaf)
             self.adversarialMaster = self.opposition_settings.adversary_class(self.opposition_settings, self.network_settings, agent.getPath(), agent)
 
@@ -166,6 +166,7 @@ class Experiment:
 
 
         else:
+            # non-intelligent attackers dont require trianing
             self.adversarialMaster =  self.opposition_settings.adversary_class(self.opposition_settings, ep_length)
             adv_e = 0
 
@@ -191,6 +192,9 @@ class Experiment:
         print("Using the {0} agent:".format(self.defender_settings.name))
         print("Advesary is {0}".format(self.opposition_settings.name))
         print("There are {0} episodes this simulation".format(num_episodes))
+        
+        # initialise headers for exported CSVs
+
         reward_lines.append("Episode,TotalReward,LastReward,LengthEpisode,e,AdvTotalReward,AdvLastReward\n")
         packet_served_lines.append("Episode,LegalReceived,LegalSent,PercentageReceived,IllegalServed,IllegalSent\n")
         loss_lines.append("Episode,Loss,Exploration,EpDefLoss\n")
@@ -204,7 +208,7 @@ class Experiment:
 
 
         with agent:
-            # different number of predicitons depending if aimd or rt
+            # exported CSV headers have different number of columns depending on number of learning agents
             for i in range(agent.num_agents):
                 server_actions_line += ",DefAction{0}".format(i)
             for i in range(self.opposition_settings.num_adv_agents):
@@ -212,7 +216,10 @@ class Experiment:
             server_actions_line += "\n"
             server_actions_lines.append(server_actions_line)
 
+            # initiate the attacker
             self.adversarialMaster.__enter__()
+
+            # determine initial episode (we might be loading a half completed version)
             if self.defender_settings.save_model_mode in self.agentLoadModes : #mapsAndSettings.defender_mode_enum.test
                 episode = agent.loadModel(self.file_path, prefix)
                 if self.defender_settings.save_model_mode == mapsAndSettings.defender_mode_enum.load_continue:
@@ -251,38 +258,37 @@ class Experiment:
             agent_last_move = (ep_length / defender_move) - 1
             adversary_last_move = (ep_length / adversary_move) - 1
             
-            #assert(defender_move == 200 and adversary_move == 200) # we can get rid of this later
             adversary_reward = None
 
             adv_print_reward = 0
             adv_print_count = 0
+
+
+
+            ### Initialisation complete, now run the simulation!
 
             print("\n\n Starting at episode {0}".format(ep_init))
             print("num_episodes {0} episode length {1} iterations between each second {2}".format(num_episodes, ep_length, self.network_settings.iterations_between_second))
             print("defender exploration = {0}".format(e))
             print("adversary exploration = {0}".format(adv_e))
             for ep_num in range(ep_init, num_episodes):
+                # initialise the episode
+
                 net.reset() # reset the network
                 agent.reset_episode(net)
                 ep_adv_loss = 0
                 ep_def_loss = 0
-                # print("\n\n\n\nloading ep {0} out of {1}".format(ep_num, num_episodes))
-                num_defender_moves = 0
+                num_defender_moves = 0 # number defender moves this episode
                 num_adversary_moves = 0                
                 if self.opposition_settings:
                     self.adversarialMaster.initiate_episode(ep_num)
 
-                rAll = 0 # accumulative reward for system in the episode. #TODO shouldn't contribute in pretraining
-                
-                advRAll = 0 # total reward for episode
+                rAll = 0 # accumulative defender reward for system in the episode.
+                advRAll = 0 # total defenderreward for episode
                 
                 if self.network_settings.save_per_step_stats:
                     (legal_capacity, illegal_capacity, total_capacity) = net.getHostCapacity()
-                # Using the network for this
-                # legit_served_ep = 0
-                # legit_sent_ep = 0
-                # illegal_served_ep = 0
-                # illegal_sent_ep = 0
+
 
                 adv_next_state = None
                 adv_next_action = None
@@ -292,32 +298,27 @@ class Experiment:
                 # episode_steps = ep_length * self.network_settings.iterations_between_second
              
                 step = -1
+
+                # iterate through every second of episode length
                 for second in range(ep_length):
-                    # print(second)
                     for iteration in range(self.network_settings.iterations_between_second):
+                        # each episode has X iterations per second (allows finite breakdown in ms)
                         step += 1
 
-                        # agent moves
+                        # attacker choooses move
                         if step % adversary_move == 0:
                             adv_step = step/adversary_move # the step for the adversary
                             
+                            # update state
                             adv_past_state = adv_next_state
                             adv_past_action = adv_next_action
-
-
                             self.adversarialMaster.update_state(net)
                             adv_next_state = self.adversarialMaster.get_state()
+                            # calculate action (considers exploration)
                             adv_next_action = self.adversarialMaster.predict(adv_next_state, adv_e, adv_step, self.can_attack(second)) # generate an action
                             num_adversary_moves += 1
 
-
-
-
-
-                            # adv_next_state = self.adversarialMaster.get_state(net, adv_e, adv_step)
-                            # adv_next_action = self.adversarialMaster.predict(adv_next_state, adv_e, adv_step, self.can_attack(second))
-                            # num_adversary_moves += 1
-
+                            # Reward attacker based on success of prior move 
                             if num_adversary_moves > 1:
                                 adv_print_count += 1
                                 if self.opposition_settings.is_intelligent: 
@@ -325,11 +326,11 @@ class Experiment:
                                     advRAll += adversary_reward  
                                     if self.opposition_settings.save_model_mode in self.agentSaveModes:
                                         adversary_done = False
-                                        if self.can_attack(second-1):
-                                            
+                                        if self.can_attack(second-1):    
+                                            # save episode into action replay
                                             self.adversarialMaster.update(adv_past_state, adv_past_action, adv_next_state, adversary_done, adversary_reward, adv_next_action) # num_adversary_moves ?
-                                    
-                                    
+                                            
+                                            # every four steps the agent does a batch learn following experience replay
                                             if num_adversary_moves % self.opposition_settings.update_freq == 0:
                                                 adv_l = self.adversarialMaster.actionReplay(adv_next_state, self.opposition_settings.batch_size)
                                                 adv_loss.append(adv_l)
@@ -341,10 +342,9 @@ class Experiment:
 
 
 
-
+                        # defender chooses move
                         if step % defender_move == 0:
-                            # print("\n\nstep {0} defender_cut {1} move {2}".format(step, defender_move, num_defender_moves))
-                            # print("made move {0}".format(num_defender_moves))
+
                             def_step = step/defender_move
                             
                             def_last_state = def_next_state
@@ -354,10 +354,10 @@ class Experiment:
                             def_next_state = agent.get_state()
                             def_next_action = agent.predict(def_next_state, e) # generate an action
                             newDefAction = True
-                            # print("\n\n\n\nmade move {0}".format(def_next_action))
                             num_defender_moves += 1
                             
-                            # print("made prediction {0}".format(def_next_action))
+
+                            # reward defender based on success of last action
                             if num_defender_moves > 1:
 
                                 """
@@ -365,13 +365,9 @@ class Experiment:
                                 We also assume that during training our reward is calculated over last 2 seconds
                                 """
 
-                                # print("\nlast_state {0} last_prediction {1} current_action {2}".format(def_last_state, def_past_action, def_current_action))
-                                # print("New State {1} AssociatedReward {0} ".format(defender_reward, def_next_state))
-
                                 if self.defender_settings.save_model_mode in self.agentSaveModes:
                                     defender_reward = net.get_reward(self.defender_settings.reward_function)
 
-                                    # print("p_state {0} p_action {1} reward {2} n_state {3} n_action {4}".format(def_last_state, def_past_action, defender_reward,def_next_state, def_next_action))
                                     agent_done = False
                                     agent.update(def_last_state, def_past_action, def_next_state, agent_done, defender_reward, def_next_action)
 
@@ -383,26 +379,17 @@ class Experiment:
                                             ep_def_loss += abs(l)
 
 
-                                
+    
 
-                            
-
-
-
-                        # network makes moves
-                        # print("step {0} defender {1} adversary {2}".format(step, def_next_action, adv_next_action))
+                        # moves are fed into network simulation
                         net.simulate_traffic(def_next_action, adv_next_action, step, newDefAction)
                         newDefAction = False # set this as false if it's not a new action
                         def_current_action = def_next_action
                         adv_current_action = adv_next_action
-                        # print("simulated the move")
                 
                     
-                    # At the end of a second
-
-                    # we've intentionally calculated the defender_reward twice. 
-                    # If action is every 2 seconds it'll use the cache.
-                    # But if action is ever 0.5 seconds and we not training ... no need to calculate reward tonnes 
+                    # At the end of a second record reward
+ 
                     if second % mapsAndSettings.SECONDS_STANDARD_INTERVAL == 0 and num_defender_moves>1:
                         defender_reward = net.get_reward(self.defender_settings.reward_function)
 
@@ -410,9 +397,6 @@ class Experiment:
                         reward_print_count += 1
                     
                         #print("\n\n\nSecond {0} Move = {1} State = {2}".format(second, def_past_action, def_last_state))
-                    
-
-
 
 
                     """
@@ -422,11 +406,7 @@ class Experiment:
                     # print("testing actions {0}".format(def_current_action))
                     (legit_served, legit_sent, legal_per, illegal_served, illegal_sent) = net.updateEpisodeStatistics(second)
                     self.adversarialMaster.update_reward(second, legit_served, legit_sent)
-                    # if num_defender_moves > 1:
-                    #     total_sent = legit_sent+illegal_sent
-                    #     print("\nState was {0}".format(def_last_state))
-                    #     print("ep_num-move {0}-{1} | def_action {2} | adv_action {3} | per {4}".format(ep_num, num_defender_moves, def_current_action, adv_current_action, legal_per))
-                    #     print("ServerState is {0} | Overflow = {1}".format(total_sent, total_sent>16))
+
                     if self.network_settings.save_per_step_stats:
                         total_sent = legit_sent+illegal_sent
 
@@ -449,16 +429,10 @@ class Experiment:
 
                 """
                 END OF THE EPISODE
-
-                This is where you would do the 'isDone logic'
-
-                if self.defender_settings.save_model_mode in self.agentSaveModes:
-                    print("p_state {0} p_action {1} reward {2} n_state {3} n_action {4}".format(def_last_state, def_past_action, defender_reward,def_next_state, def_next_action))
-                    agent_done = True
-                    agent.update(def_last_state, def_past_action, def_next_state, agent_done, defender_reward, def_next_action)
-
-
+                - Record statistics
                 """
+
+                # do one last reward for the last episode. 
                 if self.defender_settings.save_model_mode in self.agentSaveModes:
                     agent_done = True
                     final_state = agent.get_state()
@@ -485,26 +459,23 @@ class Experiment:
                     print("\n\nCompleted Episode - {0}".format(ep_num))
                     print("average reward = {0}".format((reward_per_print/reward_print_count)*100))
                     print("adversary reward = {0}".format((adv_print_reward/adv_print_count)*100))
-                    #print("average Per = {0}".format(t_packet_received/t_packet_sent))
                     reward_per_print = 0
                     reward_print_count = 0
 
                     adv_print_reward = 0
                     adv_print_count = 0
-                    #t_packet_received = 0
-                    #t_packet_sent = 0
+
                     print("def | step {0} | action {1} | reward {2} | e {3}".format(step-1, def_past_action, defender_reward, e))
                     print("prio state was {0}".format(def_last_state))
                     print("this state was {0}".format(def_next_state))
                     if self.opposition_settings.is_intelligent:
-
                         print("adv_state = {0}".format(adv_past_state))
                     print("adv_action = {0}, adv_e = {1}".format(adv_current_action, adv_e))
 
 
 
 
-                    # perform saves
+                    # save the learning models every 10,000 episodes
                     if ep_num % 10000 == 0:
                         if self.defender_settings.save_model_mode in self.agentSaveModes:  # only save the first iteration 
                             agent.saveModel(self.file_path, ep_num, prefix)
@@ -512,7 +483,7 @@ class Experiment:
                             self.adversarialMaster.saveModel(self.file_path, ep_num, prefix)
 
                 
-                # Note I've changed this to be a per episode thing
+                # Update the exploration coefficients
                 if self.defender_settings.save_model_mode in self.agentSaveModes:
                     if ep_num < pre_train_episodes:
                         e = 1
@@ -526,9 +497,6 @@ class Experiment:
                 else:
                     e = self.defender_settings.endE
                 
-
-
-
                 if self.opposition_settings.is_intelligent and self.opposition_settings.save_model_mode in self.agentSaveModes:
                     if ep_num < adv_pretrain_episodes:
                         adv_e = 1
@@ -544,9 +512,8 @@ class Experiment:
 
 
                 
-                
+                # packet statistics
 
-                #(legit_served, legit_sent, legal_per, illegal_served, illegal_sent) = net.getStepPacketStatistics()
                 (legit_served_ep, legit_sent_ep, legit_per, illegal_served_ep, illegal_sent_ep) = net.getEpisodeStatisitcs()
                 packet_served_lines.append("{0},{1},{2},{3},{4},{5}\n".format(ep_num, legit_served_ep, legit_sent_ep, legit_per, illegal_served_ep, illegal_sent_ep))
                 reward_lines.append("{0},{1},{2},{3},{4},{5},{6}\n".format(ep_num, rList[-1], defender_reward, second, e, advRList[-1], adversary_reward))
@@ -558,6 +525,14 @@ class Experiment:
                 if self.opposition_settings.is_intelligent and len(adv_loss)>0:
                     last_adv_loss = adv_loss[-1]
                     adv_loss_lines.append("{0},{1},{2},{3}\n".format(ep_num,last_adv_loss, e, ep_adv_loss))
+            
+
+
+            """
+            End of experiment. Save the learning agents one last time and export experiment statistics
+
+            """
+
             if self.defender_settings.save_model_mode in self.agentSaveModes: # only save the first iteration 
                 # save the model only every 10,000 steps
                 agent.saveModel(self.file_path, ep_num, prefix)
@@ -602,23 +577,11 @@ class Experiment:
 
 
     def can_attack(self, current_second):
-
+        # calculates if attacker is allowed to attack
         if self.delay_attacks:
             if current_second<utility.ATTACK_START:
                 return False
             if current_second>=(120- utility.ATTACK_START):
-                # sort of cheating with putting the 120 right there
                 return False
         return True
-
-
-
-# def can_attack(self, current_second):
-#     if self.delay_attacks in [attack_delay_mode.delay_start, delay_both_sides] and current_second<utility.ATTACK_START:
-#         return False
-#     elif self.delay_attacks == attack_delay_mode.delay_both_sides and current_second >
-
-    
-
- 
 

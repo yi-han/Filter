@@ -27,7 +27,8 @@ runAttacks.py - For evaluation
 ```bash
 
 python attacks # generate evaluation episodes for testing
-python runAimd.py 0 1 # runs 
+python runAimd.py {mapID} 1 # train and run IDA against Fair Throttle
+# Replace mapID with an interger between 0 and 2
 
 
 

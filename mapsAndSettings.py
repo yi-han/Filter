@@ -1,5 +1,5 @@
 """
-Common settings for networks
+This contains common settings for either the map or generating a defender
 
 """
 
@@ -7,10 +7,10 @@ Common settings for networks
 
 from enum import Enum
 import math
-import agent.genericDecentralised as genericDecentralised
-import adversary.ddAdvGenericMaster as ddGeneric
-import adversary.ddAdvGenericAgent as ddGenAgent
-import adversary.sarsaAdvAgent as sarsaAdvAgent
+import agent.genericDecentralised as genericDecentralised # generic defender
+import adversary.ddAdvGenericMaster as ddGeneric # Deep Reinforcement Master defender
+import adversary.ddAdvGenericAgent as ddGenAgent # Deep Reinforcement Agent defender
+import adversary.sarsaAdvAgent as sarsaAdvAgent # Sarsa learning defender agent
 import adversary.dumbMaster as dumbMaster
 import adversary.dumbAgent as dumbAgent
 import pandas
@@ -24,9 +24,9 @@ import agent.noThrottle as noThrot
 
 
 
-# defender_mode_enum = Enum('SaveModel', 'neither save load test_short')
 
 class defender_mode_enum(Enum):
+    # Defines defender modes
     neither = 0
     save = 1
     load = 2
@@ -35,16 +35,16 @@ class defender_mode_enum(Enum):
     load_continue = 5 # more for continuing one done half way
     
 class stateRepresentationEnum(Enum):
+    # Defines representation to the defender
     throttler = 0 #always
     up_to_server = 1  # all the way to the server
     allThrottlers = 2
     only_server = 3
 
 
-
+# Settings that define each of the common attacks used
 class adv_constant(object):
     name = "Constant-Attack"
-    
     adversary_class = dumbMaster.dumbMaster
     adv_agent_class = dumbAgent.dumbAgent    
     is_intelligent = False
@@ -79,7 +79,12 @@ class adv_random(adv_constant):
     name = "Random"
     attack_strategy = advesaryStandardAttackEnum.random
 
+
+
+# Settings defining the two AIMD defenders used in thesis
+
 class AimdMalialis(object):
+    # FixedThrottle
     name = "MalAimd"
     group_size = 1
     delta = 0.2 # additive increase
@@ -107,6 +112,7 @@ class AimdMalialis(object):
 
 
 class AimdJeremy(AimdMalialis):
+    # Fair Throttle
     name = "AimdJeremy"
     bucket_class = ProperBucket
 
@@ -134,6 +140,9 @@ class NoThrottleBaseline(object):
     actions_per_second = 0.5 # make an decision every 2 seconds
     reward_function = AGENT_REWARD_ENUM.packet_logic
 
+
+
+# Class objects defining topology properties of each network
 
 class NetworkMalialisSmall(object):
     name = "malialis_small"
@@ -167,11 +176,6 @@ class NetworkMalialisSmall(object):
 
 
 
-class NetworkSmallHard(NetworkMalialisSmall):
-    name = "small_hard"
-    rate_attack_low = 5
-    rate_attack_high = 12
-    bucket_capacity = 0
 
 class NetworkSingleTeamMalialisMedium(object):
     name = "single_team_malialis_medium"
@@ -202,14 +206,7 @@ class NetworkSingleTeamMalialisMedium(object):
     save_per_step_stats = False
     functionPastCapacity = True # make it Malialis mode
 
-class NetworkMediumOptimal(NetworkSingleTeamMalialisMedium):
-    name = "NetworkMediumOptimal"
-    lower_boundary = 13
 
-class NetworkMediumVeryHard(NetworkSingleTeamMalialisMedium):
-    name = "medium_very_hard"
-    rate_attack_low = 5
-    rate_attack_high = 30
 
 class NetworkSixFour(NetworkSingleTeamMalialisMedium):
     # 4 attackers per throttler.
@@ -267,9 +264,6 @@ class NetworkNineTwo(object):
     functionPastCapacity = True # make it Malialis mode
 
 
-
-
-
 class NetworkTwelveTwo(object):
     name = "twelve_agent"
     N_state = 12
@@ -305,57 +299,17 @@ class NetworkTwelveTwo(object):
     functionPastCapacity = True # make it Malialis mode
     
 
-class NetworkMalialisTeamFull(object):
-    name = "full_team_malialias"
-    N_state = 30
-    action_per_throttler = 10
-    N_switch = 47
-    host_sources = [4, 4, 5, 5, 6, 6, 44, 44, 45, 45, 46, 46, 
-    9, 9, 10, 10, 11, 11, 13, 13, 14, 14, 15, 15, 
-    18, 18, 19, 19, 20, 20, 22, 22, 23, 23, 24, 24,
-    27, 27, 28, 28, 29, 29, 31, 31, 32, 32, 33, 33,
-    36, 36, 37, 37, 38, 38, 40, 40, 41, 41, 42, 42]
-
-    servers = [0]
-    filters = [4, 5, 6, 44, 45, 46,
-    9, 10, 11, 13, 14, 15,
-    18, 19, 20, 22, 23, 24,
-    27, 28, 29, 31, 32, 33,
-    36, 37, 38, 40, 41, 42]
-
-    topologyFile = 'topologies/full_team.txt'
-    rate_legal_low = 0.05 
-    rate_legal_high = 1 
-    rate_attack_low = 2.5 
-    rate_attack_high = 6
-    legal_probability = 0.6 # probability that is a good guys
-    upper_boundary = 62
-    lower_boundary = 56
-    iterations_between_second = 100 # at 100 we are dealing wiht centiseconds
-    max_hosts_per_level = [2, 6, 12, 60]    
-    bucket_capacity = 0
-    is_sig_attack = False
-    max_epLength = 30
-    save_per_step_stats = False
-
-    ep_length = 60 # Training is an episode of 60 seconds
-
-    max_depth = 3
-
-    functionPastCapacity = True # make it Malialis mode
 
 
 
-class NetworkFullTeamHard(NetworkMalialisTeamFull):
-    name = "full_team_hard"
-    rate_attack_low = 5
-    rate_attack_high = 30    
+
 
 
 #################
 ###Adversaries###
-###############3#
+#################
 class DdGenericDec(object):
+    # generic template for selflearning attacker
     name = "dd DO NOT USE"
     num_adv_agents = -1
     pre_train_episodes = 50000
@@ -406,11 +360,9 @@ class DdGenericFinal(DdGenericSplit):
     num_adv_agents = 2
     include_other_attackers = False
     include_legal_traffic = True
-
     pre_train_episodes = 50000
     annealing_episodes = 150000
     num_episodes = 350000
-
 
 
 class DdGenericOneHost(DdGenericFinal):
@@ -488,11 +440,11 @@ class ddAimdAltBothSingleHighDiscount(ddAimdAltBothSingle):
 class ddAimdAltBothThree(ddAimdAltBoth):
     name = "ddAimdAltBothThree"
     num_adv_agents = 3
+
+
 def create_generic_dec(def_settings, net_settings):
     """
-    def_settings = defender_settings, net_settings = network_settings
-
-    We can make agents into groups.
+    Function for creating a decentralised defender given network and defender settings
 
     """
 
@@ -503,8 +455,7 @@ def create_generic_dec(def_settings, net_settings):
 
     group_size = def_settings.group_size
     sub_agent = def_settings.sub_agent
-    #num_teams = math.ceil(net_settings.N_state/group_size)
-    #stateletFunction = def_settings.stateletFunction
+
     sub_agent_list = []
 
     print(sub_agent)
@@ -516,13 +467,14 @@ def create_generic_dec(def_settings, net_settings):
         sub_agent_list.append(sub_agent(net_settings.action_per_throttler**agent_to_allocate, state_size, def_settings.encoders, def_settings))
         throttlers_not_allocated -= agent_to_allocate
 
-    #print("\nTest {0} \n".format(sub_agent_list[0].N_action))
     master = genericDecentralised.AgentOfAgents(sub_agent_list, def_settings, net_settings)
     return master
 
 
 
 def getSummary(adversary_classes, load_path, agent, prefix):
+    # prints out a summary of the experiment
+
     summary = open("{0}/attackSummary-{1}.csv".format(load_path,prefix), "w")
     summary.write("AttackType,Agent,LegalPacketsReceived,LegalPacketsServed,Percentage,Tau,Pretraining,Annealing,TotalEpisodes,start_e,overload,illegalSent,adv_tau,adv_discount,adv_pretrain,adv_annealing_episodes,adv_episodes,adv_start_e,delta,beta,epsilon,bucket_capacity, iteration\n")
     agentName = agent.name
@@ -531,10 +483,8 @@ def getSummary(adversary_classes, load_path, agent, prefix):
 
         file_path = "{0}/packet_served-{1}-{2}-{3}.csv".format(load_path,agent.save_model_mode.name, attack_name, prefix)
         packet_file = pandas.read_csv(file_path)
-        #print(packet_file)
         sum_legal_received = sum(packet_file.LegalReceived)
         sum_legal_sent = sum(packet_file.LegalSent)
-        #sum_server_failures = sum(packet_file.ServerFailures)
         adv_packets_sent = sum(packet_file.IllegalSent)
         percentage_received = sum_legal_received/sum_legal_sent*100
         tau = agent.tau
@@ -577,6 +527,8 @@ def getPathName(network_settings, agent_settings, commStrategy, twist, train_opp
 
 
 def calcStateSize(stateRepresentation, history_size, net_settings):
+    # determine the size of the state based on settings
+    # considers number of state inputs * length of recorded history
     if stateRepresentation == stateRepresentationEnum.throttler:
         num_routers = 1
     elif stateRepresentation == stateRepresentationEnum.up_to_server:
@@ -584,7 +536,7 @@ def calcStateSize(stateRepresentation, history_size, net_settings):
     elif stateRepresentation == stateRepresentationEnum.allThrottlers:
         num_routers = len(net_settings.N_state)
     else:
-        assert(1==2)
+        assert(1==2) # error
 
     return num_routers * history_size
 
@@ -594,8 +546,7 @@ def calc_comm_strategy(stateRepresentation):
 
 
 def merge_summaries(file_path):
-    
-
+    # util function for iterating over 10 repetitions and creating a summary
     noFileFound = True
 
     for prefix in range(10):
@@ -605,8 +556,6 @@ def merge_summaries(file_path):
             break
     if noFileFound:
         return    
-
-
     summary = open("{0}/attack_merged_summary.csv".format(file_path), "w")
     # we assume it goes from 0 to max
     first_summary = open(init_summary_path)
@@ -614,7 +563,6 @@ def merge_summaries(file_path):
     summary.write(header)
     first_summary.close()
 
-    #for i in range(0, number_summaries):
     for i in range(0,20): 
 
         if os.path.isfile("{0}/attackSummary-{1}.csv".format(file_path, i)):
@@ -758,8 +706,7 @@ def extensiveSummary(load_path):
     data_scores = {}
     first_file = True
 
-    #attackers = [adv_constant, adv_pulse_short, adv_pulse_medium, adv_pulse_large,
-    #adv_gradual]#, adv_split] 
+
 
     for attacker in attack_names:
         data_scores[attacker] = []
@@ -774,11 +721,8 @@ def extensiveSummary(load_path):
 
 
 
-# MeanSeperateEvaluation,MeanSeperateEvaluationSd,MeanSeperateEvaluationRange,CombinedMean,CombinedSd,CombinedRange
     for attacker in attack_names:
-        #print(data_scores[attacker])
-        #legal_sent_episode = sum(data_scores[attacker][0][1])
-        #illegal_sent_episode = sum(data_scores[attacker][0][2])
+
         evaluations = data_scores[attacker]
         
         combined_evaluations = []
@@ -796,7 +740,6 @@ def extensiveSummary(load_path):
         ms.write("{0},{1},{2},".format(attacker,len(evaluations),agent_used))
 
         ms.write("{0},{1},{2},".format(means.mean(), means.std(), means.ptp()))
-        #ms.write("{0},{1},{2},".format(evaluations.mean(), evaluations.std(), evaluations.ptp()))
         ms.write("{0},{1},{2},".format(combined_evaluations.mean(), combined_evaluations.std(), combined_evaluations.ptp()))
         ms.write("{0},{1},{2},{3},{4},{5},".format(tau, pretraining, annealing, totalEpisodes, start_e, overload))
         ms.write("{0},{1},{2},{3},{4},{5}\n".format(adv_tau, adv_discount, adv_pretrain, adv_annealing_episodes, adv_episodes, adv_start_e))

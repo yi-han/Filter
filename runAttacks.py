@@ -1,3 +1,9 @@
+"""
+At the completion of training a defender or attacker, run the evaluation
+against the pregenerated episodes
+
+"""
+
 import experiment
 import mapsAndSettings
 from enum import Enum
@@ -5,10 +11,7 @@ import network.network_new as network_new
 import network.hosts as hostClass
 
 import copy
-"""
-Rather than using runSARSA or runDDQN, have a master file that runs attacks for us
 
-"""
 
 
 
@@ -26,6 +29,8 @@ DEFAULT_NUMBER_ATTACKS = 100 # 100
 def run_attacks(assignedNetwork, assignedAgent, file_path, smart_attacker, prefix, custom_iterations_between_second = DEFAULT_NUMBER_ATTACKS):
     #assert(custom_iterations_between_second == DEFAULT_NUMBER_ATTACKS)
 
+
+    # load defender
     load_attack_path = "attackSimulations/{0}/".format(assignedNetwork.name)
     network_emulator = network_new.network_full # network_quick # network_full
     assignedNetwork.emulator = network_emulator
@@ -44,10 +49,9 @@ def run_attacks(assignedNetwork, assignedAgent, file_path, smart_attacker, prefi
     attackClass = adversarialLeaf
     assignedNetwork.save_per_step_stats = True
 
-
+    # iterate over each of the standard attacks
     for attacker in attackers:
-        # if attacker != mapsAndSettings.adv_pulse_short:
-        #     continue
+
         assignedNetwork.iterations_between_second = custom_iterations_between_second
         print(attacker.name)
         print("\n\n\n")
@@ -60,15 +64,15 @@ def run_attacks(assignedNetwork, assignedAgent, file_path, smart_attacker, prefi
         exp.run(prefix, genericAgent, file_path)
         assignedNetwork.iterations_between_second = original_iterations
     if smart_attacker and smart_attacker.is_intelligent:
+        # attacker is IDA
+
         init_adv_save_model = smart_attacker.save_model_mode
         smart_attacker.save_model_mode = mapsAndSettings.defender_mode_enum.test_short
 
         # we've intentionally left the actions at standard rate to reflect training for advesary
-        # attackClasses.insert(adversarialLeaf, 0)
         print("doing smart_attacker")
         assignedNetwork.iterations_between_second = custom_iterations_between_second
         genericAgent = mapsAndSettings.create_generic_dec(assignedAgent, assignedNetwork)
-        #attack_location = load_attack_path+attackClass.getName()+".apkl"
         exp = experiment.Experiment(attackClass, assignedNetwork, 
             assignedAgent, smart_attacker, load_attack_path=attack_location)
 
@@ -81,7 +85,6 @@ def run_attacks(assignedNetwork, assignedAgent, file_path, smart_attacker, prefi
     mapsAndSettings.getSummary(attackers, file_path, assignedAgent, prefix)
     if smart_attacker and smart_attacker.is_intelligent:
         attackers.remove(smart_attacker)
-    #undo changes
 
     assignedAgent.save_model_mode = initial_save_mode
     assignedNetwork.save_per_step_stats = False

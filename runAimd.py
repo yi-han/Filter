@@ -1,7 +1,6 @@
 """
-Main file that coordinates training and testing IDA against the Fair Throttle (AIMD)
 
-Run
+Trains IDA against the FairThrottle defender then evaluates over 500 episodes
 
 """
 

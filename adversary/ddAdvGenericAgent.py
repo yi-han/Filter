@@ -1,7 +1,11 @@
 """
-This is a generic attacker agent that can be responsible for attacking all/one defenders.
 
-We will then use a generic controller / master. Then allow individual masters be built on top.
+This is a subcomponent of ddAdvGenericMaster representing a learning agent 
+that consists of the intelligent attacker.
+
+Each learning agent controls a group of Hosts and directs attacking traffic
+
+Uses tensorflow for Deep Reinforcement Learning agent
 
 """
 
@@ -17,15 +21,16 @@ from network.utility import *
 class ddGenAgent():
     def __init__(self, N_state, adv_settings, encoders):
 
-        self.leaves = []
+        self.leaves = [] # each Host the agent controls
 
-        N_action = adv_settings.action_per_agent
-        tau = adv_settings.tau
-        discount_factor = adv_settings.discount_factor
+        N_action = adv_settings.action_per_agent 
+        tau = adv_settings.tau # learning rate
+        discount_factor = adv_settings.discount_factor # discount on future rewards
 
-        tf.reset_default_graph() # note remove for the decentralised one
+        tf.reset_default_graph() # initiate tensorflow object
 
         self.N_state = N_state
+        # tensorflow initialisation
         self.mainQN = Qnetwork(N_state, N_action)
         self.targetQN = Qnetwork(N_state, N_action)
         self.init = tf.global_variables_initializer()
@@ -53,12 +58,14 @@ class ddGenAgent():
 
         
     def predict(self, state, e, can_attack):
+        # given input, choose an attacking action
         if not can_attack:
             # if the attack is off return 0
             return 0
         assert(len(self.leaves)!=0)
+
+        # during exploration agent may make a random move
         randomChoice = self.isRandomGuess(e)
-        #print("I believe i can make {0} actions".format(self.N_action))
         if randomChoice:
             action = np.random.randint(0,self.N_action)
         else:
@@ -74,8 +81,9 @@ class ddGenAgent():
 
 
     def actionReplay(self, current_state, batch_size):
-        tree_idx, trainBatch, ISWeights = self.myBuffer.sample(batch_size) #Get a batch of experiences.
         #Below we perform the Double-DQN update to the target Q-values
+
+        tree_idx, trainBatch, ISWeights = self.myBuffer.sample(batch_size) #Get a batch of experiences.
         
         mainQN = self.mainQN
         targetQN = self.targetQN
@@ -93,7 +101,7 @@ class ddGenAgent():
         updateTarget(self.targetOps,self.sess) #Update the target network toward the primary network.
         self.myBuffer.batch_update(tree_idx, abs_errors)
 
-        #Exit if "dying ReLU" occurs
+        #Exit if "dying ReLU" occurs (dead neurons)
         out = self.sess.run(mainQN.Qout,feed_dict={mainQN.input:[current_state]})[0]
         if out[0] == out [1] and out[0] == out [2] and out[0] == out [3] and out[1] == 0:
             print("dying ReLU")
@@ -124,11 +132,6 @@ class ddGenAgent():
         self.saver.save(self.sess, load_path+'/model-'+str(iteration)+'.ckpt')
 
 
-    # def getName(self=None):
-    #     return "ddAdvAgent"
-
-    # def getPath(self):
-    #     return self.getName()
 
 
     def isRandomGuess(self, e):
@@ -137,6 +140,9 @@ class ddGenAgent():
 
 
     def addLeaves(self, leaves):
+        # initialisation of episode, attatch Hosts to agent
+        # structurally legal Hosts are attatched to the attacker but always emit
+        # a constant legal traffic rate
         for leaf in leaves:
             assert(not leaf in self.leaves)
             self.leaves.append(leaf)
@@ -154,6 +160,10 @@ class ddGenAgent():
 
 
     def initiate_episode(self):
+        # initialisation of episode, attatch Hosts to agent
+        # structurally legal Hosts are attatched to the attacker but always emit
+        # a constant legal traffic rate
+
         self.legal_traffic = 0.0
         self.illegal_traffic = 0.0
         self.illegal_traffic_by_host = [] # 
@@ -169,6 +179,8 @@ class ddGenAgent():
 
     def get_host_info(self, host_info_enum):
         # information about each host
+        # used for providing statistics of the state of the network
+        # to the adversary. We seperate legal and illegal traffic
         output = []
         for leaf in self.leaves:
             if host_info_enum in [advHostInfoEnum.hostRoles, advHostInfoEnum.loadsAndRoles]:
