@@ -1,12 +1,16 @@
 # IDA
 
-IDA is the first self learning DDoS penetration tool. It uses Deep Reinforcment Learning to explore the effect of different traffic attack patterns against a network defender.
+IDA is the first self learning DDoS penetration tool created as part of my Master's thesis.
 
-The black box design allows IDA to adapt to any defender and provided network topology learning a tailored attacks through network interaction.
+IDA uses Deep Reinforcment Learning to establish a lower boundary of defence effectiveness for a given defender.
 
-IDA was used to evaluate four different network defenders, when compared to traditional evaluation approaches IDA outperformed the effectiveness of commonly used DDOS attacks when given the same resources.
+Through exploration of different attacking strategies, IDA learns a policy designed to minimise the effectiveness of the network defender.
 
-This repository provides a setup allowing the user to use IDA to evaluate the Yau's Fair Throttle Defender.
+Using a black box design, IDA can adapt to any network defender and provided network topology to learn a tailored attack stragey through network interaction.
+
+IDA was used to evaluate four different network defenders, when compared to traditional evaluation approaches IDA outperformed the effectiveness of commonly used DDOS attacks when given the same resources. IDA identified a new vulnerability in the previously published MARL defender as it was able to investigate uncommon attack patterns.
+
+This repository is designed to allow the user to run IDA to evaluate Yau's Fair Throttle Defender.
 
 A detailed explanation of IDA can be found in the attatched draft publication or in Chapter 4 of the attatched thesis.
 
