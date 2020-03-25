@@ -1,11 +1,17 @@
 # IDA
 
-What is iDA?
+IDA is the first self learning DDoS penetration tool. It uses Deep Reinforcment Learning to explore the effect of different traffic attack patterns against a network defender.
 
-This readme is a condensced 
+The black box design allows IDA to adapt to any defender and provided network topology learning a tailored attacks through network interaction.
 
-#Contents:
-thesis_jpattison.pdf - Thesis submission to the University of Melbourne - Mark 87 - IDA is introduced in Chapter 4
+IDA was used to evaluate four different network defenders, when compared to traditional evaluation approaches IDA outperformed the effectiveness of commonly used DDOS attacks when given the same resources.
+
+This repository provides a setup allowing the user to use IDA to evaluate the Yau's Fair Throttle Defender.
+
+A detailed explanation of IDA can be found in the attatched draft publication or in Chapter 4 of the attatched thesis.
+
+# Contents:
+thesis_jpattison.pdf - Thesis submission to the University of Melbourne - Mark 87
 draft_publication.pdf - Draft submission for publication of work to JNCA (in progress)
 
 Folders:
@@ -18,11 +24,10 @@ topologies - contains .txt files directing network structure of each topology
 
 
 attacks.py - Generates evaluation episodes for each desired network topology
+runFairThrottle.py - Initiates IDA evaluation against the Fair Throttle
+runAttacks.py - Evaluate a trained model against a network defender
 
-runAimd
-runAttacks.py - For evaluation
-
-# Run IDA against the Fair Throttle (AIMD)
+# Run IDA against the Fair Throttle (AKA AIMD)
 
 ```bash
 
@@ -35,18 +40,3 @@ python runAimd.py {mapID} 1 # train and run IDA against Fair Throttle
 
 
 ```
-
-
-
-
-To run:
-
-IDA uses a two stage process - the training and evaluation phase.
-IDA is trained/evaluated from a network defender, MARL variant defenders require training prior to IDA being run.
-
-
-
-
-ddqn.py: implement DDQN with prioritised experience replay
-
-network_new.py: set up the network; implement the interaction between the agent and the environment, i.e., def step(), def calculate_reward()

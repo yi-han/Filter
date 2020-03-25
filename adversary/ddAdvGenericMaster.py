@@ -1,15 +1,12 @@
 """
 Generic interface for many agents for adversary.
-We assign the potentials for each agent randomally each episode
-as opposed to using another agent to coordinate the agents.
 
-Comprised of many DDQN networks with one per adversarial agent
-
+The structure allows a coordinated attacker to consist of many learning agents
+This file acts as the central coordinating tool of IDA.
 
 """
 
 import math
-#import adversary.ddAdvGenericAgent as ddGenAgent
 import numpy as np
 import copy 
 import agent.tileCoding as tileCoding
@@ -22,7 +19,7 @@ class GenericAdvMaster(genericMaster.GenericAdvMaster):
         self.adv_settings = adv_settings
         self.num_adv_agents = adv_settings.num_adv_agents # number of adversarial agents
         self.num_agents = network_setting.N_state # number of defender agents
-        # above 0 inidicates the total number of agents
+        # above 0 indicates the total number of agents
         # below 0 indicates the number of defenders each agent is responsible for
         if self.num_adv_agents < 0:
             self.num_adv_agents = -1 * self.num_adv_agents
@@ -33,6 +30,8 @@ class GenericAdvMaster(genericMaster.GenericAdvMaster):
         self.prior_agent_actions = int(adv_settings.prior_agent_seconds * defender.agent_settings.actions_per_second) # number of actions by the defender we use in state
         self.prior_agent_deltas = int(adv_settings.prior_agent_delta_seconds * defender.agent_settings.actions_per_second)
         self.prior_adversary_actions = adv_settings.prior_adversary_actions # number of actions by advesary we use in state
+        
+        # Calculate the size of the state provided to IDA each step
         if self.adv_settings.prior_server_loads:
             self.server_loads = [0] * self.adv_settings.prior_server_loads
         N_adv_state = defender.num_agents*self.prior_agent_actions + (self.num_adv_agents * 1) + (self.num_adv_agents * self.prior_adversary_actions)# plus one due to bandwiths
@@ -41,14 +40,17 @@ class GenericAdvMaster(genericMaster.GenericAdvMaster):
             # depreciated
 
         if self.adv_settings.include_indiv_hosts:
+            # Include the packet potential of each Host in state
             N_adv_state += len(network_setting.host_sources)
 
         N_adv_state += self.prior_agent_deltas
 
 
         if self.adv_settings.include_legal_traffic:
+            # Include the traffic potential of legal Hosts
             N_adv_state += self.num_adv_agents
 
+        # Enables different representations of the prior server load
         N_adv_state += self.adv_settings.prior_server_loads
         N_adv_state += self.adv_settings.prior_server_percentages
 
@@ -66,12 +68,12 @@ class GenericAdvMaster(genericMaster.GenericAdvMaster):
         encoders = None
 
 
-
+        # Now considers the existance of simultaneous learners and what information we include
         print("adv_stat size is {0}".format(N_adv_state))
         for _ in range(self.num_adv_agents):
             self.adv_agents.append(self.adv_settings.adv_agent_class(N_adv_state, adv_settings, encoders))
             if adv_settings.include_other_attackers:
-                # If we want to include the moves of the attackers before it
+                # If we want to include the moves of the attackers before it (turns actions into sequential)
                 N_adv_state += 1
                 if adv_settings.include_encoder:
                     encoders = copy.deepcopy(encoders) # copy it
@@ -79,8 +81,7 @@ class GenericAdvMaster(genericMaster.GenericAdvMaster):
                     encoders.append(advesary_move_encoding)
 
         self.all_leaves = [] # list of lists of leaves. Eventually grouped so each inner list corresponds to an adversarial agent
-        #self.unassignedAgents = self.adv_agents.copy() # hopefully we copy the references
-        #self.throttlerLeafDic = {}
+
 
         self.name = adv_settings.name
         self.N_adv_state = N_adv_state
@@ -92,9 +93,7 @@ class GenericAdvMaster(genericMaster.GenericAdvMaster):
         self.assignLeafs()
 
         for agent in self.adv_agents:
-            #agent.__enter__()
-            #agent.sess = tf.Session()
-            #agent.sess.run(agent.init)
+            # initiate each individual learner
             agent.__enter__()
 
     def __exit__(self, type, value, tb):
@@ -112,15 +111,15 @@ class GenericAdvMaster(genericMaster.GenericAdvMaster):
 
         """
 
+        # For allowing agents to see other agents moves for the same attack (for an IDA variant)
         if self.adv_settings.include_other_attackers:
             # we've already calculated the moves in this case
             return state[-1]
 
 
         actions = []
-        # print("\n\npredictions")
         for i in range(len(self.adv_agents)):
-
+            # iterate through each learning agent and create attacking move
             agentAction = self.adv_agents[i].predict(state, e, can_attack)
             actions.append(agentAction)
 
@@ -135,21 +134,16 @@ class GenericAdvMaster(genericMaster.GenericAdvMaster):
 
     def update_state(self, net):
         """ 
-        Provide the ill_bandwidth capacity for each agent,
-        and ill_bandwidth emmitted by each agent over last 3 steps
-        last 3 
+        Update the state to be provided to each learning agent
 
-        pack_per_last_action is 
+        
+
         """
         assert(len(self.prior_actions) == self.prior_adversary_actions)
         
-        # print("\n\n")
         state = []
         state.extend(self.ill_bandwidths) # start off with ill_bandwidths
-        # print(state)
-        #print(self.prior_actions)
-        #print("actions done")
-        # state.extend(self.prior_actions)
+
         if self.adv_settings.include_indiv_hosts:
             assert(1==2) # obsolete
             state.extend(self.ill_bandwidth_by_host)
@@ -161,20 +155,21 @@ class GenericAdvMaster(genericMaster.GenericAdvMaster):
         for prior_action in self.prior_actions:
             state.extend(prior_action)
 
-        # pThrottles = []
 
         if self.prior_agent_actions>0:
-            
+            # capture past predictions for learning
             for past_prediction in self.defender.past_predictions[-self.prior_agent_actions:]:
                 state.extend(past_prediction)
 
 
         # sort of a hack. Do the prediction here as the move is done simultaneously 
         if self.adv_settings.include_other_attackers:
+            # we disabled the ability to see other agents moves
             assert(1==2)
 
 
         if self.prior_agent_deltas:
+            # update list of previous moves by agents
             last_changes = self.defender.past_moves[(-1*self.prior_agent_deltas):]
             for change in last_changes:
                 state.extend(change) 
@@ -211,10 +206,7 @@ class GenericAdvMaster(genericMaster.GenericAdvMaster):
 
     def initiate_episode(self, episode_number):
         # here I assume that we know the number of designated attackers
-        # The idea is to copy the same probabilty distribution as we had for
-        # the normal version. This would be the closest mimic to the training.
-        # Another idea is to use an alternate probablity distribution
-        # ignore episode_number. Used for dumbMaster.
+
 
         super().initiate_episode()
 
@@ -232,11 +224,7 @@ class GenericAdvMaster(genericMaster.GenericAdvMaster):
             self.leg_bandwidths.append(self.adv_agents[i].legal_traffic)
             self.ill_bandwidth_by_host.extend(self.adv_agents[i].illegal_traffic_by_host)
             self.host_info.extend(self.adv_agents[i].get_host_info(self.adv_settings.indiv_host_info))
-        # for i in range(len(attackers_per_host)):
-        #     attackers = attackers_per_host[i]
-        #     for _ in range(attackers):
-        #         # repeat each number of attackers
-        #         self.ill_bandwidths[i] += self.min_ill_bandwidth + np.random.rand()*(self.max_ill_bandwidth - self.min_ill_bandwidth)
+        
 
         if self.adv_settings.prior_server_loads:
 
@@ -248,7 +236,7 @@ class GenericAdvMaster(genericMaster.GenericAdvMaster):
         self.prior_actions.append(actions)
 
     def update(self, last_state, last_actions, current_state, is_done, reward, next_actions):
-
+        # initiate update on each learning agent
         for i in range(len(self.adv_agents)):
             agent = self.adv_agents[i]
             last_action = last_actions[i]
@@ -262,7 +250,7 @@ class GenericAdvMaster(genericMaster.GenericAdvMaster):
         # self.update_past_state(last_actions)
 
     def actionReplay(self, current_state, batch_size):
-
+        # when the learning happens
         l = 0
         for i in range(len(self.adv_agents)):
             agent = self.adv_agents[i]
@@ -297,16 +285,17 @@ class GenericAdvMaster(genericMaster.GenericAdvMaster):
     
 
 
-    # The following code is abouot assigning leafs to agents
+    # The following code is about assigning leafs to agents
+    # Structurally leaves represent individual nodes which may be Hosts that send traffic to the network
+    # The attacker python class serves a dual purpose of calculating attacker move and sending all traffic
 
     def addLeaf(self, leaf):
         # add the leaf to the set of leaves we have to assign
 
-        # sanity check
+        # sanity check for duplication
         assert(not [leaf] in self.all_leaves)
         leaf.current_position = leaf.destination_switch
         # # leader is used for grouping the leaves together.
-        # # use 
         self.all_leaves.append([leaf])
 
 

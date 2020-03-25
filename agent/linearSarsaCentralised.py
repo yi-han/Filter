@@ -1,8 +1,8 @@
 """
-Middleman between the experiment and the linear sarsa agent. Called centralised 
+Midleman between the experiment and the linear sarsa agent. Called centralised 
 due to use of a singular sarsa AI but is compatble with multiple to one states.
 
-#TODO 
+Depreciated
 
 
 

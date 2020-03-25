@@ -1,3 +1,10 @@
+"""
+A centralised version of ddqn that does not assume multiple learners
+used for a MARL variant when we were investigating creating Deep Reinforcement learning defenders
+
+See thesis chapter 3 for more explanation
+"""
+
 from agent.ddqn import *
 import agent.agentBase as aBase
 import numpy as np

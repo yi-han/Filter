@@ -1,14 +1,5 @@
 """
-Middleman between the experiment and the sarsa agent. Called centralised 
-due to use of a singular sarsa AI but is compatble with multiple to one states.
-
-#TODO 
-
-1) I think the update is wrong. Confirm that experiment is sending the right state
-2) Update bug, using same state twice
-# DONE
-2) We should only keep track of last 3 saves, don't keep all due to memory / needless
-3) Implemet checkpoint file of just the latest
+Throttling agent that commits a random action at every opportunity
 
 """
 

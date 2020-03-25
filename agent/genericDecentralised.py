@@ -1,15 +1,7 @@
 """
-I want a multiple groups of DDQN, we're going to try to make a generic 
-decentralised solution
+A generic decentralised defender compatible with multiple learning agents
 
-
-"""
-
-"""
-Comprised of many DDQN networks with one per filter
-
-More of an interface where experiment will see only agent however
-the calculations are done by many agents
+Each learning agent would be associated with a throtling agent
 
 """
 
@@ -83,14 +75,9 @@ class AgentOfAgents():
             N_state = agent.N_state
             #(last_statelet, last_state) = self.getStatelet(last_state, N_state)
             last_statelet = last_state[i]
-            # print("action was {0}".format(action))
-            # print("statelet for {0} is {1}".format(i, last_statelet))
-            #(next_statelet, next_state) = self.getStatelet(next_state, N_state)
+
             next_statelet = next_state[i]
-            #print("future statelet is {0}".format(next_statelet))
-            # print("Agent {0} | PriorState {1} | PriorAction {2} | Reward {3}".format(i, last_statelet, last_action, reward))
-            # print("for {0} we have a state of {1} and performed {2}".format(N_state, last_statelet, action))
-            #print("do the last_actions line up?")
+
             agent.update(last_statelet, last_action, next_statelet, is_done, reward, next_action[i])
         self.score += reward
 
@@ -152,7 +139,8 @@ class AgentOfAgents():
 
 
     def genericActionToactions(network_action, N_action_list):
-        
+        # converts a large action into sepearte actions of each throttler
+                
         actions = []
         #print("")
 

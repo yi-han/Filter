@@ -1,3 +1,10 @@
+"""
+A function approximation SARSA learning agent - was used to compare 
+against a Deep Reinforcement Leanring Agent
+
+- depreciated although we'll leave code here
+"""
+
 
 import agent.linearSarsaCentralised as linCen
 from network.utility import *

@@ -1,5 +1,7 @@
 """
 Basecase of 0 throttle
+
+Used for comparing 'what if there was no defender'
 """
 
 import agent.agentBase as aBase

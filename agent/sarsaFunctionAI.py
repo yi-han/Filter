@@ -1,9 +1,7 @@
 """
-Quick attempt using function approximation
+SARSA logic used to replicate Malialis' reinforcement learning defender.
 
-
-Note using the state as the values is unlikely to 'work' probably need
-to do some sort of transformation.
+Uses tile coding and function approximation.
 
 """
 
@@ -97,22 +95,7 @@ class qTable():
             self.w_matrix[i] = (current_weights + (state_vectors[i]*(delta/num_tilings)))
         return delta
 class SarsaFunctionAI:
-    """
-    Value Function approximator.
-    #DONE
-    1) Creates a weight vector length N
-    2) Add for each action
-    4) Function that takes encoder for each state
-    5) Function that takes state and action and performs the necessary transformation
-    6) Update rule
-    7) Prediction Rule 
 
-    #TODO 
-
-    8) Should I be putting the encoding in the upper level?
-    3) Add the normaliser at the end. CONFIRM?
-
-    """
     
     def __init__(self, actions, encoders, agent_settings): 
         # note i set discount_factor to 0 to reflect the implementation by Malialis

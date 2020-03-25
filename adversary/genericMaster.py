@@ -1,10 +1,12 @@
 
 class GenericAdvMaster():
 
-
+    """
+    Common interface enabling smart and dumb attackers to interact with network
+    """
 
     def calculate_reward(self):
-        # our reward should be the opposite of the packets served
+        # our reward should be the opposite of the percentage of leggal packets served
         per_served = sum(self.legit_served_hist)/sum(self.legit_sent_hist)
         return 1 - per_served
 
@@ -12,6 +14,7 @@ class GenericAdvMaster():
 
     def update_reward(self, second, legit_served, legit_sent):
         """
+        Keep traf of the reward to provide
         We assume we're calculating every 1 second, but our reward is over 2 seconds
         """
         index = second % 2 

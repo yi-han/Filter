@@ -1,9 +1,6 @@
 """
-Generic interface for many agents for adversary.
-We assign the potentials for each agent randomally each episode
-as opposed to using another agent to coordinate the agents.
+Generic attacker structure, modelled after IDA, allowing traditional attacks to be simulated in network 
 
-Comprised of many DDQN networks with one per adversarial agent
 
 
 """
@@ -13,7 +10,9 @@ import random
 import adversary.genericMaster as genericMaster
 
 """
-Algorithms to determine attacks
+Algorithms to determine attack moves
+
+They take in the current timestep to determine how much traffic to produce
 
 """
 
@@ -103,6 +102,7 @@ class dumbMaster(genericMaster.GenericAdvMaster):
         return action
  
     def predict(self, state, e, step, can_attack):
+        # allows for two simultanous strategy for vector attacks
         (strategy1, strategy2) = self.current_strategy
         action1 = self.attackStrategyToAction(strategy1, step, can_attack)
         action2 = self.attackStrategyToAction(strategy2, step, can_attack)
@@ -136,8 +136,7 @@ class dumbMaster(genericMaster.GenericAdvMaster):
     def initiate_episode(self, episode_number, chosen_strategy = None):
         # here I assume that we know the number of designated attackers
         # The idea is to copy the same probabilty distribution as we had for
-        # the normal version. This would be the closest mimic to the training.
-        # Another idea is to use an alternate probablity distribution
+        # the normal version. 
         
         super().initiate_episode()
         splitStrategies = [advAttackEnum.constant, advAttackEnum.pulse_short, advAttackEnum.pulse_large]
@@ -161,6 +160,7 @@ class dumbMaster(genericMaster.GenericAdvMaster):
 
         self.step_count = 0
 
+    # No learning done here
 
     def update_past_state(self, actions):
         return
@@ -201,7 +201,9 @@ class dumbMaster(genericMaster.GenericAdvMaster):
     
 
 
-    # The following code is abouot assigning leafs to agents
+    # The following code is about assigning leafs to agents
+    # Structurally leaves represent individual nodes which may be Hosts that send traffic to the network
+    # The attacker python class serves a dual purpose of calculating attacker move and sending all traffic
 
     def addLeaf(self, leaf):
         # add the leaf to the set of leaves we have to assign

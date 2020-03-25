@@ -1,16 +1,7 @@
 """
-The baseline agent used in Mah used for comparative purposes
+The baseline agent used in Yau used for comparative purposes
 
-Really Im only creating this as a step to create MARL
-
-Do I need to model in network delays for each throttler? 
-Technically differnt throttlers can receive their mark at differnt times
-
-TODO
-1) Network delays?
-2) Initial rate probably set wrong as the formula is for through rate per second but window is 2 seconds
-    sort of fixed
-3) What throttle rate do i simulate for smart adversary? 
+This recreates the AIMD algorithm which was used for the Fair Throttle and Fixed Throttle
 """
 from enum import Enum
 from network.utility import SECONDS_STANDARD_INTERVAL
@@ -34,7 +25,6 @@ class AIMDagent():
         self.agent_settings = agent_settings
 
         self.max_rate =  network_settings.rate_attack_high * (len(network_settings.host_sources) - 1 ) + (2 * self.delta)
-        #self.activate_rate = (self.upper + self.lower)/2 # 4 is to compensate for 2 second interval where typically would be two
         self.activate_rate = (self.upper+self.lower)/self.num_throttles
         print("delta = {0}".format(self.delta))
         print("beta = {0}".format(self.beta))
@@ -90,7 +80,6 @@ class AIMDagent():
             else:
                 recorded_move = AimdMovesEnum.constant.value
         
-        # print("\n\n\nserver load is {0}, p_last is {3} we had {2} and suggesting {1}".format(p, self.rs, init_rs, old_p))
         if self.rs == -1:
             recorded_rs = self.max_rate
         elif self.rs > self.max_rate:
@@ -104,7 +93,6 @@ class AIMDagent():
         self.past_predictions.append([recorded_rs])
         self.past_moves.pop(0)
         self.past_moves.append([recorded_move])
-        # print("we set it as {0} | {1} with a delta of {2}".format(self.rs, recorded_rs, recorded_move))
 
         return self.rs
 

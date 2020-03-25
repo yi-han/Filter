@@ -1,3 +1,14 @@
+"""
+The underlying Deep Reinforcement Learning class used to power both defenders and attackers
+
+This uses tensorflow using a CNN previously designed to interpret videogames.
+
+A significant portion of this file was written by sources outside me (provided by Yi Han)
+
+Major update to this was enabling compatibility with simultaneous learners
+
+"""
+
 from __future__ import division
 
 import numpy as np
