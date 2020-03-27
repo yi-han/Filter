@@ -2,17 +2,17 @@
 
 IDA is the first self learning DDoS penetration tool created as part of my Master's thesis.
 
-IDA uses Deep Reinforcment Learning to establish a lower boundary of defence effectiveness for a given defender.
+It allows researches to evaluate the effectiveness of a proposed defence against an intelligent attacker. Traditionally network evaluation was performed through simulation against common attacks.
 
-Through exploration of different attacking strategies, IDA learns a policy designed to minimise the effectiveness of the network defender.
+Through Deep Reinforcment Learning, IDA learns a policy designed to minimise the effectiveness of the network defender, therefore IDA can be used to provide a defence metric.  
 
-Using a black box design, IDA can adapt to any network defender and provided network topology to learn a tailored attack strategy through network interaction.
+Using a black box design, IDA will adapt to any network defender and learns a tailored attack strategy through network interaction.
 
-IDA was used to evaluate four different network defenders. When provided the same attacking resources IDA matched or outperformed the most damaging traditional DDoS attack pattern previously used against the defender. IDA identified a new vulnerability in the previously published MARL defender as it was able to investigate uncommon attack patterns.
+IDA was used to evaluate four different network defenders. IDA was seen to match or outperform all common attack strategies that are commonly used for evaluation purposes. IDA identified a new vulnerability in the previously published MARL defender by committing a unique Pulse Attack. 
 
 This repository is designed to allow the user to run IDA to evaluate Yau's Fair Throttle Defender.
 
-A detailed explanation of IDA can be found in the attatched draft publication or in Chapter 4 of the attatched thesis.
+A detailed explanation of IDA can be found in the included draft publication or in Chapter 4 of the included thesis.
 
 # Contents:
 thesis_jpattison.pdf - Thesis submission to the University of Melbourne - Mark 87
@@ -33,7 +33,7 @@ shell scripts - contains shell scripts and slurm files specific for the HPC wher
 
 topologies - contains .txt files directing network structure of each topology 
 
-
+Primary Python Files:
 
 attacks.py - Generates evaluation episodes for each desired network topology
 
